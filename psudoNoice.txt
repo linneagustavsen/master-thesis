@@ -1,0 +1,13 @@
+Skip this for now!
+
+store windows/grouped data in arrays and do fourier de noiseing on each one 
+
+use https://medium.com/swlh/5-tips-for-working-with-time-series-in-python-d889109e676d
+
+then calculate the mean on the denoised data
+ 
+
+Then calculate the variance of the mean based on the array (https://www.geeksforgeeks.org/python-statistics-variance/)
+variance( [data], xbar= denoised mean )
+
+write both the denoised mean and the variance to a bucket

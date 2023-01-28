@@ -1,0 +1,98 @@
+store mean of every minute in database
+will only be 10080 entries
+if its every 30 sec it will be 20160
+
+query database for average of the 30 sec interval for every monday 
+in that period and sum it in a variable that will be added to a bucket.
+this wil be done for the whole day and for all days
+
+or 
+
+can query the whole period and aggregate every 30 sec 
+check the result for weekday and time stamp and add it to an array?
+
+    Use hoursSelection() to filter by hour of day.
+    Use date.weekDay() to process and filter points by day of the week.
+    Use date.truncate() to truncate timestamps to a specified unit of time.
+
+    https://community.influxdata.com/t/query-specific-time-range-and-day/14503/4
+
+so i can query a specific time slot for a specific week for all the weeks and get the mean and store it in a bucket
+will be O(n^2) :( 
+
+
+
+USE KEEP INSTEAD OF DROP
+
+for i in range(6):
+    from(bucket: "skogul/1md")
+        |> range(start: whole time range)
+        |> filter(fn: (r) => r._measurement == "pckts per sec")
+        |> filter(fn: (r) =>
+            date.weekDay(t: r._time) = i
+        )
+        |> aggregateWindow(every: 30s, fn: mean)
+        |> map(fn: (r) => ({r with _time: time(v: r._time).hour+":"+time(v: r._time).minute + ":"+time(v: r._time).second})) (alternatively: date.minute(t: r._time))
+)
+        |> group(columns: ["_time"]) (if I want to do the de-noiseing i have to output the groups and put them in arrays)
+        |> mean()
+    
+ALTERNATIVELY:
+    for i in range(6):
+    from(bucket: "skogul/1md")
+        |> range(start: whole time range)
+        |> filter(fn: (r) => r._measurement == "pckts per sec")
+        |> filter(fn: (r) =>
+            date.weekDay(t: r._time) = i
+        )
+        |> map(fn: (r) => ({r with _time: time(v: r._time).hour+":"+time(v: r._time).minute + ":"+time(v: r._time).second})) (alternatively: date.minute(t: r._time)))
+        |> window(every: 30s)
+    
+
+    write to a new database or store as a variable
+
+    #get variance
+    from(bucket: "skogul/1md")
+        |> range(start: whole time range)
+        |> filter(fn: (r) => r._measurement == "pckts per sec")
+        |> filter(fn: (r) =>
+            date.weekDay(t: r._time) = i
+        )
+        |> aggregateWindow(every: 30s, fn: mean)
+        |> map(fn: (r) => ({r with _time: time(v: r._time)}))
+        |> group(columns: ["_time"])
+        |> stddev()
+    and then take the square root of each value before writing it to the database
+
+
+
+hard way:
+for i in range(6):
+    from(bucket: "skogul/1md")
+        |> range(start: whole time range)
+        |> filter(fn: (r) => r._measurement == "pckts per sec")
+        |> filter(fn: (r) => date.weekDay(t: r._time) = i)
+        |> filter(fn: (r) => date.hour(t: r._time) = j)
+        |> aggregateWindow(every: 30s, fn: mean)
+        |> group(columns: ["_time"])
+        |> mean()
+    
+    write to a new database or store as a variable
+
+    #get variance
+    from(bucket: "skogul/1md")
+        |> range(start: whole time range)
+        |> filter(fn: (r) => r._measurement == "pckts per sec")
+        |> filter(fn: (r) =>
+            date.weekDay(t: r._time) = i
+        )
+        |> aggregateWindow(every: 30s, fn: mean)
+        |> group(columns: ["_time"])
+        |> stddev()
+    and then take the square root of each value before writing it to the database
+
+
+
+
+    
+

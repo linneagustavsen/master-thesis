@@ -1,0 +1,13 @@
+
+for i in rows in the last batch of data:
+    check which weekday it is to compare to the right bucket
+    check which hour minute and second it is to get the right row from that weekday bucket
+
+    P = get mean from that row from the bucket
+    V = get variance from that row from the bucket
+     
+    D = (the new measurement like number of packets - P)/V
+    Add D to a new bucket or array or dictionary or just check the threshold here
+    if D >= trigger value (test it out a bit):
+        send alert to alert correlator
+        write to file or use MQTT
