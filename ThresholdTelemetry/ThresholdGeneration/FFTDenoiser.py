@@ -1,6 +1,6 @@
 import numpy as np
-import json
 
+#From Alejandro PS: https://medium.com/swlh/5-tips-for-working-with-time-series-in-python-d889109e676d
 def fft_denoiser(x, n_components, to_real=True):
     """Fast fourier transform denoiser.
     
