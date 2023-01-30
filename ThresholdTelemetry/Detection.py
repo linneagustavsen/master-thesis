@@ -21,7 +21,7 @@ import json
 import numpy as np
 from datetime import timezone
 
-json_file_mean_var = open("/home/linneafg/Code/master-thesis/MeanVarValuesDeNoised.json", "r")
+json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDeNoised.json", "r")
 json_object_mean_var = json.load(json_file_mean_var)
 json_file_mean_var.close()
 

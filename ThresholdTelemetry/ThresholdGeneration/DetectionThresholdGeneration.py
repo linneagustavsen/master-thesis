@@ -4,8 +4,8 @@ import json
 #from FFTDenoiser import *
 import numpy as np
 
-json_file = open("/home/linneafg/Code/master-thesis/ThresholdTelemetry/RawValuesSchema.json", "r")
-json_file_mean_var = open("/home/linneafg/Code/master-thesis/ThresholdTelemetry/MeanVarSchema.json", "r")
+json_file = open("ThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
+json_file_mean_var = open("ThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
 json_object_raw = json.load(json_file)
 #json_object_denoised = json.load(json_file)
 json_object_mean_var = json.load(json_file_mean_var)
@@ -35,14 +35,14 @@ for weekday in range(6):
             #json_object_denoised["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)] = fft_denoiser(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)], 50)
 
 '''
-json_file_raw = open("RawValues.json", "w")
+json_file_raw = open("ThresholdTelemetry/RawValues/RawValues.json", "w")
 json.dump(json_object_raw,json_file_raw)
 json_file_raw.close()
 
-json_file_denoised = open("DenoisedValues.json", "w")
+json_file_denoised = open("ThresholdTelemetry/RawValues/DenoisedValues.json", "w")
 json.dump(json_object_denoised,json_file_denoised)
 json_file_denoised.close()
 '''
-json_file_mean_var = open("MeanVarValues.json", "w")
+json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValues.json", "w")
 json.dump(json_object_mean_var,json_file_mean_var)
 json_file_mean_var.close()

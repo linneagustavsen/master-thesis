@@ -19,6 +19,6 @@ for weekday in range(6):
     for hour in range(24):
         json_object["weekday"][str(weekday)]["hour"][str(hour)]["minute"] = dict.fromkeys(minutes, dict(mean = None, variance = None))
 
-json_file_mean_var = open("MeanVarSchema.json", "w")
+json_file_mean_var = open("ThresholdTelemetry/Schemas/MeanVarSchema.json", "w")
 json.dump(json_object,json_file_mean_var)
 json_file_mean_var.close()

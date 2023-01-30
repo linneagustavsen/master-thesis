@@ -46,19 +46,3 @@ def fft_denoiser(x, n_components, to_real=True):
         clean_data = clean_data.real
     
     return clean_data
-
-'''
-json_file = open("/home/linneafg/Code/master-thesis/RawValues.json", "r")
-json_object_raw = json.load(json_file)
-json_file.close()
-
-for minute in range(10): 
-    test["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)] = fft_denoiser(json_object_raw["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)], 50)
-    print("DENOISED:", test["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)])
-    print("NORMAL:", json_object_raw["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)])
-    
-    for i in range(len(test["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)])):
-        if test["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)][i] != json_object_raw["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)][i]:
-            print("Difference in i:", abs(test["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)][i] - json_object_raw["weekday"][str(0)]["hour"][str(0)]["minute"][str(minute)][i]), "\n")
-
-#The difference is microscopical'''

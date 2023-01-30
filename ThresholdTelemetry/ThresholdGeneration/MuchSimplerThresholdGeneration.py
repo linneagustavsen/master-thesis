@@ -5,8 +5,8 @@ import json
 from FFTDenoiser import *
 import numpy as np
 
-json_file = open("/home/linneafg/Code/master-thesis/ThresholdTelemetry/RawValuesSchema.json", "r")
-json_file_mean_var = open("/home/linneafg/Code/master-thesis/ThresholdTelemetry/MeanVarSchema.json", "r")
+json_file = open("ThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
+json_file_mean_var = open("ThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
 json_object_raw = json.load(json_file)
 json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
@@ -16,7 +16,11 @@ client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niw
 
 query_api = client.query_api()
 
-
+#NB NB Use systemID and interface name rather than link_name because it doesnt exist 7-10 october
+''' Will be like this instead 
+|> filter(fn: (r) => r["systemId"] == "dora-gw")
+  |> filter(fn: (r) => r["if_name"] == "ge-1/1/0")
+  |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_pkts")'''
 query = 'import "date" from(bucket: "skogul/1mnd")\
         |> range(start: 2022-09-21T02:00:00Z, stop: 2022-10-07T07:00:00Z)\
         |> filter(fn: (r) => r["link_name"] == "alta-narvik")\
@@ -37,6 +41,6 @@ for weekday in range(7):
             json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = statistics.variance(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"])
         print("Weekday:", weekday, "Hour:", hour, "finished!!")
            
-json_file_mean_var = open("MeanVarValuesDeNoised.json", "w")
+json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDeNoised.json", "w")
 json.dump(json_object_mean_var,json_file_mean_var)
 json_file_mean_var.close()
