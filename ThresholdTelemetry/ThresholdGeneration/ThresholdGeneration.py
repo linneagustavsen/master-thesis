@@ -14,12 +14,12 @@ json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
 json_file_mean_var.close()
 
-#Set up a conncetion with the database
+#Set up a connection with the database
 client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
 query_api = client.query_api()
 
-#NB NB Use systemID and interface name rather than link_name because it doesnt exist 7-10 october
+#NB NB Use systemID and interface name rather than link_name because it doesn't exist 7-10 october
 ''' Will be like this instead 
   |> filter(fn: (r) => r["systemId"] == "dora-gw")
   |> filter(fn: (r) => r["if_name"] == "ge-1/1/0")

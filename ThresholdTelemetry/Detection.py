@@ -9,7 +9,7 @@ json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDeNoised.js
 json_object_mean_var = json.load(json_file_mean_var)
 json_file_mean_var.close()
 
-#Set up a conncetion with the database
+#Set up a connection with the database
 client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
 query_api = client.query_api()
