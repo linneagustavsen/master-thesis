@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import warnings 
 from influxdb_client.client.warnings import MissingPivotFunction
 from FFTDenoiser import fft_denoiser
+import datetime
 
 warnings.simplefilter("ignore", MissingPivotFunction)
 
@@ -46,15 +47,31 @@ df_denoised['_time']= pd.to_datetime(df['_time'])
 df.to_pickle("ImprovedThresholdTelemetry/DataFrames/Week" + str(weeks.index(w)+1)+"-denoised.pkl")
 
 '''
-df = pd.read_pickle("GraphThresholdTelemetry/DataFrames/all-weeks.pkl")
-
-
 '''
 1. Go through all weeks and store them (maybe not aggregate)
 2. Lay them on top of each other and take the mean for each minute
-3. De-noise that distribution for the week combined
+3. De-noise that distribution for the weeks combined
 4. Store the denoised distribution
 5. Calculate the variance based on the de-noised value that minute and all the raw data from that weekday and that minute for all the weeks
 6. Store the variance for each minute
+'''
+raw_values_monday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_tuesday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_wednesday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_thursday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_friday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_saturday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})
+raw_values_sunday = pd.DataFrame({'_time': pd.Series(dtype='datetime64[ns]'),
+                   '_value': pd.Series(dtype='np.float64')})                
 
+print(raw_values_friday.dtypes)
+'''for i in range(1,len(weeks)+1):
+    df = pd.read_pickle("ImprovedThresholdTelemetry/DataFrames/Week"+ str(i) +".pkl")
+    print(df.dtypes)
 '''
