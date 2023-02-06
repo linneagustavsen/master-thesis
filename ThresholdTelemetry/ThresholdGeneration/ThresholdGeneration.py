@@ -19,17 +19,12 @@ client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niw
 
 query_api = client.query_api()
 
-#NB NB Use systemID and interface name rather than link_name because it doesn't exist 7-10 october
-''' Will be like this instead 
-  |> filter(fn: (r) => r["systemId"] == "dora-gw")
-  |> filter(fn: (r) => r["if_name"] == "ge-1/1/0")
-  |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_pkts")'''
-
-#Query to get all outgoing packet/sec rates from one link
-query = 'import "date" from(bucket: "skogul/1mnd")\
-        |> range(start: 2022-09-21T02:00:00Z, stop: 2022-10-07T07:00:00Z)\
-        |> filter(fn: (r) => r["link_name"] == "alta-narvik")\
+query = 'from(bucket: "skogul/1mnd")\
+        |> range(start: 2022-09-22T00:00:00Z, stop: 2022-10-13T00:00:00Z)\
+        |> filter(fn: (r) => r["systemId"] == "trd-gw")\
+        |> filter(fn: (r) => r["if_name"] == "xe-0/1/0")\
         |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_pkts")\
+        |> group()        \
         |> keep(columns: ["_value", "_time"])'
 
 #Make a flux table list from the output of the query
@@ -40,15 +35,28 @@ for table in tables:
     for row in table.records:
         json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
 
-#Loop through all the minutes for each hour for each weekday and calculate the mean and variance
+mean = []
+time = []
+#Loop through all the minutes for each hour for each weekday and calculate the mean
 for weekday in range(7):
     for hour in range(24):
         for minute in range(60):
-            #json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = np.mean(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)])
-            json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = np.mean(fft_denoiser(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)], 50))
-            json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = statistics.variance(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"])
+            mean.append(np.mean(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]))
+            time.append(str(weekday) + " " + str(hour) + ":" + str(minute))
+            
+
+#De-nosing the weeks combined
+denoisedMean = fft_denoiser(mean, 50)
+
+for weekday in range(7):
+    for hour in range(24):
+        for minute in range(60):
+            mean_this_minute = denoisedMean[time.index(str(weekday) + " " + str(hour) + ":" + str(minute))]
+            variance_this_minute = statistics.variance(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = mean_this_minute)
+            json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
+            json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
 #Write the mean and variance values to a json file      
-json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDeNoised.json", "w")
+json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDenoisedNTNU.json", "w")
 json.dump(json_object_mean_var,json_file_mean_var)
 json_file_mean_var.close()

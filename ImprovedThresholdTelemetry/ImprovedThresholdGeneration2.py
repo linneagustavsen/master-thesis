@@ -54,9 +54,7 @@ for weekday in range(7):
 #De-nosing the weeks combined
 denoisedMean = fft_denoiser(mean, 50)
 
-threshold = pd.DataFrame({'weekday': pd.Series(dtype='int'),
-                   'hour': pd.Series(dtype='int'),
-                   'minute': pd.Series(dtype='int'),
+threshold = pd.DataFrame({'_time': pd.Series(dtype='string'),
                    'mean': pd.Series(dtype='float'),
                    'variance': pd.Series(dtype='float')})
              
@@ -66,13 +64,11 @@ for weekday in range(7):
         for minute in range(60):
             mean_this_minute = denoisedMean[time.index(str(weekday) + " " + str(hour) + ":" + str(minute))]
             variance_this_minute = statistics.variance(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = mean_this_minute)
-            new_row = pd.Series({'weekday': weekday,
-                   'hour': hour,
-                   'minute': minute,
-                   'mean': mean_this_minute,
+            new_row = pd.Series({'_time': str(weekday) + ' ' + str(hour) + ':' + str(minute),
+                    'mean': mean_this_minute,
                    'variance': variance_this_minute})
             threshold = pd.concat([threshold, new_row.to_frame().T], ignore_index=True)
 
-threshold.to_pickle("ImprovedThresholdTelemetry/DataFrames/ThresholdTrained3weeks.pkl")
+threshold.to_pickle("ImprovedThresholdTelemetry/DataFrames/ThresholdTrained3weeksOneTimeColumn.pkl")
 
 
