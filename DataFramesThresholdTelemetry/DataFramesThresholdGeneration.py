@@ -4,21 +4,10 @@ import numpy as np
 from FFTDenoiser import fft_denoiser
 import json
 import statistics
-'''
-1. Go through all weeks and store them (maybe not aggregate)
-2. Lay them on top of each other and take the mean for each minute
-3. De-noise that distribution for the weeks combined
-4. Store the denoised distribution
-5. Calculate the variance based on the de-noised value that minute and all the raw data from that weekday and that minute for all the weeks
-6. Store the variance for each minute
-'''
-json_file = open("ImprovedThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
+
+json_file = open("DataFramesThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
 json_object_raw = json.load(json_file)
 json_file.close()
-json_file_mean_var = open("ImprovedThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
-json_object_mean_var = json.load(json_file_mean_var)
-json_file.close()
-json_file_mean_var.close()
 
 
 #Set up a connection with the database
@@ -69,6 +58,6 @@ for weekday in range(7):
                    'variance': variance_this_minute})
             threshold = pd.concat([threshold, new_row.to_frame().T], ignore_index=True)
 
-threshold.to_pickle("ImprovedThresholdTelemetry/DataFrames/ThresholdTrained3weeksOneTimeColumn.pkl")
+threshold.to_pickle("DataFramesThresholdTelemetry/DataFrames/ThresholdTrained3weeksOneTimeColumn.pkl")
 
 

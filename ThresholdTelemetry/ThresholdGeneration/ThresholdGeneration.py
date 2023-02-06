@@ -1,5 +1,5 @@
 import statistics
-from influxdb_client import InfluxDBClient, Point
+from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 import json
 from FFTDenoiser import *
@@ -48,6 +48,7 @@ for weekday in range(7):
 #De-nosing the weeks combined
 denoisedMean = fft_denoiser(mean, 50)
 
+#store the denoised mean and variance for all the minutes for each hour for each weekday in a json structure
 for weekday in range(7):
     for hour in range(24):
         for minute in range(60):

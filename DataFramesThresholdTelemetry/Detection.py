@@ -10,7 +10,7 @@ start_time = time.time()
 
 
 #Open pickle file with threshold values
-df = pd.read_pickle("ImprovedThresholdTelemetry/DataFrames/ThresholdTrained3weeksOneTimeColumn.pkl")
+df = pd.read_pickle("DataFramesThresholdTelemetry/DataFrames/ThresholdTrained3weeksOneTimeColumn.pkl")
 print(df.head(100))
 #Set up a connection with the database
 client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
