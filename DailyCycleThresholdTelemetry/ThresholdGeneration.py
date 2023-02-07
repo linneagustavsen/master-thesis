@@ -7,8 +7,8 @@ import numpy as np
 
 
 #Open json schema files to make json objects from them
-json_file = open("GeneralizedThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
-json_file_mean_var = open("GeneralizedThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
+json_file = open("DailyCycleThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
+json_file_mean_var = open("DailyCycleThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
 json_object_raw = json.load(json_file)
 json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
@@ -35,32 +35,30 @@ def thresholdGeneration(systemId, if_name, field):
     #Loop through all the tables and the rows and store them in a json structure based on weekday, hour, and minute
     for table in tables:
         for row in table.records:
-            json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+            json_object_raw["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
 
     mean = []
     time = []
     #Loop through all the minutes for each hour for each weekday and calculate the mean
-    for weekday in range(7):
-        for hour in range(24):
-            for minute in range(60):
-                mean.append(np.mean(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]))
-                time.append(str(weekday) + " " + str(hour) + ":" + str(minute))
+    for hour in range(24):
+        for minute in range(60):
+            mean.append(np.mean(json_object_raw["hour"][str(hour)]["minute"][str(minute)]))
+            time.append(str(hour) + ":" + str(minute))
                 
 
     #De-nosing the weeks combined
     denoisedMean = fft_denoiser(mean, 50)
 
     #store the denoised mean and variance for all the minutes for each hour for each weekday in a json structure
-    for weekday in range(7):
-        for hour in range(24):
-            for minute in range(60):
-                mean_this_minute = denoisedMean[time.index(str(weekday) + " " + str(hour) + ":" + str(minute))]
-                variance_this_minute = statistics.stdev(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = mean_this_minute)
-                json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
-                json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
+    for hour in range(24):
+        for minute in range(60):
+            mean_this_minute = denoisedMean[time.index(str(hour) + ":" + str(minute))]
+            variance_this_minute = statistics.stdev(json_object_raw["hour"][str(hour)]["minute"][str(minute)],xbar = mean_this_minute)
+            json_object_mean_var["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
+            json_object_mean_var["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
     #Write the mean and variance values to a json file      
-    json_file_mean_var = open("GeneralizedThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "w")
+    json_file_mean_var = open("DailyCycleThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 

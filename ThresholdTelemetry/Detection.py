@@ -7,7 +7,7 @@ import time
 start_time = time.time()
 
 #Open json file with threshold values
-json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDenoisedNTNU.json", "r")
+json_file_mean_var = open("ThresholdTelemetry/Thresholds/MeanVarValuesDenoisedNTNU.json", "r")
 json_object_mean_var = json.load(json_file_mean_var)
 json_file_mean_var.close()
 

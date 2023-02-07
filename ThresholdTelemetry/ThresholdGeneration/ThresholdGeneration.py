@@ -58,6 +58,6 @@ for weekday in range(7):
             json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
 #Write the mean and variance values to a json file      
-json_file_mean_var = open("ThresholdTelemetry/RawValues/MeanVarValuesDenoisedNTNU.json", "w")
+json_file_mean_var = open("ThresholdTelemetry/Thresholds/MeanVarValuesDenoisedNTNU.json", "w")
 json.dump(json_object_mean_var,json_file_mean_var)
 json_file_mean_var.close()

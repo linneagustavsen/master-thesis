@@ -7,7 +7,7 @@ client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niw
 
 def detection(systemId, if_name, field):
     #Open json file with threshold values
-    json_file_mean_var = open("GeneralizedThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "r")
+    json_file_mean_var = open("DailyCycleThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
 
@@ -29,14 +29,13 @@ def detection(systemId, if_name, field):
     #Alert detection system if the deviation is higher than a predetermined value
     for table in tables:
         for row in table.records:
-            mean_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["mean"]
-            variance_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["variance"]
+            mean_row = json_object_mean_var["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["mean"]
+            variance_row = json_object_mean_var["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["variance"]
             
             deviation = (row.values["_value"]- mean_row)/variance_row
 
-            if deviation > 20:
+            if deviation > 5:
                 print(deviation, ",", row.values["_time"],",", row.values["_value"], ",", mean_row, ",", variance_row)
                 #print("Deviation score",deviation, "at", row.values["_time"] )
-
 
 detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts")
