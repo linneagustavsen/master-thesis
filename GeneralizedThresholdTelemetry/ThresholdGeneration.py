@@ -64,4 +64,10 @@ def thresholdGeneration(systemId, if_name, field):
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
-thresholdGeneration("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts")
+thresholdGeneration("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts")
+thresholdGeneration("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts")
+thresholdGeneration("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts")
+thresholdGeneration("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts")
+thresholdGeneration("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts")
+thresholdGeneration("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts")
+thresholdGeneration("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts")

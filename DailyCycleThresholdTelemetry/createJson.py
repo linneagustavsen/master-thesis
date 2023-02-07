@@ -30,6 +30,3 @@ json_file_mean_var.close()
 json.dump(json_object_raw,json_file_raw)
 json_file_raw.close()'''
 
-
-print("DailyCycleThresholdTelemetry/Thresholds/"+ str("trd-gw") + "." + str("xe-0/1/0").replace("/","-") + "." + str("egress_stats__if_1sec_pkts"
-)+".json")

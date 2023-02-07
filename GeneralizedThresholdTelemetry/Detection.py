@@ -10,6 +10,7 @@ def detection(systemId, if_name, field):
     json_file_mean_var = open("GeneralizedThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
+    f = open("GeneralizedThresholdTelemetry/Detections/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev17.txt", "a")
 
     query_api = client.query_api()
 
@@ -24,7 +25,8 @@ def detection(systemId, if_name, field):
 
     #Make a flux table list from the output of the query
     tables = query_api.query(query=query)
-    print("Deviation score, Time, Value, Mean , Variance")
+    
+    f.write("Deviation score, Time, Value, Mean, Variance")
     #Loop through all the tables and the rows and check their deviation from the threshold values
     #Alert detection system if the deviation is higher than a predetermined value
     for table in tables:
@@ -34,9 +36,16 @@ def detection(systemId, if_name, field):
             
             deviation = (row.values["_value"]- mean_row)/variance_row
 
-            if deviation > 20:
-                print(deviation, ",", row.values["_time"],",", row.values["_value"], ",", mean_row, ",", variance_row)
+            if deviation > 17:
+                f.write("\n" + str(deviation) + "," + str(row.values["_time"]) + "," +str( row.values["_value"]) + ","+str(mean_row) + "," +str( variance_row))
                 #print("Deviation score",deviation, "at", row.values["_time"] )
-
+    f.close()
 
 detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts")
+detection("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts")
+detection("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts")
+detection("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts")
+detection("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts")
+detection("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts")
+detection("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts")
+detection("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts")
