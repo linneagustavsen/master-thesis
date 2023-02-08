@@ -7,8 +7,8 @@ import numpy as np
 
 
 #Open json schema files to make json objects from them
-json_file = open("GeneralizedThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
-json_file_mean_var = open("GeneralizedThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
+json_file = open("ThresholdTelemetry/Schemas/RawValuesSchema.json", "r")
+json_file_mean_var = open("ThresholdTelemetry/Schemas/MeanVarSchema.json", "r")
 json_object_raw = json.load(json_file)
 json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
@@ -60,7 +60,7 @@ def thresholdGeneration(systemId, if_name, field):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
     #Write the mean and variance values to a json file      
-    json_file_mean_var = open("GeneralizedThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+"stdev.json", "w")
+    json_file_mean_var = open("ThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
