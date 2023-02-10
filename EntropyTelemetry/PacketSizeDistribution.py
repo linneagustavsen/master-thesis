@@ -10,19 +10,19 @@ def packetSizeDistribution(dfEgressBytes, dfEgressPackets):
     numberOfPacketsOfSizei = np.zeros(1514)
     packetSize = []
     for i in range(len(egressBytes)):
-        '''if bytesTime != packetsTime:
-            '''
-        packetSize.append(egressBytes[i]/egressPackets[i])
-        #print(bytesTime[i], "      :      ",packetsTime[i] )
-
+        if egressPackets[i] == 0:
+            packetSize.append(0)
+        else:
+            packetSize.append(egressBytes[i]/egressPackets[i])
     
     for value in packetSize:
         numberOfPacketsOfSizei[int(value)] += 1
+        
     
     Pi = []
     sumOfNP = sum(numberOfPacketsOfSizei)
     for value in packetSize:
         Pi.append(numberOfPacketsOfSizei[int(value)]/sumOfNP)
-
+    
     return Pi, np.count_nonzero(numberOfPacketsOfSizei)
     

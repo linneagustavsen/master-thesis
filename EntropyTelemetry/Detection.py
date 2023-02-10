@@ -46,8 +46,8 @@ def detection(systemId, if_name):
         dfEgressBytes = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_octets")
         dfEgressPackets = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_pkts")
         startTime = stopTime
-        
-        if dfEgressBytes.empty or dfEgressPackets.empty:
+
+        if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
             packetSizeArray.append(None)
             packetNumberArray.append(None)
             packetSizeRateArray.append(None)
