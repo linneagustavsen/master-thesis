@@ -13,27 +13,20 @@ import numpy as np
 
 def ipSourceDistribution(infile):
 
-    # Create an empty IPset
-    sourceSet = IPSet()
+    numberOfPacketsPerIP ={}
+    sumOfPackets = 0
 
     # Loop over the records in the file
     for rec in infile:
-        sourceSet.add(rec.sip)
-    
-    uniqueIPs = len(sourceSet)
-    ipAddrs = []
-    for ip in sourceSet:
-        ipAddrs.append(ip)
-    
-    numberOfPacketsPerIP = np.zeros(uniqueIPs)
-
-    for rec in infile:
-        numberOfPacketsPerIP[ipAddrs.index(rec.sip)] += rec.packets
+        if rec.sip in numberOfPacketsPerIP:
+            numberOfPacketsPerIP[rec.sip] += rec.packets
+        else:
+            numberOfPacketsPerIP[rec.sip] = rec.packets
+        sumOfPackets += rec.packets
 
     Pi = []
-    sumOfPackets = sum(numberOfPacketsPerIP)
     
     for rec in infile:
-        Pi.append(numberOfPacketsPerIP[ipAddrs.index(rec.sip)]/sumOfPackets)
+        Pi.append(numberOfPacketsPerIP[rec.sip]/sumOfPackets)
     
     return Pi,sumOfPackets

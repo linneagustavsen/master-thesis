@@ -2,30 +2,20 @@ from silk import *
 import numpy as np
 
 def ipDestinationDistribution(infile):
-
-    # Create an empty IPset
-    destinationSet = IPSet()
+    numberOfPacketsPerIP ={}
+    sumOfPackets = 0
 
     # Loop over the records in the file
     for rec in infile:
-        destinationSet.add(rec.dip)
+        if rec.dip in numberOfPacketsPerIP:
+            numberOfPacketsPerIP[rec.dip] += rec.packets
+        else:
+            numberOfPacketsPerIP[rec.dip] = rec.packets
+        sumOfPackets += rec.packets
 
-    uniqueIPs = len(destinationSet)
-    ipAddrs = []
-
-    for ip in destinationSet:
-        ipAddrs.append(ip)
-    
-    numberOfPacketsPerIP = np.zeros(uniqueIPs)
-
-    for rec in infile:
-        numberOfPacketsPerIP[ipAddrs.index(rec.dip)] += rec.packets
-        
-    
     Pi = []
-    sumOfPackets = sum(numberOfPacketsPerIP)
-
+    
     for rec in infile:
-        Pi.append(numberOfPacketsPerIP[ipAddrs.index(rec.dip)]/sumOfPackets)
+        Pi.append(numberOfPacketsPerIP[rec.dip]/sumOfPackets)
     
     return Pi,sumOfPackets

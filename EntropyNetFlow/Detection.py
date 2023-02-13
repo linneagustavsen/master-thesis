@@ -18,7 +18,7 @@ import time
 def detection(silkFile):
 
     startTime = datetime.strptime("2011-01-01 10:00:00", '%Y-%m-%d %H:%M:%S')
-
+    stopTime = datetime.strptime("2011-01-01 11:00:00", '%Y-%m-%d %H:%M:%S')
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
     records = []
@@ -34,21 +34,21 @@ def detection(silkFile):
             PiSIP, ns = ipSourceDistribution(records)
             ipSrcArray.append(generalizedEntropy(10,PiSIP))
             ipSrcRateArray.append(generalizedEntropy(10,PiSIP)/ns)
+
             PiDIP, nd = ipDestinationDistribution(records)
             ipDstArray.append(generalizedEntropy(10,PiDIP))
             ipDstRateArray.append(generalizedEntropy(10,PiDIP)/nd)
-            
+            timeArray.append(rec.stime)
+        
             print("Runde:",counter)
-            print("rec.stime:",rec.stime)
-            print("before:",startTime + timedelta(minutes = 5))
+            print("Record stime:", rec.stime)
             print("--- %s seconds ---" % (time.time() - st))
             records = []
             startTime = startTime + timedelta(minutes = 5)
-            print("after:",startTime + timedelta(minutes = 5))
             st = time.time()
             counter+= 1
         records.append(rec)
-        timeArray.append(rec.stime)
+        
 
     infile.close()
 
