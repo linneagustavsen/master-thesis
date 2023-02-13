@@ -16,17 +16,9 @@ def ipSourceDistribution(infile):
     # Create an empty IPset
     sourceSet = IPSet()
 
-    counter = 0
-
-    recordIPs = []
-    recordPackets = []
     # Loop over the records in the file
     for rec in infile:
         sourceSet.add(rec.sip)
-        recordIPs.append(rec.sip)
-        recordPackets.append(rec.packets)
-        counter +=1
-    print(sourceSet)
     
     uniqueIPs = len(sourceSet)
     ipAddrs = []
@@ -34,16 +26,14 @@ def ipSourceDistribution(infile):
         ipAddrs.append(ip)
     
     numberOfPacketsPerIP = np.zeros(uniqueIPs)
-    print(uniqueIPs, counter)
 
-    print(infile)
-    for i in range(len(recordIPs)):
-        numberOfPacketsPerIP[ipAddrs.index(recordIPs[i])] += recordPackets[i]
-        #STOPPED HERE NEED A SMALLER SET. FIND A WAY TO PARTITION IT INTO 5 MIN INTERVALS. CALL FUNCTION EVERY 5 MINUTES? COLLECT ALL RECORDS IN A LIST AND SEND THe list to the function when the stime is past 5 minutes
-    
+    for rec in infile:
+        numberOfPacketsPerIP[ipAddrs.index(rec.sip)] += rec.packets
+
     Pi = []
-
-    for i in range(len(recordIPs)):
-        Pi.append(recordPackets[i]/numberOfPacketsPerIP[ipAddrs.index(recordIPs[i])])
+    sumOfPackets = sum(numberOfPacketsPerIP)
     
-    return Pi,uniqueIPs
+    for rec in infile:
+        Pi.append(numberOfPacketsPerIP[ipAddrs.index(rec.sip)]/sumOfPackets)
+    
+    return Pi,sumOfPackets
