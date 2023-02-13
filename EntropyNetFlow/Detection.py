@@ -18,8 +18,7 @@ import time
 # Main function
 def detection(silkFile):
 
-    startTime = datetime.strptime("2011-01-01 10:00:00", '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime("2011-01-01 11:00:00", '%Y-%m-%d %H:%M:%S')
+    startTime = datetime.strptime("2011-01-03 00:00:00", '%Y-%m-%d %H:%M:%S')
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
     records = []
@@ -71,17 +70,18 @@ def detection(silkFile):
 
     infile.close()
 
-    makePlot(ipSrcArray, timeArray, "Entropy of Source IP 1m")
-    makePlot(ipSrcRateArray, timeArray, "Entropy rate of Source IP 1m")
+    makePlot(ipSrcArray, timeArray, "Entropy of Source IP 1 week")
+    makePlot(ipSrcRateArray, timeArray, "Entropy rate of Source IP 1 week")
     
-    makePlot(ipDstArray, timeArray, "Entropy of Destination IP 1m")
-    makePlot(ipDstRateArray, timeArray, "Entropy rate of Destination IP 1m")
+    makePlot(ipDstArray, timeArray, "Entropy of Destination IP 1 week")
+    makePlot(ipDstRateArray, timeArray, "Entropy rate of Destination IP 1 week")
     
-    makePlot(flowArray, timeArray, "Entropy of Flows 1m")
-    makePlot(flowRateArray, timeArray, "Entropy rate of Flows 1m")
+    makePlot(flowArray, timeArray, "Entropy of Flows 1 week")
+    makePlot(flowRateArray, timeArray, "Entropy rate of Flows 1 week")
     
-    makePlot(numberOfFlows, timeArray, "Number of flows 1m")
+    makePlot(numberOfFlows, timeArray, "Number of flows 1 week")
 
 
 
-detection("/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11.rw") #Sorted on time
+#detection("/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11.rw") #Sorted on time
+detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw")
