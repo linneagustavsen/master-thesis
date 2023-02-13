@@ -1,25 +1,32 @@
 from silk import *
 
 def flowDistribution(infile):
-    numberOfPacketsPerFlow ={}
-    flows= []
+    numberOfPacketsPerFlow = {}
+    flows = {}
     sumOfPackets = 0
     for rec in infile:
-        if (rec.sip,rec.dip) in flows:
-            numberOfPacketsPerFlow[flows.index((rec.sip,rec.dip))] += rec.packets
-        elif (rec.dip,rec.sip) in flows:
-            numberOfPacketsPerFlow[flows.index((rec.dip,rec.sip))] += rec.packets
+        flow = (rec.sip, rec.dip)
+        reverse_flow = (rec.dip, rec.sip)
+        if flow in flows:
+            index = flows[flow]
+        elif reverse_flow in flows:
+            index = flows[reverse_flow]
+            flow = reverse_flow
         else:
-            flows.append((rec.sip,rec.dip))
-            numberOfPacketsPerFlow[flows.index((rec.sip,rec.dip))] = rec.packets
+            index = len(flows)
+            flows[flow] = index
+            numberOfPacketsPerFlow[index] = 0
+        numberOfPacketsPerFlow[index] += rec.packets
         sumOfPackets += rec.packets
     
     Pi = []
-    
     for rec in infile:
-        if (rec.sip,rec.dip) in flows:
-            Pi.append(numberOfPacketsPerFlow[flows.index((rec.sip,rec.dip))]/sumOfPackets)
-        elif (rec.dip,rec.sip) in flows:
-            Pi.append(numberOfPacketsPerFlow[flows.index((rec.dip,rec.sip))]/sumOfPackets)
+        flow = (rec.sip, rec.dip)
+        reverse_flow = (rec.dip, rec.sip)
+        if flow in flows:
+            index = flows[flow]
+        elif reverse_flow in flows:
+            index = flows[reverse_flow]
+        Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
 
     return Pi, len(flows)

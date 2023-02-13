@@ -41,16 +41,19 @@ def detection(silkFile):
     for rec in infile:
         if rec.stime >= startTime + timedelta(minutes = 1):
             PiSIP, ns = ipSourceDistribution(records)
-            ipSrcArray.append(generalizedEntropy(10,PiSIP))
-            ipSrcRateArray.append(generalizedEntropy(10,PiSIP)/ns)
+            entropySip = generalizedEntropy(10,PiSIP)
+            ipSrcArray.append(entropySip)
+            ipSrcRateArray.append(entropySip/ns)
 
             PiDIP, nd = ipDestinationDistribution(records)
-            ipDstArray.append(generalizedEntropy(10,PiDIP))
-            ipDstRateArray.append(generalizedEntropy(10,PiDIP)/nd)
+            entropyDip = generalizedEntropy(10,PiDIP)
+            ipDstArray.append(entropyDip)
+            ipDstRateArray.append(entropyDip/nd)
             
             PiF, nf = flowDistribution(records)
-            flowArray.append(generalizedEntropy(10, PiF))
-            flowRateArray.append(generalizedEntropy(10,PiF)/nf)
+            entropyFlow = generalizedEntropy(10, PiF)
+            flowArray.append(entropyFlow)
+            flowRateArray.append(entropyFlow/nf)
 
             numberOfFlows.append(nf)
             
