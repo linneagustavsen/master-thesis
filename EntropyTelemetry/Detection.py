@@ -28,17 +28,13 @@ warnings.simplefilter("ignore", MissingPivotFunction)
 
 def detection(systemId, if_name):
 
-    time = ["2022-10-13T11:00:00Z", "2022-10-13T11:05:00Z", "2022-10-13T11:10:00Z", "2022-10-13T11:15:00Z", "2022-10-13T11:20:00Z", "2022-10-13T11:25:00Z",
-    "2022-10-13T11:30:00Z", "2022-10-13T11:35:00Z", "2022-10-13T11:40:00Z", "2022-10-13T11:45:00Z", "2022-10-13T11:50:00Z", "2022-10-13T11:55:00Z", 
-    "2022-10-13T12:00:00Z","2022-10-13T12:05:00Z", "2022-10-13T12:10:00Z", "2022-10-13T12:15:00Z", "2022-10-13T12:20:00Z", "2022-10-13T12:25:00Z",
-    "2022-10-13T12:30:00Z", "2022-10-13T12:35:00Z", "2022-10-13T12:40:00Z", "2022-10-13T12:45:00Z", "2022-10-13T12:50:00Z", "2022-10-13T12:55:00Z",
-    "2022-10-13T13:00:00Z", "2022-10-13T13:05:00Z", "2022-10-13T13:10:00Z", "2022-10-13T13:15:00Z", "2022-10-13T13:20:00Z", "2022-10-13T13:25:00Z",
-    "2022-10-13T13:30:00Z", "2022-10-13T13:35:00Z", "2022-10-13T13:40:00Z", "2022-10-13T13:45:00Z", "2022-10-13T13:50:00Z", "2022-10-13T13:55:00Z", "2022-10-13T14:00:00Z"]
     packetSizeArray = []
     packetNumberEntropyArray = []
     packetSizeRateArray = []
     packetNumberArray = []
+    bytesArray = []
     timeArray = []
+    
     startTime = datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S')
 
     for i in range(2016):
@@ -49,13 +45,14 @@ def detection(systemId, if_name):
         startTime = stopTime
 
         if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
-            '''packetSizeArray.append(None)
+            packetSizeArray.append(None)
             packetNumberEntropyArray.append(None)
-            packetSizeRateArray.append(None)'''
+            packetSizeRateArray.append(None)
             packetNumberArray.append(None)
+            bytesArray.append(None)
             continue
 
-        '''PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
+        PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
 
@@ -64,18 +61,19 @@ def detection(systemId, if_name):
         packetNumberEntropyArray.append(entropyNumberOfPackets)
 
         entropyRatePacketSize = entropyPacketSize/nd
-        packetSizeRateArray.append(entropyRatePacketSize)'''
+        packetSizeRateArray.append(entropyRatePacketSize)
 
         packetNumberArray.append(sum(dfEgressPackets["_value"].to_numpy()))
+        bytesArray.append(sum(dfEgressBytes["_value"].to_numpy()))
 
 
 
 
-    '''makePlot(packetSizeArray, timeArray, "Entropy of packet size")
+    makePlot(packetSizeArray, timeArray, "Entropy of packet size")
     makePlot(packetNumberEntropyArray, timeArray, "Entropy of packet number")
-    makePlot(packetSizeRateArray, timeArray, "Entropy rate of packet size")'''
+    makePlot(packetSizeRateArray, timeArray, "Entropy rate of packet size")
     makePlot(packetNumberArray, timeArray, "Packet number")
-
+    makePlot(bytesArray, timeArray, "Bytes")
 
     #If it changes by 1 it is pretty significant
 
