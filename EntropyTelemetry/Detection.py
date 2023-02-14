@@ -35,8 +35,9 @@ def detection(systemId, if_name):
     "2022-10-13T13:00:00Z", "2022-10-13T13:05:00Z", "2022-10-13T13:10:00Z", "2022-10-13T13:15:00Z", "2022-10-13T13:20:00Z", "2022-10-13T13:25:00Z",
     "2022-10-13T13:30:00Z", "2022-10-13T13:35:00Z", "2022-10-13T13:40:00Z", "2022-10-13T13:45:00Z", "2022-10-13T13:50:00Z", "2022-10-13T13:55:00Z", "2022-10-13T14:00:00Z"]
     packetSizeArray = []
-    packetNumberArray = []
+    packetNumberEntropyArray = []
     packetSizeRateArray = []
+    packetNumberArray = []
     timeArray = []
     startTime = datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S')
 
@@ -48,25 +49,33 @@ def detection(systemId, if_name):
         startTime = stopTime
 
         if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
-            packetSizeArray.append(None)
+            '''packetSizeArray.append(None)
+            packetNumberEntropyArray.append(None)
+            packetSizeRateArray.append(None)'''
             packetNumberArray.append(None)
-            packetSizeRateArray.append(None)
             continue
 
-        PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
+        '''PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
 
         PiNP = numberOfPacketsDistribution(dfEgressPackets)
         entropyNumberOfPackets = generalizedEntropy(10, PiNP)
-        packetNumberArray.append(entropyNumberOfPackets)
+        packetNumberEntropyArray.append(entropyNumberOfPackets)
 
         entropyRatePacketSize = entropyPacketSize/nd
-        packetSizeRateArray.append(entropyRatePacketSize)
+        packetSizeRateArray.append(entropyRatePacketSize)'''
 
-    makePlot(packetSizeArray, timeArray, "Entropy of packet size")
-    makePlot(packetNumberArray, timeArray, "Entropy of packet number")
-    makePlot(packetSizeRateArray, timeArray, "Entropy rate of packet size")
+        packetNumberArray.append(sum(dfEgressPackets["_value"].to_numpy()))
+
+
+
+
+    '''makePlot(packetSizeArray, timeArray, "Entropy of packet size")
+    makePlot(packetNumberEntropyArray, timeArray, "Entropy of packet number")
+    makePlot(packetSizeRateArray, timeArray, "Entropy rate of packet size")'''
+    makePlot(packetNumberArray, timeArray, "Packet number")
+
 
     #If it changes by 1 it is pretty significant
 
