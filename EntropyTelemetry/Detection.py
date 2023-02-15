@@ -1,13 +1,9 @@
-import numpy as np
 from datetime import datetime,timedelta
-import matplotlib.dates as mdates
-from scipy.stats import norm
+import numpy as np
 from GetData import *
 from GeneralizedEntropy import *
-from PacketSizeDistribution import *
-from NumberOfPacketsDistribution import *
+from Distributions import *
 from MakePlot import *
-import pandas as pd
 import warnings
 from influxdb_client.client.warnings import MissingPivotFunction
 
@@ -27,38 +23,35 @@ warnings.simplefilter("ignore", MissingPivotFunction)
 '''
 
 def detection(systemId, if_name):
+    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
 
     packetSizeArray = []
-    packetNumberEntropyArray = []
     packetSizeRateArray = []
     packetNumberArray = []
     bytesArray = []
     timeArray = []
     
     startTime = datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S')
-
-    for i in range(2016):
+    f.write("Time, Change, Value, Mean last 10 minutes")
+    f_rate.write("Time, Change, Value, Mean last 10 minutes")
+    for i in range(10080):
         timeArray.append(startTime)
         stopTime = startTime + timedelta(minutes = 5)
         dfEgressBytes = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_octets")
         dfEgressPackets = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_pkts")
-        startTime = stopTime
+        startTime = startTime + timedelta(minutes = 1)
 
         if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
-            packetSizeArray.append(None)
-            packetNumberEntropyArray.append(None)
-            packetSizeRateArray.append(None)
-            packetNumberArray.append(None)
-            bytesArray.append(None)
+            packetSizeArray.append( np.nan)
+            packetSizeRateArray.append( np.nan)
+            packetNumberArray.append( np.nan)
+            bytesArray.append( np.nan)
             continue
 
         PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
-
-        PiNP = numberOfPacketsDistribution(dfEgressPackets)
-        entropyNumberOfPackets = generalizedEntropy(10, PiNP)
-        packetNumberEntropyArray.append(entropyNumberOfPackets)
 
         entropyRatePacketSize = entropyPacketSize/nd
         packetSizeRateArray.append(entropyRatePacketSize)
@@ -66,15 +59,26 @@ def detection(systemId, if_name):
         packetNumberArray.append(sum(dfEgressPackets["_value"].to_numpy()))
         bytesArray.append(sum(dfEgressBytes["_value"].to_numpy()))
 
+        if i < 10:
+            continue
+        '''if packetSizeArray !=  np.nan and packetSizeArray[i-1] !=  np.nan:
+            if abs(packetSizeArray[i] - packetSizeArray[i-1]) > 1:
+                print(startTime, "-----The entropy is now:",packetSizeArray[i], "and it was:",packetSizeArray[i-1], "last minute")
+                
 
+        if packetSizeRateArray !=  np.nan and packetSizeRateArray[i-1] !=  np.nan:
+            if abs(packetSizeRateArray[i] - packetSizeRateArray[i-1]) > 0.015:
+                print(startTime, "-----The entropy rate is now:",packetSizeRateArray[i], "and it was:",packetSizeRateArray[i-1], "last minute" )'''
+                
+        if packetSizeArray !=  np.nan:
+            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-10: i-1])) > 1:
+                print(startTime, "-----The entropy is now:",packetSizeArray[i], "and it was:",np.nanmean(packetSizeArray[i-10: i-1]), "the last 10 minutes")
+                f.write("\n" + str(startTime) + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-10: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-10: i-1])))
 
-
-    makePlot(packetSizeArray, timeArray, "Entropy of packet size")
-    makePlot(packetNumberEntropyArray, timeArray, "Entropy of packet number")
-    makePlot(packetSizeRateArray, timeArray, "Entropy rate of packet size")
-    makePlot(packetNumberArray, timeArray, "Packet number")
-    makePlot(bytesArray, timeArray, "Bytes")
-
-    #If it changes by 1 it is pretty significant
-
+        if packetSizeRateArray !=  np.nan:
+            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-10: i-1])) > 0.015:
+                print(startTime, "-----The entropy rate is now:",packetSizeRateArray[i], "and it was:",np.nanmean(packetSizeRateArray[i-10: i-1]), "the last 10 minutes")
+                f_rate.write("\n" + str(startTime) + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-10: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-10: i-1])))
+    f.close()
+    f_rate.close()
 detection("trd-gw", "xe-0/1/0")

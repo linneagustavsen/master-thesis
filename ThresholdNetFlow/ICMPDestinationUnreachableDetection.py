@@ -11,10 +11,11 @@
 from silk import *
 from NumberOfPackets import *
 from datetime import datetime,timedelta
-from MakePlot import *
+import numpy as np
 
 
 def icmpDetection(silkFile):
+    f = open("ThresholdNetFlow/Detections/ICMPDstUnreachable.txt", "a")
 
     startTime = datetime.strptime("2011-01-03 00:00:00", '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime("2011-01-10 00:00:00", '%Y-%m-%d %H:%M:%S')
@@ -24,8 +25,8 @@ def icmpDetection(silkFile):
 
     numberOfIcmpDstUnreachablePackets = []
 
-    timeArray = []
-
+    i =0
+    f.write("Time, Change, Value, Mean of the last 10 minutes")
     for rec in infile:
         if rec.stime >= stopTime:
             break
@@ -35,15 +36,18 @@ def icmpDetection(silkFile):
             
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
-            timeArray.append(rec.stime)
+            if i >=10:
+                if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-10: i-1])) > 50:
+                    f.write("\n" + str(startTime) + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-10: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-10: i-1])))
 
             records = []
             startTime = startTime + timedelta(minutes = 1)
+            i += 1
         records.append(rec)
         
 
     infile.close()
+    f.close()
 
-    makePlot(numberOfIcmpDstUnreachablePackets, timeArray, "Number of ICMP Destination unreachable packets 1 week")
 
 icmpDetection("/home/linneafg/silk-data/RawDataFromFilter/icmp3-in-sorted.rw")

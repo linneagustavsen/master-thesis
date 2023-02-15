@@ -6,19 +6,36 @@ rwfilter --start-date=2011/01/01:10 --end-date=2011/01/01:11 --all-destination=/
 
 # Import the PySiLK bindings
 from silk import *
-from IPSourceDistribution import *
-from IPDestinationDistribution import *
-from FlowDistribution import *
+from Distributions import *
 from GeneralizedEntropy import *
 from ICMPRatio import *
 from datetime import datetime,timedelta
 from MakePlot import *
 import time
+import numpy as np
 
 
 # Main function
 def detection(silkFile):
+    srcEntropyFile = open("EntropyNetFlow/Detections/SourceIPEntropy.txt", "a")
+    srcEntropyRateFile = open("EntropyNetFlow/Detections/SourceIPEntropyRate.txt", "a")
+    dstEntropyFile = open("EntropyNetFlow/Detections/DestinationIPEntropy.txt", "a")
+    dstEntropyRateFile = open("EntropyNetFlow/Detections/DestinationIPEntropyRate.txt", "a")
+    flowEntropyFile = open("EntropyNetFlow/Detections/FlowEntropy.txt", "a")
+    flowEntropyRateFile = open("EntropyNetFlow/Detections/FlowEntropyRate.txt", "a")#RUN THIS AGAIN
+    flowFile = open("ThresholdNetFlow/Detections/NumberOfFlows.txt", "a")
+    icmpRatioFile = open("ThresholdNetFlow/Detections/ICMPRatio.txt", "a")#RUN THIS AGAIN
 
+    srcEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    srcEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    dstEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    dstEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    flowEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    flowEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    flowFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    icmpRatioFile.write("Time, Change, Value, Mean of the last 10 minutes")
+
+    #TODO:make this an input variable
     startTime = datetime.strptime("2011-01-03 00:00:00", '%Y-%m-%d %H:%M:%S')
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
@@ -36,10 +53,8 @@ def detection(silkFile):
     numberOfFlows = []
 
     icmpRatioArray = []
-
-    timeArray = []
-    counter = 0
-    st = time.time()
+    i = 0
+    
     for rec in infile:
         if rec.stime >= startTime + timedelta(minutes = 1):
             PiSIP, ns = ipSourceDistribution(records)
@@ -61,32 +76,48 @@ def detection(silkFile):
 
             icmpRatioArray.append(icmpRatio(records))
             
-            timeArray.append(rec.stime)
         
-            print("Runde:",counter)
-            print("Record stime:", rec.stime)
-            print("--- %s seconds ---" % (time.time() - st))
+            if i >=10:
+                if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-10: i-1])) > 1:
+                    srcEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-10: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-10: i-1])))
+                
+                if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-10: i-1])) > 0.00001:
+                    srcEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-10: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-10: i-1])))
+                
+                if abs(ipDstArray[i] - np.nanmean(ipDstArray[i-10: i-1])) > 1:
+                    dstEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-10: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-10: i-1])))
+
+                if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-10: i-1])) >  0.00001:
+                    dstEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-10: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-10: i-1])))
+
+                if abs(flowArray[i] - np.nanmean(flowArray[i-10: i-1])) > 1:
+                    flowEntropyFile.write("\n" + str(startTime) + "," + str(abs(flowArray[i] - np.nanmean(flowArray[i-10: i-1]))) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-10: i-1])))
+                
+                if abs(flowRateArray[i] - np.nanmean(flowRateArray[i-10: i-1])) > 0.0001:
+                    flowEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(flowRateArray[i] - np.nanmean(flowRateArray[i-10: i-1]))) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-10: i-1])))
+                
+                if abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-10: i-1])) > 10000:
+                    flowFile.write("\n" + str(startTime) + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-10: i-1]))) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-10: i-1])))
+
+                if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-10: i-1])) > 0.001:
+                    icmpRatioFile.write("\n" + str(startTime) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-10: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-10: i-1])))
+
             records = []
             startTime = startTime + timedelta(minutes = 1)
-            st = time.time()
-            counter+= 1
+            i+= 1
         records.append(rec)
         
+    srcEntropyFile.close()
+    srcEntropyRateFile.close()
+    dstEntropyFile.close()
+    dstEntropyRateFile.close()
+    flowEntropyFile.close()
+    flowEntropyRateFile.close()
+    flowFile.close()
+    icmpRatioFile.close()
 
     infile.close()
-
-    makePlot(ipSrcArray, timeArray, "Entropy of Source IP 1 week")
-    makePlot(ipSrcRateArray, timeArray, "Entropy rate of Source IP 1 week")
     
-    makePlot(ipDstArray, timeArray, "Entropy of Destination IP 1 week")
-    makePlot(ipDstRateArray, timeArray, "Entropy rate of Destination IP 1 week")
-    
-    makePlot(flowArray, timeArray, "Entropy of Flows 1 week")
-    makePlot(flowRateArray, timeArray, "Entropy rate of Flows 1 week")
-    
-    makePlot(numberOfFlows, timeArray, "Number of flows 1 week")
-
-    makePlot(icmpRatioArray, timeArray, "ICMP ratio 1 week")
 
 
 

@@ -9,38 +9,30 @@
 
 # Import the PySiLK bindings
 from silk import *
-from MakePlot import *
-from SYNPacketDistribution import *
-from GeneralizedEntropy import *
-from datetime import datetime, timedelta
+from datetime import datetime
+import numpy as np
 
 def synDetection(silkFile):
-
+    f = open("ThresholdNetFlow/Detections/TCPSYN.txt", "a")
     #startTime = datetime.strptime("2010-12-26 06:00:00", '%Y-%m-%d %H:%M:%S')
     startTime = datetime.strptime("2011-01-03 00:00:00", '%Y-%m-%d %H:%M:%S')
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
-    records = []
 
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
     synPacketsPerFlow = []
+    i = 0
 
-    timeArray = []
+    f.write("Time, Change, Value, Mean of the last 10 minutes")
     for rec in infile:
-        if rec.packets >= 5:
-            synPacketsPerFlow.append(rec.packets)
-            #send out alert that packets in a syn flow has preceded a threshold of 5
-            print("More than 5 packets in a flow at time:", rec.stime)
-        else:
-            synPacketsPerFlow.append(None)
-        timeArray.append(None)
-       
-
+        synPacketsPerFlow.append(rec.packets)
+        
+        if i >= 10:
+            if rec.packets >= 5:
+                f.write("\n" + str(startTime) + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-10: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-10: i-1])))
+        i += 1
     infile.close()
 
-    '''makePlot(synPacketsPerFlow, timeArray, "Number of syn packets per flow")
-    
-  '''
 synDetection("/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw")
 #synDetection("/home/linneafg/silk-data/RawDataFromFilter/tcpSyn-in-sorted-time.rw")
