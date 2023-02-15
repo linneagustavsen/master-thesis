@@ -42,7 +42,7 @@ def detection(silkFile):
     st = time.time()
     for rec in infile:
         if rec.stime >= startTime + timedelta(minutes = 1):
-            '''PiSIP, ns = ipSourceDistribution(records)
+            PiSIP, ns = ipSourceDistribution(records)
             entropySip = generalizedEntropy(10,PiSIP)
             ipSrcArray.append(entropySip)
             ipSrcRateArray.append(entropySip/ns)
@@ -57,7 +57,7 @@ def detection(silkFile):
             flowArray.append(entropyFlow)
             flowRateArray.append(entropyFlow/nf)
 
-            numberOfFlows.append(nf)'''
+            numberOfFlows.append(nf)
 
             icmpRatioArray.append(icmpRatio(records))
             
@@ -74,7 +74,7 @@ def detection(silkFile):
         
 
     infile.close()
-    '''
+
     makePlot(ipSrcArray, timeArray, "Entropy of Source IP 1 week")
     makePlot(ipSrcRateArray, timeArray, "Entropy rate of Source IP 1 week")
     
@@ -84,7 +84,7 @@ def detection(silkFile):
     makePlot(flowArray, timeArray, "Entropy of Flows 1 week")
     makePlot(flowRateArray, timeArray, "Entropy rate of Flows 1 week")
     
-    makePlot(numberOfFlows, timeArray, "Number of flows 1 week")'''
+    makePlot(numberOfFlows, timeArray, "Number of flows 1 week")
 
     makePlot(icmpRatioArray, timeArray, "ICMP ratio 1 week")
 
