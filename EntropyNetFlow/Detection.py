@@ -1,127 +1,152 @@
 '''
+How to get the flows in a file format:
 
-rwfilter --start-date=2011/01/01:10 --end-date=2011/01/01:11 --all-destination=/home/linneafg/silk-data/RawDataFromFilter/one-hour-2010-12-01_10-11.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
+    #Filter out all flows from a time period
+    rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --all-destination=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
+
+    #Sorts them by start time
+    rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw /home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw
 
 '''
 
-# Import the PySiLK bindings
 from silk import *
 from Distributions import *
 from GeneralizedEntropy import *
 from ICMPRatio import *
 from datetime import datetime,timedelta
 from MakePlot import *
-import time
 import numpy as np
 
+'''
 
-# Main function
-def detection(silkFile):
-    '''srcEntropyFile = open("EntropyNetFlow/Detections/SourceIPEntropy.txt", "a")
+    Calculates entropy and other metrics and alerts in case of an anomaly
+    Input:  File with flow records sorted on time, 
+            start time as a string, 
+            a aggregation interval as a timedelta object, 
+            a window size of how far back we should compare the values
+'''
+
+def detection(silkFile, start, interval, windowSize):
+    #Open file to write alerts to
+    srcEntropyFile = open("EntropyNetFlow/Detections/SourceIPEntropy.txt", "a")
     srcEntropyRateFile = open("EntropyNetFlow/Detections/SourceIPEntropyRate.txt", "a")
-    #dstEntropyFile = open("EntropyNetFlow/Detections/DestinationIPEntropy.txt", "a")
+    dstEntropyFile = open("EntropyNetFlow/Detections/DestinationIPEntropy.txt", "a")
     dstEntropyRateFile = open("EntropyNetFlow/Detections/DestinationIPEntropyRate.txt", "a")
     flowEntropyFile = open("EntropyNetFlow/Detections/FlowEntropy.txt", "a")
-    flowEntropyRateFile = open("EntropyNetFlow/Detections/FlowEntropyRate.txt", "a")#RUN THIS AGAIN
-    #flowFile = open("ThresholdNetFlow/Detections/NumberOfFlows.txt", "a")'''
-    icmpRatioFile = open("ThresholdNetFlow/Detections/ICMPRatio.txt", "a")#RUN THIS AGAIN
+    flowEntropyRateFile = open("EntropyNetFlow/Detections/FlowEntropyRate.txt", "a")
+    flowFile = open("ThresholdNetFlow/Detections/NumberOfFlows.txt", "a")
+    icmpRatioFile = open("ThresholdNetFlow/Detections/ICMPRatio.txt", "a")
 
-    '''#srcEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    srcEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    #dstEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    dstEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    flowEntropyFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    flowEntropyRateFile.write("Time, Change, Value, Mean of the last 10 minutes")
-    #flowFile.write("Time, Change, Value, Mean of the last 10 minutes")'''
-    icmpRatioFile.write("Time, Change, Value, Mean of the last 10 minutes")
+    #Write the column titles to the files
+    srcEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    srcEntropyRateFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    dstEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    dstEntropyRateFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    flowEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    flowEntropyRateFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    flowFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    icmpRatioFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
 
-    #TODO:make this an input variable
-    startTime = datetime.strptime("2011-01-03 00:00:00", '%Y-%m-%d %H:%M:%S')
+    #Makes a datetime object of the input start time
+    startTime = datetime.strptime(start, '%Y-%m-%d %H')
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
+
+    #Instantiate empty arrays for the calculated values
     records = []
-    '''
-    #ipSrcArray = []
+    
+    ipSrcArray = []
     ipSrcRateArray = []
 
-    #ipDstArray = []
+    ipDstArray = []
     ipDstRateArray = []
 
     flowArray = []
     flowRateArray = []
 
-    #numberOfFlows = []'''
+    numberOfFlows = []
 
     icmpRatioArray = []
+    #Instantiate counter variable
     i = 0
-    timeArray=[]
+
+    #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.stime >= startTime + timedelta(minutes = 1):
-            '''PiSIP, ns = ipSourceDistribution(records)
+        #Aggregate flows into the specified time interval
+        if rec.stime >= startTime + interval:
+
+            #Find the probability distribution based on how many packets there is in each source flow in this time interval
+            PiSIP, ns = ipSourceDistribution(records)
+            #Calculate the generalized entropy of this distribution
             entropySip = generalizedEntropy(10,PiSIP)
-            #ipSrcArray.append(entropySip)
+            ipSrcArray.append(entropySip)
+            #Calculate the generalized entropy rate of this distribution
             ipSrcRateArray.append(entropySip/ns)
 
+            #Find the probability distribution based on how many packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
+            #Calculate the generalized entropy of this distribution
             entropyDip = generalizedEntropy(10,PiDIP)
-            #ipDstArray.append(entropyDip)
+            ipDstArray.append(entropyDip)
+            #Calculate the generalized entropy rate of this distribution
             ipDstRateArray.append(entropyDip/nd)
             
+            #Find the probability distribution based on how many packets there is in each bi-directional flow in this time interval
             PiF, nf = flowDistribution(records)
+            #Calculate the generalized entropy of this distribution
             entropyFlow = generalizedEntropy(10, PiF)
-            #flowArray.append(entropyFlow)
+            flowArray.append(entropyFlow)
+            #Calculate the generalized entropy rate of this distribution
             flowRateArray.append(entropyFlow/nf)
 
-            #numberOfFlows.append(nf)
-'''
+            #Store the number of bi-directional flows in this time interval
+            numberOfFlows.append(nf)
+
+            #Find the ratio of ICMP packets in this time interval
             icmpRatioArray.append(icmpRatio(records))
             
-            timeArray.append(rec.stime)
-            
-            if i >=10:
-                ''' if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-10: i-1])) > 1:
-                    srcEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-10: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-10: i-1])))
+            #If there is enough stored values to compare with we compare the difference of each metric with a threshold
+            if i >=windowSize:
+                if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])) > 1:
+                    srcEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1])))
                 
-                if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-10: i-1])) > 0.0001:
-                    srcEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-10: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-10: i-1])))
+                if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])) > 0.0001:
+                    srcEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1])))
                 
-                if abs(ipDstArray[i] - np.nanmean(ipDstArray[i-10: i-1])) > 1:
-                    dstEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-10: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-10: i-1])))
+                if abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])) > 1:
+                    dstEntropyFile.write("\n" + str(startTime) + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1])))
 
-                if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-10: i-1])) >  0.0001:
-                    dstEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-10: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-10: i-1])))
+                if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])) >  0.0001:
+                    dstEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1])))
 
-                if abs(flowArray[i] - np.nanmean(flowArray[i-10: i-1])) > 1:
-                    flowEntropyFile.write("\n" + str(startTime) + "," + str(abs(flowArray[i] - np.nanmean(flowArray[i-10: i-1]))) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-10: i-1])))
+                if abs(flowArray[i] - np.nanmean(flowArray[i-windowSize: i-1])) > 1:
+                    flowEntropyFile.write("\n" + str(startTime) + "," + str(abs(flowArray[i] - np.nanmean(flowArray[i-windowSize: i-1]))) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-windowSize: i-1])))
                 
-                if abs(flowRateArray[i] - np.nanmean(flowRateArray[i-10: i-1])) > 0.0001:
-                    flowEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(flowRateArray[i] - np.nanmean(flowRateArray[i-10: i-1]))) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-10: i-1])))
+                if abs(flowRateArray[i] - np.nanmean(flowRateArray[i-windowSize: i-1])) > 0.0001:
+                    flowEntropyRateFile.write("\n" + str(startTime) + "," + str(abs(flowRateArray[i] - np.nanmean(flowRateArray[i-windowSize: i-1]))) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-windowSize: i-1])))
                 
-                if abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-10: i-1])) > 10000:
-                    flowFile.write("\n" + str(startTime) + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-10: i-1]))) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-10: i-1])))
-                ''' 
-                if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-10: i-1])) > 0.001:
-                    icmpRatioFile.write("\n" + str(startTime) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-10: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-10: i-1])))
+                if abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1])) > 10000:
+                    flowFile.write("\n" + str(startTime) + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-windowSize: i-1])))
+                 
+                if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > 0.001:
+                    icmpRatioFile.write("\n" + str(startTime) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
         
+            #Reset the record aggregation
             records = []
-            startTime = startTime + timedelta(minutes = 1)
+            startTime = startTime + interval
             i+= 1
         records.append(rec)
     
-    '''       
-    #srcEntropyFile.close()
+           
+    srcEntropyFile.close()
     srcEntropyRateFile.close()
-    #dstEntropyFile.close()
+    dstEntropyFile.close()
     dstEntropyRateFile.close()
     flowEntropyFile.close()
     flowEntropyRateFile.close()
-    #flowFile.close()'''
+    flowFile.close()
     icmpRatioFile.close()
 
     infile.close()
     
-
-
-
-#detection("/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11.rw") #Sorted on time
-detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw")
+detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw", "2011-01-03 00",timedelta(minutes = 1), 10)

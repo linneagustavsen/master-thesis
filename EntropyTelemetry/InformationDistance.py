@@ -1,5 +1,12 @@
 import math
 
+'''
+
+    Input: list of probabilities of two distributions, the alpha, and the length of the distribution lists
+    Output: Information distance
+
+'''
+
 def informationDistance(alpha, Pi, Qi, n):
     sum1 = 0
     sum2 = 0

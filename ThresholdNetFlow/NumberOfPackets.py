@@ -1,3 +1,7 @@
+'''
+    Returns the number of packets in an input array of records
+'''
+
 def numberOfPackets(records):
     np = 0
 

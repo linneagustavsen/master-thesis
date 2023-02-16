@@ -20,9 +20,7 @@ def getData(start, stop, systemId, if_name, field):
             |> group()        \
             |> keep(columns: ["_value", "_time"])'
 
-    #Make a data frame from the output of the query
-    df = query_api.query_data_frame(query=query)
-    if not df.empty:
-        df = df.drop(columns=['result', 'table'])
+    #Make a flux table list from the output of the query
+    tables = query_api.query(query=query)
 
-    return df
+    return tables

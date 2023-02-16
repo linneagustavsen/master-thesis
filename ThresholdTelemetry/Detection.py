@@ -1,30 +1,27 @@
-from influxdb_client import InfluxDBClient
-from influxdb_client.client.write_api import SYNCHRONOUS
+from datetime import datetime
 import json
+from GetData import *
+'''
+    Calculates deviation score of a traffic measurement and alerts in case of an anomaly
+    Input:  system ID,
+            interface name,
+            field,
+            start time as a string,
+            stop time as a string
+'''
 
-#Set up a connection with the database
-client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
-def detection(systemId, if_name, field):
+def detection(systemId, if_name, field, start, stop):
     #Open json file with threshold values
     json_file_mean_var = open("ThresholdTelemetry/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
     f = open("ThresholdTelemetry/Detections/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".txt", "a")
 
-    query_api = client.query_api()
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    #Query to get all outgoing packet/sec rates from one link in the period of detection
-    query = 'from(bucket: "skogul/1mnd")\
-            |> range(start: 2022-10-13T00:00:00Z, stop: 2022-10-20T00:00:00Z)\
-            |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-            |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
-            |> filter(fn: (r) => r["_field"] == "' + field + '")\
-            |> group()        \
-            |> keep(columns: ["_value", "_time"])'
-
-    #Make a flux table list from the output of the query
-    tables = query_api.query(query=query)
+    tables = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
     
     f.write("Time, Deviation score, Value, Mean, Variance")
     #Loop through all the tables and the rows and check their deviation from the threshold values
@@ -38,15 +35,14 @@ def detection(systemId, if_name, field):
 
             if deviation > 10:
                 f.write("\n"  + str(row.values["_time"]) + "," + str(deviation) + "," +str( row.values["_value"]) + ","+str(mean_row) + "," +str( variance_row))
-                #print("Deviation score",deviation, "at", row.values["_time"] )
     f.close()
 
-detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts")
-detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets")
-'''detection("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts")
-detection("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts")
-detection("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts")
-detection("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts")
-detection("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts")
-detection("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts")
-detection("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts")'''
+detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts" ,"2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+'''detection("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")
+detection("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts", "2022-10-13 00:00:00", "2022-10-20 00:00:00")'''

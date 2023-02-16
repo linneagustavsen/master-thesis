@@ -48,6 +48,48 @@ def flowDistribution(infile):
     #Return the probabilities and the number of flows in this interval
     return Pi, len(flows)
 
+'''
+
+    Make a probability distribution based on how many SYN packets there is in each uni-directional flow in a time interval
+
+'''
+def uniDirFlowDistribution(infile):
+    #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
+    numberOfPacketsPerFlow = {}
+    flows = {}
+    #A variable to keep track of the total amount of packets in this time interval
+    sumOfPackets = 0
+
+   #Loop through each flow record in the time interval
+    for rec in infile:
+        #Define a uni-directional flow as the connection between a source and destination IP address
+        flow = (rec.sip, rec.dip)
+
+        #Find the index of the current flow in the dictionary if it exists
+        #If not add it to the dictionary 
+        if flow in flows:
+            index = flows[flow]
+        else:
+            index = len(flows)
+            flows[flow] = index
+            numberOfPacketsPerFlow[index] = 0
+        #Add the packets of the current flow to the corresponding index in the other dictionary
+        numberOfPacketsPerFlow[index] += rec.packets
+        sumOfPackets += rec.packets
+    
+   #Array to keep track of the probability distribution
+    Pi = []
+
+    #Loop through each flow record in the time interval
+    for rec in infile:
+        flow = (rec.sip, rec.dip)
+        if flow in flows:
+            index = flows[flow]
+        #Add the probability of the current flow having the size that it does to the distribution
+        Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
+
+    return Pi, len(flows)
+
 
 '''
 
