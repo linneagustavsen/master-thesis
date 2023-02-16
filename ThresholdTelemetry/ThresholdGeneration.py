@@ -1,9 +1,9 @@
 import statistics
-from influxdb_client import InfluxDBClient
-from influxdb_client.client.write_api import SYNCHRONOUS
+from GetData import *
 import json
 from FFTDenoiser import *
 import numpy as np
+from datetime import datetime
 
 
 #Open json schema files to make json objects from them
@@ -14,23 +14,20 @@ json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
 json_file_mean_var.close()
 
-def thresholdGeneration(systemId, if_name, field):
+'''
+    Calculates and stores the deonised mean value and the standard deviation of a traffic measure for each specific minute of each specific weekday
+    Input:  system ID,
+            interface name,
+            field,
+            start time as a string, 
+            stop time as a string
+'''
 
-    #Set up a connection with the database
-    client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
+def thresholdGeneration(systemId, if_name, field, start, stop):
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    query_api = client.query_api()
-
-    query = 'from(bucket: "skogul/1mnd")\
-            |> range(start: 2022-09-22T00:00:00Z, stop: 2022-10-13T00:00:00Z)\
-            |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-            |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
-            |> filter(fn: (r) => r["_field"] == "' + field + '")\
-            |> group()        \
-            |> keep(columns: ["_value", "_time"])'
-
-    #Make a flux table list from the output of the query
-    tables = query_api.query(query=query)
+    tables = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
 
     #Loop through all the tables and the rows and store them in a json structure based on weekday, hour, and minute
     for table in tables:
@@ -64,10 +61,12 @@ def thresholdGeneration(systemId, if_name, field):
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
-thresholdGeneration("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts")
-thresholdGeneration("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts")
-thresholdGeneration("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts")
-thresholdGeneration("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts")
-thresholdGeneration("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts")
-thresholdGeneration("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts")
-thresholdGeneration("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts")
+'''thresholdGeneration("trd-gw", "xe-0/1/0", "ingress_stats__if_1sec_pkts","2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("trd-gw", "et-11/0/0", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")'''
+thresholdGeneration("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+
