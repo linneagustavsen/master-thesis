@@ -1,6 +1,7 @@
 '''
 
-    The input has to be a list of probabilities from the distribution of this field.
+    Input: list of probabilities and the alpha
+    Output: Generalized entropy
 
 '''
 import math
