@@ -14,7 +14,6 @@ from Distributions import *
 from GeneralizedEntropy import *
 from ICMPRatio import *
 from datetime import datetime,timedelta
-from MakePlot import *
 import numpy as np
 
 '''
