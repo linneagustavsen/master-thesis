@@ -1,0 +1,20 @@
+egress_queue_info__0__avg_buffer_occupancy_measurement
+egress_queue_info__0__cur_buffer_occupancy_measurement
+egress_stats__if_1sec_octets_measurement
+egress_stats__if_1sec_pkts_measurement
+
+from(bucket: "skogul/1mnd")
+  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+  |> filter(fn: (r) => r["systemId"] == "trd-gw")
+  |> filter(fn: (r) => r["if_name"] == "xe-0/1/0")
+  |> filter(fn: (r) => r["_field"] == "egress_queue_info__0__avg_buffer_occupancy" or r["_field"] == "egress_queue_info__0__cur_buffer_occupancy" or r["_field"] == "egress_stats__if_1sec_pkts" or r["_field"] == "egress_stats__if_1sec_octets")
+  |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> keep(columns: ["_time", "egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"])  
+
+from(bucket: "skogul/1mnd")                
+|> range(start: 2022-09-22T00:00:00Z, stop: 2022-10-13T00:00:00Z)                
+|> filter(fn: (r) => r["systemId"] == "trd-gw")                
+|> filter(fn: (r) => r["if_name"] == "xe-0/1/0")                
+|> filter(fn: (r) => r["_field"] == "egress_queue_info__0__avg_buffer_occupancy" or r["_field"] == "egress_queue_info__0__cur_buffer_occupancy" or r["_field"] == "egress_stats__if_1sec_pkts" or r["_field"] == "egress_stats__if_1sec_octets")    
+|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")    
+|> keep(columns: ['_time', 'egress_queue_info__0__avg_buffer_occupancy', 'egress_queue_info__0__cur_buffer_occupancy', 'egress_stats__if_1sec_pkts', 'egress_stats__if_1sec_octets'])
