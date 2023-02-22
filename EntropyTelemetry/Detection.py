@@ -74,11 +74,11 @@ def detection(systemId, if_name, start, frequency, interval, windowSize):
         
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
-            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > 1:
+            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > 0.5:
                 f.write("\n" + str(startTime) + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
 
         if packetSizeRateArray !=  np.nan:
-            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > 0.015:
+            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > 0.005:
                 f_rate.write("\n" + str(startTime) + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
     f.close()
     f_rate.close()
