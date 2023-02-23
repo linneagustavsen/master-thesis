@@ -58,6 +58,8 @@ def getEntropyData(systemId,if_name, start, stop):
         
         #If there is not enough datapoints the minute is skipped
         if df.empty:
+            #Push the start time by the specified frequency
+            startTime = startTime + timedelta(minutes = 1)
             continue
         egressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         egressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
@@ -86,6 +88,6 @@ def getEntropyData(systemId,if_name, start, stop):
      "entropy_packet_size": packetSizeArray,
      "entropy_rate_packet_size": packetSizeRateArray
     })
-    entropy.to_pickle("RandomForest/entropy.pkl")
+    entropy.to_pickle("RandomForest/entropy" + str(start) + ".pkl")
 
     return packetSizeArray, packetSizeRateArray, timeArray

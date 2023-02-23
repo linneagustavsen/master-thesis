@@ -22,7 +22,7 @@ def makeTrainingSet(systemId, if_name, start, stop):
     data = np.empty((len(timeStamps),len(columTitles) ))
     print("Structured Data")
     #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(systemId, if_name, startTime, stopTime)
-    entropy_df = pd.read_pickle("RandomForest/entropy.pkl")  
+    entropy_df = pd.read_pickle("RandomForest/entropy" + str(start) + ".pkl")  
     print(entropy_df.head)
     entropy_timeStamps, entropy_measurements = structureData(entropy_df)
     print(entropy_timeStamps)
