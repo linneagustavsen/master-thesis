@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from Check import *
 
 
-detectionsFile = open("CorrelationTest/Detections.txt", "a")
+detectionsFile = open("CorrelationTest/DetectionsWithKmeans.txt", "a")
 detectionsFile.write("Time")
 detectionsArray = []
 
@@ -20,7 +20,7 @@ while not stop:
 
         break
 
-    if check("EntropyTelemetry/Detections/EntropyPacketSize.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("EntropyTelemetry/Detections/EntropyRatePacketSize.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("ThresholdTelemetry/Detections/trd-gw.xe-0-1-0.egress_stats__if_1sec_pkts.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("ThresholdTelemetry/Detections/trd-gw.xe-0-1-0.egress_stats__if_1sec_pkts.MaxVar.txt", timestamp.strftime('%Y-%m-%d %H:%M')):
+    if check("CorrelationTest/Combined.Cluster0.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("EntropyTelemetry/Detections/EntropyPacketSize.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("EntropyTelemetry/Detections/EntropyRatePacketSize.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("ThresholdTelemetry/Detections/trd-gw.xe-0-1-0.egress_stats__if_1sec_pkts.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("ThresholdTelemetry/Detections/trd-gw.xe-0-1-0.egress_stats__if_1sec_pkts.MaxVar.txt", timestamp.strftime('%Y-%m-%d %H:%M')):
         detectionsArray.append(timestamp.strftime('%Y-%m-%d %H:%M'))
         #detectionsFile.write("\n" + timestamp.strftime('%Y-%m-%d %H:%M'))
     timestamp += timedelta(minutes = 1)
