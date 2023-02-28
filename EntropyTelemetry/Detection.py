@@ -19,10 +19,10 @@ warnings.simplefilter("ignore", MissingPivotFunction)
             a window size of how far back we should compare the values
 '''
 
-def detection(systemId, if_name, start, frequency, interval, windowSize):
+def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
-    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(start) + "." + str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
     
     #Write the column titles to the files
     f.write("Time, Change, Value, Mean last "+ str(windowSize))
@@ -36,13 +36,17 @@ def detection(systemId, if_name, start, frequency, interval, windowSize):
 
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+
+    intervalTime = (stopTime - startTime).total_seconds()/60
     
     #Loop for every minute in a week
-    for i in range(10080):
+    for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        dfEgressBytes = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_octets")
-        dfEgressPackets = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_pkts")
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
+        dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
         #Push the start time by the specified frequency
         startTime = startTime + frequency
 

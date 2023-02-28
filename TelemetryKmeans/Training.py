@@ -10,7 +10,7 @@ def training(start, stop, systemId, if_name, fields):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
-    df = pd.read_pickle("TelemetryKmeans/data.pkl")  
+    df = pd.read_pickle("TelemetryKmeans/TrainingData.pkl")  
     timeStamps, measurements = structureData(df)
 
     kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(measurements)
