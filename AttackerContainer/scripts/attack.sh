@@ -15,10 +15,10 @@ destination_port=$8
 attack_script=$9
 
 #Start Wireshark capture
-tshark -i $interface -w "$capture_file" -F libcap & pid_tshark=$!
+tshark -i $interface -w "$capture_file" -F pcap & pid_tshark=$!
 
 #Write to file
-echo "Started Wireshark trace for attack $attack_type" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+echo "Started Wireshark trace for "$attack_type" attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Traceroute to the victim
 traceroute $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $traceroute_log
@@ -26,7 +26,7 @@ traceroute $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $traceroute_log
 #Write to file
 echo "Finished traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
-echo "Start attack $attack_type" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+echo "Start "$attack_type" attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Execute the attack and write the output to file
 $attack_script | ts "[%b %d %H:%M:%.S]" | tee -a $attack_stats_log & pid_attack=$!
