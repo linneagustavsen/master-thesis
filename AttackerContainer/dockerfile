@@ -1,5 +1,7 @@
 FROM kalilinux/kali-rolling
 COPY ./scripts/ /home/scripts/
+RUN mkdir /home/wiresharkTraces
+RUN mkdir /home/logs
 RUN apt-get update
 RUN apt-get install hping3 -y
 RUN apt-get install traceroute -y
@@ -9,4 +11,4 @@ RUN apt-get install tshark -y
 RUN chmod +x /home/scripts/attack_procedure_training.sh
 RUN chmod +x /home/scripts/attack.sh
 RUN chmod +x /home/scripts/variables.sh
-CMD cd /home/scripts && ./attack_procedure_training.sh
+CMD cd /home/scripts/ && ./attack_procedure_training.sh
