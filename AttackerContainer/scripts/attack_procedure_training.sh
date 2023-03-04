@@ -4,8 +4,8 @@
 source variables.sh
 
 #Define variables for whole attack
-attack_procedure_log="attack_procedure.txt"
-capture_file="attack_procedure.pcap"
+attack_procedure_log="/home/logs/attack_procedure.log"
+capture_file="/home/wiresharkTraces/attack_procedure.pcap"
 
 attack(){
     #Write to file
