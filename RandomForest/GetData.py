@@ -88,6 +88,6 @@ def getEntropyData(systemId,if_name, start, stop):
      "entropy_packet_size": packetSizeArray,
      "entropy_rate_packet_size": packetSizeRateArray
     })
-    entropy.to_pickle("RandomForest/entropy" + str(start) + ".pkl")
+    entropy.to_pickle("RandomForest/Data/entropy" + str(start) + ".pkl")
 
     return packetSizeArray, packetSizeRateArray, timeArray

@@ -2,7 +2,7 @@ from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 
-trainingSet = pd.read_pickle("RandomForest/TrainingSet.pkl")
+trainingSet = pd.read_pickle("RandomForest/Data/TrainingSet.pkl")
 
 valueArrayX = np.array(trainingSet.iloc[1:, 0:5])
 print(valueArrayX)
@@ -11,7 +11,7 @@ labely = np.array(trainingSet.iloc[1:,6])
 classifier_RF = RandomForestClassifier(n_estimators = 100)
 classifier_RF.fit(valueArrayX,labely)
 
-testingSet = pd.read_pickle("RandomForest/TestingSet.pkl")
+testingSet = pd.read_pickle("RandomForest/Data/TestingSet.pkl")
 print(len(testingSet))
 
 X_test = np.array(testingSet.iloc[1:,  0:5])

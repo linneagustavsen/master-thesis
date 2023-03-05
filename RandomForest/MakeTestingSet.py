@@ -16,13 +16,13 @@ def makeTrainingSet(systemId, if_name, start, stop):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
 
-    #df.to_pickle("RandomForest/RawTestingData.pkl")
-    df = pd.read_pickle("RandomForest/RawTestingData.pkl")
+    #df.to_pickle("RandomForest/Data/RawTestingData.pkl")
+    df = pd.read_pickle("RandomForest/Data/RawTestingData.pkl")
     timeStamps, measurements = structureData(df)
     data = np.empty((len(timeStamps),len(columTitles) ))
     print("Structured Data")
     #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(systemId, if_name, startTime, stopTime)
-    entropy_df = pd.read_pickle("RandomForest/entropy" + str(start) + ".pkl")  
+    entropy_df = pd.read_pickle("RandomForest/Data/entropy" + str(start) + ".pkl")  
     print(entropy_df.head)
     entropy_timeStamps, entropy_measurements = structureData(entropy_df)
     print(entropy_timeStamps)
@@ -73,7 +73,7 @@ def makeTrainingSet(systemId, if_name, start, stop):
         data[i] = curMeasurements
     
     trainingSet = pd.DataFrame(data, columns=columTitles)
-    trainingSet.to_pickle("RandomForest/TestingSet.pkl")
+    trainingSet.to_pickle("RandomForest/Data/TestingSet.pkl")
     print(trainingSet.head)
 
 start = "2022-09-21 01:00:00"
