@@ -19,10 +19,10 @@ warnings.simplefilter("ignore", MissingPivotFunction)
             a window size of how far back we should compare the values
 '''
 
-def detection(systemId, if_name, start, frequency, interval, windowSize):
+def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
-    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(start) + "." + str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
     
     #Write the column titles to the files
     f.write("Time, Change, Value, Mean last "+ str(windowSize))
@@ -36,9 +36,12 @@ def detection(systemId, if_name, start, frequency, interval, windowSize):
 
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
+    intervalTime = (stopTime - startTime).total_seconds()/60
+
     #Loop for every minute in a week
-    for i in range(10080):
+    for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
         dfEgressBytes = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_octets")
@@ -74,13 +77,13 @@ def detection(systemId, if_name, start, frequency, interval, windowSize):
         
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
-            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > 1:
+            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > 0.5:
                 f.write("\n" + str(startTime) + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
 
         if packetSizeRateArray !=  np.nan:
-            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > 0.015:
+            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > 0.005:
                 f_rate.write("\n" + str(startTime) + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
     f.close()
     f_rate.close()
 
-detection("trd-gw", "xe-0/1/0", "2022-10-13 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
+detection("trd-gw", "xe-0/1/0", "2022-09-21 01:00:00", "2022-09-22 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
