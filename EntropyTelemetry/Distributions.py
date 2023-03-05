@@ -3,9 +3,7 @@
     Make a probability distribution based on how many packets there is in a time interval
 
 '''
-def numberOfPacketsDistribution(dfEgressPackets):
-    egressPackets = dfEgressPackets["_value"].to_numpy()
-    
+def numberOfPacketsDistribution(egressPackets):
     Pi = []
     sumOfNP = sum(egressPackets)
     for value in egressPackets:
@@ -17,10 +15,7 @@ def numberOfPacketsDistribution(dfEgressPackets):
     Make a probability distribution based on how big packets are in a time interval
 
 '''
-def packetSizeDistribution(dfEgressBytes, dfEgressPackets):
-    egressBytes = dfEgressBytes["_value"].to_numpy()
-    egressPackets = dfEgressPackets["_value"].to_numpy()
-
+def packetSizeDistribution(egressBytes, egressPackets):
     numberOfPacketsOfSizei = {}
     packetSize = []
     

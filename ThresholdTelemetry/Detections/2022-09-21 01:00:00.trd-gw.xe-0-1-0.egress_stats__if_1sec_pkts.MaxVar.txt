@@ -1,0 +1,1 @@
+Time, Deviation score, Value, Mean, Variance
