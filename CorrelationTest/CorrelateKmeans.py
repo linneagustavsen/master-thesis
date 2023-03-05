@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from Check import *
 
 
-detectionsFile = open("CorrelationTest/DetectionsWithKmeansEntropyCluster0.txt", "a")
+detectionsFile = open("CorrelationTest/Detections/DetectionsWithKmeansEntropyCluster0.txt", "a")
 detectionsFile.write("Time")
 detectionsArray = []
 
@@ -20,7 +20,7 @@ while not stop:
 
         break
 
-    if check("CorrelationTest/Entropy.Cluster0.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("CorrelationTest/Detections.txt", timestamp.strftime('%Y-%m-%d %H:%M')):
+    if check("CorrelationTest/Detections/Entropy.Cluster0.trd-gw.xe-0-1-0.txt", timestamp.strftime('%Y-%m-%d %H:%M')) and check("CorrelationTest/Detections/Detections.txt", timestamp.strftime('%Y-%m-%d %H:%M')):
         detectionsArray.append(timestamp.strftime('%Y-%m-%d %H:%M'))
         detectionsFile.write("\n" + timestamp.strftime('%Y-%m-%d %H:%M'))
     timestamp += timedelta(minutes = 1)
