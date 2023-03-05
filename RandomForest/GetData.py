@@ -32,6 +32,7 @@ def getData(start, stop, systemId, if_name, fields):
         
     query += ')\
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+    |> group()        \
     |> keep(columns: ' + str(columns).replace("'", '"') + ')'
 
     #Make a data frame from the output of the query

@@ -3,11 +3,6 @@ import numpy as np
 from GetData import *
 from GeneralizedEntropy import *
 from Distributions import *
-import warnings
-from influxdb_client.client.warnings import MissingPivotFunction
-
-warnings.simplefilter("ignore", MissingPivotFunction)
-
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
