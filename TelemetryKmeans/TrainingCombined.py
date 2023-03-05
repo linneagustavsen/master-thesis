@@ -15,13 +15,13 @@ def training(start, stop, systemId, if_name):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
 
-    #df.to_pickle("RandomForest/RawTrainingData.pkl")
-    df = pd.read_pickle("TelemetryKmeans/TrainingData.pkl")
+    #df.to_pickle("RandomForest/Data/RawTrainingData.pkl")
+    df = pd.read_pickle("TelemetryKmeans/Data/TrainingData.pkl")
     timeStamps, measurements = structureData(df)
     data = np.empty((len(timeStamps),len(columTitles)))
     print("Structured Data")
     #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(systemId, if_name, startTime, stopTime)
-    entropy_df = pd.read_pickle("TelemetryKmeans/TrainingDataEntropy.pkl")   
+    entropy_df = pd.read_pickle("TelemetryKmeans/Data/TrainingDataEntropy.pkl")   
     print(entropy_df.head)
     entropy_timeStamps, entropy_measurements = structureData(entropy_df)
     print(entropy_timeStamps)
@@ -70,13 +70,13 @@ def training(start, stop, systemId, if_name):
         data[i] = curMeasurements
     
     trainingSet = pd.DataFrame(data, columns=columTitles)
-    trainingSet.to_pickle("TelemetryKmeans/TrainingDataCombined.pkl")
+    trainingSet.to_pickle("TelemetryKmeans/Data/TrainingDataCombined.pkl")
     print(trainingSet.head)
 
 
 
     kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(trainingSet)
-    pickle.dump(kmeans, open("TelemetryKmeans/MLmodelCombined.pkl", 'wb'))
+    pickle.dump(kmeans, open("TelemetryKmeans/Models/MLmodelCombined.pkl", 'wb'))
 
 start = "2022-09-22 00:00:00"
 stop = "2022-10-13 00:00:00"

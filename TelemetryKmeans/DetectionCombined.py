@@ -5,20 +5,20 @@ from StructureData import *
 from datetime import datetime
 
 def detection(start, stop, systemId, if_name, fields):
-    f0 = open("TelemetryKmeans/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f1 = open("TelemetryKmeans/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f0 = open("TelemetryKmeans/Data/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f1 = open("TelemetryKmeans/Data/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
     f0.write("Time, Values")
     f1.write("Time, Values")
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #df = getEntropyData(startTime, stopTime, systemId, if_name)
-    #df.to_pickle("TelemetryKmeans/TestingDataEntropy.pkl")
-    df = pd.read_pickle("TelemetryKmeans/TestingDataCombined.pkl")
+    #df.to_pickle("TelemetryKmeans/Data/TestingDataEntropy.pkl")
+    df = pd.read_pickle("TelemetryKmeans/Data/TestingDataCombined.pkl")
     measurements = df.values
 
-    timeStamps = pd.read_pickle("TelemetryKmeans/TestingData.pkl")["_time"].to_numpy()
-    kmeans = pickle.load(open("TelemetryKmeans/MLmodelCombined.pkl", 'rb'))
+    timeStamps = pd.read_pickle("TelemetryKmeans/Data/TestingData.pkl")["_time"].to_numpy()
+    kmeans = pickle.load(open("TelemetryKmeans/Models/MLmodelCombined.pkl", 'rb'))
 
     prediction = kmeans.predict(df)
     count0 = 0 

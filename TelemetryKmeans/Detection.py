@@ -5,18 +5,18 @@ from StructureData import *
 from datetime import datetime
 
 def detection(start, stop, systemId, if_name, fields):
-    f0 = open("TelemetryKmeans/Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f1 = open("TelemetryKmeans/Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f0 = open("TelemetryKmeans/Data/Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f1 = open("TelemetryKmeans/Data/Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
     f0.write("Time, Values")
     f1.write("Time, Values")
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     '''df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
-    df.to_pickle("TelemetryKmeans/TestingData.pkl")  '''
-    df = pd.read_pickle("TelemetryKmeans/TestingData.pkl")
+    df.to_pickle("TelemetryKmeans/Data/TestingData.pkl")  '''
+    df = pd.read_pickle("TelemetryKmeans/Data/TestingData.pkl")
     timeStamps, measurements = structureData(df)
-    kmeans = pickle.load(open("TelemetryKmeans/MLmodel.pkl", 'rb'))
+    kmeans = pickle.load(open("TelemetryKmeans/Models/MLmodel.pkl", 'rb'))
     prediction = kmeans.predict(measurements)
     count0 = 0 
     count1 = 0

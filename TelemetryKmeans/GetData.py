@@ -83,6 +83,6 @@ def getEntropyData(start, stop, systemId, if_name):
      "entropy_packet_size": packetSizeArray,
      "entropy_rate_packet_size": packetSizeRateArray
     })
-    entropy.to_pickle("TelemetryKmeans/entropy" + str(start) + ".pkl")
+    entropy.to_pickle("TelemetryKmeans/Data/entropy" + str(start) + ".pkl")
 
     return entropy

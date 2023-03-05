@@ -6,10 +6,10 @@ from datetime import datetime
 from MakePlot import *
 
 def detection(start, stop, systemId, if_name, fields):
-    df = pd.read_pickle("TelemetryKmeans/TestingDataCombined.pkl")
+    df = pd.read_pickle("TelemetryKmeans/Data/TestingDataCombined.pkl")
     measurements = df.values
-    timeStamps = pd.read_pickle("TelemetryKmeans/TestingData.pkl")["_time"].to_numpy()
-    kmeans = pickle.load(open("TelemetryKmeans/MLmodelCombined.pkl", 'rb'))
+    timeStamps = pd.read_pickle("TelemetryKmeans/Data/TestingData.pkl")["_time"].to_numpy()
+    kmeans = pickle.load(open("TelemetryKmeans/Models/MLmodelCombined.pkl", 'rb'))
     prediction = kmeans.predict(df)
     count0 = 0 
     count1 = 0

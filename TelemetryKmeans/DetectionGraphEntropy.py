@@ -6,9 +6,9 @@ from datetime import datetime
 from MakePlot import *
 
 def detection(start, stop, systemId, if_name, fields):
-    df = pd.read_pickle("TelemetryKmeans/TestingDataEntropy.pkl")
+    df = pd.read_pickle("TelemetryKmeans/Data/TestingDataEntropy.pkl")
     timeStamps, measurements = structureData(df)
-    kmeans = pickle.load(open("TelemetryKmeans/MLmodelEntropy.pkl", 'rb'))
+    kmeans = pickle.load(open("TelemetryKmeans/Models/MLmodelEntropy.pkl", 'rb'))
     prediction = kmeans.predict(measurements)
     count0 = 0 
     count1 = 0
