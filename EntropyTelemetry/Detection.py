@@ -44,8 +44,9 @@ def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        dfEgressBytes = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_octets")
-        dfEgressPackets = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, "egress_stats__if_1sec_pkts")
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
+        dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
         #Push the start time by the specified frequency
         startTime = startTime + frequency
 
