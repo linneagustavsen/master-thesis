@@ -1,10 +1,10 @@
-from GetData import *
+from ..GetData import *
 from datetime import datetime,timedelta,date
 import pandas as pd
 from StructureData import *
 import numpy as np
-from Distributions import *
-from GeneralizedEntropy import *
+from ..Distributions import *
+from ..GeneralizedEntropy import *
 import math
 from CheckLabel import *
 def makeTrainingSet(systemId, if_name, start, stop):
@@ -21,7 +21,8 @@ def makeTrainingSet(systemId, if_name, start, stop):
     timeStamps, measurements = structureData(df)
     data = np.empty((len(timeStamps),len(columTitles) ))
     print("Structured Data")
-    #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(systemId, if_name, startTime, stopTime)
+    #entropy_df = getEntropyData(startTime, stopTime, systemId, if_name)
+    entropy_df.to_pickle("RandomForest/Data/entropy" + str(start) + ".pkl")
     entropy_df = pd.read_pickle("RandomForest/Data/entropy" + str(start) + ".pkl")  
     print(entropy_df.head)
     entropy_timeStamps, entropy_measurements = structureData(entropy_df)

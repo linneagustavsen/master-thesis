@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from GetData import *
+from ..GetData import *
 from FindMaxVar import *
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
@@ -24,7 +24,7 @@ def detection(systemId, if_name, field, start, stop):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    tables = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
+    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
     
     f.write("Time, Deviation score, Value, Mean, Variance")
     #Loop through all the tables and the rows and check their deviation from the threshold values

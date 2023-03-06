@@ -1,10 +1,10 @@
-from GetData import *
+from ..GetData import *
 from datetime import datetime,timedelta,date
 import pandas as pd
 from StructureData import *
 import numpy as np
-from Distributions import *
-from GeneralizedEntropy import *
+from ..Distributions import *
+from ..GeneralizedEntropy import *
 import math
 from CheckLabel import *
 def makeTrainingSet(systemId, if_name, start, stop):

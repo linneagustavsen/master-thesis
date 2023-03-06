@@ -21,7 +21,7 @@ def makeTrainingSet(systemId, if_name, start, stop):
     timeStamps, measurements = structureData(df)
     data = np.empty((len(timeStamps),len(columTitles) ))
     print("Structured Data")
-    #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(systemId, if_name, startTime, stopTime)
+    #packetSizeArray, packetSizeRateArray, timeArray = getEntropyData(startTime, stopTime, systemId, if_name)
     entropy_df = pd.read_pickle("TelemetryKmeans/Data/TestingDataEntropy.pkl")  
     print(entropy_df.head)
     entropy_timeStamps, entropy_measurements = structureData(entropy_df)

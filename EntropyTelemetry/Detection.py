@@ -1,6 +1,6 @@
 from datetime import datetime,timedelta
 import numpy as np
-from GetData import *
+from ..GetData import *
 from GeneralizedEntropy import *
 from Distributions import *
 

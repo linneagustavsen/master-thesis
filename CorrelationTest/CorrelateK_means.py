@@ -1,4 +1,4 @@
-from GetData import *
+from ..GetData import *
 from datetime import datetime, timedelta
 from Check import *
 

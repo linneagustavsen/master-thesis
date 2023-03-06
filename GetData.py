@@ -1,9 +1,8 @@
 from influxdb_client import InfluxDBClient
-from datetime import datetime,timedelta
-from Distributions import *
+from .Distributions import *
+from .GeneralizedEntropy import *
 import math
-import numpy as np
-from GeneralizedEntropy import generalizedEntropy
+from datetime import timedelta
 import pandas as pd
 '''
 start: datetime
@@ -43,6 +42,25 @@ def getData(start, stop, systemId, if_name, fields):
 
     return df
 
+def getDataTables(start, stop, systemId, if_name, field):
+    client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
+
+    query_api = client.query_api()
+
+    query = 'from(bucket: "skogul/1mnd")\
+            |> range(start: ' + start + ', stop: ' + stop + ')\
+            |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
+            |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
+            |> filter(fn: (r) => r["_field"] == "' + field + '")\
+            |> group()        \
+            |> keep(columns: ["_value", "_time"])'
+
+    #Make a flux table list from the output of the query
+    tables = query_api.query(query=query)
+
+    return tables
+
+
 def getEntropyData(start, stop, systemId, if_name):
     intervalTime = (stop - start).total_seconds()/60
 
@@ -63,7 +81,7 @@ def getEntropyData(start, stop, systemId, if_name):
             continue
         egressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         egressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
-
+        
         timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
 
         #Find the probability distribution based on how big the packets are this time interval
@@ -84,6 +102,6 @@ def getEntropyData(start, stop, systemId, if_name):
      "entropy_packet_size": packetSizeArray,
      "entropy_rate_packet_size": packetSizeRateArray
     })
-    #entropy.to_pickle("TelemetryKmeans/Data/entropy" + str(start) + ".pkl")
+    #entropy.to_pickle("RandomForest/Data/entropy" + str(start) + ".pkl")
 
     return entropy

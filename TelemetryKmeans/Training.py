@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
 import numpy as np
 from datetime import datetime
-from GetData import *
+from ..GetData import *
 from StructureData import *
 import pandas as pd
 import pickle
