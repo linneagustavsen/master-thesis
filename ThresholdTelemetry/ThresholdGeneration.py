@@ -1,5 +1,5 @@
 import statistics
-from ..GetData import *
+from HelperFunctions.GetData import *
 import json
 from FFTDenoiser import *
 import numpy as np

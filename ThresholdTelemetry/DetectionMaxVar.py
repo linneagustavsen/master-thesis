@@ -1,6 +1,6 @@
 from datetime import datetime
 import json
-from ..GetData import *
+from HelperFunctions.GetData import *
 from FindMaxVar import *
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly

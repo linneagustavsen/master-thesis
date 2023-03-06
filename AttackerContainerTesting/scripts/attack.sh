@@ -29,7 +29,7 @@ echo "Finished traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a 
 echo "Start "$attack_type" attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Execute the attack and write the output to file
-$attack_script | ts "[%b %d %H:%M:%.S]" | tee -a $attack_stats_log & pid_attack=$!
+$attack_script & pid_attack=$!
 
 #Wait for the attack duration to be over
 sleep $attack_duration
