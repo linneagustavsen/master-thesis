@@ -6,6 +6,6 @@ RUN mkdir /home/wiresharkTraces
 RUN apt-get update
 RUN apt-get install tshark -y
 RUN apt-get install cron -y
-RUN echo "35 11 6 3 * root cd /home/scripts && ./attack_procedure_testing.sh" >> /etc/crontab
+RUN echo "35 11 6 3 * root cd /home && ./capture.sh" >> /etc/crontab
 RUN chmod +x /home/capture.sh
 RUN chmod +x /home/variables.sh

