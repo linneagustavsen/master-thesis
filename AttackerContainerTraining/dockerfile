@@ -1,4 +1,5 @@
-FROM kalilinux/kali-rolling
+### TO NOT GET TCP RST run this in the host: iptables -I DOCKER-USER -i <interface of host machine> -d 172.17.0.2 -p tcp --tcp-flags RST RST -j DROP
+FROM debian:stable-slim
 COPY ./scripts/ /home/scripts/
 RUN mkdir /home/wiresharkTraces
 RUN mkdir /home/logs
@@ -7,10 +8,11 @@ RUN apt-get install hping3 -y
 RUN apt-get install traceroute -y
 RUN apt-get install slowhttptest -y
 RUN apt-get install moreutils -y
-RUN apt-get install tshark -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
 RUN apt-get install cron -y
-RUN echo "25 9 7 3 * root cd /home/scripts && ./attack_procedure_training.sh" >> /etc/crontab
+RUN echo "45 9 8 3 * root cd /home/scripts && ./attack_procedure_training.sh" >> /etc/crontab
 RUN chmod +x /home/scripts/attack_procedure_training.sh
 RUN chmod +x /home/scripts/attack.sh
 RUN chmod +x /home/scripts/variables.sh
+RUN chmod +x /home/scripts/capture.sh
 CMD ["cron", "-f"]

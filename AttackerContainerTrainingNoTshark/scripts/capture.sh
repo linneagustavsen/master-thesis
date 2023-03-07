@@ -2,6 +2,8 @@
 #Import variables from file
 source variables.sh
 
+DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
+
 for i in {1..300}
 do
     file_name="/home/wiresharkTraces/Trace"

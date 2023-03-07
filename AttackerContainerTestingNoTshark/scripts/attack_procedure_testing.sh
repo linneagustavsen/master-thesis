@@ -43,12 +43,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((10*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -67,12 +65,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 2" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((6*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 2 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -92,12 +88,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 3" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((15*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -117,12 +111,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 4" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break4.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((7*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 4 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -142,12 +134,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 5" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break5.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((14*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 5 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -169,12 +159,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 6" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break6.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((3*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 6 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -194,12 +182,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 7" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break7.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((20*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 7 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -219,12 +205,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 8" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break8.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((6*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 8 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -244,12 +228,10 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 
 #Write to file
 echo "Started break 9" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break9.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((3*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 9 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -271,12 +253,10 @@ mul_attack $attack_type $capture_file $traceroute_log  $attack_log $attack_durat
 
 #Write to file
 echo "Started break 10" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
-#Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break10.pcap" -F pcap & pid_tshark=$!
+
 #Wait for next attack
 sleep $((7*60))
-#Stop the Wireshark capture
-kill $pid_tshark
+
 #Write to file
 echo "Break 10 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
