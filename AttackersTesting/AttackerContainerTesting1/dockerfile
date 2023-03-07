@@ -9,7 +9,7 @@ RUN apt-get install slowhttptest -y
 RUN apt-get install moreutils -y
 RUN apt-get install tshark -y
 RUN apt-get install cron -y
-RUN echo "20 10 7 3 * root cd /home/scripts && ./attack_procedure_testing.sh" >> /etc/crontab
+RUN echo "45 9 8 3 * root cd /home/scripts && ./attack_procedure_testing.sh" >> /etc/crontab
 RUN chmod +x /home/scripts/attack_procedure_testing.sh
 RUN chmod +x /home/scripts/attack.sh
 RUN chmod +x /home/scripts/variables.sh
