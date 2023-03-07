@@ -1,7 +1,7 @@
 from sklearn.cluster import KMeans
 import numpy as np
 from datetime import datetime
-from GetData import *
+from HelperFunctions.GetData import *
 from StructureData import *
 import pandas as pd
 import pickle
@@ -9,7 +9,7 @@ import pickle
 def training(start, stop, systemId, if_name):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getEntropyData(startTime, stopTime,systemId, if_name)
+    df = getEntropyData(startTime, stopTime, systemId, if_name)
     df.to_pickle("TelemetryKmeans/Data/TrainingDataEntropy.pkl")
     #df = pd.read_pickle("TelemetryKmeans/data.pkl")  
     timeStamps, measurements = structureData(df)

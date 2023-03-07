@@ -18,6 +18,7 @@ def getData(start, stop, systemId, if_name, field):
             |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
             |> filter(fn: (r) => r["_field"] == "' + field + '")\
             |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")        \
+            |> group()        \
             |> keep(columns: ["'+ field + '", "_time"])'
 
 

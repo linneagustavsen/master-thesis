@@ -10,8 +10,8 @@ How to get the flows in a file format:
 
 
 from silk import *
-from Distributions import *
-from GeneralizedEntropy import *
+from HelperFunctions.Distributions import *
+from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime, timedelta
 import numpy as np
 

@@ -1,6 +1,6 @@
 import pickle
 import pandas as pd
-from GetData import *
+from HelperFunctions.GetData import *
 from StructureData import *
 from datetime import datetime
 

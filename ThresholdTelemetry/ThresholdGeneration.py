@@ -1,5 +1,5 @@
 import statistics
-from GetData import *
+from HelperFunctions.GetData import *
 import json
 from FFTDenoiser import *
 import numpy as np
@@ -27,7 +27,7 @@ def thresholdGeneration(systemId, if_name, field, start, stop):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    tables = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
+    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
 
     #Loop through all the tables and the rows and store them in a json structure based on weekday, hour, and minute
     for table in tables:

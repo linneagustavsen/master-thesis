@@ -32,6 +32,7 @@ def getData(start, stop, systemId, if_name, fields):
         
     query += ')\
     |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+    |> group()        \
     |> keep(columns: ' + str(columns).replace("'", '"') + ')'
 
     #Make a data frame from the output of the query
@@ -83,6 +84,6 @@ def getEntropyData(start, stop, systemId, if_name):
      "entropy_packet_size": packetSizeArray,
      "entropy_rate_packet_size": packetSizeRateArray
     })
-    entropy.to_pickle("TelemetryKmeans/Data/entropy" + str(start) + ".pkl")
+    #entropy.to_pickle("TelemetryKmeans/Data/entropy" + str(start) + ".pkl")
 
     return entropy
