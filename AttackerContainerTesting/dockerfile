@@ -14,4 +14,5 @@ RUN echo "0 16 7 3 * root cd /home/scripts && ./attack_procedure_testing.sh" >> 
 RUN chmod +x /home/scripts/attack_procedure_testing.sh
 RUN chmod +x /home/scripts/attack.sh
 RUN chmod +x /home/scripts/variables.sh
+RUN chmod +x /home/scripts/mul_attacks.sh
 CMD ["cron", "-f"]
