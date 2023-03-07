@@ -1,0 +1,15 @@
+#name	dns	ip
+googleeu-mp	34.105.154.156	34.105.154.156
+amazonuw2-mp	ec2-18-236-63-8.us-west-2.compute.amazonaws.com.	18.236.63.8
+amazonff-mp	ec2-3-69-241-159.eu-central-1.compute.amazonaws.com.	3.69.241.159
+amazonie-mp	ec2-34-254-179-150.eu-west-1.compute.amazonaws.com.	34.254.179.150
+amazonsth-mp	13.48.73.156	13.48.73.156
+azure-mp	13.82.53.167		13.82.53.167
+azurene-mp	13.79.144.22		13.79.144.22
+googlefi-mp	35.228.220.215	35.228.220.215
+ytelse-brg	ytelse-brg.uninett.no	158.39.1.94
+ytelse-osl	ytelse-osl.uninett.no	158.39.1.126
+ytelse-tos	ytelse-tos.uninett.no	158.39.1.98
+ytelse-trd	ytelse-trd.uninett.no	158.39.1.90
+trondheim-mp	ytelse1.uninett.no	128.39.65.26
+
