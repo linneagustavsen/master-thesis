@@ -9,7 +9,7 @@ do
     suffix="pcap"
     new_fileName=$file_name.$current_time.$suffix
     #Start Wireshark capture
-    tshark -i $interface -w "$new_fileName" -F pcap & pid_tshark=$!
+    tshark -i $interface -f "host 128.39.65.26" -w "$new_fileName" -F pcap & pid_tshark=$!
     #Wait for next attack
     sleep 15
     #Stop the Wireshark capture

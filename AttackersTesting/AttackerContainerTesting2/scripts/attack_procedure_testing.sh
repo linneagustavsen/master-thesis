@@ -19,7 +19,7 @@ attack(){
 #Write to file
 echo "Started break 1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "/home/wiresharkTraces/Break1.pcap" -F pcap & pid_tshark=$!
 sleep $((3*60)) # in seconds
 
 
@@ -46,7 +46,7 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 #Write to file
 echo "Started break 2" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "/home/wiresharkTraces/Break2.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
 sleep $((6*60))
 #Stop the Wireshark capture
@@ -71,7 +71,7 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 #Write to file
 echo "Started break 3" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "/home/wiresharkTraces/Break3.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
 sleep $((15*60))
 sleep $((5*60)) # in seconds
@@ -100,7 +100,7 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 #Write to file
 echo "Started break 4" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break4.pcap" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "/home/wiresharkTraces/Break4.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
 sleep $((14*60))
 
@@ -130,7 +130,7 @@ attack $attack_type $capture_file $traceroute_log $attack_stats_log $attack_log 
 #Write to file
 echo "Started break 5" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Start Wireshark capture
-tshark -i $interface -w "/home/wiresharkTraces/Break5.pcap" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "/home/wiresharkTraces/Break5.pcap" -F pcap & pid_tshark=$!
 #Wait for next attack
 sleep $((20*60))
 #Stop the Wireshark capture

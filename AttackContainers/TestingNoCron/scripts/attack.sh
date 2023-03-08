@@ -15,7 +15,7 @@ destination_port=$8
 attack_script=$9
 
 #Start Wireshark capture
-tshark -i $interface -w "$capture_file" -F pcap & pid_tshark=$!
+tshark -i $interface -f "host 128.39.65.26" -w "$capture_file" -F pcap & pid_tshark=$!
 
 #Write to file
 echo "Started Wireshark trace for $attack_type attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
