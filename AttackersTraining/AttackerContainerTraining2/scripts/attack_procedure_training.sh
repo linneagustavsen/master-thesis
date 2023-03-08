@@ -5,6 +5,7 @@ source variables.sh
 
 function interupted {
     iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+    exit
 }
 
 trap interupted 2

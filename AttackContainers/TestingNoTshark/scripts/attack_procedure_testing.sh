@@ -5,6 +5,7 @@ source variables.sh
 
 function interupted {
     iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+    exit
 }
 
 trap interupted 2
@@ -286,3 +287,4 @@ attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$dest
 mul_attack $attack_type $capture_file $traceroute_log  $attack_log $attack_duration $destination_ip  "$attack_script1" "$attack_script2"
 
 iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+    exit
