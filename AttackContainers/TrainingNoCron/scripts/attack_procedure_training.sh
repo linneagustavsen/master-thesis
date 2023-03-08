@@ -3,6 +3,8 @@
 #Import variables from file
 source variables.sh
 
+iptables -I OUTPUT -i $interface -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+
 #Define variables for whole attack
 attack_procedure_log="/home/logs/attack_procedure.log"
 

@@ -1,3 +1,3 @@
 #!/bin/bash
-interface="eth0"
+interface="eno1"
 

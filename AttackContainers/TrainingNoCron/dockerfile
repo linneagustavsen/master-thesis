@@ -8,6 +8,8 @@ RUN apt-get install hping3 -y
 RUN apt-get install traceroute -y
 RUN apt-get install slowhttptest -y
 RUN apt-get install moreutils -y
+RUN apt-get install iptables -y
+RUN apt-get install iproute2 -y
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
 RUN chmod +x /home/scripts/attack_procedure_training.sh
 RUN chmod +x /home/scripts/attack.sh

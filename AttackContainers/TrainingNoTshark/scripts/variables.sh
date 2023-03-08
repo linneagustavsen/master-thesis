@@ -1,5 +1,5 @@
 #!/bin/bash
-interface="eth0"
+interface=$(routel 2>/dev/null | grep default | awk '{ print $3 }' | head -1)
 #Googleeu-mp
 machine1_ip="34.105.154.156"
 #Amazonuw2-mp IP: 18.236.63.8
