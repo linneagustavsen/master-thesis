@@ -3,7 +3,7 @@ FROM debian:stable-slim
 RUN mkdir /home/wiresharkTraces
 RUN mkdir /home/logs
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest tshark cron iptables iproute2
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils tshark cron iptables iproute2
 RUN echo "45 9 8 3 * root cd /home/scripts && ./attack_procedure_training.sh" >> /etc/crontab
 COPY ./scripts/ /home/scripts/
 RUN chmod +x /home/scripts/attack_procedure_training.sh

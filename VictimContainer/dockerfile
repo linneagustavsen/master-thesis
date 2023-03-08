@@ -1,8 +1,8 @@
 FROM httpd:2.4
-COPY ./html/ /usr/local/apache2/htdocs/
-COPY ./scripts/ /home/
 RUN mkdir /home/wiresharkTraces
 RUN apt-get update
 RUN apt-get install tshark -y
+COPY ./html/ /usr/local/apache2/htdocs/
+COPY ./scripts/ /home/
 RUN chmod +x /home/capture.sh
 RUN chmod +x /home/variables.sh

@@ -2,14 +2,6 @@
 #Import variables from file
 source variables.sh
 
-function interupted {
-    iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
-    exit
-}
-
-trap interupted 2
-trap interupted 9
-
 DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
 
 for i in {1..300}
