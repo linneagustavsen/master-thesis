@@ -25,8 +25,7 @@ machine11_ip="ytelse-tos.uninett.no"
 #ytelse-trd IP: 158.39.1.90
 machine12_ip="ytelse-trd.uninett.no"
 #trondheim-mp   IP: 128.39.65.26
-machine13_ip="172.17.0.2"
-#"ytelse1.uninett.no"
+machine13_ip="ytelse1.uninett.no"
 
 machine1_port=""
 machine2_port=""
