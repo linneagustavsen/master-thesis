@@ -2,6 +2,13 @@
 #Import variables from file
 source variables.sh
 
+function interupted {
+    iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+}
+
+trap interupted 2
+trap interupted 9
+
 for i in {1..300}
 do
     file_name="/home/wiresharkTraces/Trace"

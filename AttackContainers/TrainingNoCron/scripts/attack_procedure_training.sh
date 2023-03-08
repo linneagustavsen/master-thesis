@@ -3,6 +3,13 @@
 #Import variables from file
 source variables.sh
 
+function interupted {
+    iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
+}
+
+trap interupted 2
+trap interupted 9
+
 iptables -I OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
 
 #Define variables for whole attack
