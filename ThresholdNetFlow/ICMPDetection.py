@@ -25,7 +25,7 @@ import numpy as np
 
 def icmpDetection(silkFile, start, interval, windowSize):
     #Open file to write alerts to
-    f = open("ThresholdNetFlow/Detections/ICMP.txt", "a")
+    f = open("ThresholdNetFlow/Detections/ICMP.csv", "a")
     #Write the column titles to the files
     f.write("Time, Change, Value, Mean of the last "+ str(windowSize))
     

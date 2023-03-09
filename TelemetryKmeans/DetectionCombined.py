@@ -5,8 +5,8 @@ from StructureData import *
 from datetime import datetime
 
 def detection(start, stop, systemId, if_name, fields):
-    f0 = open("TelemetryKmeans/Data/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f1 = open("TelemetryKmeans/Data/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f0 = open("TelemetryKmeans/Data/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
+    f1 = open("TelemetryKmeans/Data/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
     f0.write("Time, Values")
     f1.write("Time, Values")
 

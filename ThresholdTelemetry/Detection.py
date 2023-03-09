@@ -16,7 +16,7 @@ def detection(systemId, if_name, field, start, stop):
     json_file_mean_var = open("ThresholdTelemetry/Thresholds/" + str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
-    f = open("ThresholdTelemetry/Detections/"+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".txt", "a")
+    f = open("ThresholdTelemetry/Detections/"+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".csv", "a")
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')

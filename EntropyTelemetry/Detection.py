@@ -16,8 +16,8 @@ from HelperFunctions.Distributions import *
 
 def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
-    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(start) + "." + str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
-    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + ".txt", "a")
+    f = open("EntropyTelemetry/Detections/EntropyPacketSize."+ str(start) + "." + str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
+    f_rate = open("EntropyTelemetry/Detections/EntropyRatePacketSize."+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
     
     #Write the column titles to the files
     f.write("Time, Change, Value, Mean last "+ str(windowSize))

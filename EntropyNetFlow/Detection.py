@@ -27,14 +27,14 @@ import numpy as np
 
 def detection(silkFile, start, interval, windowSize):
     #Open file to write alerts to
-    srcEntropyFile = open("EntropyNetFlow/Detections/SourceIPEntropy.txt", "a")
-    srcEntropyRateFile = open("EntropyNetFlow/Detections/SourceIPEntropyRate.txt", "a")
-    dstEntropyFile = open("EntropyNetFlow/Detections/DestinationIPEntropy.txt", "a")
-    dstEntropyRateFile = open("EntropyNetFlow/Detections/DestinationIPEntropyRate.txt", "a")
-    flowEntropyFile = open("EntropyNetFlow/Detections/FlowEntropy.txt", "a")
-    flowEntropyRateFile = open("EntropyNetFlow/Detections/FlowEntropyRate.txt", "a")
-    flowFile = open("ThresholdNetFlow/Detections/NumberOfFlows.txt", "a")
-    icmpRatioFile = open("ThresholdNetFlow/Detections/ICMPRatio.txt", "a")
+    srcEntropyFile = open("EntropyNetFlow/Detections/SourceIPEntropy.csv", "a")
+    srcEntropyRateFile = open("EntropyNetFlow/Detections/SourceIPEntropyRate.csv", "a")
+    dstEntropyFile = open("EntropyNetFlow/Detections/DestinationIPEntropy.csv", "a")
+    dstEntropyRateFile = open("EntropyNetFlow/Detections/DestinationIPEntropyRate.csv", "a")
+    flowEntropyFile = open("EntropyNetFlow/Detections/FlowEntropy.csv", "a")
+    flowEntropyRateFile = open("EntropyNetFlow/Detections/FlowEntropyRate.csv", "a")
+    flowFile = open("ThresholdNetFlow/Detections/NumberOfFlows.csv", "a")
+    icmpRatioFile = open("ThresholdNetFlow/Detections/ICMPRatio.csv", "a")
 
     #Write the column titles to the files
     srcEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))

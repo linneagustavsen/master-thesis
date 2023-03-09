@@ -26,9 +26,9 @@ import numpy as np
 
 def synDetection(silkFile, start, interval, windowSize):
     #Open file to write alerts to
-    srcEntropyFile = open("EntropyNetFlow/Detections/SYNSourceIPEntropy.txt", "a")
-    dstEntropyFile = open("EntropyNetFlow/Detections/SYNDestinationIPEntropy.txt", "a")
-    flowEntropyFile = open("EntropyNetFlow/Detections/SYNFlowIPEntropy.txt", "a")
+    srcEntropyFile = open("EntropyNetFlow/Detections/SYNSourceIPEntropy.csv", "a")
+    dstEntropyFile = open("EntropyNetFlow/Detections/SYNDestinationIPEntropy.csv", "a")
+    flowEntropyFile = open("EntropyNetFlow/Detections/SYNFlowIPEntropy.csv", "a")
 
     #Write the column titles to the files
     srcEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))

@@ -18,7 +18,7 @@ def detection(systemId, if_name, field, start, stop):
     json_object_mean_var = json.load(json_file_mean_var)
     
     json_file_mean_var.close()
-    f = open("ThresholdTelemetry/Detections/"+ str(start) + "."+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".MaxVar.txt", "a")
+    f = open("ThresholdTelemetry/Detections/"+ str(start) + "."+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".MaxVar.csv", "a")
 
     maxVar = findMaxVar(json_object_mean_var)
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
