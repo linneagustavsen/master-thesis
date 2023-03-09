@@ -11,7 +11,7 @@ do
     #Start Wireshark capture
     tshark -i $interface -f "host 128.39.65.26" -w "$new_fileName" -F pcap & pid_tshark=$!
     #Wait for next attack
-    sleep 15
+    sleep 60
     #Stop the Wireshark capture
     kill $pid_tshark
 done

@@ -3,20 +3,23 @@
 #Import variables from file
 source variables.sh
 
+function crash {
+    echo "Attack stopped"| ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+    exit
+}
+
+trap crash 0
+
 #Define variables
 attack_type=$1
-capture_file=$2
-traceroute_log=$3
-attack_log=$4
-attack_duration=$5 # in seconds
-destination_ip=$6
-attack_script1=$7
-attack_script2=$8
-#Start Wireshark capture
-tshark -i $interface -f "host 128.39.65.26" -w "$capture_file" -F pcap & pid_tshark=$!
-
+attack_duration=$2 # in seconds
+destination_ip=$3
+attack_script1=$4
+attack_script2=$5
+attack_stats_log1="/home/logs/"$attack_type"1_stats.log"
+attack_stats_log2="/home/logs/"$attack_type"2_stats.log"
 #Write to file
-echo "Started Wireshark trace for $attack_type attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+echo "Started traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Traceroute to the victim
 traceroute $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $traceroute_log
@@ -26,9 +29,18 @@ echo "Finished traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a 
 
 echo "Start $attack_type attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
+#Write to file
+echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+
+#Curl to the victim server
+curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
+
+#Write to file
+echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+
 #Execute the attack and write the output to file
-$attack_script1 & pid_attack1=$!
-$attack_script2 & pid_attack2=$!
+$attack_script1 &> $attack_stats_log1 & pid_attack1=$!
+$attack_script2 &> $attack_stats_log2 & pid_attack2=$!
 
 #Wait for the attack duration to be over
 sleep $attack_duration
@@ -47,8 +59,11 @@ traceroute $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $traceroute_log
 #Write to file
 echo "Finished traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
-#Stop the Wireshark capture
-kill $pid_tshark
+#Write to file
+echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+
+#Curl to the victim server
+curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
 
 #Write to file
-echo "Stopped Wireshark trace for attack $attack_type" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
