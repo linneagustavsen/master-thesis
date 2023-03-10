@@ -3,7 +3,7 @@ import pandas as pd
 from HelperFunctions.GetData import *
 from StructureData import *
 from datetime import datetime
-from MakePlot import *
+from HelperFunctions.MakePlot import *
 
 def detection(start, stop, systemId, if_name, fields):
     df = pd.read_pickle("Telemetry/Kmeans/Data/TestingData.pkl")
@@ -59,17 +59,17 @@ def detection(start, stop, systemId, if_name, fields):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(queueA0, time0, "Average queue in cluster 0")
-    makePlot(queueA1, time1, "Average queue in cluster 1")
+    makePlot(queueA0, time0, "Average queue in cluster 0", "Telemetry/Kmeans/")
+    makePlot(queueA1, time1, "Average queue in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(queueC0, time0, "Current queue in cluster 0")
-    makePlot(queueC1, time1, "Current queue in cluster 1")
+    makePlot(queueC0, time0, "Current queue in cluster 0", "Telemetry/Kmeans/")
+    makePlot(queueC1, time1, "Current queue in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(pkts0, time0, "Packets per sec in cluster 0")
-    makePlot(pkts1, time1, "Packets per sec in cluster 1")
+    makePlot(pkts0, time0, "Packets per sec in cluster 0", "Telemetry/Kmeans/")
+    makePlot(pkts1, time1, "Packets per sec in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(bytes0, time0, "Bytes per sec in cluster 0")
-    makePlot(bytes1, time1, "Bytes per sec in cluster 1")
+    makePlot(bytes0, time0, "Bytes per sec in cluster 0", "Telemetry/Kmeans/")
+    makePlot(bytes1, time1, "Bytes per sec in cluster 1", "Telemetry/Kmeans/")
     
 
 start = "2022-10-13 00:00:00"

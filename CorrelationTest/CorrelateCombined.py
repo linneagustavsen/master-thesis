@@ -11,7 +11,7 @@ startTime = datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S')
 stopTime = datetime.strptime("2022-10-20 00:00:00", '%Y-%m-%d %H:%M:%S')
 
 
-#time = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),"trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts")["_time"].to_numpy()
+#time = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),"trd-gw", "xe-0/1/0", ["egress_stats__if_1sec_pkts"])["_time"].to_numpy()
 stop = False
 timestamp = startTime
 while not stop:

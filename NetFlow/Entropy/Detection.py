@@ -12,7 +12,6 @@ How to get the flows in a file format:
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from ICMPRatio import *
 from datetime import datetime,timedelta
 import numpy as np
 

@@ -1,9 +1,9 @@
 import pickle
 import pandas as pd
-from GetData import *
+from HelperFunctions.GetData import *
 from StructureData import *
 from datetime import datetime
-from MakePlot import *
+from HelperFunctions.MakePlot import *
 
 def detection(start, stop, systemId, if_name, fields):
     df = pd.read_pickle("Telemetry/Kmeans/Data/TestingDataCombined.pkl")
@@ -74,22 +74,22 @@ def detection(start, stop, systemId, if_name, fields):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(queueA0, time0, "Combined Average queue in cluster 0")
-    makePlot(queueA1, time1, "Combined Average queue in cluster 1")
+    makePlot(queueA0, time0, "Combined Average queue in cluster 0", "Telemetry/Kmeans/")
+    makePlot(queueA1, time1, "Combined Average queue in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(queueC0, time0, "Combined Current queue in cluster 0")
-    makePlot(queueC1, time1, "Combined Current queue in cluster 1")
+    makePlot(queueC0, time0, "Combined Current queue in cluster 0", "Telemetry/Kmeans/")
+    makePlot(queueC1, time1, "Combined Current queue in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(pkts0, time0, "Combined Packets per sec in cluster 0")
-    makePlot(pkts1, time1, "Combined Packets per sec in cluster 1")
+    makePlot(pkts0, time0, "Combined Packets per sec in cluster 0", "Telemetry/Kmeans/")
+    makePlot(pkts1, time1, "Combined Packets per sec in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(bytes0, time0, "Combined Bytes per sec in cluster 0")
-    makePlot(bytes1, time1, "Combined Bytes per sec in cluster 1")
-    makePlot(entropy0, time0, "Combined Entropy in cluster 0")
-    makePlot(entropy1, time1, "Combined Entropy in cluster 1")
+    makePlot(bytes0, time0, "Combined Bytes per sec in cluster 0", "Telemetry/Kmeans/")
+    makePlot(bytes1, time1, "Combined Bytes per sec in cluster 1", "Telemetry/Kmeans/")
+    makePlot(entropy0, time0, "Combined Entropy in cluster 0", "Telemetry/Kmeans/")
+    makePlot(entropy1, time1, "Combined Entropy in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(entropyR0, time0, "Combined Entropy rate in cluster 0")
-    makePlot(entropyR1, time1, "Combined Entropy rate in cluster 1")
+    makePlot(entropyR0, time0, "Combined Entropy rate in cluster 0", "Telemetry/Kmeans/")
+    makePlot(entropyR1, time1, "Combined Entropy rate in cluster 1", "Telemetry/Kmeans/")
     
 
 start = "2022-10-13 00:00:00"

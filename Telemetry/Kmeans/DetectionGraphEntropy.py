@@ -3,7 +3,7 @@ import pandas as pd
 from HelperFunctions.GetData import *
 from StructureData import *
 from datetime import datetime
-from MakePlot import *
+from HelperFunctions.MakePlot import *
 
 def detection(start, stop, systemId, if_name, fields):
     df = pd.read_pickle("Telemetry/Kmeans/Data/TestingDataEntropy.pkl")
@@ -45,11 +45,11 @@ def detection(start, stop, systemId, if_name, fields):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(entropy0, time0, "Entropy in cluster 0")
-    makePlot(entropy1, time1, "Entropy in cluster 1")
+    makePlot(entropy0, time0, "Entropy in cluster 0", "Telemetry/Kmeans/")
+    makePlot(entropy1, time1, "Entropy in cluster 1", "Telemetry/Kmeans/")
 
-    makePlot(entropyR0, time0, "Entropy rate in cluster 0")
-    makePlot(entropyR1, time1, "Entropy rate in cluster 1")
+    makePlot(entropyR0, time0, "Entropy rate in cluster 0", "Telemetry/Kmeans/")
+    makePlot(entropyR1, time1, "Entropy rate in cluster 1", "Telemetry/Kmeans/")
     
 
 start = "2022-10-13 00:00:00"
