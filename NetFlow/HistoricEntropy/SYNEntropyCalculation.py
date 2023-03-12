@@ -10,7 +10,7 @@ How to get the flows in a file format:
 
 
 from silk import *
-from HelperFunctions.Distributions import *
+from NetFlow.HistoricEntropy.HelperFunctions.DistributionsHistoric import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime, timedelta
 from IsAttackFlow import *

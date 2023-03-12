@@ -3,13 +3,7 @@
     Make a probability distribution based on how many packets there is in each bi-directional flow in a time interval
 
 '''
-def flowDistribution(infile):
-    #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
-    numberOfPacketsPerFlow = {}
-    flows = {}
-    #A variable to keep track of the total amount of packets in this time interval
-    sumOfPackets = 0
-
+def flowDistribution(infile, numberOfPacketsPerFlow, flows, sumOfPackets):
     #Loop through each flow record in the time interval
     for rec in infile:
         #Define a bi-directional flow as the connection between a source and destination IP address
@@ -46,20 +40,14 @@ def flowDistribution(infile):
         Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
 
     #Return the probabilities and the number of flows in this interval
-    return Pi, len(flows)
+    return Pi, len(flows), numberOfPacketsPerFlow, flows, sumOfPackets
 
 '''
 
     Make a probability distribution based on how many SYN packets there is in each uni-directional flow in a time interval
 
 '''
-def uniDirFlowDistribution(infile):
-    #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
-    numberOfPacketsPerFlow = {}
-    flows = {}
-    #A variable to keep track of the total amount of packets in this time interval
-    sumOfPackets = 0
-
+def uniDirFlowDistribution(infile, numberOfPacketsPerFlow, flows, sumOfPackets):
    #Loop through each flow record in the time interval
     for rec in infile:
         #Define a uni-directional flow as the connection between a source and destination IP address
@@ -88,7 +76,7 @@ def uniDirFlowDistribution(infile):
         #Add the probability of the current flow having the size that it does to the distribution
         Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
 
-    return Pi, len(flows)
+    return Pi, len(flows), numberOfPacketsPerFlow, flows, sumOfPackets
 
 
 '''
@@ -96,12 +84,7 @@ def uniDirFlowDistribution(infile):
     Make a probability distribution based on how many packets there is in each destination flow in a time interval
 
 '''
-def ipDestinationDistribution(infile):
-    #Make dictionaries for how many packets each destination flow has
-    numberOfPacketsPerIP ={}
-    #A variable to keep track of the total amount of packets in this time interval
-    sumOfPackets = 0
-
+def ipDestinationDistribution(infile, numberOfPacketsPerIP, sumOfPackets):
     #Loop through each flow record in the time interval
     for rec in infile:
         #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
@@ -121,19 +104,14 @@ def ipDestinationDistribution(infile):
         Pi.append(numberOfPacketsPerIP[rec.dip]/sumOfPackets)
     
     #Return the probabilities and the number of destination flows in this interval
-    return Pi,len(numberOfPacketsPerIP)
+    return Pi,len(numberOfPacketsPerIP), numberOfPacketsPerIP, sumOfPackets
 
 '''
 
     Make a probability distribution based on how many packets there is in each source flow in a time interval
 
 '''
-def ipSourceDistribution(infile):
-    #Make dictionaries for how many packets each destination flow has
-    numberOfPacketsPerIP ={}
-    #A variable to keep track of the total amount of packets in this time interval
-    sumOfPackets = 0
-
+def ipSourceDistribution(infile, numberOfPacketsPerIP, sumOfPackets):
    #Loop through each flow record in the time interval
     for rec in infile:
         #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
@@ -153,7 +131,7 @@ def ipSourceDistribution(infile):
         Pi.append(numberOfPacketsPerIP[rec.sip]/sumOfPackets)
     
     #Return the probabilities and the number of source flows in this interval
-    return Pi,len(numberOfPacketsPerIP)
+    return Pi,len(numberOfPacketsPerIP), numberOfPacketsPerIP, sumOfPackets
 
 '''
 
