@@ -13,27 +13,25 @@ from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime, timedelta
-import numpy as np
+from IsAttackFlow import *
 
 '''
 
-    Calculates entropy alerts in case of an anomaly
+    Calculates entropy
     Input:  File with flow records sorted on time, 
             start time as a string, 
             a aggregation interval as a timedelta object, 
             a window size of how far back we should compare the values
 '''
 
-def synDetection(silkFile, start, stop, frequency, interval, windowSize):
+def synEntropyCalculation(silkFile, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
-    srcEntropyFile = open("NetFlow/Entropy/Detections/SYNSourceIPEntropy.csv", "a")
-    dstEntropyFile = open("NetFlow/Entropy/Detections/SYNDestinationIPEntropy.csv", "a")
-    flowEntropyFile = open("NetFlow/Entropy/Detections/SYNFlowIPEntropy.csv", "a")
+    calculations = open("NetFlow/Entropy/Calculations/SYN.attack.08.03.csv", "a")
+    attackFlows = open("NetFlow/Entropy/Calculations/AttackFlowsSYN.attack.08.03.csv", "a")
 
     #Write the column titles to the files
-    srcEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
-    dstEntropyFile.write("Time, Change, Value, Mean of the last"+ str(windowSize))
-    flowEntropyFile.write("Time, Change, Value, Mean of the last"+ str(windowSize))
+    calculations.write("Time, srcEntropy, dstEntropy, flowEntropy")
+    attackFlows.write("sTime, eTime")
     
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -78,22 +76,14 @@ def synDetection(silkFile, start, stop, frequency, interval, windowSize):
             entropyFlow = generalizedEntropy(10,PiF)
             entropyOfSynPacketsPerFlow.append(entropyFlow)
             
-            #If there is enough stored values to compare with we compare the difference of each metric with a threshold
-            if i >=windowSize:
-                if abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])) > 1:
-                    srcEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])))
-                
-                if abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])) > 1:
-                    dstEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])))
-
-                if abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])) > 1:
-                    flowEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])))
-
+            calculations.write("\n" + str(startTime) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
             #Reset the record aggregation
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
+        if isAttackFlow(rec.sip, rec.dip):
+            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime))
         if rec.stime >= windowTime + frequency:
             thisMinuteSize = len(records) - lastMinuteSize
             sizes.append(thisMinuteSize)
@@ -103,8 +93,7 @@ def synDetection(silkFile, start, stop, frequency, interval, windowSize):
             
 
     infile.close()
-    srcEntropyFile.close()
-    dstEntropyFile.close()
-    flowEntropyFile.close()
+    calculations.close()
+    attackFlows.close()
 
-synDetection("/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5),10)
+synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)

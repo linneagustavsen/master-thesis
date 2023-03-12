@@ -24,7 +24,7 @@ import numpy as np
             a window size of how far back we should compare the values
 '''
 
-def detection(silkFile, start, frequency, interval, windowSize):
+def detection(silkFile, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
     srcEntropyFile = open("NetFlow/Entropy/Detections/SourceIPEntropy.csv", "a")
     srcEntropyRateFile = open("NetFlow/Entropy/Detections/SourceIPEntropyRate.csv", "a")
@@ -34,6 +34,7 @@ def detection(silkFile, start, frequency, interval, windowSize):
     flowEntropyRateFile = open("NetFlow/Entropy/Detections/FlowEntropyRate.csv", "a")
     flowFile = open("NetFlow/Threshold/Detections/NumberOfFlows.csv", "a")
     icmpRatioFile = open("NetFlow/Threshold/Detections/ICMPRatio.csv", "a")
+    icmpPacketsFile = open("NetFlow/Threshold/Detections/ICMPPackets.csv", "a")
 
     #Write the column titles to the files
     srcEntropyFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
@@ -44,9 +45,13 @@ def detection(silkFile, start, frequency, interval, windowSize):
     flowEntropyRateFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
     flowFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
     icmpRatioFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    icmpPacketsFile.write("Time, Change, Value, Mean of the last "+ str(windowSize))
 
     #Makes a datetime object of the input start time
-    startTime = datetime.strptime(start, '%Y-%m-%d %H')
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    windowTime = startTime
+
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
@@ -65,6 +70,7 @@ def detection(silkFile, start, frequency, interval, windowSize):
     numberOfFlows = []
 
     icmpRatioArray = []
+    icmpPacketsArray = []
     #Instantiate counter variable
     i = 0
     sizes = []
@@ -72,6 +78,10 @@ def detection(silkFile, start, frequency, interval, windowSize):
 
     #Loop through all the flow records in the input file
     for rec in infile:
+        if rec.etime >= stopTime:
+            break
+        if rec.stime < startTime:
+            continue
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
 
@@ -103,7 +113,9 @@ def detection(silkFile, start, frequency, interval, windowSize):
             numberOfFlows.append(nf)
 
             #Find the ratio of ICMP packets in this time interval
-            icmpRatioArray.append(icmpRatio(records))
+            icmpRatio, icmpPackets = icmpDistribution(records)
+            icmpRatioArray.append(icmpRatio)
+            icmpPacketsArray.append(icmpPackets)
             
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
@@ -130,7 +142,9 @@ def detection(silkFile, start, frequency, interval, windowSize):
                  
                 if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > 0.001:
                     icmpRatioFile.write("\n" + str(startTime) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
-        
+                if abs(icmpPackets[i] - np.nanmean(icmpPackets[i-windowSize: i-1])) > 100:
+                    icmpPacketsFile.write("\n" + str(startTime) + "," + str(abs(icmpPackets[i] - np.nanmean(icmpPackets[i-windowSize: i-1]))) + "," + str(icmpPackets[i]) + "," + str(np.nanmean(icmpPackets[i-windowSize: i-1])))
+    
             #Reset the record aggregation
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -152,7 +166,8 @@ def detection(silkFile, start, frequency, interval, windowSize):
     flowEntropyRateFile.close()
     flowFile.close()
     icmpRatioFile.close()
+    icmpPacketsFile.close()
 
     infile.close()
     
-detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw", "2011-01-03 00",timedelta(minutes = 1), timedelta(minutes = 5), 10)
+detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)

@@ -21,12 +21,13 @@ import numpy as np
             a window size of how many flows back we should compare the values
 '''
 
-def synDetection(silkFile, start, stop, windowSize):
+def synCalculation(silkFile, start, stop, windowSize):
     #Open file to write alerts to
-    f = open("NetFlow/Threshold/Detections/TCPSYN.csv", "a")
+    calculations = open("NetFlow/Threshold/Calculations/SYN.attack.08.03.csv", "a")
+    attackFlows = open("NetFlow/Threshold/Calculations/AttackFlowsSYN.attack.08.03.csv", "a")
     #Write the column titles to the files
-    f.write("Time, Change, Value, Mean of the last "+ str(windowSize))
-
+    calculations.write("Time, synPacketsPerFlow")
+    attackFlows.write("sTime, eTime")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -47,11 +48,9 @@ def synDetection(silkFile, start, stop, windowSize):
             continue
         synPacketsPerFlow.append(rec.packets)
 
-        #If there is enough stored values to compare with we compare the difference of the metric with a threshold
-        if i >= windowSize:
-            if rec.packets >= 5:
-                f.write("\n" + str(startTime) + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1])))
+        if rec.packets >= 2:
+            calculations.write("\n" + str(startTime) + "," + str(synPacketsPerFlow[i]))
         i += 1
     infile.close()
 
-synDetection("/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", 10)
+synCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00", 10)

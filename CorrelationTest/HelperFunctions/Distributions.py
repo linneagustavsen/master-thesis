@@ -210,7 +210,7 @@ def packetSizeDistribution(egressBytes, egressPackets):
 
 '''
 
-def icmpRatio(records):
+def icmpDistribution(records):
     icmpPackets = 0
     packets = 0
 
@@ -224,4 +224,16 @@ def icmpRatio(records):
             packets += rec.packets
 
     #Return the ratio of ICMP packets to the number of packets of other protocols
-    return icmpPackets/packets
+    return icmpPackets/packets, icmpPackets
+
+'''
+    Returns the number of packets in an input array of records
+'''
+
+def numberOfPackets(records):
+    np = 0
+
+    for rec in records:
+        np+= rec.packets
+
+    return np

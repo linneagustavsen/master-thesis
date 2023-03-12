@@ -12,22 +12,24 @@ How to get the flows in a file format:
 from silk import *
 from HelperFunctions.Distributions import *
 from datetime import datetime,timedelta
-import numpy as np
+from IsAttackFlow import *
 
 '''
 
     Calculates the number of ICMP destination unreachable packets and alerts in case of an anomaly
     Input:  File with flow records sorted on time, 
             start time as a string, 
-            an aggregation frequency as a timedelta object, 
+            a aggregation frequency as a timedelta object, 
             a window size of how far back we should compare the values
 '''
 
 def icmpDstUnreachableDetection(silkFile, start, stop, frequency, windowSize):
     #Open file to write alerts to
-    f = open("NetFlow/Threshold/Detections/ICMPDstUnreachable.csv", "a")
+    calculations = open("NetFlow/Threshold/Calculations/ICMPDstUnreachable.attack.08.03.csv", "a")
+    attackFlows = open("NetFlow/Threshold/Calculations/AttackFlowsICMPDstUnreachable.attack.08.03.csv", "a")
     #Write the column titles to the files
-    f.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    calculations.write("Time, ICMPDstUnreachable")
+    attackFlows.write("sTime, eTime")
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -53,20 +55,20 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, windowSize):
             #Find the number of ICMP Destination unavailable packets in this time frequency
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
-            #If there is enough stored values to compare with we compare the difference of the metric with a threshold
-            if i >= windowSize:
-                if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])) > 50:
-                    f.write("\n" + str(startTime) + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
-
+            calculations.write("\n" + str(startTime) + "," + str(numberOfIcmpDstUnreachablePackets[i]))
             #Reset the record aggregation
             records = []
             startTime = startTime + frequency
             i += 1
+
+        if isAttackFlow(rec.sip, rec.dip):
+            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime))
         records.append(rec)
         
 
     infile.close()
-    f.close()
+    calculations.close()
+    attackFlows.close()
 
 
-icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/icmp3-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", timedelta(minutes = 1), 10)
+icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/one-day-icmp3-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00", timedelta(minutes = 1), 10)

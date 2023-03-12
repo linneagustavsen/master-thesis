@@ -24,7 +24,7 @@ from IsAttackFlow import *
             a window size of how far back we should compare the values
 '''
 
-def synCalculation(silkFile, start, frequency, interval, windowSize):
+def synEntropyCalculation(silkFile, start, stop, frequency, interval, windowSize):
     #Open file to write alerts to
     calculations = open("NetFlow/Entropy/Calculations/SYN.attack.08.03.csv", "a")
     attackFlows = open("NetFlow/Entropy/Calculations/AttackFlowsSYN.attack.08.03.csv", "a")
@@ -34,7 +34,8 @@ def synCalculation(silkFile, start, frequency, interval, windowSize):
     attackFlows.write("sTime, eTime")
     
     #Makes a datetime object of the input start time
-    startTime = datetime.strptime(start, '%Y-%m-%d %H')
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
     
     # Open a silk flow file for reading
@@ -51,6 +52,10 @@ def synCalculation(silkFile, start, frequency, interval, windowSize):
     lastMinuteSize = 0
     #Loop through all the flow records in the input file
     for rec in infile:
+        if rec.etime >= stopTime:
+            break
+        if rec.stime < startTime:
+            continue
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
             #Find the probability distribution based on how many SYN packets there is in each source flow in this time interval
@@ -91,4 +96,4 @@ def synCalculation(silkFile, start, frequency, interval, windowSize):
     calculations.close()
     attackFlows.close()
 
-synCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00",timedelta(minutes = 1), timedelta(minutes = 5), 10)
+synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)
