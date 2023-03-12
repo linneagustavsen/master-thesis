@@ -24,7 +24,7 @@ from IsAttackFlow import *
             a window size of how far back we should compare the values
 '''
 
-def calculationOfValues(silkFile, start, frequency, interval):
+def metricCalculation(silkFile, start, frequency, interval):
     #Open file to write alerts to
     calculations = open("NetFlow/Entropy/Calculations/Metrics.attack.08.03.csv", "a")
     attackFlows = open("NetFlow/Entropy/Calculations/AttackFlows.attack.08.03.csv", "a")
@@ -115,4 +115,4 @@ def calculationOfValues(silkFile, start, frequency, interval):
 
     infile.close()
     
-calculationOfValues("//home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00",timedelta(minutes = 1), timedelta(minutes = 5))
+metricCalculation("//home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00",timedelta(minutes = 1), timedelta(minutes = 5))

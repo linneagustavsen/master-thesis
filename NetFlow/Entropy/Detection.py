@@ -24,7 +24,7 @@ import numpy as np
             a window size of how far back we should compare the values
 '''
 
-def detection(silkFile, start, interval, windowSize):
+def detection(silkFile, start, frequency, interval, windowSize):
     #Open file to write alerts to
     srcEntropyFile = open("NetFlow/Entropy/Detections/SourceIPEntropy.csv", "a")
     srcEntropyRateFile = open("NetFlow/Entropy/Detections/SourceIPEntropyRate.csv", "a")
@@ -67,6 +67,8 @@ def detection(silkFile, start, interval, windowSize):
     icmpRatioArray = []
     #Instantiate counter variable
     i = 0
+    sizes = []
+    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -130,9 +132,15 @@ def detection(silkFile, start, interval, windowSize):
                     icmpRatioFile.write("\n" + str(startTime) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
         
             #Reset the record aggregation
-            records = []
-            startTime = startTime + interval
-            i+= 1
+            startTime = startTime + frequency
+            records = records[sizes[0]:]
+            sizes.pop(0)
+            i += 1
+        if rec.stime >= windowTime + frequency:
+            thisMinuteSize = len(records) - lastMinuteSize
+            sizes.append(thisMinuteSize)
+            lastMinuteSize = thisMinuteSize
+            windowTime += frequency
         records.append(rec)
     
            
@@ -147,4 +155,4 @@ def detection(silkFile, start, interval, windowSize):
 
     infile.close()
     
-detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw", "2011-01-03 00",timedelta(minutes = 1), 10)
+detection("/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw", "2011-01-03 00",timedelta(minutes = 1), timedelta(minutes = 5), 10)
