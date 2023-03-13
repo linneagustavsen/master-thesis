@@ -6,8 +6,8 @@ from silk import *
 from StructureData import *
 
 def detection(silkFile, systemId):
-    f0 = open("NetFlow/Kmeans/Data/Cluster0."+ str(systemId) + ".csv", "a")
-    f1 = open("NetFlow/Kmeans/Data/Cluster1."+ str(systemId) + ".csv", "a")
+    f0 = open("NetFlow/Kmeans/Calculations/Cluster0."+ str(systemId) + ".csv", "a")
+    f1 = open("NetFlow/Kmeans/Calculations/Cluster1."+ str(systemId) + ".csv", "a")
     f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration")
     f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration")
     

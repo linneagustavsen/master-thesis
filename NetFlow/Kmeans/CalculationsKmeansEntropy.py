@@ -4,8 +4,8 @@ from GetData import *
 from StructureData import *
 
 def detection(silkFile, start, stop, systemId, frequency, interval):
-    f0 = open("NetFlow/Kmeans/Data/Entropy.Cluster0."+ str(systemId) + ".csv", "a")
-    f1 = open("NetFlow/Kmeans/Data/Entropy.Cluster1."+ str(systemId) + ".csv", "a")
+    f0 = open("NetFlow/Kmeans/Calculations/Entropy.Cluster0."+ str(systemId) + ".csv", "a")
+    f1 = open("NetFlow/Kmeans/Calculations/Entropy.Cluster1."+ str(systemId) + ".csv", "a")
     f0.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets")
     f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets")
 
