@@ -11,13 +11,13 @@ def detection(silkFile, systemId):
     f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration")
     f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration")
     
-    '''infile = silkfile_open(silkFile, READ)
+    '''
     
-    testingData= getDataTesting(infile)
-    testingData.to_pickle("NetFlow/Kmeans/RawData/RawTestingData.pkl")'''
-    testingData = pd.read_pickle("NetFlow/Kmeans/RawData/RawTestingData.pkl")
+    testingData = getData(silkFile)
+    testingData.to_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")'''
+    testingData = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(testingData)
-    kmeans = pickle.load(open("NetFlow/Kmeans/Models/MLmodel.pkl", 'rb'))
+    kmeans = pickle.load(open("NetFlow/Kmeans/Models/MLmodel."+str(systemId)+ ".pkl", 'rb'))
     prediction = kmeans.predict(measurements)
 
     count0 = 0 
