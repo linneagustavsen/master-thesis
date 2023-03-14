@@ -1,21 +1,19 @@
-import pickle
-import pandas as pd
-from GetData import *
-from StructureData import *
+from sklearn.cluster import KMeans
+from .GetData import *
+from HelperFunctions.StructureData import *
 
-def detection(silkFile, start, stop, systemId, frequency, interval):
-    f0 = open("NetFlow/Kmeans/Calculations/Entropy.Cluster0."+ str(systemId) + ".csv", "a")
-    f1 = open("NetFlow/Kmeans/Calculations/Entropy.Cluster1."+ str(systemId) + ".csv", "a")
-    f0.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,is_attack")
-    f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,is_attack")
+def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
+    f0 = open("NetFlowCalculations/Kmeans/Calculations/Entropy.Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f1 = open("NetFlowCalculations/Kmeans/Calculations/Entropy.Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f0.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets")
+    f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets")
 
     df = getEntropyData(silkFile, start, stop, frequency, interval)
-    df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+str(systemId)+ ".pkl")
+    df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataEntropy(df)
-    kmeans = pickle.load(open("NetFlow/Kmeans/Models/MLmodelEntropy."+str(systemId)+ ".pkl", 'rb'))
 
-    prediction = kmeans.predict(measurements)
+    prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
@@ -39,4 +37,4 @@ stop = "2011-01-02 12:00:00"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
 
-detection(silkFile, start, stop, systemId, frequency, interval)
+'''kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval)'''

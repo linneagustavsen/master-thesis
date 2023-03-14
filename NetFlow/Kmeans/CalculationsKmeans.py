@@ -1,24 +1,20 @@
-import pickle
-import pandas as pd
-from GetData import *
+from sklearn.cluster import KMeans
+from .GetData import *
 from silk import *
-from StructureData import *
-from IsAttackFlow import *
+from HelperFunctions.StructureData import *
+from .IsAttackFlow import *
 
-def detection(silkFile, systemId):
-    f0 = open("NetFlow/Kmeans/Calculations/Cluster0."+ str(systemId) + ".csv", "a")
-    f1 = open("NetFlow/Kmeans/Calculations/Cluster1."+ str(systemId) + ".csv", "a")
+def kmeansCalculation(silkFile, systemId, attackDate):
+    f0 = open("NetFlowCalculations/Kmeans/Calculations/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f1 = open("NetFlowCalculations/Kmeans/Calculations/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,is_attack")
     f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,is_attack")
     
-    '''
-    
     testingData = getData(silkFile)
-    testingData.to_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")'''
-    testingData = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")
+    testingData.to_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #testingData = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ "..pkl")
     sTime, eTime, measurements = structureData(testingData)
-    kmeans = pickle.load(open("NetFlow/Kmeans/Models/MLmodel."+str(systemId)+ ".pkl", 'rb'))
-    prediction = kmeans.predict(measurements)
+    prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
 
     count0 = 0 
     count1 = 0
@@ -39,4 +35,4 @@ def detection(silkFile, systemId):
 systemId = "oslo-gw"
 silkFile ="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
 
-detection(silkFile, systemId)
+'''kmeansCalculation(silkFile, systemId)'''

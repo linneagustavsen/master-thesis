@@ -1,23 +1,22 @@
-from GetData import *
+from .GetData import *
 from datetime import datetime,timedelta
 import pandas as pd
-from StructureData import *
+from HelperFunctions.StructureData import *
 import numpy as np
-def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path):
+def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
     
-    df = getData(silkFile)
-    df.to_pickle("NetFlow/RandomForest/RawData/"+path+"."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+str(systemId)+ ".pkl"))
+    df = getData(silkFile, start, stop)
+    df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
-    print("Structured Data")
-    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+str(systemId)+ ".pkl")   
-    entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
-    print("Got entropy data")
 
+    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
+    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
+    print(entropy_df.head)
 
     now = datetime.now()
 
@@ -27,12 +26,8 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path):
     lastHour = now.hour
     lastMinute = now.minute
     
-    print("Start loop")
     for i in range(len(sTime)):
         timestamp = datetime.utcfromtimestamp(((sTime[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
-        if i % 10000 == 0:
-            print(timestamp)
-            print(data[i-1])
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day
@@ -40,16 +35,15 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path):
         curMinute = timestamp.minute
         
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
+            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            if len(indexArray[0]) == 0:
+                continue
+            indexInTimeArray = indexArray[0][0]
             lastYear = curYear
             lastMonth = curMonth
             lastDay = curDay
             lastHour = curHour
             lastMinute = curMinute
-
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
-            if len(indexArray[0]) == 0:
-                continue
-            indexInTimeArray = indexArray[0][0]
 
         ipSrcArray = entropy_measurements[indexInTimeArray][0]
         ipSrcRateArray = entropy_measurements[indexInTimeArray][1]
@@ -72,16 +66,16 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path):
 
         data[i] = curMeasurements
     dataSet = pd.DataFrame(data, columns=columTitles)
-    return dataSet, sTime
+    return dataSet
     
-silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11-sorted.rw"
+'''silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11-sorted.rw"
 start = "2011-01-01 10:00:00"
 stop = "2011-01-01 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
 trainingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Training")
-trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+str(systemId)+ ".pkl")
+trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(trainingSet.head)    
 
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
@@ -91,5 +85,5 @@ systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
 testingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Testing")
-testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+str(systemId)+ ".pkl")
-print(testingSet.head)
+testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+print(testingSet.head)'''

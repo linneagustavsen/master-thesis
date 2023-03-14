@@ -12,7 +12,7 @@ How to get the flows in a file format:
 from silk import *
 from HelperFunctions.Distributions import *
 from datetime import datetime,timedelta
-from IsAttackFlow import *
+from .IsAttackFlow import *
 
 '''
 
@@ -23,10 +23,10 @@ from IsAttackFlow import *
             a window size of how far back we should compare the values
 '''
 
-def icmpDstUnreachableDetection(silkFile, start, stop, frequency, windowSize):
+def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlow/Threshold/Calculations/ICMPDstUnreachable.attack.08.03.csv", "a")
-    attackFlows = open("NetFlow/Threshold/Calculations/AttackFlowsICMPDstUnreachable.attack.08.03.csv", "a")
+    calculations = open("NetFlowCalculations/Threshold/Calculations/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Threshold/Calculations/AttackFlowsICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time, ICMPDstUnreachable")
     attackFlows.write("sTime, eTime")
@@ -70,5 +70,5 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, windowSize):
     calculations.close()
     attackFlows.close()
 
-
-icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/one-day-icmp3-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00", timedelta(minutes = 1), 10)
+'''
+icmpDstUnreachableCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-icmp3-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00", timedelta(minutes = 1), 10)'''

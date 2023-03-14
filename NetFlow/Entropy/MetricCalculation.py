@@ -13,7 +13,7 @@ from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
-from IsAttackFlow import *
+from .IsAttackFlow import *
 
 '''
 
@@ -24,14 +24,14 @@ from IsAttackFlow import *
             a window size of how far back we should compare the values
 '''
 
-def metricCalculation(silkFile, start, stop, frequency, interval):
+def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlow/Entropy/Calculations/Metrics.attack.08.03.csv", "a")
-    attackFlows = open("NetFlow/Entropy/Calculations/AttackFlows.attack.08.03.csv", "a")
+    calculations = open("NetFlowCalculations/Entropy/Calculations/Metrics.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    calculations.write("Time, srcEntropy, srcEntropyRate, dstEntropy, dstEntropyRate, flowEntropy, flowEntropyRate, numberOfFlows, icmpRatio, icmpPackets")
-    attackFlows.write("sTime, eTime")
+    calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets")
+    attackFlows.write("sTime,eTime")
 
 
     #Makes a datetime object of the input start time
@@ -122,5 +122,5 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
      
 
     infile.close()
-    
-metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))
+'''    
+metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''

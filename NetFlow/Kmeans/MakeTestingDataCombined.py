@@ -1,25 +1,17 @@
-from sklearn.cluster import KMeans
 import numpy as np
 from datetime import datetime
-from GetData import *
-from StructureData import *
+from .GetData import *
+from HelperFunctions.StructureData import *
 import pandas as pd
-import pickle
 
-def testing(silkFile, start, stop, systemId, frequency, interval):
+def makeTestingDataCombined(systemId, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets"]
     
-    '''df = getData(silkFile)
-    df.to_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")'''
-    df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData."+str(systemId)+ ".pkl")
+    df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
-    print("Structured Data")
-    '''entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+str(systemId)+ ".pkl")'''
-    entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+str(systemId)+ ".pkl")   
+    entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
-    print("Got entropy data")
 
     now = datetime.now()
 
@@ -28,8 +20,7 @@ def testing(silkFile, start, stop, systemId, frequency, interval):
     lastDay = now.day
     lastHour = now.hour
     lastMinute = now.minute
-    
-    print("Start loop")
+
     for i in range(len(sTime)):
         timestamp = datetime.utcfromtimestamp(((sTime[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
         curYear = timestamp.year
@@ -39,17 +30,15 @@ def testing(silkFile, start, stop, systemId, frequency, interval):
         curMinute = timestamp.minute
         
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
+            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            if len(indexArray[0]) == 0:
+                continue
+            indexInTimeArray = indexArray[0][0]
             lastYear = curYear
             lastMonth = curMonth
             lastDay = curDay
             lastHour = curHour
             lastMinute = curMinute
-
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
-            if len(indexArray[0]) == 0:
-                continue
-            indexInTimeArray = indexArray[0][0]
-
         ipSrcArray = entropy_measurements[indexInTimeArray][0]
         ipSrcRateArray = entropy_measurements[indexInTimeArray][1]
 
@@ -72,13 +61,12 @@ def testing(silkFile, start, stop, systemId, frequency, interval):
         data[i] = curMeasurements
     
     testingSet = pd.DataFrame(data, columns=columTitles)
-    testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+str(systemId)+ ".pkl")
-    print(testingSet.head)
-
+    testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+'''
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
 start = "2011-01-02 10:00:00"
 stop = "2011-01-02 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
-testing(silkFile, start, stop, systemId, frequency, interval)
+makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval)'''

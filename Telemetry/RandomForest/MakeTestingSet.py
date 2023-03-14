@@ -50,16 +50,15 @@ def makeTrainingSet(systemId, if_name, start, stop):
         curMinute = timestamp.minute
         
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
+            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            if len(indexArray[0]) == 0:
+                continue
+            indexInTimeArray = indexArray[0][0]
             lastYear = curYear
             lastMonth = curMonth
             lastDay = curDay
             lastHour = curHour
             lastMinute = curMinute
-
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
-            if len(indexArray[0]) == 0:
-                continue
-            indexInTimeArray = indexArray[0][0]
 
         entropyPacketSize = entropy_measurements[indexInTimeArray][0]
         entropyRatePacketSize = entropy_measurements[indexInTimeArray][1]
