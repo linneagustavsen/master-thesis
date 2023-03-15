@@ -44,7 +44,7 @@ attack $attack_type $attack_duration $destination_ip "$attack_script"
 #Write to file
 echo "Started break 1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Wait for next attack
-sleep $((15*60))
+sleep $((30*60))
 #Write to file
 echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
@@ -72,7 +72,7 @@ attack $attack_type $attack_duration $destination_ip "$attack_script"
 #Write to file
 echo "Started break 3" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 #Wait for next attack
-sleep $((20*60))
+sleep $((40*60))
 #Write to file
 echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 

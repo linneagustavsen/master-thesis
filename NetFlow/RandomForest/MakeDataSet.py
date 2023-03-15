@@ -16,7 +16,6 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
     entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
-    print(entropy_df.head)
 
     now = datetime.now()
 

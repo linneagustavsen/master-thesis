@@ -72,7 +72,6 @@ def trainingCombined(silkFile, start, stop, systemId, frequency, interval, attac
     
     trainingSet = pd.DataFrame(data, columns=columTitles)
     trainingSet.to_pickle("NetFlow/Kmeans/RawData/TrainingDataCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    print(trainingSet.head)
 
     kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(trainingSet)
     pickle.dump(kmeans, open("NetFlow/Kmeans/Models/MLmodelCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb'))
