@@ -2,7 +2,7 @@
 #Import variables from file
 source variables.sh
 
-for i in {1..300}
+for i in {1..800}
 do
     file_name="/home/wiresharkTraces/Trace"
     current_time=$(date "+%Y.%m.%d-%H.%M.%S")
