@@ -2,11 +2,11 @@ from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 
-def randomForestCalculations(systemId, attackDate):
-    f = open("NetFlowCalculations/RandomForest/Calculations/Alerts.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def randomForestCalculations(systemId, interval, attackDate):
+    f = open("NetFlowCalculations/RandomForest/Calculations/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,real_label")
     
-    trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
 
     trainingLabel = np.array(trainingSet.iloc[1:,-1])
@@ -14,9 +14,9 @@ def randomForestCalculations(systemId, attackDate):
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    testingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TestingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    testingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
     testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])

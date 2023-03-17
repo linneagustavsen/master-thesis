@@ -5,13 +5,13 @@ from HelperFunctions.StructureData import *
 from .IsAttackFlow import *
 from .StructureData import *
 
-def kmeansCombinedCalculation(systemId, attackDate):
-    f0 = open("NetFlowCalculations/Kmeans/Calculations/Combined.Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f1 = open("NetFlowCalculations/Kmeans/Calculations/Combined.Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def kmeansCombinedCalculation(systemId, interval, attackDate):
+    f0 = open("NetFlowCalculations/Kmeans/Calculations/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f1 = open("NetFlowCalculations/Kmeans/Calculations/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,is_attack")
     f1.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,is_attack")
     
-    df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataEntropy(df)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)

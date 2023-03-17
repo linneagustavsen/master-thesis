@@ -7,14 +7,14 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
     
     df = getData(silkFile, start, stop)
-    df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df.to_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
     entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
 
     now = datetime.now()
@@ -74,7 +74,7 @@ systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
 trainingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Training")
-trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(trainingSet.head)    
 
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
@@ -84,5 +84,5 @@ systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
 testingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Testing")
-testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(testingSet.head)'''

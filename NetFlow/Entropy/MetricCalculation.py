@@ -26,8 +26,8 @@ from .IsAttackFlow import *
 
 def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlowCalculations/Entropy/Calculations/Metrics.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open("NetFlowCalculations/Entropy/Calculations/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets")

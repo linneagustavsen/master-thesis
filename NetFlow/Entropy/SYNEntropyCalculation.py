@@ -26,8 +26,8 @@ from .IsAttackFlow import *
 
 def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlowCalculations/Entropy/Calculations/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlowsSYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open("NetFlowCalculations/Entropy/Calculations/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlowsSYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     calculations.write("Time,srcEntropy,dstEntropy,flowEntropy")

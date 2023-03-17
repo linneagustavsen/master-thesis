@@ -7,14 +7,14 @@ import pandas as pd
 def makeTestingDataCombined(silkFile, start, stop,systemId, frequency, interval, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets"]
     
-    ''' df = getData(silkFile, start, stop)
-    df.to_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")'''
-    df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df = getData(silkFile, start, stop)
+    df.to_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
-    '''entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")'''
-    entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
+    entropy_df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
 
     now = datetime.now()
@@ -67,7 +67,7 @@ def makeTestingDataCombined(silkFile, start, stop,systemId, frequency, interval,
     
     testingSet = pd.DataFrame(data, columns=columTitles)
     testingSet.insert(0, "time", sTime)
-    testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 '''
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
 start = "2011-01-02 10:00:00"

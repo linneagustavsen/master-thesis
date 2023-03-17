@@ -16,8 +16,8 @@ def trainingCombined(silkFile, start, stop, systemId, frequency, interval, attac
     data = np.empty((len(sTime),len(columTitles)))
     print("Structured Data")
     '''entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/Kmeans/RawData/TrainingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")'''
-    entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TrainingDataEntropy.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df.to_pickle("NetFlow/Kmeans/RawData/TrainingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")'''
+    entropy_df = pd.read_pickle("NetFlow/Kmeans/RawData/TrainingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
     print("Got entropy data")
 
@@ -71,10 +71,10 @@ def trainingCombined(silkFile, start, stop, systemId, frequency, interval, attac
         data[i] = curMeasurements
     
     trainingSet = pd.DataFrame(data, columns=columTitles)
-    trainingSet.to_pickle("NetFlow/Kmeans/RawData/TrainingDataCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    trainingSet.to_pickle("NetFlow/Kmeans/RawData/TrainingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
     kmeans = KMeans(n_clusters=2, random_state=0, n_init="auto").fit(trainingSet)
-    pickle.dump(kmeans, open("NetFlow/Kmeans/Models/MLmodelCombined.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb'))
+    pickle.dump(kmeans, open("NetFlow/Kmeans/Models/MLmodelCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb'))
 '''
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11-sorted.rw"
 start = "2011-01-01 10:00:00"
