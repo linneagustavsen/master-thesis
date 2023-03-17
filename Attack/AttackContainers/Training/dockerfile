@@ -3,17 +3,18 @@ FROM debian:stable-slim
 RUN mkdir /home/wiresharkTraces
 RUN mkdir /home/logs
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils tshark cron iptables iproute2 curl
-RUN echo "45 9 8 3 * root cd /home/scripts && ./attack_procedure_training.sh" >> /etc/crontab
-ARG SSH_PRIVATE_KEY
-RUN mkdir /root/.ssh
-RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
-RUN chmod 600 /root/.ssh/id_rsa
-ARG SSH_KNOWN_HOSTS
-RUN echo "${SSH_KNOWN_HOSTS}" >> /root/.ssh/known_hosts
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils tshark cron iptables iproute2 curl procps
+RUN echo "0 11 17 3 * root cd /home/scripts && ./attack_procedure_training.sh" >> /etc/crontab
+#ARG SSH_PRIVATE_KEY
+#RUN mkdir /root/.ssh
+#RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+#RUN chmod 600 /root/.ssh/id_rsa
+#ARG SSH_KNOWN_HOSTS
+#RUN echo "${SSH_KNOWN_HOSTS}" >> /root/.ssh/known_hosts
 COPY ./scripts/ /home/scripts/
 RUN chmod +x /home/scripts/attack_procedure_training.sh
 RUN chmod +x /home/scripts/attack.sh
+RUN chmod +x /home/scripts/attack_starter.sh
 RUN chmod +x /home/scripts/variables.sh
 RUN chmod +x /home/scripts/capture.sh
 CMD ["cron", "-f"]

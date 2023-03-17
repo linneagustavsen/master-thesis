@@ -3,10 +3,12 @@ from datetime import datetime,timedelta
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from silk import *
-from IsAttackFlow import *
+from .IsAttackFlow import *
 
-def getData(silkFile):
+def getData(silkFile, start, stop):
     infile = silkfile_open(silkFile, READ)
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     sIP=[]
     dIP=[]
     sPort=[]
@@ -30,6 +32,10 @@ def getData(silkFile):
 
 
     for rec in infile:
+        if rec.etime >= stopTime:
+            break
+        if rec.stime < startTime:
+            continue
         sIP.append(int(rec.sip))
         dIP.append(int(rec.dip))
         sPort.append(rec.sport)

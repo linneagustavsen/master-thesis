@@ -13,7 +13,7 @@ from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime, timedelta
-from IsAttackFlow import *
+from .IsAttackFlow import *
 
 '''
 
@@ -24,14 +24,14 @@ from IsAttackFlow import *
             a window size of how far back we should compare the values
 '''
 
-def synEntropyCalculation(silkFile, start, stop, frequency, interval, windowSize):
+def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlow/Entropy/Calculations/SYN.attack.08.03.csv", "a")
-    attackFlows = open("NetFlow/Entropy/Calculations/AttackFlowsSYN.attack.08.03.csv", "a")
+    calculations = open("NetFlowCalculations/Entropy/Calculations/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlowsSYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    calculations.write("Time, srcEntropy, dstEntropy, flowEntropy")
-    attackFlows.write("sTime, eTime")
+    calculations.write("Time,srcEntropy,dstEntropy,flowEntropy")
+    attackFlows.write("sTime,eTime")
     
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -95,5 +95,5 @@ def synEntropyCalculation(silkFile, start, stop, frequency, interval, windowSize
     infile.close()
     calculations.close()
     attackFlows.close()
-
-synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)
+'''
+synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)'''

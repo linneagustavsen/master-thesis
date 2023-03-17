@@ -11,7 +11,7 @@ How to get the flows in a file format:
 
 from silk import *
 from datetime import datetime
-import numpy as np
+from .IsAttackFlow import *
 
 '''
 
@@ -21,13 +21,13 @@ import numpy as np
             a window size of how many flows back we should compare the values
 '''
 
-def synCalculation(silkFile, start, stop, windowSize):
+def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlow/Threshold/Calculations/SYN.attack.08.03.csv", "a")
-    attackFlows = open("NetFlow/Threshold/Calculations/AttackFlowsSYN.attack.08.03.csv", "a")
+    calculations = open("NetFlowCalculations/Threshold/Calculations/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("NetFlowCalculations/Threshold/Calculations/AttackFlowsSYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("Time, synPacketsPerFlow")
-    attackFlows.write("sTime, eTime")
+    calculations.write("Time,synPacketsPerFlow")
+    attackFlows.write("sTime,eTime,synPacketsPerFlow")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -50,7 +50,10 @@ def synCalculation(silkFile, start, stop, windowSize):
 
         if rec.packets >= 2:
             calculations.write("\n" + str(startTime) + "," + str(synPacketsPerFlow[i]))
+        if isAttackFlow(rec.sip, rec.dip):
+            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime)+"," + str(synPacketsPerFlow[i]))
         i += 1
     infile.close()
-
+'''
 synCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00", 10)
+'''
