@@ -80,7 +80,7 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         #testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
         randomForestCalculationsNoIP(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations without IPs")
-'''
+
 #Attack 1
 baseFile="twelve-hours-2023-03-08_08-20-sorted.rw"         
 systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
@@ -166,25 +166,4 @@ interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)'''
-
-
-baseFile= "twelve-hours-2011-01-01_08-20-sorted.rw"
-systems = ["oslo-gw"]
-start = "2011-01-01 08:00:00"
-stop = "2011-01-01 20:00:00"
-startCombined = "2011-01-01 10:00:00"
-stopCombined = "2011-01-01 16:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 5)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="01.01"
-
-
-trainingBase="twelve-hours-2011-01-01_08-20-sorted.rw"
-testingBase="twelve-hours-2011-01-01_08-20-sorted.rw"
-startRFTraining = "2011-01-01 10:00:00"
-stopRFTraining = "2011-01-01 15:00:00"
-startRFTesting = "2011-01-01 15:00:00"
-stopRFTesting = "2011-01-01 16:00:00"
-randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
