@@ -12,7 +12,8 @@ ytelse_osl = IPv4Addr('158.39.1.126')
 ytelse_tos = IPv4Addr('158.39.1.98')
 ytelse_trd = IPv4Addr('158.39.1.90')
 trondheim_mp = IPv4Addr('128.39.65.26')
-ip_addresses = [int(googleeu_mp), int(amazonuw2_mp), int(amazonff_mp), int(amazonie_mp), int(amazonsth_mp), int(azure_mp), int(azurene_mp), int(googlefi_mp), int(ytelse_brg), int(ytelse_osl), int(ytelse_tos), int(ytelse_trd), int(trondheim_mp)]
+ip_addresses_cloud = [googleeu_mp, amazonuw2_mp, amazonff_mp, amazonie_mp, amazonsth_mp, azure_mp, azurene_mp, googlefi_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
+ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
 
 def isAttackFlow(sip, dip):
     if sip in ip_addresses and dip in ip_addresses:
