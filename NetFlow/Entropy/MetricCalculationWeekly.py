@@ -113,39 +113,39 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
     
 
     infile.close()
-    json_file_raw_sip = open("NetFlow/Calculations/sip.json", "w")
+    json_file_raw_sip = open("NetFlow/Entropy/Calculations/sip.json", "w")
     json.dump(json_object_raw_sip,json_file_raw_sip)
     json_file_raw_sip.close()
 
-    json_file_raw_sip_rate = open("NetFlow/Calculations/sip_rate.json", "w")
+    json_file_raw_sip_rate = open("NetFlow/Entropy/Calculations/sip_rate.json", "w")
     json.dump(json_object_raw_sip_rate,json_file_raw_sip_rate)
     json_file_raw_sip_rate.close()
 
-    json_file_raw_dip = open("NetFlow/Calculations/dip.json", "w")
+    json_file_raw_dip = open("NetFlow/Entropy/Calculations/dip.json", "w")
     json.dump(json_object_raw_dip,json_file_raw_dip)
     json_file_raw_dip.close()
 
-    json_file_raw_dip_rate = open("NetFlow/Calculations/dip_rate.json", "w")
+    json_file_raw_dip_rate = open("NetFlow/Entropy/Calculations/dip_rate.json", "w")
     json.dump(json_object_raw_dip_rate,json_file_raw_dip_rate)
     json_file_raw_dip_rate.close()
 
-    json_file_raw_flow = open("NetFlow/Calculations/flow.json", "w")
+    json_file_raw_flow = open("NetFlow/Entropy/Calculations/flow.json", "w")
     json.dump(json_object_raw_f,json_file_raw_flow)
     json_file_raw_flow.close()
 
-    json_file_raw_f_rate = open("NetFlow/Calculations/f_rate.json", "w")
+    json_file_raw_f_rate = open("NetFlow/Entropy/Calculations/f_rate.json", "w")
     json.dump(json_object_raw_f_rate,json_file_raw_f_rate)
     json_file_raw_f_rate.close()
 
-    json_file_raw_nf = open("NetFlow/Calculations/nf.json", "w")
+    json_file_raw_nf = open("NetFlow/Entropy/Calculations/nf.json", "w")
     json.dump(json_object_raw_nf,json_file_raw_nf)
     json_file_raw_nf.close()
 
-    json_file_raw_icmp_ratio = open("NetFlow/Calculations/icmp_ratio.json", "w")
+    json_file_raw_icmp_ratio = open("NetFlow/Entropy/Calculations/icmp_ratio.json", "w")
     json.dump(json_object_raw_icmp_ratio,json_file_raw_icmp_ratio)
     json_file_raw_icmp_ratio.close()
 
-    json_file_raw_icmp_packets = open("NetFlow/Calculations/icmp_packets.json", "w")
+    json_file_raw_icmp_packets = open("NetFlow/Entropy/Calculations/icmp_packets.json", "w")
     json.dump(json_object_raw_icmp_packets,json_file_raw_icmp_packets)
     json_file_raw_icmp_packets.close()
 '''    
