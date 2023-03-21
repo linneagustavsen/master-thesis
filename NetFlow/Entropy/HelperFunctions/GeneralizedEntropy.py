@@ -10,5 +10,5 @@ def generalizedEntropy(alpha, Pi):
     sumProb = 0
     for pi in Pi:
         sumProb += pi**alpha
-
+    print(sumProb)
     return 1/(1-alpha)*math.log(sumProb, 2)
