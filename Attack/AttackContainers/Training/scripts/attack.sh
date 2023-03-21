@@ -43,5 +43,4 @@ attack_log="/home/logs/"$attack_type".log"
 destination_ip=$2
 attack_script=$3
 
-#Execute the attack and write the output to file
 $attack_script

