@@ -12,6 +12,9 @@ trap crash 0
 
 #Define variables
 attack_type=$1
+curl_log="/home/logs/"$attack_type"_curl.log"
+traceroute_log="/home/logs/"$attack_type"_traceroute.log"
+attack_log="/home/logs/"$attack_type".log"
 attack_duration=$2 # in seconds
 destination_ip=$3
 attack_script1=$4
@@ -39,16 +42,17 @@ curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
 echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Execute the attack and write the output to file
-$attack_script1 &> $attack_stats_log1 & pid_attack1=$!
-$attack_script2 &> $attack_stats_log2 & pid_attack2=$!
+./attack.sh $attack_type $destination_ip "$attack_script1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_stats_log1 &
+./attack.sh $attack_type $destination_ip "$attack_script2" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_stats_log2 &
+
 
 #Wait for the attack duration to be over
 sleep $attack_duration
 
 #Stop the attack
-kill $pid_attack1
-#Stop the attack
-kill $pid_attack2
+pkill -f "./attack.sh"
+pgrep -f "$attack_script1" | tail -1 | xargs kill
+pgrep -f "$attack_script2" | tail -1 | xargs kill
 
 #Write to file
 echo "Stopped attack $attack_type" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
@@ -67,3 +71,5 @@ curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
 
 #Write to file
 echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+pkill -f "$attack_script1"
+pkill -f "$attack_script2"
