@@ -27,7 +27,7 @@ def weeklyMetricCalculation(silkFile, week):
     calculations = open("NetFlow/Entropy/Calculations/WeeklySIP.csv", "a")
     
     #Write the column titles to the files
-    calculations.write("Week,srcEntropy")
+    #calculations.write("Week,srcEntropy")
     
     print("Started on the silk files")
     
@@ -76,5 +76,5 @@ def weeklyMetricCalculation(silkFile, week):
     calculations.close()
      
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
-weeklyMetricCalculation(silkFiles[0],1)
+weeklyMetricCalculation(silkFiles[3],4)
 

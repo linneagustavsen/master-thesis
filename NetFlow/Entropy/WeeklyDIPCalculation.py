@@ -40,7 +40,7 @@ def weeklyMetricCalculation(silkFile, week):
 
     #Instantiate empty arrays for the calculated values
     
-    print("Start on silk file", i)
+    print("Start on silk file", week)
     numberOfPacketsPerDIP ={}
     #A variable to keep track of the total amount of packets in this time interval
     sumOfPacketsDIP = 0
@@ -78,8 +78,4 @@ def weeklyMetricCalculation(silkFile, week):
      
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
 weeklyMetricCalculation(silkFiles[2], 3)
-weeklyMetricCalculation(silkFiles[3], 4)
-weeklyMetricCalculation(silkFiles[4], 5)
-weeklyMetricCalculation(silkFiles[5], 6)
-weeklyMetricCalculation(silkFiles[6], 7)
 

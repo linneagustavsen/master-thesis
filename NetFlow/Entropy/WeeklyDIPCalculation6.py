@@ -24,57 +24,58 @@ from HelperFunctions.GeneralizedEntropy import *
 
 def weeklyMetricCalculation(silkFile, week):
     #Open file to write alerts to
-    calculations = open("NetFlow/Entropy/Calculations/WeeklySIP.csv", "a")
+    calculations = open("NetFlow/Entropy/Calculations/WeeklyDIP.csv", "a")
     
     #Write the column titles to the files
-    calculations.write("Week,srcEntropy")
+    #calculations.write("Week,dstEntropy")
     
+    
+    #Instantiate counter variable
+    i = 0
     print("Started on the silk files")
+    #Loop through all the flow records in the input file
     
-        
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
     #Instantiate empty arrays for the calculated values
     
     print("Start on silk file", week)
-    #Make dictionaries for how many packets each destination flow has
-    numberOfPacketsPerSIP ={}
+    numberOfPacketsPerDIP ={}
     #A variable to keep track of the total amount of packets in this time interval
-    sumOfPacketsSIP = 0
+    sumOfPacketsDIP = 0
     #Loop through each flow record in the time interval
     for rec in infile:
         #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
         #If it has not been encountered before it is added to the dictionary
-        if rec.sip in numberOfPacketsPerSIP:
-            numberOfPacketsPerSIP[rec.sip] += rec.packets
+        if rec.dip in numberOfPacketsPerDIP:
+            numberOfPacketsPerDIP[rec.dip] += rec.packets
         else:
-            numberOfPacketsPerSIP[rec.sip] = rec.packets
-        sumOfPacketsSIP += rec.packets
+            numberOfPacketsPerDIP[rec.dip] = rec.packets
+        sumOfPacketsDIP += rec.packets
 
-    #Array to keep track of the probability distribution
-    PiSIP = []
+    PiDIP = []
+
     infile.close()
     infile = silkfile_open(silkFile, READ)
     #Loop through each flow record in the time interval
     for rec in infile:
-        #Add the probability of the current source flow having the size that it does to the distribution
-        PiSIP.append(numberOfPacketsPerSIP[rec.sip]/sumOfPacketsSIP)
-        
+        PiDIP.append(numberOfPacketsPerDIP[rec.dip]/sumOfPacketsDIP)
 
     #Calculate the generalized entropy of this distribution
-    print(PiSIP[0:10])
-    print(len(PiSIP))
-    entropySip = generalizedEntropy(10,PiSIP)
+    print(PiDIP[0:10])
+    print(len(PiDIP))
     
-    print("Finished IP source calculation for silk file", week)
+    #Calculate the generalized entropy of this distribution
+    entropyDip = generalizedEntropy(10,PiDIP)
+    print("Finished IP destination calculation for silk file", i)
 
-    print("Finished with silk file", week)
-    calculations.write("\n" + str(week) + "," + str(entropySip))
+    calculations.write("\n" + str(week) + "," + str(entropyDip))
 
+    i += 1
     infile.close()
     calculations.close()
      
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
-weeklyMetricCalculation(silkFiles[0],1)
+weeklyMetricCalculation(silkFiles[5], 6)
 

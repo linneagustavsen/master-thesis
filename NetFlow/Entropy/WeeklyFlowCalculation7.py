@@ -24,14 +24,17 @@ from HelperFunctions.GeneralizedEntropy import *
 
 def weeklyMetricCalculation(silkFile, week):
     #Open file to write alerts to
-    calculations = open("NetFlow/Entropy/Calculations/WeeklySIP.csv", "a")
+    calculations = open("NetFlow/Entropy/Calculations/WeeklyFlow.csv", "a")
+    
     
     #Write the column titles to the files
-    calculations.write("Week,srcEntropy")
+    #calculations.write("Week,flowEntropy")
     
+    
+    #Instantiate counter variable
+    i = 0
     print("Started on the silk files")
-    
-        
+    #Loop through all the flow records in the input file
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
@@ -39,42 +42,60 @@ def weeklyMetricCalculation(silkFile, week):
     
     print("Start on silk file", week)
     #Make dictionaries for how many packets each destination flow has
-    numberOfPacketsPerSIP ={}
+    numberOfPacketsPerFlow = {}
+    flows = {}
     #A variable to keep track of the total amount of packets in this time interval
-    sumOfPacketsSIP = 0
+    sumOfPackets = 0
+    
     #Loop through each flow record in the time interval
     for rec in infile:
-        #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
-        #If it has not been encountered before it is added to the dictionary
-        if rec.sip in numberOfPacketsPerSIP:
-            numberOfPacketsPerSIP[rec.sip] += rec.packets
-        else:
-            numberOfPacketsPerSIP[rec.sip] = rec.packets
-        sumOfPacketsSIP += rec.packets
+        flow = (rec.sip, rec.dip)
+        reverse_flow = (rec.dip, rec.sip)
 
+        #Find the index of the current flow in the dictionary if it exists
+        #If not add it to the dictionary 
+        if flow in flows:
+            index = flows[flow]
+        elif reverse_flow in flows:
+            index = flows[reverse_flow]
+            flow = reverse_flow
+        else:
+            index = len(flows)
+            flows[flow] = index
+            numberOfPacketsPerFlow[index] = 0
+        #Add the packets of the current flow to the corresponding index in the other dictionary
+        numberOfPacketsPerFlow[index] += rec.packets
+        sumOfPackets += rec.packets
     #Array to keep track of the probability distribution
-    PiSIP = []
+
+    PiF = []
     infile.close()
     infile = silkfile_open(silkFile, READ)
     #Loop through each flow record in the time interval
     for rec in infile:
-        #Add the probability of the current source flow having the size that it does to the distribution
-        PiSIP.append(numberOfPacketsPerSIP[rec.sip]/sumOfPacketsSIP)
-        
+        flow = (rec.sip, rec.dip)
+        reverse_flow = (rec.dip, rec.sip)
+        if flow in flows:
+            index = flows[flow]
+        elif reverse_flow in flows:
+            index = flows[reverse_flow]
+        #Add the probability of the current flow having the size that it does to the distribution
+        PiF.append(numberOfPacketsPerFlow[index]/sumOfPackets)
 
     #Calculate the generalized entropy of this distribution
-    print(PiSIP[0:10])
-    print(len(PiSIP))
-    entropySip = generalizedEntropy(10,PiSIP)
-    
-    print("Finished IP source calculation for silk file", week)
+    print(PiF[0:10])
+    print(len(PiF))
+    entropyFlow = generalizedEntropy(10, PiF)
+    print("Finished flow calculation for silk file", i)
+
 
     print("Finished with silk file", week)
-    calculations.write("\n" + str(week) + "," + str(entropySip))
+    calculations.write("\n" + str(week) + "," + str(entropyFlow))
 
+    i += 1
     infile.close()
     calculations.close()
      
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
-weeklyMetricCalculation(silkFiles[0],1)
+weeklyMetricCalculation(silkFiles[6],7)
 
