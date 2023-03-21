@@ -13,5 +13,7 @@ COPY ./scripts/ /home/scripts/
 RUN chmod +x /home/scripts/attack_procedure_testing.sh
 RUN chmod +x /home/scripts/attack.sh
 RUN chmod +x /home/scripts/variables.sh
-RUN chmod +x /home/scripts/mul_attacks.sh
+RUN chmod +x /home/scripts/attack_starter.sh
+RUN chmod +x /home/scripts/two_attacks.sh
+RUN chmod +x /home/scripts/all_attacks.sh
 RUN chmod +x /home/scripts/capture.sh

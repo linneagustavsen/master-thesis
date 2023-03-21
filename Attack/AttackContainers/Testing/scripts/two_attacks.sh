@@ -14,7 +14,6 @@ trap crash 0
 attack_type=$1
 curl_log="/home/logs/"$attack_type"_curl.log"
 traceroute_log="/home/logs/"$attack_type"_traceroute.log"
-attack_stats_log="/home/logs/"$attack_type"_stats.log"
 attack_log="/home/logs/"$attack_type".log"
 attack_duration=$2 # in seconds
 destination_ip=$3
