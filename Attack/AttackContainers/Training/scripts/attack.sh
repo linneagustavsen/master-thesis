@@ -21,9 +21,10 @@ function crash {
 
         #Write to file
         echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
+        ./attack.sh $attack_type $destination_ip "$attack_script"
+    else
+        exit
     fi
-
-    exit
 }
 
 function killed {
