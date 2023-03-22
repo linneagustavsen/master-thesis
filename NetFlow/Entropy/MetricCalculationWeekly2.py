@@ -26,39 +26,39 @@ import json
 
 def metricCalculation(silkFile, start, stop, frequency, interval):
     #Open file to write entropy to
-    json_file_raw_sip = open("NetFlow/Entropy/Calculations/sip."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_sip = open("NetFlow/Entropy/Calculations/sip."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_sip = json.load(json_file_raw_sip)
     json_file_raw_sip.close()
 
-    json_file_raw_sip_rate = open("NetFlow/Entropy/Calculations/sip_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_sip_rate = open("NetFlow/Entropy/Calculations/sip_rate."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_sip_rate = json.load(json_file_raw_sip_rate)
     json_file_raw_sip_rate.close()
 
-    json_file_raw_dip = open("NetFlow/Entropy/Calculations/dip."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_dip = open("NetFlow/Entropy/Calculations/dip."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_dip = json.load(json_file_raw_dip)
     json_file_raw_dip.close()
 
-    json_file_raw_dip_rate = open("NetFlow/Entropy/Calculations/dip_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_dip_rate = open("NetFlow/Entropy/Calculations/dip_rate."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_dip_rate = json.load(json_file_raw_dip_rate)
     json_file_raw_dip_rate.close()
 
-    json_file_raw_flow = open("NetFlow/Entropy/Calculations/flow."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_flow = open("NetFlow/Entropy/Calculations/flow."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_f = json.load(json_file_raw_flow)
     json_file_raw_flow.close()
 
-    json_file_raw_f_rate = open("NetFlow/Entropy/Calculations/f_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_f_rate = open("NetFlow/Entropy/Calculations/f_rate."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_f_rate = json.load(json_file_raw_f_rate)
     json_file_raw_f_rate.close()
 
-    json_file_raw_nf = open("NetFlow/Entropy/Calculations/nf."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_nf = open("NetFlow/Entropy/Calculations/nf."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_nf = json.load(json_file_raw_nf)
     json_file_raw_nf.close()
 
-    json_file_raw_icmp_ratio = open("NetFlow/Entropy/Calculations/icmp_ratio."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_icmp_ratio = open("NetFlow/Entropy/Calculations/icmp_ratio."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_icmp_ratio = json.load(json_file_raw_icmp_ratio)
     json_file_raw_icmp_ratio.close()
 
-    json_file_raw_icmp_packets = open("NetFlow/Entropy/Calculations/icmp_packets."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_icmp_packets = open("NetFlow/Entropy/Calculations/icmp_packets."+ str(int(interval.total_seconds())) + ".json", "r")
     json_object_raw_icmp_packets = json.load(json_file_raw_icmp_packets)
     json_file_raw_icmp_packets.close()
 
