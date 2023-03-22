@@ -168,8 +168,8 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
 metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
 
-start="2011-01-03 00:00:00"
-stop="2011-01-10 00:00:00"
-metricCalculation(silkFiles[1], start, stop, timedelta(minutes = 1), timedelta(minutes = 5))
+start="2011-01-10 00:00:00"
+stop="2011-01-17 00:00:00"
+metricCalculation(silkFiles[2], start, stop, timedelta(minutes = 1), timedelta(minutes = 5))
 
-metricCalculation(silkFiles[1], start, stop, timedelta(minutes = 1), timedelta(minutes = 10))
+metricCalculation(silkFiles[2], start, stop, timedelta(minutes = 1), timedelta(minutes = 10))
