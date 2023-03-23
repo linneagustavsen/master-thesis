@@ -12,15 +12,15 @@ trap crash 0
 
 #Define variables
 attack_type=$1
-curl_log="/home/logs/"$attack_type"_curl.log"
-traceroute_log="/home/logs/"$attack_type"_traceroute.log"
-attack_log="/home/logs/"$attack_type".log"
+curl_log="/home/output/logs/"$attack_type"_curl.log"
+traceroute_log="/home/output/logs/"$attack_type"_traceroute.log"
+attack_log="/home/output/logs/"$attack_type".log"
 attack_duration=$2 # in seconds
 destination_ip=$3
 attack_script1=$4
 attack_script2=$5
-attack_stats_log1="/home/logs/"$attack_type"1_stats.log"
-attack_stats_log2="/home/logs/"$attack_type"2_stats.log"
+attack_stats_log1="/home/output/logs/"$attack_type"1_stats.log"
+attack_stats_log2="/home/output/logs/"$attack_type"2_stats.log"
 #Write to file
 echo "Started traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 

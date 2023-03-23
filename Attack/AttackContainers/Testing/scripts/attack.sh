@@ -36,9 +36,9 @@ trap crash 0
 
 #Define variables
 attack_type=$1
-curl_log="/home/logs/"$attack_type"_curl.log"
-traceroute_log="/home/logs/"$attack_type"_traceroute.log"
-attack_log="/home/logs/"$attack_type".log"
+curl_log="/home/output/logs/"$attack_type"_curl.log"
+traceroute_log="/home/output/logs/"$attack_type"_traceroute.log"
+attack_log="/home/output/logs/"$attack_type".log"
 destination_ip=$2
 attack_script=$3
 

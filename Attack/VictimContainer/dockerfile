@@ -1,5 +1,5 @@
 FROM httpd:2.2
-RUN mkdir /home/wiresharkTraces
+RUN mkdir /home/output/wiresharkTraces
 RUN apt-get install iproute2 
 COPY ./html/ /usr/local/apache2/htdocs/
 COPY ./scripts/ /home/

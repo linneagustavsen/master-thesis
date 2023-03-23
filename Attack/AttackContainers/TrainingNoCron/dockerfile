@@ -1,7 +1,7 @@
 ### TO NOT GET TCP RST run this in the host: iptables -I DOCKER-USER -i <interface of host machine> -d 172.17.0.2 -p tcp --tcp-flags RST RST -j DROP
 FROM debian:stable-slim
-RUN mkdir /home/wiresharkTraces
-RUN mkdir /home/logs
+RUN mkdir /home/output/wiresharkTraces
+RUN mkdir /home/output/logs
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils tshark iptables iproute2 procps curl
 #ARG SSH_PRIVATE_KEY

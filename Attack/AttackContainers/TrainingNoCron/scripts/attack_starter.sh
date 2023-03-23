@@ -5,10 +5,10 @@ source variables.sh
 
 #Define variables
 attack_type=$1
-curl_log="/home/logs/"$attack_type"_curl.log"
-traceroute_log="/home/logs/"$attack_type"_traceroute.log"
-attack_stats_log="/home/logs/"$attack_type"_stats.log"
-attack_log="/home/logs/"$attack_type".log"
+curl_log="/home/output/logs/"$attack_type"_curl.log"
+traceroute_log="/home/output/logs/"$attack_type"_traceroute.log"
+attack_stats_log="/home/output/logs/"$attack_type"_stats.log"
+attack_log="/home/output/logs/"$attack_type".log"
 attack_duration=$2 # in seconds
 destination_ip=$3
 attack_script=$4
