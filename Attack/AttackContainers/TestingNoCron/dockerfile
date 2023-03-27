@@ -1,4 +1,5 @@
 FROM debian:stable-slim
+RUN mkdir /home/output
 RUN mkdir /home/output/wiresharkTraces
 RUN mkdir /home/output/logs
 RUN apt-get update
