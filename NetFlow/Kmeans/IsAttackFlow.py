@@ -15,7 +15,6 @@ trondheim_mp = IPv4Addr('128.39.65.26')
 ip_addresses_cloud = [int(googleeu_mp), int(amazonuw2_mp), int(amazonff_mp), int(amazonie_mp), int(amazonsth_mp), int(azure_mp), int(azurene_mp), int(googlefi_mp), int(ytelse_brg), int(ytelse_osl), int(ytelse_tos), int(ytelse_trd), int(trondheim_mp)]
 ip_addresses = [int(ytelse_brg), int(ytelse_osl), int(ytelse_tos), int(ytelse_trd)]
 victim = int(trondheim_mp)
-
 def isAttackFlow(sip, dip):
     if (sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses):
         return True
