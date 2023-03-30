@@ -28,8 +28,8 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, at
     calculations = open("NetFlowCalculations/Threshold/Calculations/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open("NetFlowCalculations/Threshold/Calculations/AttackFlowsICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("Time, ICMPDstUnreachable")
-    attackFlows.write("sTime, eTime")
+    calculations.write("Time,ICMPDstUnreachable")
+    attackFlows.write("sTime,eTime")
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
