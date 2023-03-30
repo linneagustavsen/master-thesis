@@ -4,7 +4,7 @@ source variables.sh
 
 for i in {1..800}
 do
-    file_name="/home/wiresharkTraces/Trace"
+    file_name="/home/output/wiresharkTraces/Trace"
     current_time=$(date "+%Y.%m.%d-%H.%M.%S")
     suffix="pcap"
     new_fileName=$file_name.$current_time.$suffix

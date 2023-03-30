@@ -13,10 +13,11 @@ ytelse_tos = IPv4Addr('158.39.1.98')
 ytelse_trd = IPv4Addr('158.39.1.90')
 trondheim_mp = IPv4Addr('128.39.65.26')
 ip_addresses_cloud = [googleeu_mp, amazonuw2_mp, amazonff_mp, amazonie_mp, amazonsth_mp, azure_mp, azurene_mp, googlefi_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
-ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
+ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
+victim = trondheim_mp
 
 def isAttackFlow(sip, dip):
-    if sip in ip_addresses and dip in ip_addresses:
+    if (sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses):
         return True
     else:
         return False
