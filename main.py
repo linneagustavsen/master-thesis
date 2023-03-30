@@ -103,7 +103,7 @@ startRFTraining = "2023-03-08 10:00:00"
 stopRFTraining = "2023-03-08 15:00:00"
 startRFTesting = "2023-03-08 15:00:00"
 stopRFTesting = "2023-03-08 16:00:00"
-randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, attackDate)
+randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
@@ -136,7 +136,7 @@ startRFTraining = "2023-03-17 12:00:00"
 stopRFTraining = "2023-03-17 14:00:00"
 startRFTesting = "2023-03-24 14:30:00"
 stopRFTesting = "2023-03-24 19:00:00"
-randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, attackDate)
+randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
