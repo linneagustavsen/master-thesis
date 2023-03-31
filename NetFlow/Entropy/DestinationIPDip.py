@@ -33,7 +33,7 @@ def metricCalculation(silkFile, start, stop, interval):
 
     #Instantiate empty arrays for the calculated values
     records = []
-    
+    distributions = []
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
@@ -53,15 +53,20 @@ def metricCalculation(silkFile, start, stop, interval):
                     numberOfPacketsPerIP[rec.dip] += rec.packets
                 else:
                     numberOfPacketsPerIP[rec.dip] = rec.packets
-            print(numberOfPacketsPerIP)    
+            
+            distributions.append(dict(sorted(numberOfPacketsPerIP.items(), key=lambda item: item[1], reverse=True)))    
             records = []
+            startTime = startTime + interval
         records.append(rec)
     
 
     infile.close()
+    json_file = open("NetFlow/Entropy/Calculations/dstDistributionsWeek4Day3.json", "w")
+    json.dump(distributions,json_file)
+    json_file.close()
 
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
-start="2011-01-17 00:00:00"
-stop="2011-01-24 00:00:00"
+start="2011-01-19 06:56:00"
+stop="2011-01-19 08:37:00"
 
 metricCalculation(silkFiles[3], start, stop, timedelta(minutes = 1))
