@@ -24,6 +24,10 @@ import json
             a window size of how far back we should compare the values
 '''
 
+def transform(distribution):
+    return {str(key) : value for key, value in distribution.items()}
+
+
 def metricCalculation(silkFile, start, stop, interval):
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -31,9 +35,9 @@ def metricCalculation(silkFile, start, stop, interval):
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
-    #Instantiate empty arrays for the calculated values
-    records = []
     distributions = []
+    #Make dictionaries for how many packets each destination flow has
+    numberOfPacketsPerIP ={}
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
@@ -42,22 +46,18 @@ def metricCalculation(silkFile, start, stop, interval):
             continue
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
-            #Make dictionaries for how many packets each destination flow has
+            numberOfPacketsPerIP = transform(numberOfPacketsPerIP)
+            distributions.append(dict(sorted(numberOfPacketsPerIP.items(), key=lambda item: item[1], reverse=True))) 
             numberOfPacketsPerIP ={}
-
-            #Loop through each flow record in the time interval
-            for rec in records:
-                #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
-                #If it has not been encountered before it is added to the dictionary
-                if rec.dip in numberOfPacketsPerIP:
-                    numberOfPacketsPerIP[rec.dip] += rec.packets
-                else:
-                    numberOfPacketsPerIP[rec.dip] = rec.packets
-            
-            distributions.append(dict(sorted(numberOfPacketsPerIP.items(), key=lambda item: item[1], reverse=True)))    
-            records = []
             startTime = startTime + interval
-        records.append(rec)
+    
+        #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
+        #If it has not been encountered before it is added to the dictionary
+        if rec.dip in numberOfPacketsPerIP:
+            numberOfPacketsPerIP[rec.dip] += rec.packets
+        else:
+            numberOfPacketsPerIP[rec.dip] = rec.packets
+        
     
 
     infile.close()
