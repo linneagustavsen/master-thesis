@@ -123,7 +123,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             calculations.write("\n" + str(startTime) + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
                                + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
                                + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
-                               + "," + str(icmpPacketsArray[i])+ "," + str(entropyPacketSize[i]) + "," + str(packetSizeRateArray[i])
+                               + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
                                + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]))
             #Reset the record aggregation
             startTime = startTime + frequency
