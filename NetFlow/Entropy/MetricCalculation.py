@@ -30,7 +30,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets")
+    calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
     attackFlows.write("sTime,eTime")
 
 
@@ -57,6 +57,10 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
 
     icmpRatioArray = []
     icmpPacketsArray = []
+    packetSizeArray = []
+    packetSizeRateArray = []
+    packetNumberArray = []
+    bytesArray = []
     #Instantiate counter variable
     i = 0
     sizes = []
@@ -101,8 +105,26 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
-            
-            calculations.write("\n" + str(startTime) + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) + "," + str(icmpPacketsArray[i]))
+
+             #Find the probability distribution based on how big the packets are this time interval
+            PiPS,nd = packetSizeDistributionNetFlow(records)
+            #Calculate the generalized entropy of this distribution
+            entropyPacketSize = generalizedEntropy(10, PiPS)
+            packetSizeArray.append(entropyPacketSize)
+
+            #Calculate the generalized entropy rate of this distribution
+            entropyRatePacketSize = entropyPacketSize/nd
+            packetSizeRateArray.append(entropyRatePacketSize)
+
+            #Store the number of packets and bytes this time interval
+            packetNumberArray.append(numberOfPackets(records))
+            bytesArray.append(numberOfBytes(records))
+
+            calculations.write("\n" + str(startTime) + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
+                               + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
+                               + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
+                               + "," + str(icmpPacketsArray[i])+ "," + str(entropyPacketSize[i]) + "," + str(packetSizeRateArray[i])
+                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]))
             #Reset the record aggregation
             startTime = startTime + frequency
             records = records[sizes[0]:]

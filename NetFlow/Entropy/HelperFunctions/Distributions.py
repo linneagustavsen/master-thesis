@@ -206,6 +206,43 @@ def packetSizeDistribution(egressBytes, egressPackets):
 
 '''
 
+    Make a probability distribution based on how big packets are in a time interval
+
+'''
+def packetSizeDistributionNetFlow(records):
+
+    numberOfPacketsOfSizei = {}
+    packetSize = []
+    
+    #Loop through the measurements that is collected every 2 sec
+    for rec in records:
+        #If there are no packets the size is 0
+        if rec.packets == 0:
+            size = 0
+        else:
+            #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
+            size = int(rec.bytes/rec.packets)
+        packetSize.append(size)
+        #If the size of the packet has been encountered before the number of packets with this size is increased by one
+        if size in numberOfPacketsOfSizei:
+            numberOfPacketsOfSizei[size] += 1
+        else:
+            numberOfPacketsOfSizei[size] = 1
+    
+    Pi = []
+
+    sumOfNP = sum(numberOfPacketsOfSizei.values())
+
+    #Loop through all of the packet sizes
+    for value in packetSize:
+        #Add the probability of the current packet size being the size that it does to the distribution
+        Pi.append(numberOfPacketsOfSizei[value]/sumOfNP)
+    
+    return Pi, len(numberOfPacketsOfSizei)
+
+
+'''
+
     Calculates the ratio of ICMP packets in a time interval
 
 '''
@@ -235,5 +272,17 @@ def numberOfPackets(records):
 
     for rec in records:
         np+= rec.packets
+
+    return np
+
+'''
+    Returns the number of bytes in an input array of records
+'''
+
+def numberOfBytes(records):
+    np = 0
+
+    for rec in records:
+        np+= rec.bytes
 
     return np
