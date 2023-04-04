@@ -1,12 +1,14 @@
 import math
 
 '''
-
-    Input: list of probabilities of two distributions, the alpha, and the length of the distribution lists
-    Output: Information distance
+    Calculates the information distance between two probability distributions
+    Input:  alpha:  int, the alpha
+            Pi:     list of floats, probabilities of a distribution
+            Qi:     list of floats, probabilities of a distribution
+            n:      int, the length of the distribution lists
+    Output:         float, Information distance
 
 '''
-
 def informationDistance(alpha, Pi, Qi, n):
     sum1 = 0
     sum2 = 0

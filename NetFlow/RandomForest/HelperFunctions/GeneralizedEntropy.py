@@ -1,11 +1,11 @@
-'''
-
-    Input: list of probabilities and the alpha
-    Output: Generalized entropy
-
-'''
 import math
+'''
 
+    Input:  alpha:  int, the alpha
+            Pi:     list of floats, probabilities
+    Output: float, Generalized entropy of Pi
+
+'''
 def generalizedEntropy(alpha, Pi):
     sumProb = 0
     for pi in Pi:

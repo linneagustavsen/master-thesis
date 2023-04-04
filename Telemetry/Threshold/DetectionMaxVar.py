@@ -4,21 +4,23 @@ from HelperFunctions.GetData import *
 from FindMaxVar import *
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
-    Input:  system ID,
-            interface name,
-            field,
-            start time as a string,
-            stop time as a string
+    Input:  start:      string, indicates the start time of the testing period,
+            stop:       string, indicates the stop time of the testing period
+            systemId:   string, name of the system to collect and calculate on,
+            if_name:    string, interface name,
+            field:      string, what field to make a threshold for,
+            attackDate: string, date of the attack to detect
+            
 '''
 
 
-def detection(systemId, if_name, field, start, stop):
+def detection(start, stop, systemId, if_name, field, attackDate):
     #Open json file with threshold values
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".json", "r")
+    json_file_mean_var = open("Telemetry/Threshold/Thresholds/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     
     json_file_mean_var.close()
-    f = open("Telemetry/Threshold/Detections/"+ str(start) + "."+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".MaxVar.csv", "a")
+    f = open("Detections/Threshold/Telemetry/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
 
     maxVar = findMaxVar(json_object_mean_var)
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -26,7 +28,7 @@ def detection(systemId, if_name, field, start, stop):
 
     tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
     
-    f.write("Time, Deviation score, Value, Mean, Variance")
+    f.write("Time,Deviation score,Value,Mean,Variance")
     #Loop through all the tables and the rows and check their deviation from the threshold values
     #Alert detection system if the deviation is higher than a predetermined value
     for table in tables:

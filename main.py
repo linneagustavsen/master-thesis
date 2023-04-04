@@ -4,11 +4,25 @@ from NetFlow.Entropy.SYNEntropyCalculation import synEntropyCalculation
 from NetFlow.Kmeans.CalculationsKmeans import kmeansCalculation
 from NetFlow.Kmeans.CalculationsKmeansCombined import kmeansCombinedCalculation
 from NetFlow.Kmeans.CalculationsKmeansEntropy import kmeansEntropyCalculation
-from NetFlow.Kmeans.MakeTestingDataCombined import makeTestingDataCombined
+from NetFlow.Kmeans.MakeDataSet import makeTestingDataCombined
 from NetFlow.RandomForest.CalculationsRandomForest import *
 from NetFlow.RandomForest.MakeDataSet import *
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
+
+'''
+    Function to get different calculations on NetFlow data
+    Input:  baseFile:       string, raw base file with SiLK NetFlow records,
+            systems:        list of strings, list of systems the calculations will be made on,
+            start:          string, indicates the start time of the records,
+            stop:           string, indicates the stop time of the records,
+            startCombined:  string, indicates the start time of the records when doing K-means on both entropy and metrics,
+            stopCombined:   string, indicates the stop time of the records when doing K-means on both entropy and metrics,
+            frequency:      timedelta object, frequency of metric calculation,
+            interval:       timedelta object, size of the sliding window which the calculation is made on,
+            pathToRawFiles: string, path to the SiLK NetFlow records,
+            attackDate:     string, date of the attack the calculations are made on
+'''
 
 def main(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate):
     for systemId in systems:
@@ -18,7 +32,7 @@ def main(baseFile, systems, start, stop, startCombined, stopCombined, frequency,
         print("Finished entropy and other metrics calculations")
         #Entropy of SYN calculation
         silkFileSyn = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
-        synEntropyCalculation(silkFileSyn, start, stop, systemId,  frequency, interval, attackDate)
+        synEntropyCalculation(silkFileSyn, start, stop, systemId, frequency, interval, attackDate)
         print("Finished entropy of SYN calculation")
         #ICMP unreachable calculation
         silkFileICMP3 = pathToRawFiles+systemId + "/icmp3-"+ baseFile
@@ -35,11 +49,25 @@ def main(baseFile, systems, start, stop, startCombined, stopCombined, frequency,
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        testingSet = makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
-        kmeansCombinedCalculation(systemId, interval, attackDate)
+        kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
 
+'''
+    Function to get different calculations on NetFlow data
+    This function only includes the metrics that depend on interval
+    Input:  baseFile:       string, raw base file with SiLK NetFlow records,
+            systems:        list of strings, systems the calculations will be made on,
+            start:          string, indicates the start time of the records,
+            stop:           string, indicates the stop time of the records,
+            startCombined:  string, indicates the start time of the records when doing K-means on both entropy and metrics,
+            stopCombined:   string, indicates the stop time of the records when doing K-means on both entropy and metrics,
+            frequency:      timedelta object, frequency of metric calculation,
+            interval:       timedelta object, size of the sliding window which the calculation is made on,
+            pathToRawFiles: string, path to the SiLK NetFlow records,
+            attackDate:     string, date of the attack the calculations are made on
+'''
 def main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate):
     for systemId in systems:
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
@@ -55,11 +83,25 @@ def main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        testingSet = makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
-        kmeansCombinedCalculation(systemId, interval, attackDate)
+        kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
-        
+
+'''
+    Function to do Random Forest classifier on NetFlow data
+    Input:  trainingBase:   string, raw base file with SiLK NetFlow records for the training data,
+            testingBase:    string, raw base file with SiLK NetFlow records for the testing data,
+            systems:        list of strings, systems the calculations will be made on,
+            startRFTraining:string, indicates the start time of the training records,
+            stopRFTraining: string, indicates the stop time of the training records,
+            startRFTesting: string, indicates the start time of the testing records,
+            stopRFTesting:  string, indicates the stop time of the testing records,
+            frequency:      timedelta object, frequency of metric calculation,
+            interval:       timedelta object, size of the sliding window which the calculation is made on,
+            pathToRawFiles: string, path to the SiLK NetFlow records,
+            attackDate:     string, date of the attack the calculations are made on
+'''       
 def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate):
     for systemId in systems:
         trainingFile = pathToRawFiles+systemId + "/"+ trainingBase

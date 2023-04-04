@@ -2,9 +2,10 @@ from scipy.fft import rfft,irfft
 import numpy as np
 
 '''
-    Input:  array of values 
-            how many energy coefficients to keep
-    Output: denoised array of values by using Fast Fourier Transform
+    Does Fast Fourier Transform on an array of values
+    Input:  y:              list, array of values 
+            n_components:   int, how many energy coefficients to keep
+    Output: clean_data:     list, denoised array of values by using Fast Fourier Transform
 '''
 
 def fft_denoiser(y, n_components):

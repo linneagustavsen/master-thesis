@@ -1,18 +1,31 @@
-from .GetData import *
-from datetime import datetime,timedelta
+from HelperFunctions.GetData import *
+from datetime import datetime
 import pandas as pd
 from HelperFunctions.StructureData import *
 import numpy as np
+
+'''
+    Make a dataset to use for either training or testing a Random Forest classifier
+    Input:  silkFile:   string, File with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            path:       string, path to the dataset
+            attackDate: string, date of the attack the calculations are made on
+    Output: dataSet:    pandas dataframe, contains the dataset         
+'''
 def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
     
-    df = getData(silkFile, start, stop)
+    df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
-    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
+    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
@@ -67,6 +80,19 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
     dataSet = pd.DataFrame(data, columns=columTitles)
     return dataSet
 
+'''
+    Make a dataset to use for either training or testing a Random Forest classifier
+    Specifically without IPs
+    Input:  silkFile:   string, File with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            path:       string, path to the dataset
+            attackDate: string, date of the attack the calculations are made on
+    Output: dataSet:    pandas dataframe, contains the dataset       
+'''
 def makeDataSetNoIP(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
     columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
     

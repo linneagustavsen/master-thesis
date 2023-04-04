@@ -1,38 +1,27 @@
-'''
-How to get the flows in a file format:
-
-    #Filter out all flows from a time period
-    rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --all-destination=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
-
-    #Sorts them by start time
-    rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw /home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw
-
-'''
-
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
-from .IsAttackFlow import *
+from HelperFunctions.IsAttack import *
 
 '''
-
     Calculates entropy and other metrics and write them to file. Also checks if the flow is an attack flow
-    Input:  File with flow records sorted on time, 
-            start time as a string, 
-            an aggregation interval as a timedelta object, 
-            a window size of how far back we should compare the values
+    Input:  silkFile:   string, File with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            attackDate: string, date of the attack the calculations are made on
 '''
-
 def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlowCalculations/Entropy/Calculations/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open("Calculations/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("Calculations/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
     attackFlows.write("sTime,eTime")
-
 
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -57,8 +46,10 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
 
     icmpRatioArray = []
     icmpPacketsArray = []
+
     packetSizeArray = []
     packetSizeRateArray = []
+
     packetNumberArray = []
     bytesArray = []
     #Instantiate counter variable
@@ -106,7 +97,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
 
-             #Find the probability distribution based on how big the packets are this time interval
+            #Find the probability distribution based on how big the packets are this time interval
             PiPS,nd = packetSizeDistributionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
@@ -144,5 +135,3 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
      
 
     infile.close()
-'''    
-metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''

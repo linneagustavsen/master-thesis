@@ -15,12 +15,13 @@ json_file.close()
 json_file_mean_var.close()
 
 '''
-    Calculates and stores the deonised mean value and the standard deviation of a traffic measure for each specific minute of each specific weekday
-    Input:  system ID,
-            interface name,
-            field,
-            start time as a string, 
-            stop time as a string
+    Calculates and stores the deonised mean value and the standard deviation 
+    of a traffic measure for each specific minute of each specific weekday
+    Input:  systemId:   string, name of the system to collect and calculate on,
+            if_name:    string, interface name,
+            field:      string, what field to make a threshold for,
+            start:      string, indicates the start time of the training period,
+            stop:       string, indicates the stop time of the training period
 '''
 
 def thresholdGeneration(systemId, if_name, field, start, stop):
@@ -47,7 +48,7 @@ def thresholdGeneration(systemId, if_name, field, start, stop):
     #De-nosing the weeks combined
     denoisedMean = fft_denoiser(mean, 50)
 
-    #store the denoised mean and variance for all the minutes for each hour for each weekday in a json structure
+    #Store the denoised mean and variance for all the minutes for each hour for each weekday in a json structure
     for weekday in range(7):
         for hour in range(24):
             for minute in range(60):
@@ -57,7 +58,7 @@ def thresholdGeneration(systemId, if_name, field, start, stop):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
     #Write the mean and variance values to a json file      
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+ str(systemId) + "." + str(if_name).replace("/","-") + "." + str(field)+".json", "w")
+    json_file_mean_var = open("Telemetry/Threshold/Thresholds/Thresholds/"+str(systemId)+ "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 

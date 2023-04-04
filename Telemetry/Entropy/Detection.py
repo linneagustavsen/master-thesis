@@ -5,23 +5,33 @@ from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
 
 '''
-    Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  system ID,
-            interface name,
-            start time as a string, 
-            a detection frequency as a timedelta object,
-            a aggregation interval as a timedelta object, 
-            a window size of how far back we should compare the values
+    Calculates entropy, packet and byte count and alerts in case of an anomaly
+    Input:  start:                  string, indicating the start time of the data to detect on
+            stop:                   string, indicating the stop time of the data to detect on
+            systemId:               string, name of the system to collect and calculate on  
+            if_name:                string, interface name, 
+            interval:               timedelta object, size of the sliding window which the calculation is made on,
+            frequency:              timedelta object, frequency of metric calculation,
+            windowSize:             int, represents a multiplier of frequency, how far back we want to compare the value with
+            thresholdEntropy:       float, values over this threshold will cause an alert
+            thresholdEntropyRate:   float, values over this threshold will cause an alert
+            thresholdPackets:       float, values over this threshold will cause an alert
+            thresholdBytes:         float, values over this threshold will cause an alert
+            attackDate:             string, date of the attack the calculations are made on
 '''
 
-def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
+def detectionEntropy(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
     #Open file to write alerts to
-    f = open("Telemetry/Entropy/Detections/EntropyPacketSize."+ str(start) + "." + str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
-    f_rate = open("Telemetry/Entropy/Detections/EntropyRatePacketSize."+ str(start) + "." +  str(systemId) + "." + str(if_name).replace("/","-") + ".csv", "a")
-    
+    f = open("Detections/Entropy/Telemetry/EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_rate = open("Detections/Entropy/Telemetry/EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_pkts = open("Detections/Entropy/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_bytes = open("Detections/Entropy/Telemetry/NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
     #Write the column titles to the files
-    f.write("Time, Change, Value, Mean last "+ str(windowSize))
-    f_rate.write("Time, Change, Value, Mean last "+ str(windowSize))
+    f.write("Time,Change,Value,Mean last "+ str(windowSize))
+    f_rate.write("Time,Change,Value,Mean last "+ str(windowSize))
+    f_pkts.write("Time,Change,Value,Mean last "+ str(windowSize))
+    f_bytes.write("Time,Change,Value,Mean last "+ str(windowSize))
 
     #Instantiate empty arrays for the calculated values
     packetSizeArray = []
@@ -33,7 +43,7 @@ def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
-    intervalTime = (stopTime - startTime).total_seconds()/60
+    intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
 
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
@@ -42,8 +52,6 @@ def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
-        #Push the start time by the specified frequency
-        startTime = startTime + frequency
 
         #If there is not enough datapoints the minute is skipped
         if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
@@ -69,17 +77,45 @@ def detection(systemId, if_name, start, stop, frequency, interval, windowSize):
 
         #If there is not enough stored values to compare with we skip the detection
         if i < windowSize:
+            #Push the start time by the specified frequency
+            startTime = startTime + frequency
             continue
         
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
-            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > 0.5:
+            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
                 f.write("\n" + str(startTime) + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
 
         if packetSizeRateArray !=  np.nan:
-            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > 0.005:
+            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
                 f_rate.write("\n" + str(startTime) + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
+
+        if packetNumberArray !=  np.nan:
+            if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
+                f.write("\n" + str(startTime) + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+
+        if bytesArray !=  np.nan:
+            if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
+                f_rate.write("\n" + str(startTime) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+
+        #Push the start time by the specified frequency
+        startTime = startTime + frequency
+
     f.close()
     f_rate.close()
+    f_pkts.close()
+    f_bytes.close()
 
-detection("trd-gw", "xe-0/1/0", "2022-09-21 01:00:00", "2022-09-22 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
+start = "2022-09-21 01:00:00"
+stop = "2022-09-22 00:00:00"
+systemId = "trd-gw"
+if_name = "xe-0/1/0"
+interval = timedelta(minutes = 5)
+frequency = timedelta(minutes = 1)
+attackDate = "21.09"
+windowSize = 10
+thresholdEntropy = 0.5
+thresholdEntropyRate = 0.005
+thresholdPackets = 1000
+thresholdBytes = 1000
+detectionEntropy(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
