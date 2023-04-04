@@ -16,7 +16,7 @@ from FindMaxVar import *
 
 def detection(start, stop, systemId, if_name, field, attackDate):
     #Open json file with threshold values
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
+    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     
     json_file_mean_var.close()

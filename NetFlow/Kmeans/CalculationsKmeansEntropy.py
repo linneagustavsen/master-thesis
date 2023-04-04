@@ -15,8 +15,8 @@ from HelperFunctions.StructureData import *
 def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     f0 = open("Calculations/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f1 = open("Calculations/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f0.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,real_label")
-    f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,real_label")
+    f0.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
     df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     #df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
@@ -27,10 +27,10 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
-        line = "\n"  + str(timeStamps[i])
+        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
+        line = "\n"  + timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
         line += "," +str(int(isAttack(timestamp)))
         
         if prediction[i] == 0:

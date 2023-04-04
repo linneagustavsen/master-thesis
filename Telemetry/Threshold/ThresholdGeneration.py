@@ -58,7 +58,7 @@ def thresholdGeneration(systemId, if_name, field, start, stop):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
     #Write the mean and variance values to a json file      
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/Thresholds/"+str(systemId)+ "." + str(field)+".json", "w")
+    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 

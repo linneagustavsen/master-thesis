@@ -111,7 +111,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             packetNumberArray.append(numberOfPackets(records))
             bytesArray.append(numberOfBytes(records))
 
-            calculations.write("\n" + str(startTime) + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
+            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
                                + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
                                + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
                                + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
@@ -122,7 +122,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             sizes.pop(0)
             i += 1
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime))
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
         if rec.stime >= windowTime + frequency:
             thisMinuteSize = len(records) - lastMinuteSize
             sizes.append(thisMinuteSize)

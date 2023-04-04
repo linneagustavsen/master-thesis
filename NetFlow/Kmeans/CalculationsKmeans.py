@@ -30,7 +30,7 @@ def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
-        line = "\n"  + str(sTime[i]) + "," + str(eTime[i])
+        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for j in range(len(measurements[i])):
             if j == 0 or j == 1 or j == 16:
                 continue

@@ -16,7 +16,7 @@ import pandas as pd
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval, attackDate):
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","label"]
+    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
     df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle("NetFlow/Kmeans/RawData/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
@@ -69,9 +69,15 @@ def makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval
         icmpRatioArray = entropy_measurements[indexInTimeArray][7]
         icmpPacketsArray = entropy_measurements[indexInTimeArray][8]
 
+        packetSizeArray = entropy_measurements[indexInTimeArray][9]
+        packetSizeRateArray = entropy_measurements[indexInTimeArray][10]
+
+        packetNumberArray = entropy_measurements[indexInTimeArray][11]
+        bytesArray = entropy_measurements[indexInTimeArray][12]
+
         curMeasurements = measurements[i][:-1]
 
-        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, measurements[i][-1]])
+        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, packetSizeArray, packetSizeRateArray, packetNumberArray, bytesArray, measurements[i][-1]])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 

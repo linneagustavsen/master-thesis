@@ -25,9 +25,9 @@ def synDetection(silkFile, start, stop, systemId, frequency, interval, windowSiz
     flowEntropyFile = open("Detections/Entropy/NetFlow/SYNFlowIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    srcEntropyFile.write("Time,Change,Value,Mean of the last "+ str(windowSize))
-    dstEntropyFile.write("Time,Change,Value,Mean of the last"+ str(windowSize))
-    flowEntropyFile.write("Time,Change,Value,Mean of the last"+ str(windowSize))
+    srcEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    flowEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -75,13 +75,13 @@ def synDetection(silkFile, start, stop, systemId, frequency, interval, windowSiz
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
                 if abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])) > thresholdSrc:
-                    srcEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])))
+                    srcEntropyFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])))
                 
                 if abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])) > thresholdDst:
-                    dstEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])))
+                    dstEntropyFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])))
 
                 if abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])) > thresholdFlow:
-                    flowEntropyFile.write("\n" + str(startTime) + "," + str(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])))
+                    flowEntropyFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])))
 
             #Reset the record aggregation
             startTime = startTime + frequency

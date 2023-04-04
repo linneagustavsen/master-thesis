@@ -245,6 +245,13 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
 
     icmpRatioArray = []
     icmpPacketsArray = []
+
+    packetSizeArray = []
+    packetSizeRateArray = []
+
+    packetNumberArray = []
+    bytesArray = []
+
     timeArray = []
     #Instantiate counter variable
     i = 0
@@ -291,6 +298,21 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
+
+            #Find the probability distribution based on how big the packets are this time interval
+            PiPS,nd = packetSizeDistributionNetFlow(records)
+            #Calculate the generalized entropy of this distribution
+            entropyPacketSize = generalizedEntropy(10, PiPS)
+            packetSizeArray.append(entropyPacketSize)
+
+            #Calculate the generalized entropy rate of this distribution
+            entropyRatePacketSize = entropyPacketSize/nd
+            packetSizeRateArray.append(entropyRatePacketSize)
+
+            #Store the number of packets and bytes this time interval
+            packetNumberArray.append(numberOfPackets(records))
+            bytesArray.append(numberOfBytes(records))
+
             timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
             #Reset the record aggregation
             startTime = startTime + frequency
@@ -315,7 +337,11 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
      "entropy_rate_flow": flowRateArray,
      "number_of_flows": numberOfFlows,
      "icmp_ratio": icmpRatioArray,
-     "number_of_icmp_packets": icmpPacketsArray
+     "number_of_icmp_packets": icmpPacketsArray,
+     "packet_size_entropy": packetSizeArray,
+     "packet_size_entropy_rate": packetSizeRateArray,
+     "number_of_packets": packetNumberArray,
+     "number_of_bytes": bytesArray
     })
 
     return entropy

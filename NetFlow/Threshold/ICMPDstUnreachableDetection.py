@@ -18,7 +18,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, wind
     #Open file to write alerts to
     f = open("NetFlow/Threshold/Detections/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    f.write("Time,Change,Value,Mean of the last "+ str(windowSize))
+    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -47,7 +47,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, wind
             #If there is enough stored values to compare with we compare the difference of the metric with a threshold
             if i >= windowSize:
                 if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])) > threshold:
-                    f.write("\n" + str(startTime) + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
+                    f.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
 
             #Reset the record aggregation
             records = []

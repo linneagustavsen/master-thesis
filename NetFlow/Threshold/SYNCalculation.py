@@ -38,8 +38,8 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
         synPacketsPerFlow.append(rec.packets)
 
         if rec.packets >= 2:
-            calculations.write("\n" + str(rec.stime) + "," + str(synPacketsPerFlow[i]))
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i]))
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime)+"," + str(synPacketsPerFlow[i]))
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ")+"," + str(synPacketsPerFlow[i]))
         i += 1
     infile.close()

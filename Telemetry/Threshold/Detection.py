@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from HelperFunctions.GetData import *
+
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
     Input:  systemId:   string, name of the system to collect and calculate on,
@@ -11,8 +12,6 @@ from HelperFunctions.GetData import *
             threshold:  int, threshold for when to alert
             attackDate: string, date of the attack to detect
 '''
-
-
 def detection(systemId, if_name, field, start, stop, threshold, attackDate):
     #Open json file with threshold values
     json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")

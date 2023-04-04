@@ -44,14 +44,14 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, at
             #Find the number of ICMP Destination unavailable packets in this time frequency
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
-            calculations.write("\n" + str(startTime) + "," + str(numberOfIcmpDstUnreachablePackets[i]))
+            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
             #Reset the record aggregation
             records = []
             startTime = startTime + frequency
             i += 1
 
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime) + str(numberOfIcmpDstUnreachablePackets[i]))
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(numberOfIcmpDstUnreachablePackets[i]))
         records.append(rec)
         
 

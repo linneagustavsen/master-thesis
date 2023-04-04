@@ -6,12 +6,12 @@ import numpy as np
     Detect anomalies based on a random forest classifier and write them to file
     Input:  trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
-            systemId:       string, name of the system to collect and calculate on  
-            interval:       timedelta object, size of the sliding window which the calculation is made on
-            attackDate:     string, date of the attack the calculations are made on
+            systemId:       string, name of the system to collect and detct on  
+            interval:       timedelta object, size of the sliding window which the detection is made on
+            attackDate:     string, date of the attack the detection are made on
 '''
-def randomForestCalculations(trainingSet, testingSet, systemId, interval, attackDate):
-    f = open("Calculations/RandomForest/NetFlow/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def randomForestDetection(trainingSet, testingSet, systemId, interval, attackDate):
+    f = open("Detections/RandomForest/NetFlow/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
@@ -47,12 +47,12 @@ def randomForestCalculations(trainingSet, testingSet, systemId, interval, attack
     Specifically without IPs
     Input:  trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
-            systemId:       string, name of the system to collect and calculate on  
-            interval:       timedelta object, size of the sliding window which the calculation is made on
-            attackDate:     string, date of the attack the calculations are made on
+            systemId:       string, name of the system to collect and detect on  
+            interval:       timedelta object, size of the sliding window which the detection is made on
+            attackDate:     string, date of the attack the detections are made on
 '''
-def randomForestCalculationsNoIP(trainingSet, testingSet, systemId, interval, attackDate):
-    f = open("Calculations/RandomForest/NetFlow/AlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def randomForestDetectionNoIP(trainingSet, testingSet, systemId, interval, attackDate):
+    f = open("Detections/RandomForest/NetFlow/AlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
