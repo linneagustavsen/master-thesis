@@ -37,6 +37,9 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
         stopTime = startTime + interval
         #Get data for a specified time interval
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        if df.empty:
+            packetNumberArray.append(np.nan)
+            continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 

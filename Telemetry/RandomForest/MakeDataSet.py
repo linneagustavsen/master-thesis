@@ -77,7 +77,7 @@ def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, f
         curMeasurements = measurements[i]
         
         #Add a label to the measurements
-        curLabel = checkLabel("CorrelationTest/Detections 2022-09-21 01:00:00.txt", timestamp.strftime("%Y-%m-%d %H:%M:%S"))
+        curLabel = isAttack(timestamp)
 
         newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize, int(curLabel)])
 
