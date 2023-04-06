@@ -20,7 +20,10 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
     f1.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
-    df = getData(start, stop, systemId, if_name, fields)
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, if_name, fields)
+    
     #df.to_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
@@ -32,8 +35,8 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
         line = "\n"  + str(timeStamps[i])
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%dT%H:%M:%SZ"))
-        line += "," +str(int(isAttack(timestamp)))
+        #timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%dT%H:%M:%SZ"))
+        line += "," +str(int(isAttack(timeStamps[i])))
         
         if prediction[i] == 0:
             f0.write(line)

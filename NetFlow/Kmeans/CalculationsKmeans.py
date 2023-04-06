@@ -24,7 +24,8 @@ def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
     sTime, eTime, measurements = structureData(testingData)
     measurements = measurements[:, :-1]
     label = measurements[:,-1]
-
+    sTime = pd.to_datetime(sTime)
+    eTime = pd.to_datetime(eTime)
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
 
     count0 = 0 

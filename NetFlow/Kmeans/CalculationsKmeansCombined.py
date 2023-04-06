@@ -22,6 +22,7 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     timeStamps, measurements = structureDataEntropy(testingSet)
     measurements = measurements[:, :-1]
     label = measurements[:,-1]
+    timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     count0 = 0 

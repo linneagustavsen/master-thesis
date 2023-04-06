@@ -4,7 +4,7 @@ from NetFlow.Entropy.SYNEntropyCalculation import synEntropyCalculation
 from NetFlow.Kmeans.CalculationsKmeans import kmeansCalculation
 from NetFlow.Kmeans.CalculationsKmeansCombined import kmeansCombinedCalculation
 from NetFlow.Kmeans.CalculationsKmeansEntropy import kmeansEntropyCalculation
-from NetFlow.Kmeans.MakeDataSet import makeTestingDataCombined
+from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
 from NetFlow.RandomForest.CalculationsRandomForest import *
 from NetFlow.RandomForest.MakeDataSet import *
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
@@ -49,7 +49,7 @@ def main(baseFile, systems, start, stop, startCombined, stopCombined, frequency,
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        testingSet = makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
         kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
@@ -83,7 +83,7 @@ def main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        testingSet = makeTestingDataCombined(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
         kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
@@ -107,20 +107,20 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         trainingFile = pathToRawFiles+systemId + "/"+ trainingBase
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
         
-        trainingSet = makeDataSet(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
         #trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-        testingSet = makeDataSet(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
         #testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-        randomForestCalculations(trainingSet, testingSet, systemId, interval, attackDate)
+        calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations on all fields")
 
-        trainingSet = makeDataSetNoIP(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
         #trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-        testingSet = makeDataSetNoIP(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
         #testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-        randomForestCalculationsNoIP(trainingSet, testingSet, systemId, interval, attackDate)
+        calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations without IPs")
 
 #Attack 1

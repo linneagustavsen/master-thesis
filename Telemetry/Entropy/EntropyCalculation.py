@@ -39,6 +39,12 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         stopTime = startTime + interval
         #Get data for a specified time interval
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        if df.empty:
+            packetSizeArray.append(np.nan)
+            packetSizeRateArray.append(np.nan)
+            packetNumberArray.append(np.nan)
+            bytesArray.append(np.nan)
+            continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 

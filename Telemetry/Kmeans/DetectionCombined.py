@@ -30,8 +30,8 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
         line = "\n"  + str(timeStamps[i])
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%dT%H:%M:%SZ"))
-        line += "," +str(int(isAttack(timestamp)))
+        #timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%dT%H:%M:%SZ"))
+        line += "," +str(int(isAttack(timeStamps[i])))
         
         if prediction[i] == 0:
             f0.write(line)

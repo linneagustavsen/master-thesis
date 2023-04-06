@@ -11,6 +11,7 @@ from NetFlow.Kmeans.CalculationsKmeans import kmeansCalculation
 from NetFlow.Kmeans.CalculationsKmeansCombined import kmeansCombinedCalculation
 from NetFlow.Kmeans.CalculationsKmeansEntropy import kmeansEntropyCalculation
 from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
+from NetFlow.RandomForest.CalculationsRandomForest import calculationsRandomForestNetFlow, calculationsRandomForestNoIPNetFlow
 from NetFlow.RandomForest.MakeDataSet import makeDataSetNetFlow, makeDataSetNoIPNetFlow
 from NetFlow.RandomForest.RandomForestDetection import detectionRandomForestNetFlow, detectionRandomForestNoIPNetFlow
 from NetFlow.Threshold.BytesDetection import detectionBytesNetFlow
@@ -101,7 +102,7 @@ detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, w
 print("Finished detectionEntropyTelemetry")
 
 baseFile="two-hours-2011-01-02_10-11-sorted.rw"         
-system = "oslo-gw"
+systemId = "oslo-gw"
 start = "2011-01-02 10:00:00"
 stop = "2011-01-02 12:00:00"
 frequency = timedelta(minutes = 1)
@@ -137,6 +138,8 @@ testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, inte
 print("Finished makeDataSetNetFlow testing")
 detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlow")
+calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+print("Finished calculationsRandomForestNetFlow")
 path = "Training"
 trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
@@ -145,6 +148,8 @@ testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, 
 print("Finished makeDataSetNoIPNetFlow testing")
 detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNoIPNetFlow")
+calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+print("Finished calculationsRandomForestNoIPNetFlow")
 
 ###K-means
 testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate)

@@ -17,7 +17,7 @@ import numpy as np
 '''
 def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, threshold, attackDate):
     #Open file to write alerts to
-    f = open("Detections/Threshold/NetFlow/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f = open("Detections/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     

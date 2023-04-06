@@ -69,8 +69,8 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                 if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > thresholdICMPRatio:
                     icmpRatioFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
                 
-                if abs(icmpPackets[i] - np.nanmean(icmpPackets[i-windowSize: i-1])) > thresholdNumberOfICMPPackets:
-                    icmpPacketsFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPackets[i] - np.nanmean(icmpPackets[i-windowSize: i-1]))) + "," + str(icmpPackets[i]) + "," + str(np.nanmean(icmpPackets[i-windowSize: i-1])))
+                if abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])) > thresholdNumberOfICMPPackets:
+                    icmpPacketsFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1])))
                 
             #Reset the record aggregation
             startTime = startTime + frequency

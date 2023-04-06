@@ -84,7 +84,8 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interva
         data[i] = curMeasurements
     
     testingSet = pd.DataFrame(data, columns=columTitles)
-    testingSet.insert(0, "time", sTime)
+    timeStamps = pd.to_datetime(sTime)
+    testingSet.insert(0, "time", timeStamps)
     return testingSet
 '''
 silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
