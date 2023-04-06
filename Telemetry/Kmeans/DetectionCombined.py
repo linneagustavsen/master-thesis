@@ -2,8 +2,8 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
-from datetime import datetime,timdelta
-from HelperFunctions.isAttack import *
+from datetime import datetime,timedelta
+from HelperFunctions.IsAttack import *
 
 '''
     Do K-means clustering on entropy data and field data and write both clusters to file

@@ -5,7 +5,7 @@ from HelperFunctions.StructureData import *
 import numpy as np
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from CheckLabel import *
+from .CheckLabel import *
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
