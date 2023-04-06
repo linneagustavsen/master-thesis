@@ -6,13 +6,14 @@ from HelperFunctions.MakePlot import *
 
 '''
     Do K-means clustering on entropy data and field data and make plots of the results
-    Input:  systemId:   string, name of the system to collect and calculate on  
+    Input:  testingSet: pandas dataframe, data set to detect anomalies on
+            systemId:   string, name of the system to collect and calculate on  
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def kmeansGraphCombined(systemId, interval, attackDate):
-    df = pd.read_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    measurements = df.values
+def kmeansGraphCombined(testingSet, systemId, interval, attackDate):
+    #df = pd.read_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    measurements = testingSet.values
     timeStamps = pd.read_pickle("Telemetry/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
@@ -79,26 +80,26 @@ def kmeansGraphCombined(systemId, interval, attackDate):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(queueA0, time0, "Combined Average queue in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(queueA1, time1, "Combined Average queue in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(queueA0, time0, "Combined Average queue in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(queueA1, time1, "Combined Average queue in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
 
-    makePlot(queueC0, time0, "Combined Current queue in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(queueC1, time1, "Combined Current queue in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(queueC0, time0, "Combined Current queue in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(queueC1, time1, "Combined Current queue in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
 
-    makePlot(pkts0, time0, "Combined Packets per sec in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(pkts1, time1, "Combined Packets per sec in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(pkts0, time0, "Combined Packets per sec in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(pkts1, time1, "Combined Packets per sec in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
 
-    makePlot(bytes0, time0, "Combined Bytes per sec in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(bytes1, time1, "Combined Bytes per sec in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(entropy0, time0, "Combined Entropy in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(entropy1, time1, "Combined Entropy in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(bytes0, time0, "Combined Bytes per sec in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(bytes1, time1, "Combined Bytes per sec in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(entropy0, time0, "Combined Entropy in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(entropy1, time1, "Combined Entropy in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
 
-    makePlot(entropyR0, time0, "Combined Entropy rate in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(entropyR1, time1, "Combined Entropy rate in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(entropyR0, time0, "Combined Entropy rate in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(entropyR1, time1, "Combined Entropy rate in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
     
 
-systemId = "trd-gw"
+'''systemId = "trd-gw"
 interval = timedelta(minutes = 5)
 frequency = timedelta(minutes = 1)
 attackDate = "21.09"
-kmeansGraphCombined(systemId, interval, attackDate)
+kmeansGraphCombined(systemId, interval, attackDate)'''

@@ -16,7 +16,7 @@ import numpy as np
             thresholdBytes:                 float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionBytes(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
+def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
     #Open file to write alerts to
     bytesFile = open("Detections/Threshold/NetFlow/Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 

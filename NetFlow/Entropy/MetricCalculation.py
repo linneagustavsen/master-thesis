@@ -55,7 +55,6 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     #Instantiate counter variable
     i = 0
     sizes = []
-    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:

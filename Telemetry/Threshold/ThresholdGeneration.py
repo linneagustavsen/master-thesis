@@ -1,7 +1,7 @@
 import statistics
 from HelperFunctions.GetData import *
 import json
-from FFTDenoiser import *
+from .FFTDenoiser import *
 import numpy as np
 from datetime import datetime
 
@@ -68,6 +68,6 @@ thresholdGeneration("trd-gw", "et-11/0/0", "egress_stats__if_1sec_pkts", "2022-0
 thresholdGeneration("hmg9-gw1", "et-0/1/4", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
 thresholdGeneration("hmg9-gw1", "et-0/1/4", "egress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
 thresholdGeneration("hovedbygget-gw", "et-11/0/2", "egress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
-thresholdGeneration("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")'''
-thresholdGeneration("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("hovedbygget-gw", "et-11/0/2", "ingress_stats__if_1sec_pkts", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")
+thresholdGeneration("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets", "2022-09-22 00:00:00" ,"2022-10-13 00:00:00")'''
 

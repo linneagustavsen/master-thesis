@@ -15,7 +15,7 @@ import pandas as pd
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval, attackDate):
+def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
     df = getDataNetFlow(silkFile, start, stop)

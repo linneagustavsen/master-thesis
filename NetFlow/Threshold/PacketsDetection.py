@@ -16,7 +16,7 @@ import numpy as np
             thresholdPackets:               int, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionPackets(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
+def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
     #Open file to write alerts to
     packetsFile = open("Detections/Threshold/NetFlow/Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     

@@ -16,7 +16,7 @@ import numpy as np
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+def makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
     df = getDataNetFlow(silkFile, start, stop)
@@ -100,7 +100,7 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSetNoIP(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+def makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
     columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
     df = getDataNetFlow(silkFile, start, stop)
@@ -178,7 +178,7 @@ stop = "2011-01-01 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
-trainingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Training")
+trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Training")
 trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(trainingSet.head)    
 
@@ -188,6 +188,6 @@ stop = "2011-01-02 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
-testingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Testing")
+testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Testing")
 testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(testingSet.head)'''

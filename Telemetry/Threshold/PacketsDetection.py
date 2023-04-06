@@ -16,8 +16,7 @@ from HelperFunctions.Distributions import *
             thresholdPackets:       float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-
-def detectionPackets(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate):
+def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate):
     #Open file to write alerts to
     f_pkts = open("Detections/Threshold/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
@@ -65,7 +64,7 @@ def detectionPackets(start, stop, systemId, if_name, interval, frequency, window
 
     f_pkts.close()
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
@@ -77,4 +76,4 @@ thresholdEntropy = 0.5
 thresholdEntropyRate = 0.005
 thresholdPackets = 1000
 thresholdBytes = 1000
-detectionEntropy(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
+detectionPacketsTelemetry(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)'''

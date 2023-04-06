@@ -13,7 +13,7 @@ from HelperFunctions.isAttack import *
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombined(testingSet, systemId, if_name, attackDate):
+def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
     f0 = open("Calculations/Kmeans/Telemetry/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
     f1 = open("Calculations/Kmeans/Telemetry/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
@@ -45,11 +45,11 @@ def detectionKmeansCombined(testingSet, systemId, if_name, attackDate):
     f0.close()
     f1.close()
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
 attackDate = "21.09"
 fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 
-detectionKmeansCombined(testingSet, systemId, if_name, attackDate)
+detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)'''

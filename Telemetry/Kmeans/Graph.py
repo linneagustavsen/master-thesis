@@ -80,7 +80,7 @@ def kmeansGraph(start, stop, systemId, if_name, fields, attackDate):
     makePlot(bytes0, time0, "Bytes per sec in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
     makePlot(bytes1, time1, "Bytes per sec in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
     
-
+'''
 start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
@@ -88,4 +88,4 @@ if_name = "xe-0/1/0"
 fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 attackDate = "21.09"
 
-kmeansGraph(start, stop, systemId, if_name, fields, attackDate)
+kmeansGraph(start, stop, systemId, if_name, fields, attackDate)'''

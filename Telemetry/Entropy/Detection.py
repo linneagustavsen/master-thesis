@@ -19,8 +19,7 @@ from HelperFunctions.Distributions import *
             thresholdBytes:         float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-
-def detectionEntropy(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
     #Open file to write alerts to
     f = open("Detections/Entropy/Telemetry/EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_rate = open("Detections/Entropy/Telemetry/EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -125,7 +124,7 @@ def detectionEntropy(start, stop, systemId, if_name, interval, frequency, window
     f_pkts.close()
     f_bytes.close()
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
@@ -137,4 +136,4 @@ thresholdEntropy = 0.5
 thresholdEntropyRate = 0.005
 thresholdPackets = 1000
 thresholdBytes = 1000
-detectionEntropy(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
+detectionEntropyTelemetry(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)'''

@@ -18,7 +18,7 @@ import numpy as np
             thresholdFlow:  float, values over this threshold will cause an alert
             attackDate:     string, date of the attack the calculations are made on
 '''
-def synDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrc, thresholdDst, thresholdFlow, attackDate):
+def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrc, thresholdDst, thresholdFlow, attackDate):
     #Open file to write alerts to
     srcEntropyFile = open("Detections/Entropy/NetFlow/SYNSourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     dstEntropyFile = open("Detections/Entropy/NetFlow/SYNDestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")

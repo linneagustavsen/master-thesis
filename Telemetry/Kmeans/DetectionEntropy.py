@@ -15,7 +15,7 @@ from HelperFunctions.isAttack import *
             frequency:  timedelta object, frequency of metric calculation,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansEntropy(start, stop, systemId, if_name, interval, frequency, attackDate):
+def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
     f0 = open("Calculations/Kmeans/Telemetry/Entropy.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
     f1 = open("Calculations/Kmeans/Telemetry/Entropy.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
     f0.write("Time,entropy_packet_size,entropy_rate_packet_size,real_label")
@@ -51,11 +51,11 @@ def detectionKmeansEntropy(start, stop, systemId, if_name, interval, frequency, 
     f0.close()
     f1.close()
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
 interval = timedelta(minutes = 5)
 frequency = timedelta(minutes = 1)
 attackDate = "21.09"
-detectionKmeansEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
+detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)'''

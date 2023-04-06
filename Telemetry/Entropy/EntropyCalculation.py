@@ -16,7 +16,7 @@ from HelperFunctions.IsAttack import isAttack
             attackDate: string, date of the attack the calculations are made on
 '''
 
-def calculationEntropy(start, stop, systemId, if_name, interval, frequency, attackDate):
+def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
     #Open file to write alerts to
     calculations = open("Calculations/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
@@ -74,7 +74,7 @@ def calculationEntropy(start, stop, systemId, if_name, interval, frequency, atta
         i += 1
 
     calculations.close()
-
+'''
 start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
@@ -82,4 +82,4 @@ if_name = "xe-0/1/0"
 interval = timedelta(minutes = 5)
 frequency = timedelta(minutes = 1)
 attackDate = "21.09"
-calculationEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
+calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)'''

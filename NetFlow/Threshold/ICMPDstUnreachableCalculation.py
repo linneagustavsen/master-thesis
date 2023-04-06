@@ -36,7 +36,6 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
     #Instantiate counter variable
     i = 0
     sizes = []
-    lastMinuteSize = 0
    
     for rec in infile:
         if rec.etime >= stopTime:

@@ -65,7 +65,7 @@ def kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, atta
     makePlot(entropyR1, time1, "Entropy rate in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
     
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
@@ -73,4 +73,4 @@ interval = timedelta(minutes = 5)
 frequency = timedelta(minutes = 1)
 attackDate = "21.09"
 
-kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
+kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)'''

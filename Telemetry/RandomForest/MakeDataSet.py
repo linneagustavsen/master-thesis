@@ -19,7 +19,7 @@ from CheckLabel import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSet(systemId, if_name, start, stop, interval, frequency, path, attackDate):
+def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate):
     columTitles = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets","entropy_packet_size", "entropy_rate_packet_size", "label"]
     
     fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
@@ -88,7 +88,7 @@ def makeDataSet(systemId, if_name, start, stop, interval, frequency, path, attac
     dataSet = pd.DataFrame(data, columns=columTitles)
     return dataSet
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
@@ -97,5 +97,5 @@ frequency = timedelta(minutes = 1)
 path = "Training"
 attackDate = "21.09"
 
-dataSet = makeDataSet(systemId, if_name, start, stop, interval, frequency, path, attackDate)
-dataSet.to_pickle("Telemetry/RandomForest/Data/TrainingSet.pkl")
+dataSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+dataSet.to_pickle("Telemetry/RandomForest/Data/TrainingSet.pkl")'''

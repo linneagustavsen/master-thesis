@@ -14,7 +14,7 @@ from HelperFunctions.isAttack import *
             fields:     list of strings, features to incorporate in the clustering
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeans(start, stop, systemId, if_name, fields, attackDate):
+def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate):
     f0 = open("Calculations/Kmeans/Telemetry/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f1 = open("Calculations/Kmeans/Telemetry/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
@@ -47,7 +47,7 @@ def detectionKmeans(start, stop, systemId, if_name, fields, attackDate):
     f0.close()
     f1.close()
 
-start = "2022-09-21 01:00:00"
+'''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"
@@ -56,4 +56,4 @@ frequency = timedelta(minutes = 1)
 attackDate = "21.09"
 fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 
-detectionKmeans(start, stop, systemId, if_name, fields, attackDate)
+detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)'''
