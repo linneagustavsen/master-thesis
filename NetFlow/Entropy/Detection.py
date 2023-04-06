@@ -92,7 +92,6 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
     #Instantiate counter variable
     i = 0
     sizes = []
-    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -100,6 +99,13 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             break
         if rec.stime < startTime:
             continue
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
 
@@ -190,16 +196,25 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
                 if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
                     bytesFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
     
+                '''
+                CHAT GPT VERSION
+                arrays = [ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPackets, packetSizeArray, packetSizeRateArray]
+                thresholds = [thresholdSrcEntropy, thresholdSrcEntropyRate, thresholdDstEntropy, thresholdDstEntropyRate, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, thresholdICMPRatio, thresholdNumberOfICMPPackets, thresholdPSEntropy, thresholdPSEntropyRate]
+                files = [srcEntropyFile, srcEntropyRateFile, dstEntropyFile, dstEntropyRateFile, flowEntropyFile, flowEntropyRateFile, flowFile, icmpRatioFile, icmpPacketsFile, packetSizeEntropyFile, packetSizeEntropyRateFile]
+
+                for i in range(len(arrays)):
+                    array = arrays[i]
+                    threshold = thresholds[i]
+                    file = files[i]
+
+                    if abs(array[i] - np.nanmean(array[i-windowSize: i-1])) > threshold:
+                        file.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(array[i] - np.nanmean(array[i-windowSize: i-1]))) + "," + str(array[i]) + "," + str(np.nanmean(array[i-windowSize: i-1])))
+                '''
             #Reset the record aggregation
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
         records.append(rec)
     
            

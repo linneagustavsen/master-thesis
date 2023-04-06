@@ -10,9 +10,10 @@ from HelperFunctions.IsAttack import *
             stop:       string, stop time of detection 
             systemId:   string, name of the system to calculate on
             frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
             attackDate: string, date of the attack the calculations are made on
 '''
-def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, attackDate):
+def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
     calculations = open("Calculations/Threshold/NetFlow/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open("Calculations/Threshold/NetFlow/AttackFlowsICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -22,7 +23,8 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, at
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    
+    windowTime = startTime
+
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
     
@@ -33,21 +35,32 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, at
 
     #Instantiate counter variable
     i = 0
+    sizes = []
+    lastMinuteSize = 0
    
     for rec in infile:
         if rec.etime >= stopTime:
             break
         if rec.stime < startTime:
             continue
-        if rec.stime >= startTime + frequency:
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
+        if rec.stime >= startTime + interval:
             
-            #Find the number of ICMP Destination unavailable packets in this time frequency
+            #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
             calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
+            
             #Reset the record aggregation
-            records = []
             startTime = startTime + frequency
+            records = records[sizes[0]:]
+            sizes.pop(0)
             i += 1
 
         if isAttackFlow(rec.sip, rec.dip):

@@ -63,6 +63,13 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             break
         if rec.stime < startTime:
             continue
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
@@ -123,11 +130,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             i += 1
         if isAttackFlow(rec.sip, rec.dip):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
+
         records.append(rec)
     
     calculations.close()

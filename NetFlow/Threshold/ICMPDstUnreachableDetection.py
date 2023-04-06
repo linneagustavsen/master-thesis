@@ -9,19 +9,21 @@ import numpy as np
             start:      string, start time of detection 
             stop:       string, stop time of detection 
             systemId:   string, name of the system to calculate on
-            frequency:  timedelta object, frequency of metric calculation,
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
             windowSize: int, represents a multiplier of frequency, how far back we want to compare the value with
             threshold:  int, values over this threshold will cause an alert
             attackDate: string, date of the attack the calculations are made on
 '''
-def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, windowSize, threshold, attackDate):
+def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, threshold, attackDate):
     #Open file to write alerts to
-    f = open("NetFlow/Threshold/Detections/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f = open("Detections/Threshold/NetFlow/ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    windowTime = startTime
     
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
@@ -33,15 +35,21 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, wind
 
     #Instantiate counter variable
     i = 0
-   
+    sizes = []
     for rec in infile:
         if rec.etime >= stopTime:
             break
         if rec.stime < startTime:
             continue
-        if rec.stime >= startTime + frequency:
-            
-            #Find the number of ICMP Destination unavailable packets in this time frequency
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
+        if rec.stime >= startTime + interval:
+            #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
             #If there is enough stored values to compare with we compare the difference of the metric with a threshold
@@ -49,10 +57,12 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, wind
                 if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])) > threshold:
                     f.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
 
-            #Reset the record aggregation
-            records = []
+           #Reset the record aggregation
             startTime = startTime + frequency
+            records = records[sizes[0]:]
+            sizes.pop(0)
             i += 1
+ 
         records.append(rec)
 
     infile.close()

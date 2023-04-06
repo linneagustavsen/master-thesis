@@ -52,6 +52,13 @@ def synDetection(silkFile, start, stop, systemId, frequency, interval, windowSiz
             break
         if rec.stime < startTime:
             continue
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
             #Find the probability distribution based on how many SYN packets there is in each source flow in this time interval
@@ -83,16 +90,25 @@ def synDetection(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])) > thresholdFlow:
                     flowEntropyFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])))
 
+                '''
+                CHAT GPT VERSION
+                def check_threshold(data, avg_data, threshold, output_file):
+                    if abs(data - avg_data) > threshold:
+                        output_file.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(data - avg_data)) + "," + str(data) + "," + str(avg_data))
+
+                for data_type in ["src", "dst", "flow"]:
+                    entropy_data = eval("entropyOfSynPacketsPer" + data_type)
+                    avg_entropy_data = np.nanmean(entropy_data[i-windowSize: i-1])
+                    threshold = eval("threshold" + data_type.capitalize())
+                    output_file = eval(data_type.capitalize() + "EntropyFile")
+                    check_threshold(entropy_data[i], avg_entropy_data, threshold, output_file)
+                '''
             #Reset the record aggregation
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
+        
         records.append(rec)
             
 

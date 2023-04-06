@@ -24,14 +24,14 @@ def detectionEntropy(start, stop, systemId, if_name, interval, frequency, window
     #Open file to write alerts to
     f = open("Detections/Entropy/Telemetry/EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_rate = open("Detections/Entropy/Telemetry/EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_pkts = open("Detections/Entropy/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_bytes = open("Detections/Entropy/Telemetry/NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_pkts = open("Detections/Threshold/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_bytes = open("Detections/Threshold/Telemetry/NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    f.write("Time,Change,Value,Mean last "+ str(windowSize))
-    f_rate.write("Time,Change,Value,Mean last "+ str(windowSize))
-    f_pkts.write("Time,Change,Value,Mean last "+ str(windowSize))
-    f_bytes.write("Time,Change,Value,Mean last "+ str(windowSize))
+    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    f_rate.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    f_pkts.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    f_bytes.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
     #Instantiate empty arrays for the calculated values
     packetSizeArray = []
@@ -92,11 +92,30 @@ def detectionEntropy(start, stop, systemId, if_name, interval, frequency, window
 
         if packetNumberArray !=  np.nan:
             if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                f.write("\n" + str(startTime) + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+                f_pkts.write("\n" + str(startTime) + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
 
         if bytesArray !=  np.nan:
             if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
-                f_rate.write("\n" + str(startTime) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+                f_bytes.write("\n" + str(startTime) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+
+        '''
+        #CHATGPT VERSION
+        # Define a list of tuples where each tuple contains the array, threshold value,
+        # and the file object to write the output to.
+        data = [
+            (packetSizeArray, thresholdEntropy, f),
+            (packetSizeRateArray, thresholdEntropyRate, f_rate),
+            (packetNumberArray, thresholdPackets, f_pkts),
+            (bytesArray, thresholdBytes, f_bytes)
+        ]
+
+        # Loop through the list of tuples and process each array accordingly.
+        for arr, threshold, file_obj in data:
+            if arr is not None and not np.isnan(arr):
+                if abs(arr[i] - np.nanmean(arr[i-windowSize:i-1])) > threshold:
+                    file_obj.write("\n" + str(startTime) + "," + str(abs(arr[i] - np.nanmean(arr[i-windowSize:i-1]))) + "," + str(arr[i]) + "," + str(np.nanmean(arr[i-windowSize:i-1])))
+
+        '''
 
         #Push the start time by the specified frequency
         startTime = startTime + frequency
