@@ -36,7 +36,7 @@ def main(baseFile, systems, start, stop, startCombined, stopCombined, frequency,
         print("Finished entropy of SYN calculation")
         #ICMP unreachable calculation
         silkFileICMP3 = pathToRawFiles+systemId + "/icmp3-"+ baseFile
-        icmpDstUnreachableCalculation(silkFileICMP3, start, stop, systemId, frequency, attackDate)
+        icmpDstUnreachableCalculation(silkFileICMP3,  start, stop, systemId, frequency, interval, attackDate)
         print("Finished icmp unreachable calculations")
         #SYN calculation
         synCalculation(silkFileSyn, start, stop, systemId, attackDate)
@@ -76,8 +76,11 @@ def main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency
         print("Finished entropy and other metrics calculations")
         #Entropy of SYN calculation
         silkFileSyn = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
-        synEntropyCalculation(silkFileSyn, start, stop, systemId,  frequency, interval, attackDate)
+        synEntropyCalculation(silkFileSyn, start, stop, systemId, frequency, interval, attackDate)
         print("Finished entropy of SYN calculation")
+        silkFileICMP3 = pathToRawFiles+systemId + "/icmp3-"+ baseFile
+        icmpDstUnreachableCalculation(silkFileICMP3,  start, stop, systemId, frequency, interval, attackDate)
+        print("Finished icmp unreachable calculations")
 
         #entropy
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
@@ -109,7 +112,7 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         
         trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
         #trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-
+        
         testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
         #testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
         calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)

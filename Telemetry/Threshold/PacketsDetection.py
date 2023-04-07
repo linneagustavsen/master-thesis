@@ -39,13 +39,15 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
         if df.empty:
             packetNumberArray.append(np.nan)
+            startTime = startTime + frequency
             continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 
         #If there is not enough datapoints the minute is skipped
-        if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
+        if len(dfEgressBytes) < 10 or len(dfEgressPackets) < 10:
             packetNumberArray.append(np.nan)
+            startTime = startTime + frequency
             continue
 
         #Store the number of packets and bytes this time interval

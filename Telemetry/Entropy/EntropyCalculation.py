@@ -39,24 +39,12 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         stopTime = startTime + interval
         #Get data for a specified time interval
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        #If there is no data for this interval we skip the calculations
         if df.empty:
-            packetSizeArray.append(np.nan)
-            packetSizeRateArray.append(np.nan)
-            packetNumberArray.append(np.nan)
-            bytesArray.append(np.nan)
+            startTime = startTime + frequency
             continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
-
-        #If there is not enough datapoints the minute is skipped
-        if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
-            #Push the start time by the specified frequency
-            startTime = startTime + frequency
-            packetSizeArray.append(np.nan)
-            packetSizeRateArray.append(np.nan)
-            packetNumberArray.append(np.nan)
-            bytesArray.append(np.nan)
-            continue
 
         #Find the probability distribution based on how big the packets are this time interval
         PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)

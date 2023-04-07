@@ -54,16 +54,18 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             packetSizeRateArray.append(np.nan)
             packetNumberArray.append(np.nan)
             bytesArray.append(np.nan)
+            startTime = startTime + frequency
             continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 
         #If there is not enough datapoints the minute is skipped
-        if len(dfEgressBytes) <130 or len(dfEgressPackets) <130:
+        if len(dfEgressBytes) < 10 or len(dfEgressPackets) < 10:
             packetSizeArray.append(np.nan)
             packetSizeRateArray.append(np.nan)
             packetNumberArray.append(np.nan)
             bytesArray.append(np.nan)
+            startTime = startTime + frequency
             continue
 
         #Find the probability distribution based on how big the packets are this time interval
