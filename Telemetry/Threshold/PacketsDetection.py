@@ -51,7 +51,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
             continue
 
         #Store the number of packets and bytes this time interval
-        packetNumberArray.append(sum(dfEgressPackets["_value"].to_numpy()))
+        packetNumberArray.append(sum(dfEgressPackets))
 
         #If there is not enough stored values to compare with we skip the detection
         if i < windowSize:

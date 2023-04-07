@@ -56,8 +56,8 @@ field = "egress_stats__if_1sec_pkts"
 ###Threshold
 thresholdGeneration(systemId, if_name, field, start, stop)
 print("Finished thresholdGeneration")
-start = "2022-09-21 01:00:00"
-stop = "2022-09-22 00:00:00"
+start = "2022-10-05 00:00:00"
+stop = "2022-10-06 00:00:00"
 detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
 print("Finished detectionBytesTelemetry")
 detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)

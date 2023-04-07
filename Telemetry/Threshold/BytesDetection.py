@@ -51,7 +51,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
             bytesArray.append(np.nan)
             continue
 
-        bytesArray.append(sum(dfEgressBytes["_value"].to_numpy()))
+        bytesArray.append(sum(dfEgressBytes))
 
         #If there is not enough stored values to compare with we skip the detection
         if i < windowSize:

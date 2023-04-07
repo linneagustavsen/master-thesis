@@ -57,8 +57,8 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         packetSizeRateArray.append(entropyRatePacketSize)
 
         #Store the number of packets and bytes this time interval
-        packetNumberArray.append(sum(dfEgressPackets["_value"].to_numpy()))
-        bytesArray.append(sum(dfEgressBytes["_value"].to_numpy()))
+        packetNumberArray.append(sum(dfEgressPackets))
+        bytesArray.append(sum(dfEgressBytes))
 
         #If there is not enough stored values to compare with we skip the detection
         calculations.write("\n" + str(startTime) + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
