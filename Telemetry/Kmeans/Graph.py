@@ -70,17 +70,17 @@ def kmeansGraph(start, stop, systemId, if_name, fields, attackDate):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(queueA0, time0, "Average queue in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(queueA1, time1, "Average queue in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(queueA0, time0, "Average queue in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(queueA1, time1, "Average queue in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
 
-    makePlot(queueC0, time0, "Current queue in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(queueC1, time1, "Current queue in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(queueC0, time0, "Current queue in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(queueC1, time1, "Current queue in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
 
-    makePlot(pkts0, time0, "Packets per sec in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(pkts1, time1, "Packets per sec in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(pkts0, time0, "Packets per sec in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(pkts1, time1, "Packets per sec in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
 
-    makePlot(bytes0, time0, "Bytes per sec in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(bytes1, time1, "Bytes per sec in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(bytes0, time0, "Bytes per sec in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(bytes1, time1, "Bytes per sec in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
     
 '''
 start = "2022-09-21 01:00:00"

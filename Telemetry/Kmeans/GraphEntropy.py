@@ -58,11 +58,11 @@ def kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, atta
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(entropy0, time0, "Entropy in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(entropy1, time1, "Entropy in cluster 1", "Plots/Kmeans/Telemetry/")
+    makePlot(entropy0, time0, "Entropy in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(entropy1, time1, "Entropy in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
 
-    makePlot(entropyR0, time0, "Entropy rate in cluster 0", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
-    makePlot(entropyR1, time1, "Entropy rate in cluster 1", "Plots/Kmeans/Telemetry/" + str(attackDate) + ".")
+    makePlot(entropyR0, time0, "Entropy rate in cluster 0", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
+    makePlot(entropyR1, time1, "Entropy rate in cluster 1", "Plots/Kmeans/Telemetry/attack." + str(attackDate) + ".")
     
 
 '''start = "2022-09-21 01:00:00"

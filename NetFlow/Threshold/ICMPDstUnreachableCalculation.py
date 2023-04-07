@@ -16,7 +16,7 @@ from HelperFunctions.IsAttack import *
 def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
     calculations = open("Calculations/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlowsICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,ICMPDstUnreachable")
     attackFlows.write("sTime,eTime,ICMPDstUnreachable")

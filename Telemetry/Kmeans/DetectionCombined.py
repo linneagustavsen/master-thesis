@@ -14,8 +14,8 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
-    f0 = open("Calculations/Kmeans/Telemetry/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
-    f1 = open("Calculations/Kmeans/Telemetry/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-") + str(attackDate) + ".csv", "a")
+    f0 = open("Calculations/Kmeans/Telemetry/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+    f1 = open("Calculations/Kmeans/Telemetry/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
     f1.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 

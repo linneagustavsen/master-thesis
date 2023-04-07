@@ -13,7 +13,7 @@ from HelperFunctions.IsAttack import *
 def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Open file to write alerts to
     calculations = open("Calculations/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlowsSYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,synPacketsPerFlow")
     attackFlows.write("sTime,eTime,synPacketsPerFlow")

@@ -80,7 +80,7 @@ def kmeansGraphCombined(testingSet, systemId, interval, attackDate):
             count1 += 1
     print(count0)
     print(count1)
-    makePlot(queueA0, time0, "Combined Average queue in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
+    makePlot(queueA0, time0, "Combined Average queue in cluster 0", ""+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
     makePlot(queueA1, time1, "Combined Average queue in cluster 1", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
 
     makePlot(queueC0, time0, "Combined Current queue in cluster 0", "Plots/Kmeans/Telemetry/"+ str(int(interval.total_seconds())) +"secInterval.attack." + str(attackDate) + ".")
