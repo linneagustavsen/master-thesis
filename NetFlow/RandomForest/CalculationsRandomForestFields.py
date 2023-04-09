@@ -9,8 +9,8 @@ import numpy as np
             systemId:       string, name of the system to collect and detct on  
             attackDate:     string, date of the attack the detection are made on
 '''
-def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate):
+    f = open("Calculations/RandomForest/NetFlow/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
@@ -49,8 +49,8 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
             systemId:       string, name of the system to collect and detect on  
             attackDate:     string, date of the attack the detections are made on
 '''
-def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate):
+    f = open("Calculations/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")

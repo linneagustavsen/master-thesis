@@ -26,7 +26,7 @@ def detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, 
     timeStamps = pd.read_pickle("Telemetry/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
     
     #testingSet = pd.read_pickle("Telemetry/RandomForest/Data/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
+    testingMeasurements = np.array(testingSet.iloc[1:, 0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])
 
     #Predict the label of the testing data set

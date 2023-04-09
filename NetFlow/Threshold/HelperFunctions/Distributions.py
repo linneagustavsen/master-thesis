@@ -34,16 +34,10 @@ def flowDistribution(infile):
     #Array to keep track of the probability distribution
     Pi = []
 
-    #Loop through each flow record in the time interval
-    for rec in infile:
-        flow = (rec.sip, rec.dip)
-        reverse_flow = (rec.dip, rec.sip)
-        if flow in flows:
-            index = flows[flow]
-        elif reverse_flow in flows:
-            index = flows[reverse_flow]
-        #Add the probability of the current flow having the size that it does to the distribution
-        Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
+    #Loop through each flow in the time interval
+    for key, value in numberOfPacketsPerFlow.items():
+        #Add the probability of the current destination flow having the size that it does to the distribution
+        Pi.append(value/sumOfPackets)
 
     #Return the probabilities and the number of flows in this interval
     return Pi, len(flows)
@@ -80,13 +74,11 @@ def uniDirFlowDistribution(infile):
    #Array to keep track of the probability distribution
     Pi = []
 
-    #Loop through each flow record in the time interval
-    for rec in infile:
-        flow = (rec.sip, rec.dip)
-        if flow in flows:
-            index = flows[flow]
-        #Add the probability of the current flow having the size that it does to the distribution
-        Pi.append(numberOfPacketsPerFlow[index]/sumOfPackets)
+    #Loop through each flow in the time interval
+    for key, value in numberOfPacketsPerFlow.items():
+        #Add the probability of the current destination flow having the size that it does to the distribution
+        Pi.append(value/sumOfPackets)
+    
 
     return Pi, len(flows)
 
@@ -115,10 +107,10 @@ def ipDestinationDistribution(infile):
     #Array to keep track of the probability distribution
     Pi = []
     
-    #Loop through each flow record in the time interval
-    for rec in infile:
+    #Loop through each IP flow in the time interval
+    for key, value in numberOfPacketsPerIP.items():
         #Add the probability of the current destination flow having the size that it does to the distribution
-        Pi.append(numberOfPacketsPerIP[rec.dip]/sumOfPackets)
+        Pi.append(value/sumOfPackets)
     
     #Return the probabilities and the number of destination flows in this interval
     return Pi,len(numberOfPacketsPerIP)
@@ -147,10 +139,11 @@ def ipSourceDistribution(infile):
     #Array to keep track of the probability distribution
     Pi = []
     
-    #Loop through each flow record in the time interval
-    for rec in infile:
-        #Add the probability of the current source flow having the size that it does to the distribution
-        Pi.append(numberOfPacketsPerIP[rec.sip]/sumOfPackets)
+    #Loop through each IP flow in the time interval
+    for key, value in numberOfPacketsPerIP.items():
+        #Add the probability of the current destination flow having the size that it does to the distribution
+        Pi.append(value/sumOfPackets)
+    
     
     #Return the probabilities and the number of source flows in this interval
     return Pi,len(numberOfPacketsPerIP)
@@ -189,9 +182,9 @@ def packetSizeDistribution(egressBytes, egressPackets):
         packetSize.append(size)
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
-            numberOfPacketsOfSizei[size] += 1
+            numberOfPacketsOfSizei[size] += egressPackets[i]
         else:
-            numberOfPacketsOfSizei[size] = 1
+            numberOfPacketsOfSizei[size] = egressPackets[i]
     
     Pi = []
 
@@ -225,9 +218,9 @@ def packetSizeDistributionNetFlow(records):
         packetSize.append(size)
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
-            numberOfPacketsOfSizei[size] += 1
+            numberOfPacketsOfSizei[size] += rec.packets
         else:
-            numberOfPacketsOfSizei[size] = 1
+            numberOfPacketsOfSizei[size] = rec.packets
     
     Pi = []
 

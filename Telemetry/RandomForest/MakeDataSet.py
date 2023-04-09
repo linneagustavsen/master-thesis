@@ -20,7 +20,7 @@ from .CheckLabel import *
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
 def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate):
-    columTitles = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets","entropy_packet_size", "entropy_rate_packet_size", "label"]
+    columTitles = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets","entropy_packet_size", "entropy_rate_packet_size", "number_of_packets", "number_of_bytes", "label"]
     
     fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 

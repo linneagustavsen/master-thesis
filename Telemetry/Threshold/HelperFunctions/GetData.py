@@ -251,7 +251,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
 
     packetNumberArray = []
     bytesArray = []
-    
+
     timeArray = []
     #Instantiate counter variable
     i = 0
@@ -263,13 +263,14 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             break
         if rec.stime < startTime:
             continue
+
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
                 lastSizes += size
             thisMinuteSize = len(records) - lastSizes
             sizes.append(thisMinuteSize)
-            windowTime += frequency 
+            windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
@@ -324,7 +325,6 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-
         records.append(rec)
         
     entropy = pd.DataFrame(

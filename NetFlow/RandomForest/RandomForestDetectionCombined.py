@@ -7,11 +7,12 @@ import numpy as np
     Input:  trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
             systemId:       string, name of the system to collect and detct on  
+            interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detection are made on
 '''
-def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
+    f = open("Detections/RandomForest/NetFlow/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
@@ -22,7 +23,7 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
 
     #testingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
     testingMeasurements = np.array(testingSet.iloc[1:, 0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])
@@ -47,11 +48,12 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     Input:  trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
             systemId:       string, name of the system to collect and detect on  
+            interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detections are made on
 '''
-def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
+    f = open("Detections/RandomForest/NetFlow/AlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
@@ -63,7 +65,7 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
 
     #testingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
     testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])

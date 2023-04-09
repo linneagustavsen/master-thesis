@@ -251,12 +251,11 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
 
     packetNumberArray = []
     bytesArray = []
-    
+
     timeArray = []
     #Instantiate counter variable
     i = 0
     sizes = []
-    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -264,6 +263,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             break
         if rec.stime < startTime:
             continue
+
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -325,7 +325,6 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-
         records.append(rec)
         
     entropy = pd.DataFrame(
