@@ -64,48 +64,48 @@ field = "egress_stats__if_1sec_pkts"
 print("Finished thresholdGeneration")
 start = "2022-10-05 00:00:00"
 stop = "2022-10-06 00:00:00"
-#detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
+detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
 print("Finished detectionBytesTelemetry")
-#detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
+detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionTelemetry")
-#detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate)
+detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionMaxVar")
-#detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
+detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
 print("Finished detectionPacketsTelemetry")
 
 ###Random forest
 path = "Training"
-#trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry training")
 path = "Testing"
-#testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry testing")
-#detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestTelemetry")
-#calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestTelemetry")
 
 ###K-means
-#testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetKmeansTelemetry")
-#kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
+kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished kmeansGraphEntropy")
 #kmeansGraphCombined(testingSet, systemId, interval, attackDate)
 print("Finished kmeansGraphCombined")
 fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 #kmeansGraph(start, stop, systemId, if_name, fields, attackDate)
 print("Finished kmeansGraph")
-#detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
+detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished detectionKmeansEntropyTelemetry")
-#detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
+detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
 print("Finished detectionKmeansCombinedTelemetry")
-#detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
+detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
 print("Finished detectionKmeansTelemetry")
 
 ###Entropy
-#calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
+calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished calculationEntropyTelemetry")
-#detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
+detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
 print("Finished detectionEntropyTelemetry")
 
 baseFile="two-hours-2011-01-02_10-11-sorted.rw"         
@@ -139,38 +139,38 @@ print("Finished detectionBytesNetFlow")
 ###Random Forest
 #Combined
 path = "Training"
-#trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow training")
 path = "Testing"
-#testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
-#detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlow")
-#calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNetFlow")
 
 #Combined No IP
 path = "Training"
-#trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
 path = "Testing"
-#testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow testing")
-#detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNoIPNetFlow")
-#calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNoIPNetFlow")
 
 #Entropy
 path = "Training"
-#trainingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+trainingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlowEntropy training")
 path = "Testing"
-#testingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+testingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlowEntropy testing")
-#detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
-#calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationRandomForestNetFlowEntropy")
 
 #Fields
@@ -196,7 +196,7 @@ detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attack
 print("Finished detectionRandomForestNoIPNetFlowFields")
 calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNoIPNetFlowFields")
-
+'''
 ###K-means
 testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate)
 print("Finished makeDataSetKmeansNetFlow")
@@ -235,4 +235,4 @@ thresholdDstEntropyRate = 0.0002
 detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate)
 print("Finished detectionDst")
 detection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, thresholdDstEntropy, thresholdDstEntropyRate, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, thresholdICMPRatio, thresholdNumberOfICMPPackets, thresholdPSEntropy, thresholdPSEntropyRate, thresholdPackets, thresholdBytes, attackDate)
-print("Finished detection")
+print("Finished detection")'''
