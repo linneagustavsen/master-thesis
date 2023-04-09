@@ -34,10 +34,9 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
 
     for i in range(len(prediction)):
         timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
-        line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
         line += "," +str(int(isAttack(timestamp)))
         
         if prediction[i] == 0:
