@@ -18,9 +18,10 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
 
     df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
+    print(measurements["label"])
     
     dataSet = pd.DataFrame(measurements, columns=columTitles)
     return dataSet
@@ -44,7 +45,7 @@ def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDa
     data = np.empty((len(sTime),len(columTitles)))
 
     for i in range(len(sTime)):
-        curMeasurements = np.concatenate(measurements[i][2:-2], measurements[-1], axis=None)
+        curMeasurements = np.concatenate(measurements[i][2:-2], measurements[i][-1], axis=None)
 
         data[i] = curMeasurements
     dataSet = pd.DataFrame(data, columns=columTitles)
