@@ -24,7 +24,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     data = np.empty((len(sTime),len(columTitles)))
 
     for i in range(len(sTime)):
-        curMeasurements = np.concatenate(measurements[i][:-1], measurements[i][-1], axis=None)
+        curMeasurements = np.concatenate((measurements[i][:-1], measurements[i][-1]), axis=None)
 
         data[i] = curMeasurements
     dataSet = pd.DataFrame(data, columns=columTitles)
@@ -50,7 +50,7 @@ def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDa
     data = np.empty((len(sTime),len(columTitles)))
 
     for i in range(len(sTime)):
-        curMeasurements = np.concatenate(measurements[i][2:-2], measurements[i][-1], axis=None)
+        curMeasurements = np.concatenate((measurements[i][2:-2], measurements[i][-1]), axis=None)
 
         data[i] = curMeasurements
     dataSet = pd.DataFrame(data, columns=columTitles)
