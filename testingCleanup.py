@@ -180,7 +180,7 @@ print("Finished makeDataSetNetFlow training")
 path = "Testing"
 testingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
-detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+#detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
 calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNetFlowFields")
