@@ -15,10 +15,10 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
-    trainingLabel = np.array(trainingSet.iloc[1:,-1])
-    print(trainingSet.iloc[1:, 0:-1])
-    print(trainingSet.iloc[1:,-1])
+    trainingMeasurements = trainingSet[1:, 0:-1]
+    trainingLabel = trainingSet[1:,-1].astype('int')
+    print(trainingMeasurements)
+    print(trainingLabel)
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
