@@ -97,15 +97,15 @@ fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__c
 print("Finished kmeansGraph")
 detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished detectionKmeansEntropyTelemetry")
-detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
+#detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
 print("Finished detectionKmeansCombinedTelemetry")
-detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
+#detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
 print("Finished detectionKmeansTelemetry")
 
 ###Entropy
-calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
+#calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished calculationEntropyTelemetry")
-detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
+#detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
 print("Finished detectionEntropyTelemetry")
 
 baseFile="two-hours-2011-01-02_10-11-sorted.rw"         
@@ -196,7 +196,7 @@ detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attack
 print("Finished detectionRandomForestNoIPNetFlowFields")
 calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNoIPNetFlowFields")
-'''
+
 ###K-means
 testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate)
 print("Finished makeDataSetKmeansNetFlow")
@@ -235,4 +235,4 @@ thresholdDstEntropyRate = 0.0002
 detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate)
 print("Finished detectionDst")
 detection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, thresholdDstEntropy, thresholdDstEntropyRate, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, thresholdICMPRatio, thresholdNumberOfICMPPackets, thresholdPSEntropy, thresholdPSEntropyRate, thresholdPackets, thresholdBytes, attackDate)
-print("Finished detection")'''
+print("Finished detection")

@@ -27,17 +27,17 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
     #df.to_pickle("NetFlow/Kmeans/RawData/Testing.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/Kmeans/RawData/Testing.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
+    timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     count0 = 0 
     count1 = 0
 
     for i in range(len(prediction)):
-        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
-        line = "\n"  + timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        line += "," +str(int(isAttack(timestamp)))
+        line += "," +str(int(isAttack(timeStamps[i])))
         
         if prediction[i] == 0:
             f0.write(line)
