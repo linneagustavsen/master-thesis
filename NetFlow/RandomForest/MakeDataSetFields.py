@@ -17,11 +17,12 @@ import numpy as np
 def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
 
-    df = getDataNetFlow(silkFile, start, stop)
+    #df = getDataNetFlow(silkFile, start, stop)
     #df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
-    print(measurements["label"])
+    print(measurements)
+    print(type(measurements))
     
     dataSet = pd.DataFrame(measurements, columns=columTitles)
     return dataSet
