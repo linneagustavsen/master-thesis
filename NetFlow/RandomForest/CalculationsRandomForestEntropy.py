@@ -24,7 +24,8 @@ def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, int
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
-
+    timeStamps = pd.to_datetime(timeStamps)
+    
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
 
