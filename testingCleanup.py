@@ -64,25 +64,25 @@ field = "egress_stats__if_1sec_pkts"
 print("Finished thresholdGeneration")
 start = "2022-10-05 00:00:00"
 stop = "2022-10-06 00:00:00"
-detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
+#detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
 print("Finished detectionBytesTelemetry")
-detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
+#detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionTelemetry")
-detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate)
+#detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionMaxVar")
-detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
+#detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
 print("Finished detectionPacketsTelemetry")
 
 ###Random forest
 path = "Training"
-trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+#trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry training")
 path = "Testing"
-testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+#testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry testing")
-detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestTelemetry")
-calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestTelemetry")
 
 ###K-means

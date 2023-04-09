@@ -33,6 +33,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
     count1 = 0
 
     for i in range(len(prediction)):
+        timestamp = datetime.strptime(timeStamps[i], ("%Y-%m-%d %H:%M"))
         line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
