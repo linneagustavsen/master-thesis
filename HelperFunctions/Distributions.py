@@ -1,12 +1,12 @@
 '''
     Make a probability distribution based on how many packets there is in each bi-directional flow in a time interval
     Input:  
-            infile: list of SiLK flow records
+            records:    list of SiLK flow records
     Output:
-            Pi:     list of floats, the probability distribution
-            nf:     int, number of different bi-directional flows
+            Pi:         list of floats, the probability distribution
+            nf:         int, number of different bi-directional flows
 '''
-def flowDistribution(infile):
+def flowDistribution(records):
     #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
     numberOfPacketsPerFlow = {}
     flows = {}
@@ -14,7 +14,7 @@ def flowDistribution(infile):
     sumOfPackets = 0
 
     #Loop through each flow record in the time interval
-    for rec in infile:
+    for rec in records:
         #Define a bi-directional flow as the connection between a source and destination IP address
         flow = (rec.sip, rec.dip)
         reverse_flow = (rec.dip, rec.sip)
@@ -48,12 +48,12 @@ def flowDistribution(infile):
 '''
     Make a probability distribution based on how many packets there is in each uni-directional flow in a time interval
     Input:  
-            infile: list of SiLK flow records
+            records:    list of SiLK flow records
     Output:
-            Pi:     list of floats, the probability distribution
-            nf:     int, number of different flows
+            Pi:         list of floats, the probability distribution
+            nf:         int, number of different flows
 '''
-def uniDirFlowDistribution(infile):
+def uniDirFlowDistribution(records):
     #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
     numberOfPacketsPerFlow = {}
     flows = {}
@@ -61,7 +61,7 @@ def uniDirFlowDistribution(infile):
     sumOfPackets = 0
 
    #Loop through each flow record in the time interval
-    for rec in infile:
+    for rec in records:
         #Define a uni-directional flow as the connection between a source and destination IP address
         flow = (rec.sip, rec.dip)
 
@@ -92,19 +92,19 @@ def uniDirFlowDistribution(infile):
 '''
     Make a probability distribution based on how many packets there is in each destination flow in a time interval
     Input:  
-            infile: list of SiLK flow records
+            records:    list of SiLK flow records
     Output:
-            Pi:     list of floats, the probability distribution
-            nd:     int, number of different destination flows
+            Pi:         list of floats, the probability distribution
+            nd:         int, number of different destination flows
 '''
-def ipDestinationDistribution(infile):
+def ipDestinationDistribution(records):
     #Make dictionary for how many packets each destination flow has
     numberOfPacketsPerIP ={}
     #A variable to keep track of the total amount of packets in this time interval
     sumOfPackets = 0
 
     #Loop through each flow record in the time interval
-    for rec in infile:
+    for rec in records:
         #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
         #If it has not been encountered before it is added to the dictionary
         if rec.dip in numberOfPacketsPerIP:
@@ -127,19 +127,19 @@ def ipDestinationDistribution(infile):
 '''
     Make a probability distribution based on how many packets there is in each source flow in a time interval
     Input:  
-            infile: list of SiLK flow records
+            records:    list of SiLK flow records
     Output:
-            Pi:     list of floats, the probability distribution
-            ns:     int, number of different source flows  
+            Pi:         list of floats, the probability distribution
+            ns:         int, number of different source flows  
 '''
-def ipSourceDistribution(infile):
+def ipSourceDistribution(records):
     #Make dictionary for how many packets each destination flow has
     numberOfPacketsPerIP ={}
     #A variable to keep track of the total amount of packets in this time interval
     sumOfPackets = 0
 
    #Loop through each flow record in the time interval
-    for rec in infile:
+    for rec in records:
         #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
         #If it has not been encountered before it is added to the dictionary
         if rec.sip in numberOfPacketsPerIP:
@@ -180,7 +180,7 @@ def packetSizeDistribution(bytes, packets):
         else:
             #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
             size = int(bytes[i]/packets[i])
-        #If the size of the packet has been encountered before the number of packets with this size is increased by one
+        #If the size of the packet has been encountered before the number of packets by the number of packets
         if size in numberOfPacketsOfSizei:
             numberOfPacketsOfSizei[size] += packets[i]
         else:
@@ -198,15 +198,18 @@ def packetSizeDistribution(bytes, packets):
     return Pi, len(numberOfPacketsOfSizei)
 
 '''
-
     Make a probability distribution based on how big packets are in a time interval
-
+    Input:  
+            records:    list of SiLK flow records
+    Output:
+            Pi:         list of floats, the probability distribution
+            ns:         int, number of different packet sizes
 '''
 def packetSizeDistributionNetFlow(records):
-
+    #Make dictionary for how many packets each packet size has
     numberOfPacketsOfSizei = {}
     
-    #Loop through the measurements that is collected every 2 sec
+    #Loop through the flow records
     for rec in records:
         #If there are no packets the size is 0
         if rec.packets == 0:
@@ -214,7 +217,7 @@ def packetSizeDistributionNetFlow(records):
         else:
             #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
             size = int(rec.bytes/rec.packets)
-        #If the size of the packet has been encountered before the number of packets with this size is increased by one
+        #If the size of the packet has been encountered before the number of packets with this size is increased by the number of packets
         if size in numberOfPacketsOfSizei:
             numberOfPacketsOfSizei[size] += rec.packets
         else:
@@ -233,9 +236,12 @@ def packetSizeDistributionNetFlow(records):
 
 
 '''
-
-    Calculates the ratio of ICMP packets in a time interval
-
+    Calculates the ratio of ICMP packets and number of ICMP packets in a time interval
+    Input:  
+            records:        list of SiLK flow records
+    Output:
+            ICMP ratio:     float, the ratio
+            icmpPackets:    int, number of ICMP packets in the time interval
 '''
 
 def icmpDistribution(records):
@@ -244,18 +250,22 @@ def icmpDistribution(records):
 
     #Loop through the flow records in a time interval
     for rec in records:
-        #Check if the flow is an ICMP protocol
+        #Check if the flow is of the ICMP protocol
         #If it is we count up the packets in the flow
         if rec.protocol == 1 or rec.protocol == 58:
             icmpPackets += rec.packets
         else:
             packets += rec.packets
 
-    #Return the ratio of ICMP packets to the number of packets of other protocols
+    #Return the ratio of ICMP packets to the number of packets of other protocols and the number of ICMP packets
     return icmpPackets/packets, icmpPackets
 
 '''
     Returns the number of packets in an input array of records
+    Input:  
+            records:    list of SiLK flow records
+    Output:
+            np:         int, number of packets in the time interval
 '''
 
 def numberOfPackets(records):
@@ -268,12 +278,16 @@ def numberOfPackets(records):
 
 '''
     Returns the number of bytes in an input array of records
+    Input:  
+            records:    list of SiLK flow records
+    Output:
+            nb:         int, number of bytes in the time interval
 '''
 
 def numberOfBytes(records):
-    np = 0
+    nb = 0
 
     for rec in records:
-        np+= rec.bytes
+        nb+= rec.bytes
 
-    return np
+    return nb

@@ -3,7 +3,6 @@ from NetFlow.RandomForest.CalculationsRandomForestEntropy import calculationRand
 from NetFlow.RandomForest.CalculationsRandomForestFields import calculationRandomForestNetFlowFields, calculationRandomForestNoIPNetFlowFields
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.RandomForest.RandomForestDetection import detectionRandomForestNetFlowFields, detectionRandomForestNoIPNetFlowFields
-
 from NetFlow.RandomForest.RandomForestDetectionEntropy import detectionRandomForestNetFlowEntropy
 from NetFlow.Entropy.Detection import detection
 from NetFlow.Entropy.DstDetection import detectionDst
@@ -61,52 +60,52 @@ thresholdBytes = 1000
 threshold = 5
 field = "egress_stats__if_1sec_pkts"
 ###Threshold
-thresholdGeneration(systemId, if_name, field, start, stop)
+#thresholdGeneration(systemId, if_name, field, start, stop)
 print("Finished thresholdGeneration")
 start = "2022-10-05 00:00:00"
 stop = "2022-10-06 00:00:00"
-detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
+#detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate)
 print("Finished detectionBytesTelemetry")
-detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
+#detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionTelemetry")
-detectionMaxVar(start, stop, systemId, if_name, field, attackDate)
+#detectionMaxVar(start, stop, systemId, if_name, field, attackDate)
 print("Finished detectionMaxVar")
-detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
+#detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
 print("Finished detectionPacketsTelemetry")
 
 ###Random forest
 path = "Training"
-trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+#trainingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry training")
 path = "Testing"
-testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+#testingSet = makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetRandomForestTelemetry testing")
-detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestTelemetry")
-calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestTelemetry")
 
 ###K-means
-testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+#testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetKmeansTelemetry")
-kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
+#kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished kmeansGraphEntropy")
-kmeansGraphCombined(testingSet, systemId, interval, attackDate)
+#kmeansGraphCombined(testingSet, systemId, interval, attackDate)
 print("Finished kmeansGraphCombined")
 fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
-kmeansGraph(start, stop, systemId, if_name, fields, attackDate)
+#kmeansGraph(start, stop, systemId, if_name, fields, attackDate)
 print("Finished kmeansGraph")
-detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
+#detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished detectionKmeansEntropyTelemetry")
-detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
+#detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
 print("Finished detectionKmeansCombinedTelemetry")
-detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
+#detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
 print("Finished detectionKmeansTelemetry")
 
 ###Entropy
-calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
+#calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished calculationEntropyTelemetry")
-detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
+#detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
 print("Finished detectionEntropyTelemetry")
 
 baseFile="two-hours-2011-01-02_10-11-sorted.rw"         
@@ -119,22 +118,22 @@ pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
 attackDate="02.01"
 ###Threshold
 silkFile = pathToRawFiles + baseFile
-synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate)
+#synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate)
 print("Finished synDetection")
-synCalculation(silkFile, start, stop, systemId, attackDate)
+#synCalculation(silkFile, start, stop, systemId, attackDate)
 print("Finished synCalculation")
-detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate)
+#detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate)
 print("Finished detectionPacketsNetFlow")
 threshold = 50
-icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, threshold, attackDate)
+#icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, threshold, attackDate)
 print("Finished icmpDstUnreachableDetection")
-icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
+#icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
 print("Finished icmpDstUnreachableCalculation")
 thresholdICMPRatio = 0.01
 thresholdNumberOfICMPPackets = 600
-detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate)
+#detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate)
 print("Finished detectionICMP")
-detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate)
+#detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate)
 print("Finished detectionBytesNetFlow")
 
 ###Random Forest

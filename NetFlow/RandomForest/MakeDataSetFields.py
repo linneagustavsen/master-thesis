@@ -35,7 +35,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, path, attackDate):
+def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "label"]    
     df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle("NetFlow/RandomForest/RawData/NoIP"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
