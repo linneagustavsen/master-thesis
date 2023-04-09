@@ -26,8 +26,8 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
-    testingMeasurements = np.array(testingSet.iloc[1:, 0:-1])
-    testingLabel = np.array(testingSet.iloc[1:,-1])
+    testingMeasurements = np.array(testingSet.values[:, 0:-1])
+    testingLabel = np.array(testingSet.values[:,-1].astype('int'))
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
