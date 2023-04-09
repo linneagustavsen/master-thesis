@@ -5,8 +5,9 @@ from datetime import datetime,timedelta
 import numpy as np
 
 '''
-    Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  silkFile:                       string, File with flow records sorted on time
+    Calculates source IP entropy and entropy rate and alerts in case of an anomaly
+    Input:  
+            silkFile:                       string, file with flow records sorted on time
             start:                          string, indicating the start time of the data wanted
             stop:                           string, indicating the stop time of the data wanted
             systemId:                       string, name of the system to collect and calculate on
@@ -18,7 +19,7 @@ import numpy as np
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate):
-    #Open file to write alerts to
+    #Open files to write alerts to
     srcEntropyFile = open("Detections/Entropy/NetFlow/SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     srcEntropyRateFile = open("Detections/Entropy/NetFlow/SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
@@ -26,7 +27,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     srcEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     srcEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -40,7 +41,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     ipSrcArray = []
     ipSrcRateArray = []
 
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -50,6 +51,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -59,7 +61,6 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
-
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
@@ -68,7 +69,6 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
             #Calculate the generalized entropy rate of this distribution
             ipSrcRateArray.append(entropySip/ns)
 
-            
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
                 if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])) > thresholdSrcEntropy:
@@ -77,7 +77,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])) > thresholdSrcEntropyRate:
                     srcEntropyRateFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1])))
 
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

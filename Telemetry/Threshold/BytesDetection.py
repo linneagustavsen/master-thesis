@@ -27,7 +27,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
     #Instantiate empty arrays for the calculated values
     bytesArray = []
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -62,7 +62,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
         #Compare the difference of each metric with a threshold
         if bytesArray !=  np.nan:
             if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
-                f_bytes.write("\n" + str(startTime) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+                f_bytes.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
 
         #Push the start time by the specified frequency
         startTime = startTime + frequency

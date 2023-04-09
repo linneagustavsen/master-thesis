@@ -6,7 +6,7 @@ import numpy as np
 
 '''
     Calculates entropy and alerts in case of an anomaly
-    Input:  silkFile:       string, File with flow records sorted on time
+    Input:  silkFile:       string, file with flow records sorted on time
             start:          string, indicating the start time of the data wanted
             stop:           string, indicating the stop time of the data wanted
             systemId:       string, name of the system to collect and calculate on
@@ -29,7 +29,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
     dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     flowEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -52,6 +52,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -103,7 +104,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                     output_file = eval(data_type.capitalize() + "EntropyFile")
                     check_threshold(entropy_data[i], avg_entropy_data, threshold, output_file)
                 '''
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

@@ -26,7 +26,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
     #Instantiate empty arrays for the calculated values
     packetNumberArray = []
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -62,7 +62,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
         #Compare the difference of each metric with a threshold
         if packetNumberArray !=  np.nan:
             if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                f_pkts.write("\n" + str(startTime) + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+                f_pkts.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
 
         #Push the start time by the specified frequency
         startTime = startTime + frequency

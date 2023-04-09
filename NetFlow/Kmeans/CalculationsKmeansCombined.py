@@ -7,7 +7,8 @@ from HelperFunctions.StructureData import *
 
 '''
     Do K-means clustering on entropy and field data and write clusters to file
-    Input:  testingSet: pandas dataframe, data set to detect on
+    Input:  
+            testingSet: pandas dataframe, data set to detect on
             systemId:   string, name of the system to collect and calculate on
             interval:   timedelta object, size of the sliding window which the calculation is made on
             attackDate: string, date of the attack the calculations are made on
@@ -18,7 +19,6 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     f0.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     f1.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
-    #df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataEntropy(testingSet)
     measurements = measurements[:, :-1]
     label = measurements[:,-1]
@@ -30,6 +30,7 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     for i in range(len(prediction)):
         line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for j in range(len(measurements[i])):
+            #Skip the IP fields
             if j == 0 or j == 1 or j == 16:
                 continue
             line += "," + str(measurements[i][j])

@@ -1,12 +1,13 @@
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime,timedelta
+from datetime import datetime
 import numpy as np
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  silkFile:                       string, File with flow records sorted on time
+    Input:  
+            silkFile:                       string, file with flow records sorted on time
             start:                          string, indicating the start time of the data wanted
             stop:                           string, indicating the stop time of the data wanted
             systemId:                       string, name of the system to collect and calculate on
@@ -59,7 +60,7 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
     packetsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     bytesFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -89,7 +90,7 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
     
     packetNumberArray = []
     bytesArray = []
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -99,6 +100,7 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -108,7 +110,6 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime >= startTime + interval:
-
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
@@ -136,7 +137,7 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             #Store the number of bi-directional flows in this time interval
             numberOfFlows.append(nf)
 
-            #Find the ratio of ICMP packets in this time interval
+            #Find the ratio of ICMP packets and number of ICMP packets in this time interval
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
@@ -146,10 +147,8 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             packetSizeArray.append(entropyPacketSize)
-
             #Calculate the generalized entropy rate of this distribution
-            entropyRatePacketSize = entropyPacketSize/nd
-            packetSizeRateArray.append(entropyRatePacketSize)
+            packetSizeRateArray.append(entropyPacketSize/nd)
 
             #Store the number of packets and bytes this time interval
             packetNumberArray.append(numberOfPackets(records))
@@ -210,13 +209,12 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
                     if abs(array[i] - np.nanmean(array[i-windowSize: i-1])) > threshold:
                         file.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(array[i] - np.nanmean(array[i-windowSize: i-1]))) + "," + str(array[i]) + "," + str(np.nanmean(array[i-windowSize: i-1])))
                 '''
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
         records.append(rec)
-    
            
     srcEntropyFile.close()
     srcEntropyRateFile.close()

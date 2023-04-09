@@ -6,7 +6,7 @@ import numpy as np
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
@@ -17,9 +17,9 @@ import numpy as np
 def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
 
-    #df = getDataNetFlow(silkFile, start, stop)
-    #df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df = getDataNetFlow(silkFile, start, stop)
+    df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
@@ -33,7 +33,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on

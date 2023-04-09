@@ -68,7 +68,7 @@ stop = "2022-10-06 00:00:00"
 print("Finished detectionBytesTelemetry")
 #detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionTelemetry")
-#detectionMaxVar(start, stop, systemId, if_name, field, attackDate)
+#detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate)
 print("Finished detectionMaxVar")
 #detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate)
 print("Finished detectionPacketsTelemetry")

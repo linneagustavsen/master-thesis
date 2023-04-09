@@ -1,12 +1,13 @@
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime,timedelta
+from datetime import datetime
 import numpy as np
 
 '''
-    Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  silkFile:                       string, File with flow records sorted on time
+    Calculates destination IP entropy and entropy rate and alerts in case of an anomaly
+    Input:  
+            silkFile:                       string, file with flow records sorted on time
             start:                          string, indicating the start time of the data wanted
             stop:                           string, indicating the stop time of the data wanted
             systemId:                       string, name of the system to collect and calculate on
@@ -18,7 +19,7 @@ import numpy as np
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate):
-    #Open file to write alerts to
+    #Open files to write alerts to
     dstEntropyFile = open("Detections/Entropy/NetFlow/DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     dstEntropyRateFile = open("Detections/Entropy/NetFlow/DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
@@ -26,7 +27,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     dstEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -40,7 +41,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     ipDstArray = []
     ipDstRateArray = []
 
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -50,6 +51,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -75,7 +77,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])) >  thresholdDstEntropyRate:
                     dstEntropyRateFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1])))
 
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
@@ -83,7 +85,6 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
 
         records.append(rec)
     
-
     dstEntropyFile.close()
     dstEntropyRateFile.close()
     

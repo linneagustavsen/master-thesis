@@ -4,7 +4,7 @@ from HelperFunctions.StructureData import *
 
 '''
     Do K-means clustering on entropy data and write clusters to file
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
@@ -19,8 +19,6 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     f1.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
     df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    #df.to_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/Kmeans/RawData/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataEntropy(df)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)

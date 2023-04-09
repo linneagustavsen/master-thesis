@@ -9,12 +9,14 @@ from .IsAttack import *
 
 '''
     Get data from an InfluxDB
-    Input:  start:      datetime object, indicating the start time of the data wanted
+    Input:  
+            start:      datetime object, indicating the start time of the data wanted
             stop:       datetime object, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect from
             if_name:    string, interface name,
             fields:     list of strings, the fields to get from the database
-    Output: df:         pandas dataframe, dataframe containing the data from the database
+    Output: 
+            df:         pandas dataframe, dataframe containing the data from the database
 '''
 def getData(start, stop, systemId, if_name, fields):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
@@ -50,12 +52,14 @@ def getData(start, stop, systemId, if_name, fields):
 
 '''
     Get data from an InfluxDB
-    Input:  start:      datetime object, indicating the start time of the data wanted
+    Input:  
+            start:      datetime object, indicating the start time of the data wanted
             stop:       datetime object, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect from
             if_name:    string, interface name,
             field:      string, the field to get from the database
-    Output: tables:     flux table list, table containing the data from the database
+    Output: 
+            tables:     flux table list, table containing the data from the database
 '''
 def getDataTables(start, stop, systemId, if_name, field):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
@@ -79,11 +83,13 @@ def getDataTables(start, stop, systemId, if_name, field):
 '''
     Get data from an InfluxDB
     Use the data to calculate the entropy and entropy rate of packet size
-    Input:  start:      datetime object, indicating the start time of the data wanted
+    Input:  
+            start:      datetime object, indicating the start time of the data wanted
             stop:       datetime object, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect from
             if_name:    string, interface name,
-    Output: entropy:    pandas dataframe, dataframe containing the entropy of packet size and the entropy rate of packet size
+    Output: 
+            entropy:    pandas dataframe, dataframe containing the entropy of packet size and the entropy rate of packet size
 '''
 def getEntropyData(start, stop, systemId, if_name, interval, frequency):
     intervalTime = (stop - start).total_seconds()/frequency.total_seconds()
@@ -131,10 +137,12 @@ def getEntropyData(start, stop, systemId, if_name, interval, frequency):
 
 '''
     Get data from an raw SiLK file of NetFlow records
-    Input:  silkFile:   string, path to the raw SiLK file sorted on time
+    Input:  
+            silkFile:   string, path to the raw SiLK file sorted on time
             start:      datetime object, indicating the start time of the data wanted
             stop:       datetime object, indicating the stop time of the data wanted
-    Output: df:         pandas dataframe, dataframe containing the data from the SiLK file 
+    Output: 
+            df:         pandas dataframe, dataframe containing the data from the SiLK file 
 '''
 def getDataNetFlow(silkFile, start, stop):
     infile = silkfile_open(silkFile, READ)
@@ -213,16 +221,19 @@ def getDataNetFlow(silkFile, start, stop):
     return data
 
 '''
-    Get entropy data from an raw SiLK file of NetFlow records
-    Input:  silkFile:   string, path to the raw SiLK file sorted on time
+    Get data from an raw SiLK file of NetFlow records
+    Use the data to calculate the entropy and entropy rate of packet size
+    Input:  
+            silkFile:   string, path to the raw SiLK file sorted on time
             start:      datetime object, indicating the start time of the data wanted
             stop:       datetime object, indicating the stop time of the data wanted
             frequency:  timedelta object, frequency of entropy calculation
             interval:   timedelta object, size of the sliding window which the calculation is made on
-    Output: df:         pandas dataframe, dataframe containing the data from the SiLK file 
+    Output: 
+            df:         pandas dataframe, dataframe containing the data from the SiLK file 
 '''
 def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -253,7 +264,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     bytesArray = []
 
     timeArray = []
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -264,6 +275,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
         if rec.stime < startTime:
             continue
 
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -320,7 +332,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             bytesArray.append(numberOfBytes(records))
 
             timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

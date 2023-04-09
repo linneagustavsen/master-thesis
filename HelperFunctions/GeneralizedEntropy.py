@@ -1,9 +1,11 @@
 import math
 '''
-
-    Input:  alpha:  int, the alpha
-            Pi:     list of floats, probabilities
-    Output: float, Generalized entropy of Pi
+    Calculates the generalized entropy of a probability distribution
+    Input:  
+            alpha:      int, the alpha
+            Pi:         list of floats, probabilities
+    Output: 
+            entropy:    float, Generalized entropy of Pi
 
 '''
 def generalizedEntropy(alpha, Pi):

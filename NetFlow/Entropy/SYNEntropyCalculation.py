@@ -7,7 +7,7 @@ from HelperFunctions.IsAttack import *
 '''
     Calculates entropy on TCP SYN packets and writes it to file
     Input:  
-            silkFile:   string, File with flow records sorted on time
+            silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
@@ -24,7 +24,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     calculations.write("Time,srcEntropy,dstEntropy,flowEntropy")
     attackFlows.write("sTime,eTime")
     
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -47,6 +47,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -76,7 +77,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             
             calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(entropyOfSynPacketsPerSrc[i]) 
                             + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

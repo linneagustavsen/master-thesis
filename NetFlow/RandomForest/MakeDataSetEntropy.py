@@ -6,7 +6,7 @@ import numpy as np
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on

@@ -10,6 +10,7 @@ from NetFlow.RandomForest.CalculationsRandomForestEntropy import calculationRand
 from NetFlow.RandomForest.CalculationsRandomForestFields import calculationRandomForestNetFlowFields, calculationRandomForestNoIPNetFlowFields
 from NetFlow.RandomForest.MakeDataSet import *
 from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
+from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
 
@@ -138,13 +139,13 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations on entropy")
 
-        trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
-        testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
+        trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
+        testingSet = makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
         calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
         print("Finished Random Forest calculations on fields")
 
-        trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
-        testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
+        trainingSet = makeDataSetNoIPNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
+        testingSet = makeDataSetNoIPNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
         calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
         print("Finished Random Forest calculations on fields without IPs")
 

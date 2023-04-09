@@ -49,9 +49,6 @@ def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, f
     
     for i in range(len(timeStamps)):
         timestamp = timeStamps[i]
-        if i % 10000 == 0:
-            print(timestamp)
-            print(data[i-1])
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day

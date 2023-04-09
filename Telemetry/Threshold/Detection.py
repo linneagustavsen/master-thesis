@@ -4,7 +4,8 @@ from HelperFunctions.GetData import *
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
-    Input:  systemId:   string, name of the system to collect and calculate on,
+    Input:  
+            systemId:   string, name of the system to collect and calculate on,
             if_name:    string, interface name,
             field:      string, what field to detect on
             start:      string, indicates the start time of the testing period
@@ -35,7 +36,7 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
             deviation = (row.values["_value"]- mean_row)/variance_row
 
             if deviation > threshold:
-                f.write("\n"  + str(row.values["_time"]) + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(variance_row))
+                f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(variance_row))
     f.close()
 
 '''detectionTelemetry("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts" ,"2022-09-21 01:00:00", "2022-09-22 00:00:00", 5)

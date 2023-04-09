@@ -38,7 +38,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     packetNumberArray = []
     bytesArray = []
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -91,19 +91,19 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
             if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
-                f.write("\n" + str(startTime) + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
+                f.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
 
         if packetSizeRateArray !=  np.nan:
             if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
-                f_rate.write("\n" + str(startTime) + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
+                f_rate.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
 
         if packetNumberArray !=  np.nan:
             if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                f_pkts.write("\n" + str(startTime) + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+                f_pkts.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
 
         if bytesArray !=  np.nan:
             if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
-                f_bytes.write("\n" + str(startTime) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+                f_bytes.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
 
         '''
         #CHATGPT VERSION
@@ -120,7 +120,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
         for arr, threshold, file_obj in data:
             if arr is not None and not np.isnan(arr):
                 if abs(arr[i] - np.nanmean(arr[i-windowSize:i-1])) > threshold:
-                    file_obj.write("\n" + str(startTime) + "," + str(abs(arr[i] - np.nanmean(arr[i-windowSize:i-1]))) + "," + str(arr[i]) + "," + str(np.nanmean(arr[i-windowSize:i-1])))
+                    file_obj.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(arr[i] - np.nanmean(arr[i-windowSize:i-1]))) + "," + str(arr[i]) + "," + str(np.nanmean(arr[i-windowSize:i-1])))
 
         '''
 

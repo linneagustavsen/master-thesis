@@ -4,7 +4,7 @@ import numpy as np
 
 '''
     Calculates the number of SYN packets in a flow and alerts in case of an anomaly
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, start time of detection 
             stop:       string, stop time of detection 
             systemId:   string, name of the system to calculate on
@@ -27,7 +27,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     #Instantiate empty arrays for the calculated values
     synPacketsPerFlow = []
     
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
 
     #Loop through all the flow records

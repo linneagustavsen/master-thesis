@@ -1,12 +1,13 @@
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime,timedelta
+from datetime import datetime
 from HelperFunctions.IsAttack import *
 
 '''
     Calculates entropy and other metrics and write them to file. Also checks if the flow is an attack flow
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  
+            silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
@@ -15,7 +16,7 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
-    #Open file to write alerts to
+    #Open files to write alerts to
     calculations = open("Calculations/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open("Calculations/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
@@ -23,10 +24,11 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
     attackFlows.write("sTime,eTime")
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
+
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
@@ -52,7 +54,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
 
     packetNumberArray = []
     bytesArray = []
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -62,6 +64,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -122,11 +125,12 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
                                + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
                                + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
                                + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]))
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
+        #Check if it is an attack flow
         if isAttackFlow(rec.sip, rec.dip):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
@@ -135,5 +139,4 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     calculations.close()
     attackFlows.close()
      
-
     infile.close()

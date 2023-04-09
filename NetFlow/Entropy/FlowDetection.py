@@ -1,12 +1,13 @@
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime,timedelta
+from datetime import datetime
 import numpy as np
 
 '''
-    Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  silkFile:                       string, File with flow records sorted on time
+    Calculates bi-directional flow entropy and entropy rate and alerts in case of an anomaly
+    Input:  
+            silkFile:                       string, file with flow records sorted on time
             start:                          string, indicating the start time of the data wanted
             stop:                           string, indicating the stop time of the data wanted
             systemId:                       string, name of the system to collect and calculate on
@@ -19,7 +20,7 @@ import numpy as np
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, attackDate):
-    #Open file to write alerts to
+    #Open files to write alerts to
     flowEntropyFile = open("Detections/Entropy/NetFlow/FlowEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     flowEntropyRateFile = open("Detections/Entropy/NetFlow/FlowEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     flowFile = open("Detections/Threshold/NetFlow/NumberOfFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -29,7 +30,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
     flowEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     flowFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -45,7 +46,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
 
     numberOfFlows = []
 
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -55,6 +56,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -86,7 +88,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                 if abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1])) > thresholdNumberOfFlows:
                     flowFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-windowSize: i-1])))
                  
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

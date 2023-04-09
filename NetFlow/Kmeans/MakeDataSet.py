@@ -6,14 +6,16 @@ import pandas as pd
 
 '''
     Make a dataset to use for testing a K-means clustering algorithm
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  
+            silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
             frequency:  timedelta object, frequency of metric calculation
             interval:   timedelta object, size of the sliding window which the calculation is made on
             attackDate: string, date of the attack the calculations are made on
-    Output: dataSet:    pandas dataframe, contains the dataset         
+    Output: 
+            dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]

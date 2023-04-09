@@ -4,7 +4,7 @@ from HelperFunctions.GeneralizedEntropy import *
 
 '''
     Calculates entropy and other metrics and write them to file. Also checks if the flow is an attack flow
-    Input:  silkFile:   string, File with flow records sorted on time, 
+    Input:  silkFile:   string, file with flow records sorted on time, 
             week:       int, what week number this calculation is for
 '''
 def weeklyMetricCalculation(silkFile, week):

@@ -6,7 +6,7 @@ import numpy as np
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
-    Input:  silkFile:                       string, File with flow records sorted on time
+    Input:  silkFile:                       string, file with flow records sorted on time
             start:                          string, indicating the start time of the data wanted
             stop:                           string, indicating the stop time of the data wanted
             systemId:                       string, name of the system to collect and calculate on
@@ -23,7 +23,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
     #Write the column titles to the files
     packetsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -36,7 +36,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
     
     packetNumberArray = []
 
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -46,6 +46,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -63,7 +64,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                 if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
                     packetsFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
                 
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

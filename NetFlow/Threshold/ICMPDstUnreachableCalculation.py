@@ -5,7 +5,7 @@ from HelperFunctions.IsAttack import *
 
 '''
     Calculates the number of ICMP destination unreachable packets in a flow and writes all values to file
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, start time of detection 
             stop:       string, stop time of detection 
             systemId:   string, name of the system to calculate on
@@ -33,7 +33,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
 
     numberOfIcmpDstUnreachablePackets = []
 
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
    
@@ -42,6 +42,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -56,7 +57,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             
             calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
             
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

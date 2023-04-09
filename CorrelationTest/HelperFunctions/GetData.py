@@ -222,7 +222,7 @@ def getDataNetFlow(silkFile, start, stop):
     Output: df:         pandas dataframe, dataframe containing the data from the SiLK file 
 '''
 def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -253,7 +253,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     bytesArray = []
     
     timeArray = []
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -264,6 +264,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
         if rec.stime < startTime:
             continue
         
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -320,7 +321,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             bytesArray.append(numberOfBytes(records))
 
             timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)

@@ -5,7 +5,8 @@ from datetime import timedelta,datetime
 
 '''
     Detect anomalies based on a random forest classifier
-    Input:  trainingSet:    pandas dataframe, training data set
+    Input:  
+            trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
             systemId:       string, name of the system to collect and calculate on  
             interval:       timedelta object, size of the sliding window which the calculation is made on
@@ -13,9 +14,10 @@ from datetime import timedelta,datetime
 '''
 def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate):
     f = open("Calculations/RandomForest/Telemetry/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_not = open("Calculations/RandomForest/Telemetry/NotAlerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
+    f_not.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    #trainingSet = pd.read_pickle("Telemetry/RandomForest/Data/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[1:,-1])
 
@@ -25,7 +27,6 @@ def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interva
 
     timeStamps = pd.read_pickle("Telemetry/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
     
-    #testingSet = pd.read_pickle("Telemetry/RandomForest/Data/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])
 
@@ -33,13 +34,20 @@ def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interva
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            line = "\n"  + str(timeStamps[i])
+            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(testingMeasurements[i])):
                 line += "," + str(testingMeasurements[i][j])
             line += "," +str(testingLabel[i])
             f.write(line)
+        if predictions[i] == 0:
+            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for j in range(len(testingMeasurements[i])):
+                line += "," + str(testingMeasurements[i][j])
+            line += "," +str(testingLabel[i])
+            f_not.write(line)
 
     f.close()
+    f_not.close()
 
 '''
 trainingSet = "Telemetry/RandomForest/Data/TrainingSet.pkl"

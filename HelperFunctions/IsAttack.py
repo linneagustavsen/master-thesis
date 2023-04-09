@@ -17,12 +17,27 @@ ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
 victim = trondheim_mp
 attackTimestamps = []
 
+'''
+    Checks whether a flow is an attack flow or not
+    Input:
+            sip:    SiLK IPv4Addr object, the source IP of the flow record
+            dip:    SiLK IPv4Addr object, the destination IP of the flow record
+    Output:
+                    boolean, whether the flow is an attack flow or not
+'''
 def isAttackFlow(sip, dip):
     if (sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses):
         return True
     else:
         return False
 
+'''
+    Checks whether a flow is an attack flow or not
+    Input:
+            timeStamp:  datetime object, the timestamp of a potential attack period
+    Output:
+                        boolean, whether the flow is an attack flow or not
+'''
 def isAttack(timeStamp):
     if timeStamp in attackTimestamps:
         return True

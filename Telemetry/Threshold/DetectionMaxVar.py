@@ -5,15 +5,17 @@ from .FindMaxVar import *
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
-    Input:  start:      string, indicates the start time of the testing period,
-            stop:       string, indicates the stop time of the testing period
+    Input:  
             systemId:   string, name of the system to collect and calculate on,
             if_name:    string, interface name,
-            field:      string, what field to make a threshold for,
+            field:      string, what field to detect on
+            start:      string, indicates the start time of the testing period
+            stop:       string, indicates the stop time of the testing period
+            threshold:  int, threshold for when to alert
             attackDate: string, date of the attack to detect
             
 '''
-def detectionMaxVar(start, stop, systemId, if_name, field, attackDate):
+def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate):
     #Open json file with threshold values
     json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
@@ -36,8 +38,8 @@ def detectionMaxVar(start, stop, systemId, if_name, field, attackDate):
             
             deviation = (row.values["_value"]- mean_row)/maxVar
 
-            if deviation > 2:
-                f.write("\n"  + str(row.values["_time"]) + "," + str(deviation) + "," +str( row.values["_value"]) + ","+str(mean_row) + "," +str( maxVar))
+            if deviation > threshold:
+                f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str( row.values["_value"]) + ","+str(mean_row) + "," +str( maxVar))
     f.close()
 
 '''detectionMaxVar("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts" ,"2022-09-21 01:00:00", "2022-09-22 00:00:00")

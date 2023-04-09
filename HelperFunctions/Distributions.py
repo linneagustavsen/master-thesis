@@ -243,7 +243,6 @@ def packetSizeDistributionNetFlow(records):
             ICMP ratio:     float, the ratio
             icmpPackets:    int, number of ICMP packets in the time interval
 '''
-
 def icmpDistribution(records):
     icmpPackets = 0
     packets = 0
@@ -267,7 +266,6 @@ def icmpDistribution(records):
     Output:
             np:         int, number of packets in the time interval
 '''
-
 def numberOfPackets(records):
     np = 0
 
@@ -283,7 +281,6 @@ def numberOfPackets(records):
     Output:
             nb:         int, number of bytes in the time interval
 '''
-
 def numberOfBytes(records):
     nb = 0
 

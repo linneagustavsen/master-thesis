@@ -4,7 +4,7 @@ from HelperFunctions.IsAttack import *
 
 '''
     Calculates the number of SYN packets in a flow and writes all values over 1 to file
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, start time of detection 
             stop:       string, stop time of detection 
             systemId:   string, name of the system to calculate on
@@ -26,7 +26,7 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Instantiate empty arrays for the calculated values
     synPacketsPerFlow = []
     
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
 
     #Loop through all the flow records

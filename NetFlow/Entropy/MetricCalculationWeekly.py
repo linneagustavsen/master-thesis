@@ -8,7 +8,7 @@ import json
     Calculates entropy and other metrics and for every minute of a week. 
     Uses a sliding window to calculate the entropy
     Stores the values in a json structure based on weekday, hour and minute.
-    Input:  silkFile:   string, File with flow records sorted on time
+    Input:  silkFile:   string, file with flow records sorted on time
             start:      string, indicating the start time of the data wanted
             stop:       string, indicating the stop time of the data wanted
             systemId:   string, name of the system to collect and calculate on
@@ -38,7 +38,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     json_object_raw_icmp_packets = json.load(json_file)
     json_file.close()
 
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -48,7 +48,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     #Instantiate empty arrays for the calculated values
     records = []
     
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
 
@@ -58,6 +58,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes = 0
             for size in sizes:
@@ -95,7 +96,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             json_object_raw_icmp_ratio["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(icmpRatio)
             json_object_raw_icmp_packets["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(icmpPackets)
 
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
