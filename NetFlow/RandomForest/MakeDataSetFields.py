@@ -21,11 +21,14 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     #df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
-    print(measurements)
-    print(type(measurements))
+    data = np.empty((len(sTime),len(columTitles)))
+
+    for i in range(len(sTime)):
+        curMeasurements = np.concatenate(measurements[i][:-1], measurements[i][-1], axis=None)
+
+        data[i] = curMeasurements
+    dataSet = pd.DataFrame(data, columns=columTitles)
     
-    dataSet = pd.DataFrame(measurements, columns=columTitles)
-    print(dataSet)
     return dataSet
 
 '''

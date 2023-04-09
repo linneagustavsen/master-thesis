@@ -17,9 +17,7 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, inter
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[:,-1])
-    print(trainingMeasurements)
-    print(trainingLabel)
-    print(type(trainingLabel[0]))
+
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
