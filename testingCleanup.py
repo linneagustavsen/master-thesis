@@ -139,26 +139,26 @@ print("Finished detectionBytesNetFlow")
 ###Random Forest
 #Combined
 path = "Training"
-trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
-detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlow")
-calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNetFlow")
 
 #Combined No IP
 path = "Training"
-trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow testing")
-detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNoIPNetFlow")
-calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNoIPNetFlow")
 
 #Entropy
