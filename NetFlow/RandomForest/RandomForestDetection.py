@@ -4,7 +4,8 @@ import numpy as np
 
 '''
     Detect anomalies based on a random forest classifier and write them to file
-    Input:  trainingSet:    pandas dataframe, training data set
+    Input:  
+            trainingSet:    pandas dataframe, training data set
             testingSet:     pandas dataframe, testing data set
             systemId:       string, name of the system to collect and detct on  
             attackDate:     string, date of the attack the detection are made on
@@ -16,7 +17,8 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[1:,-1])
-
+    print(trainingSet.iloc[1:, 0:-1])
+    print(trainingSet.iloc[1:,-1])
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 

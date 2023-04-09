@@ -25,6 +25,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     print(type(measurements))
     
     dataSet = pd.DataFrame(measurements, columns=columTitles)
+    print(dataSet)
     return dataSet
 
 '''
