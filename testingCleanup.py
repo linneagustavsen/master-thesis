@@ -139,60 +139,60 @@ print("Finished detectionBytesNetFlow")
 ###Random Forest
 #Combined
 path = "Training"
-trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
-detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlow")
-calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNetFlow")
 
 #Combined No IP
 path = "Training"
-trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#trainingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#testingSet = makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow testing")
-detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNoIPNetFlow")
-calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationsRandomForestNoIPNetFlow")
 
 #Entropy
 path = "Training"
-trainingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#trainingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlowEntropy training")
 path = "Testing"
-testingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+#testingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlowEntropy testing")
-detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
-calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+#calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationRandomForestNetFlowEntropy")
 
 #Fields
 path = "Training"
-trainingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+trainingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+testingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
-detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
 calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNetFlowFields")
 
 #Fields no IP
 path = "Training"
-trainingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+trainingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
+testingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow testing")
-detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, interval, attackDate)
+detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished detectionRandomForestNoIPNetFlowFields")
 calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNoIPNetFlowFields")
