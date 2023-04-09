@@ -168,7 +168,7 @@ print("Finished makeDataSetNetFlowEntropy training")
 path = "Testing"
 testingSet = makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate)
 print("Finished makeDataSetNetFlowEntropy testing")
-detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+#detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
 calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
 print("Finished calculationRandomForestNetFlowEntropy")
