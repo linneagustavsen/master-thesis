@@ -24,7 +24,7 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
-    
+
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
 

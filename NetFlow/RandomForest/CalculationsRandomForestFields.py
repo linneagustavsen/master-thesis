@@ -21,6 +21,7 @@ def calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, atta
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
@@ -64,7 +65,8 @@ def calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, 
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-
+    timeStamps = pd.to_datetime(timeStamps)
+    
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
 
