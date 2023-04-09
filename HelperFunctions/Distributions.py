@@ -1,7 +1,10 @@
 '''
-
     Make a probability distribution based on how many packets there is in each bi-directional flow in a time interval
-
+    Input:  
+            infile: list of SiLK flow records
+    Output:
+            Pi:     list of floats, the probability distribution
+            nf:     int, number of different bi-directional flows
 '''
 def flowDistribution(infile):
     #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
@@ -43,9 +46,12 @@ def flowDistribution(infile):
     return Pi, len(flows)
 
 '''
-
-    Make a probability distribution based on how many SYN packets there is in each uni-directional flow in a time interval
-
+    Make a probability distribution based on how many packets there is in each uni-directional flow in a time interval
+    Input:  
+            infile: list of SiLK flow records
+    Output:
+            Pi:     list of floats, the probability distribution
+            nf:     int, number of different flows
 '''
 def uniDirFlowDistribution(infile):
     #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
@@ -84,12 +90,15 @@ def uniDirFlowDistribution(infile):
 
 
 '''
-
     Make a probability distribution based on how many packets there is in each destination flow in a time interval
-
+    Input:  
+            infile: list of SiLK flow records
+    Output:
+            Pi:     list of floats, the probability distribution
+            nd:     int, number of different destination flows
 '''
 def ipDestinationDistribution(infile):
-    #Make dictionaries for how many packets each destination flow has
+    #Make dictionary for how many packets each destination flow has
     numberOfPacketsPerIP ={}
     #A variable to keep track of the total amount of packets in this time interval
     sumOfPackets = 0
@@ -116,12 +125,15 @@ def ipDestinationDistribution(infile):
     return Pi,len(numberOfPacketsPerIP)
 
 '''
-
     Make a probability distribution based on how many packets there is in each source flow in a time interval
-
+    Input:  
+            infile: list of SiLK flow records
+    Output:
+            Pi:     list of floats, the probability distribution
+            ns:     int, number of different source flows  
 '''
 def ipSourceDistribution(infile):
-    #Make dictionaries for how many packets each destination flow has
+    #Make dictionary for how many packets each destination flow has
     numberOfPacketsPerIP ={}
     #A variable to keep track of the total amount of packets in this time interval
     sumOfPackets = 0
@@ -141,59 +153,47 @@ def ipSourceDistribution(infile):
     
     #Loop through each IP flow in the time interval
     for key, value in numberOfPacketsPerIP.items():
-        #Add the probability of the current destination flow having the size that it does to the distribution
+        #Add the probability of the current source flow having the size that it does to the distribution
         Pi.append(value/sumOfPackets)
-    
     
     #Return the probabilities and the number of source flows in this interval
     return Pi,len(numberOfPacketsPerIP)
-
-'''
-
-    Make a probability distribution based on how many packets there is in a time interval
-
-'''
-def numberOfPacketsDistribution(egressPackets):
-    
-    Pi = []
-    sumOfNP = sum(egressPackets)
-    for value in egressPackets:
-        Pi.append(value/sumOfNP)
-    return Pi
     
 '''
-
     Make a probability distribution based on how big packets are in a time interval
-
+    Input:  
+            bytes:      list telemetry bytes measurements
+            packets:    list telemetry bytes measurements
+    Output:
+            Pi:         list of floats, the probability distribution
+            ns:         int, number of different packet sizes
 '''
-def packetSizeDistribution(egressBytes, egressPackets):
-
+def packetSizeDistribution(bytes, packets):
+    #Make dictionary for how many packets each packet size has
     numberOfPacketsOfSizei = {}
-    packetSize = []
     
     #Loop through the measurements that is collected every 2 sec
-    for i in range(len(egressPackets)):
+    for i in range(len(packets)):
         #If there are no packets the size is 0
-        if egressPackets[i] == 0:
+        if packets[i] == 0:
             size = 0
         else:
             #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
-            size = int(egressBytes[i]/egressPackets[i])
-        packetSize.append(size)
+            size = int(bytes[i]/packets[i])
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
-            numberOfPacketsOfSizei[size] += egressPackets[i]
+            numberOfPacketsOfSizei[size] += packets[i]
         else:
-            numberOfPacketsOfSizei[size] = egressPackets[i]
+            numberOfPacketsOfSizei[size] = packets[i]
     
     Pi = []
 
     sumOfNP = sum(numberOfPacketsOfSizei.values())
 
-    #Loop through all of the packet sizes
-    for value in packetSize:
-        #Add the probability of the current packet size being the size that it does to the distribution
-        Pi.append(numberOfPacketsOfSizei[value]/sumOfNP)
+    #Loop through each packet size in the time interval
+    for key, value in numberOfPacketsOfSizei.items():
+        #Add the probability of the current packet size having the size that it does to the distribution
+        Pi.append(value/sumOfNP)
     
     return Pi, len(numberOfPacketsOfSizei)
 
@@ -205,7 +205,6 @@ def packetSizeDistribution(egressBytes, egressPackets):
 def packetSizeDistributionNetFlow(records):
 
     numberOfPacketsOfSizei = {}
-    packetSize = []
     
     #Loop through the measurements that is collected every 2 sec
     for rec in records:
@@ -215,7 +214,6 @@ def packetSizeDistributionNetFlow(records):
         else:
             #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
             size = int(rec.bytes/rec.packets)
-        packetSize.append(size)
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
             numberOfPacketsOfSizei[size] += rec.packets
@@ -227,9 +225,9 @@ def packetSizeDistributionNetFlow(records):
     sumOfNP = sum(numberOfPacketsOfSizei.values())
 
     #Loop through all of the packet sizes
-    for value in packetSize:
+    for key, value in numberOfPacketsOfSizei.items():
         #Add the probability of the current packet size being the size that it does to the distribution
-        Pi.append(numberOfPacketsOfSizei[value]/sumOfNP)
+        Pi.append(value/sumOfNP)
     
     return Pi, len(numberOfPacketsOfSizei)
 
