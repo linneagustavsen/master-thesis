@@ -15,8 +15,8 @@ def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, int
     f.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
-    trainingLabel = np.array(trainingSet.iloc[1:,-1])
+    trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
+    trainingLabel = np.array(trainingSet.iloc[:,-1])
 
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
@@ -25,8 +25,8 @@ def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, int
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
 
-    testingMeasurements = np.array(testingSet.iloc[1:, 0:-1])
-    testingLabel = np.array(testingSet.iloc[1:,-1])
+    testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
+    testingLabel = np.array(testingSet.iloc[:,-1])
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):

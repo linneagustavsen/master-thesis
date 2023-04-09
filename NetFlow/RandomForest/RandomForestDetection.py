@@ -15,10 +15,11 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    trainingMeasurements = trainingSet.values[:, 0:-1]
-    trainingLabel = trainingSet.values[:,-1].astype('int')
+    trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
+    trainingLabel = np.array(trainingSet.iloc[:,-1])
     print(trainingMeasurements)
     print(trainingLabel)
+    print(type(trainingLabel))
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
@@ -26,8 +27,8 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
-    testingMeasurements = np.array(testingSet.values[:, 0:-1])
-    testingLabel = np.array(testingSet.values[:,-1].astype('int'))
+    testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
+    testingLabel = np.array(testingSet.iloc[:,-1])
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
@@ -56,9 +57,9 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #trainingSet = pd.read_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
+    trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
 
-    trainingLabel = np.array(trainingSet.iloc[1:,-1])
+    trainingLabel = np.array(trainingSet.iloc[:,-1])
 
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
@@ -67,8 +68,8 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
 
     timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
 
-    testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
-    testingLabel = np.array(testingSet.iloc[1:,-1])
+    testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
+    testingLabel = np.array(testingSet.iloc[:,-1])
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
