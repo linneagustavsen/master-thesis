@@ -181,6 +181,6 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
     json_file_raw_bytes.close()
 
 silkFiles = ["/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week1.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week2.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week3.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week4.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week5.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week6.rw", "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/week7.rw"]
-start="2010-12-27 00:00:00"
+'''start="2010-12-27 00:00:00"
 stop="2011-01-03 00:00:00"
-metricCalculation(silkFiles[0], start, stop, timedelta(minutes = 1), timedelta(minutes = 10))
+metricCalculation(silkFiles[0], start, stop, timedelta(minutes = 1), timedelta(minutes = 10))'''
