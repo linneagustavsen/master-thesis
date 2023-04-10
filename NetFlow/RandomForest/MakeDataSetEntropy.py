@@ -3,6 +3,7 @@ from datetime import datetime
 import pandas as pd
 from HelperFunctions.StructureData import *
 import numpy as np
+from HelperFunctions.IsAttack import *
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -23,7 +24,8 @@ def makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interv
     entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
-
+    entropy_timeStamps = pd.to_datetime(entropy_timeStamps)
+    
     data = np.empty((len(entropy_timeStamps),len(columTitles)))
     
     for i in range(len(entropy_timeStamps)):
