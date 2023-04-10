@@ -60,7 +60,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
             #Calculate the generalized entropy of this distribution

@@ -55,7 +55,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Store the number of packets and bytes this time interval
             packetNumberArray.append(numberOfPackets(records))
             

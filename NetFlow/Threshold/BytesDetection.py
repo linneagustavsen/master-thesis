@@ -55,7 +55,7 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             bytesArray.append(numberOfBytes(records))
             
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold

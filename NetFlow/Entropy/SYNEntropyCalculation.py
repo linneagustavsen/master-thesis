@@ -56,7 +56,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many SYN packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution

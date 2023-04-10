@@ -59,7 +59,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the ratio of ICMP packets in this time interval
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)

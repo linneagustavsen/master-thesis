@@ -65,7 +65,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
             sizes.append(thisMinuteSize)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many packets there is in each bi-directional flow in this time interval
             PiF, nf = flowDistribution(records)
             #Calculate the generalized entropy of this distribution
