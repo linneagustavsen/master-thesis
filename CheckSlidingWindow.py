@@ -44,9 +44,9 @@ def testingSlidingWindow(silkFile, start, stop, frequency, interval):
             #Push the sliding window
             print("rec.stime:",rec.stime, "startTime + interval:", startTime + interval)
             startTime = startTime + frequency
-            print("records:",records )
+            print("len(records):",len(records) )
             records = records[sizes[0]:]
-            print("records:",records )
+            print("len(records):",len(records) )
             print("Sizes:", sizes)
             sizes.pop(0)
             print("Sizes:", sizes)
