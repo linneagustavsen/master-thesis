@@ -47,14 +47,12 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 
         #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nd = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
+        PiPS,nps = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
-
         #Calculate the generalized entropy rate of this distribution
-        entropyRatePacketSize = entropyPacketSize/nd
-        packetSizeRateArray.append(entropyRatePacketSize)
+        packetSizeRateArray.append(entropyPacketSize/nps)
 
         #Store the number of packets and bytes this time interval
         packetNumberArray.append(sum(dfEgressPackets))

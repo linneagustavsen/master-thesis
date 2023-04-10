@@ -62,12 +62,12 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
         #Aggregate flows into the specified time interval
         if rec.stime > startTime + interval:
             #Find the probability distribution based on how big the packets are this time interval
-            PiPS,nd = packetSizeDistributionNetFlow(records)
+            PiPS,nps = packetSizeDistributionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             packetSizeArray.append(entropyPacketSize)
             #Calculate the generalized entropy rate of this distribution
-            packetSizeRateArray.append(entropyPacketSize/nd)
+            packetSizeRateArray.append(entropyPacketSize/nps)
 
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
