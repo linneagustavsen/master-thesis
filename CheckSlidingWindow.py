@@ -40,7 +40,7 @@ def testingSlidingWindow(silkFile, start, stop, frequency, interval):
             print("Sizes:", sizes)
             windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Push the sliding window
             print("rec.stime:",rec.stime, "startTime + interval:", startTime + interval)
             startTime = startTime + frequency
