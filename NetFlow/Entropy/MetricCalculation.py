@@ -1,43 +1,34 @@
-'''
-How to get the flows in a file format:
-
-    #Filter out all flows from a time period
-    rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --all-destination=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
-
-    #Sorts them by start time
-    rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw /home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw
-
-'''
-
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime,timedelta
-from .IsAttackFlow import *
+from datetime import datetime
+from HelperFunctions.IsAttack import *
 
 '''
-
     Calculates entropy and other metrics and write them to file. Also checks if the flow is an attack flow
-    Input:  File with flow records sorted on time, 
-            start time as a string, 
-            an aggregation interval as a timedelta object, 
-            a window size of how far back we should compare the values
+    Input:  
+            silkFile:   string, file with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            attackDate: string, date of the attack the calculations are made on
 '''
-
 def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
-    #Open file to write alerts to
-    calculations = open("NetFlowCalculations/Entropy/Calculations/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    #Open files to write alerts to
+    calculations = open("Calculations/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("Calculations/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets")
+    calculations.write("Time,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
     attackFlows.write("sTime,eTime")
 
-
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
+
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
@@ -57,10 +48,15 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
 
     icmpRatioArray = []
     icmpPacketsArray = []
-    #Instantiate counter variable
+
+    packetSizeArray = []
+    packetSizeRateArray = []
+
+    packetNumberArray = []
+    bytesArray = []
+    #Instantiate variables
     i = 0
     sizes = []
-    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -68,8 +64,16 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
@@ -101,26 +105,38 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
-            
-            calculations.write("\n" + str(startTime) + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) + "," + str(icmpPacketsArray[i]))
-            #Reset the record aggregation
+
+            #Find the probability distribution based on how big the packets are this time interval
+            PiPS,nd = packetSizeDistributionNetFlow(records)
+            #Calculate the generalized entropy of this distribution
+            entropyPacketSize = generalizedEntropy(10, PiPS)
+            packetSizeArray.append(entropyPacketSize)
+
+            #Calculate the generalized entropy rate of this distribution
+            entropyRatePacketSize = entropyPacketSize/nd
+            packetSizeRateArray.append(entropyRatePacketSize)
+
+            #Store the number of packets and bytes this time interval
+            packetNumberArray.append(numberOfPackets(records))
+            bytesArray.append(numberOfBytes(records))
+
+            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
+                               + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
+                               + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
+                               + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
+                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]))
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
+        #Check if it is an attack flow
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime))
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
+
         records.append(rec)
     
     calculations.close()
     attackFlows.close()
      
-
     infile.close()
-'''    
-metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''

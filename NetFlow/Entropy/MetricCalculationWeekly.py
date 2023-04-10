@@ -1,14 +1,3 @@
-'''
-How to get the flows in a file format:
-
-    #Filter out all flows from a time period
-    rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --all-destination=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
-
-    #Sorts them by start time
-    rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10-sorted.rw /home/linneafg/silk-data/RawDataFromFilter/one-week-2011-01-03_03-10.rw
-
-'''
-
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -16,15 +5,18 @@ from datetime import datetime,timedelta
 import json
 
 '''
-
-    Calculates entropy and other metrics and write them to file. Also checks if the flow is an attack flow
-    Input:  File with flow records sorted on time, 
-            start time as a string, 
-            an aggregation interval as a timedelta object, 
-            a window size of how far back we should compare the values
+    Calculates entropy and other metrics and for every minute of a week. 
+    Uses a sliding window to calculate the entropy
+    Stores the values in a json structure based on weekday, hour and minute.
+    Input:  silkFile:   string, file with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            attackDate: string, date of the attack the calculations are made on
 '''
-
-def metricCalculation(silkFile, start, stop, frequency, interval):
+def metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
     json_file = open("NetFlow/Entropy/Schemas/RawValuesSchema.json", "r")
     json_object_raw_sip = json.load(json_file)
@@ -46,9 +38,7 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
     json_object_raw_icmp_packets = json.load(json_file)
     json_file.close()
 
-
-
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -58,10 +48,9 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
     #Instantiate empty arrays for the calculated values
     records = []
     
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
     sizes = []
-    lastMinuteSize = 0
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -69,8 +58,16 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
@@ -99,53 +96,49 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
             json_object_raw_icmp_ratio["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(icmpRatio)
             json_object_raw_icmp_packets["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(icmpPackets)
 
-            #Reset the record aggregation
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
+    
         records.append(rec)
     
 
     infile.close()
-    json_file_raw_sip = open("NetFlow/Entropy/Calculations/sip."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_sip = open("NetFlow/Entropy/Calculations/sip."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_sip,json_file_raw_sip)
     json_file_raw_sip.close()
 
-    json_file_raw_sip_rate = open("NetFlow/Entropy/Calculations/sip_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_sip_rate = open("NetFlow/Entropy/Calculations/sip_rate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_sip_rate,json_file_raw_sip_rate)
     json_file_raw_sip_rate.close()
 
-    json_file_raw_dip = open("NetFlow/Entropy/Calculations/dip."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_dip = open("NetFlow/Entropy/Calculations/dip."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_dip,json_file_raw_dip)
     json_file_raw_dip.close()
 
-    json_file_raw_dip_rate = open("NetFlow/Entropy/Calculations/dip_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_dip_rate = open("NetFlow/Entropy/Calculations/dip_rate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_dip_rate,json_file_raw_dip_rate)
     json_file_raw_dip_rate.close()
 
-    json_file_raw_flow = open("NetFlow/Entropy/Calculations/flow."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_flow = open("NetFlow/Entropy/Calculations/flow."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_f,json_file_raw_flow)
     json_file_raw_flow.close()
 
-    json_file_raw_f_rate = open("NetFlow/Entropy/Calculations/f_rate."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_f_rate = open("NetFlow/Entropy/Calculations/f_rate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_f_rate,json_file_raw_f_rate)
     json_file_raw_f_rate.close()
 
-    json_file_raw_nf = open("NetFlow/Entropy/Calculations/nf."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_nf = open("NetFlow/Entropy/Calculations/nf."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_nf,json_file_raw_nf)
     json_file_raw_nf.close()
 
-    json_file_raw_icmp_ratio = open("NetFlow/Entropy/Calculations/icmp_ratio."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_icmp_ratio = open("NetFlow/Entropy/Calculations/icmp_ratio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_icmp_ratio,json_file_raw_icmp_ratio)
     json_file_raw_icmp_ratio.close()
 
-    json_file_raw_icmp_packets = open("NetFlow/Entropy/Calculations/icmp_packets."+ str(int(interval.total_seconds())) + ".json", "w")
+    json_file_raw_icmp_packets = open("NetFlow/Entropy/Calculations/icmp_packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(json_object_raw_icmp_packets,json_file_raw_icmp_packets)
     json_file_raw_icmp_packets.close()
 '''    

@@ -2,6 +2,10 @@ import matplotlib.pyplot as plt
 '''
 
     Make a plot based on arrays of values and timestamps
+    Input:  valueArray: list, list of values to plot
+            timeArray:  list of datetime objects, x-axis time data points
+            name:       string, name of plot
+            path:       string, destination path of plot
 
 '''
 def makePlot(valueArray, timeArray, name, path):

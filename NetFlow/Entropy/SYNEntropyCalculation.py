@@ -1,39 +1,30 @@
-'''
-How to get the flows in a file format:
-    #Get SYN packets with destination AS 224 in the oslo-gw:
-	rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --proto=6,56 --flags-all=S/SA --pass-destination=/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
-	
-    #Sorts them by start time
-	rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw  /home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in.rw 
-
-'''
-
-
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime, timedelta
-from .IsAttackFlow import *
+from HelperFunctions.IsAttack import *
 
 '''
-
-    Calculates entropy
-    Input:  File with flow records sorted on time, 
-            start time as a string, 
-            a aggregation interval as a timedelta object, 
-            a window size of how far back we should compare the values
+    Calculates entropy on TCP SYN packets and writes it to file
+    Input:  
+            silkFile:   string, file with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            attackDate: string, date of the attack the calculations are made on
 '''
-
 def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
     #Open file to write alerts to
-    calculations = open("NetFlowCalculations/Entropy/Calculations/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("NetFlowCalculations/Entropy/Calculations/AttackFlowsSYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open("Calculations/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open("Calculations/Entropy/NetFlow/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     calculations.write("Time,srcEntropy,dstEntropy,flowEntropy")
     attackFlows.write("sTime,eTime")
     
-    #Makes a datetime object of the input start time
+    #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
@@ -56,8 +47,16 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             break
         if rec.stime < startTime:
             continue
+        #Implement the sliding window
+        if rec.stime > windowTime + frequency:
+            lastSizes = 0
+            for size in sizes:
+                lastSizes += size
+            thisMinuteSize = len(records) - lastSizes
+            sizes.append(thisMinuteSize)
+            windowTime += frequency
         #Aggregate flows into the specified time interval
-        if rec.stime >= startTime + interval:
+        if rec.stime > startTime + interval:
             #Find the probability distribution based on how many SYN packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
@@ -76,24 +75,19 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             entropyFlow = generalizedEntropy(10,PiF)
             entropyOfSynPacketsPerFlow.append(entropyFlow)
             
-            calculations.write("\n" + str(startTime) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
-            #Reset the record aggregation
+            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(entropyOfSynPacketsPerSrc[i]) 
+                            + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
+            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + str(rec.stime) + ","+ str(rec.etime))
-        if rec.stime >= windowTime + frequency:
-            thisMinuteSize = len(records) - lastMinuteSize
-            sizes.append(thisMinuteSize)
-            lastMinuteSize = thisMinuteSize
-            windowTime += frequency
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
+
         records.append(rec)
             
 
     infile.close()
     calculations.close()
     attackFlows.close()
-'''
-synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-tcp-syn-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5), 10)'''

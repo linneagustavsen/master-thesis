@@ -2,10 +2,9 @@ import matplotlib.pyplot as plt
 import json
 from datetime import datetime
 import matplotlib.dates as mdates
+
 '''
-
     Make a plot based on arrays of values and timestamps
-
 '''
 def makePlot(jsonFile, y_field, y_fieldName, path):
     with open(jsonFile, 'r') as f:
@@ -93,17 +92,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
     fig.tight_layout()
     fig.savefig(path+y_field+".png", dpi=300)
     fig.show()
-
-    '''axs[0, 1].plot(x_values, y_values)
-    axs[0, 1].set_title('Tuesday')
-
-    axs[1, 0].plot(x_values, y_values)
-    axs[1, 0].set_title('Wednesday')
-
-    axs[1, 1].plot(x_values, y_values)
-    axs[1, 1].set_title('Thursday')'''
-    fig.savefig(path+y_field+".png", dpi=300)
-    fig.show()
+    
 '''makePlot('NetFlow/Entropy/Calculations/dip_rate.300.json', 'dstEntropyRate','Entropy rate of destination IP', 'Plots/Entropy/WeeklyComparison.300.')
 makePlot('NetFlow/Entropy/Calculations/dip_rate.600.json', 'dstEntropyRate','Entropy rate of destination IP', 'Plots/Entropy/WeeklyComparison.600.')
 

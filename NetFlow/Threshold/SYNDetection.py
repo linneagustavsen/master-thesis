@@ -1,31 +1,22 @@
-'''
-How to get the flows in a file format:
-
-    #Get syn packets with destination AS 224 in the oslo-gw:
-	rwfilter --start-date=2011/01/03:00 --end-date=2011/01/10:00 --proto=6,56 --flags-all=S/SA --pass-destination=/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in.rw --data-rootdir=/home/linneafg/silk-data/oslo-gw
-	
-    #Sorts them by start time
-	rwsort --fields=stime --output-path=/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw  /home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in.rw 
-
-'''
-
 from silk import *
 from datetime import datetime
 import numpy as np
 
 '''
-
     Calculates the number of SYN packets in a flow and alerts in case of an anomaly
-    Input:  File with flow records sorted on time, 
-            start time as a string, 
-            a window size of how many flows back we should compare the values
+    Input:  silkFile:   string, file with flow records sorted on time
+            start:      string, start time of detection 
+            stop:       string, stop time of detection 
+            systemId:   string, name of the system to calculate on
+            windowSize: int, represents a multiplier of frequency, how far back we want to compare the value with
+            threshold:  int, values over this threshold will cause an alert
+            attackDate: string, date of the attack the calculations are made on
 '''
-
-def synDetection(silkFile, start, stop, windowSize):
+def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate):
     #Open file to write alerts to
-    f = open("NetFlow/Threshold/Detections/TCPSYN.csv", "a")
+    f = open("Detections/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    f.write("Time, Change, Value, Mean of the last "+ str(windowSize))
+    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -36,7 +27,7 @@ def synDetection(silkFile, start, stop, windowSize):
     #Instantiate empty arrays for the calculated values
     synPacketsPerFlow = []
     
-    #Instantiate counter variable
+    #Instantiate variables
     i = 0
 
     #Loop through all the flow records
@@ -49,9 +40,7 @@ def synDetection(silkFile, start, stop, windowSize):
 
         #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= windowSize:
-            if rec.packets >= 5:
-                f.write("\n" + str(startTime) + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1])))
+            if rec.packets >= threshold:
+                f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1])))
         i += 1
     infile.close()
-
-synDetection("/home/linneafg/silk-data/RawDataFromFilter/tcp-syn-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", 10)
