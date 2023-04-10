@@ -160,14 +160,13 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
             
             #Array to keep track of the probability distribution
             PiSIP = []
-            print(numberOfPacketsPerSIP)
+
             #Loop through each IP flow in the time interval
             for key, value in numberOfPacketsPerSIP.items():
-                print(key, value)
                 #Add the probability of the current source flow having the size that it does to the distribution
                 PiSIP.append(value/sumOfPackets)
             ns = len(numberOfPacketsPerSIP)
-            print(ns)
+
             #Calculate the generalized entropy of this distribution
             entropySip = generalizedEntropy(10,PiSIP)
 
@@ -207,7 +206,6 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
 
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
-
 
             json_object_raw_sip["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(entropySip)
             json_object_raw_sip_rate["weekday"][rec.stime.strftime('%w')]["hour"][str(rec.stime.hour)]["minute"][str(rec.stime.minute)].append(entropySip/ns)
