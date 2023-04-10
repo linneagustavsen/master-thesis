@@ -1,6 +1,2 @@
 __pycache__/
-*.txt
 *.csv
-*.pkl
-*.png
-*.icloud

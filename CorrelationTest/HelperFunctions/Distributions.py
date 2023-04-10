@@ -189,9 +189,9 @@ def packetSizeDistribution(egressBytes, egressPackets):
         packetSize.append(size)
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
-            numberOfPacketsOfSizei[size] += 1
+            numberOfPacketsOfSizei[size] += egressPackets[i]
         else:
-            numberOfPacketsOfSizei[size] = 1
+            numberOfPacketsOfSizei[size] = egressPackets[i]
     
     Pi = []
 
@@ -225,9 +225,9 @@ def packetSizeDistributionNetFlow(records):
         packetSize.append(size)
         #If the size of the packet has been encountered before the number of packets with this size is increased by one
         if size in numberOfPacketsOfSizei:
-            numberOfPacketsOfSizei[size] += 1
+            numberOfPacketsOfSizei[size] += rec.packets
         else:
-            numberOfPacketsOfSizei[size] = 1
+            numberOfPacketsOfSizei[size] = rec.packets
     
     Pi = []
 

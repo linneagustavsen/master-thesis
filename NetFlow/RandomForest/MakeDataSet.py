@@ -1,20 +1,32 @@
-from .GetData import *
-from datetime import datetime,timedelta
+from HelperFunctions.GetData import *
+from datetime import datetime
 import pandas as pd
 from HelperFunctions.StructureData import *
 import numpy as np
-def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
-    
-    df = getData(silkFile, start, stop)
+
+'''
+    Make a dataset to use for either training or testing a Random Forest classifier
+    Input:  silkFile:   string, file with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            path:       string, path to the dataset
+            attackDate: string, date of the attack the calculations are made on
+    Output: dataSet:    pandas dataframe, contains the dataset         
+'''
+def makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","packet_size_entropy","packet_size_entropy_rate", "label"]    
+    df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
-    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
 
     now = datetime.now()
@@ -53,13 +65,12 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
         flowArray = entropy_measurements[indexInTimeArray][4]
         flowRateArray = entropy_measurements[indexInTimeArray][5]
 
-        numberOfFlows = entropy_measurements[indexInTimeArray][6]
+        packetSizeArray = entropy_measurements[indexInTimeArray][9]
+        packetSizeRateArray = entropy_measurements[indexInTimeArray][10]
 
-        icmpRatioArray = entropy_measurements[indexInTimeArray][7]
-        icmpPacketsArray = entropy_measurements[indexInTimeArray][8]
         curMeasurements = measurements[i][:-1]
 
-        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, measurements[i][-1]])
+        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, packetSizeArray, packetSizeRateArray, measurements[i][-1]])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 
@@ -67,18 +78,30 @@ def makeDataSet(silkFile, start, stop, systemId, frequency, interval, path, atta
     dataSet = pd.DataFrame(data, columns=columTitles)
     return dataSet
 
-def makeDataSetNoIP(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
-    columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets", "label"]
-    
-    df = getData(silkFile, start, stop)
+'''
+    Make a dataset to use for either training or testing a Random Forest classifier
+    Specifically without IPs
+    Input:  silkFile:   string, file with flow records sorted on time
+            start:      string, indicating the start time of the data wanted
+            stop:       string, indicating the stop time of the data wanted
+            systemId:   string, name of the system to collect and calculate on
+            frequency:  timedelta object, frequency of metric calculation
+            interval:   timedelta object, size of the sliding window which the calculation is made on
+            path:       string, path to the dataset
+            attackDate: string, date of the attack the calculations are made on
+    Output: dataSet:    pandas dataframe, contains the dataset       
+'''
+def makeDataSetNoIPNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+    columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow", "entropy_rate_flow","packet_size_entropy","packet_size_entropy_rate", "label"]    
+    df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle("NetFlow/RandomForest/RawData/NoIP"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
-    entropy_df = getEntropyData(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/RandomForest/RawData/NoIP"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+    entropy_df.to_pickle("NetFlow/RandomForest/RawData/NoIP"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
 
     now = datetime.now()
@@ -117,13 +140,12 @@ def makeDataSetNoIP(silkFile, start, stop, systemId, frequency, interval, path, 
         flowArray = entropy_measurements[indexInTimeArray][4]
         flowRateArray = entropy_measurements[indexInTimeArray][5]
 
-        numberOfFlows = entropy_measurements[indexInTimeArray][6]
+        packetSizeArray = entropy_measurements[indexInTimeArray][9]
+        packetSizeRateArray = entropy_measurements[indexInTimeArray][10]
 
-        icmpRatioArray = entropy_measurements[indexInTimeArray][7]
-        icmpPacketsArray = entropy_measurements[indexInTimeArray][8]
         curMeasurements = measurements[i][2:-2]
 
-        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, measurements[i][-1]])
+        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray,flowArray, flowRateArray, packetSizeArray, packetSizeRateArray, measurements[i][-1]])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 
@@ -138,7 +160,7 @@ stop = "2011-01-01 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
-trainingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Training")
+trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Training")
 trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(trainingSet.head)    
 
@@ -148,6 +170,6 @@ stop = "2011-01-02 12:00:00"
 systemId = "oslo-gw"
 frequency = timedelta(minutes=1)
 interval = timedelta(minutes=5)
-testingSet = makeDataSet(silkFile, start, stop, systemId, frequency, interval, "Testing")
+testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Testing")
 testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 print(testingSet.head)'''

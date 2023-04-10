@@ -2,10 +2,9 @@ import matplotlib.pyplot as plt
 import json
 from datetime import datetime
 import matplotlib.dates as mdates
+
 '''
-
     Make a plot based on arrays of values and timestamps
-
 '''
 def makePlot(jsonFile, y_field, y_fieldName, path):
     with open(jsonFile, 'r') as f:
