@@ -138,5 +138,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     
     calculations.close()
     attackFlows.close()
-     
+
     infile.close()
+'''    
+metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''
