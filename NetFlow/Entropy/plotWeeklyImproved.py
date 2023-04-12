@@ -73,5 +73,5 @@ y_field_names = ["Entropy of source IP flows", "Entropy rate of source IP flows"
                  "Number of packets", "Number of bytes"]
 counter1 = 0
 for file in files:
-    makePlot(file, y_fields[counter1], y_fields[counter1], 'Plots/Entropy/ImprovedWeeklyComparison.600.', timedelta(minutes = 10))
+    makePlot(file, y_fields[counter1], y_field_names[counter1], 'Plots/Entropy/ImprovedWeeklyComparison.600.', timedelta(minutes = 10))
     counter1 += 1
