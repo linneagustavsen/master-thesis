@@ -119,10 +119,8 @@ def getEntropyData(start, stop, systemId, if_name, interval, frequency):
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
-
         #Calculate the generalized entropy rate of this distribution
-        entropyRatePacketSize = entropyPacketSize/nps
-        packetSizeRateArray.append(entropyRatePacketSize)
+        packetSizeRateArray.append(entropyPacketSize/nps)
 
         #Push the start time by the specified frequency
         startTime = startTime + frequency
@@ -322,10 +320,8 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             packetSizeArray.append(entropyPacketSize)
-
             #Calculate the generalized entropy rate of this distribution
-            entropyRatePacketSize = entropyPacketSize/nps
-            packetSizeRateArray.append(entropyRatePacketSize)
+            packetSizeRateArray.append(entropyPacketSize/nps)
 
             #Store the number of packets and bytes this time interval
             packetNumberArray.append(numberOfPackets(records))
