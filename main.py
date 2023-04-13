@@ -13,6 +13,7 @@ from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
+from NetFlow.TopKFlows.topkflow import topkflows2
 
 '''
     Function to get different calculations on NetFlow data
@@ -42,6 +43,9 @@ def main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, at
         #SYN calculation
         synCalculation(silkFileSyn, start, stop, systemId, attackDate)
         print("Finished SYN calculations")
+        #TopKflows
+        topkflows2(silkFile, start, stop, frequency, 20, attackDate, systemId)
+        print("Finished top k flows")
 
 '''
     Function to get different calculations on NetFlow data
@@ -299,4 +303,4 @@ kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequen
 
 interval = timedelta(minutes = 15)
 main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)

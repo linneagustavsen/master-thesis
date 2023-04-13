@@ -1,10 +1,7 @@
 from datetime import timedelta
-from NetFlow.Entropy.MetricCalculation import metricCalculation
-silkFile = "/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
-start = "2011-01-02 10:00:00"
-stop = "2011-01-02 11:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 5)
-systemId = "oslo-gw"
-attackDate = "01.02"
-metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
+from NetFlow.TopKFlows.topkflow import topkflows, topkflows2 
+start="2011-01-19 06:56:00"
+stop="2011-01-19 08:37:00"
+interval = timedelta(minutes = 1)
+silkFile = "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/dip-in-destination-ips-sorted.rw"
+topkflows2(silkFile, start, stop, interval, 20, "19.01", "oslo-gw")
