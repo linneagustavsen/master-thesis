@@ -4,7 +4,7 @@ from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import json
 
-def topkflows(silkFile, start, stop, interval, k):
+def topkflows(silkFile, start, stop, frequency, k):
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -22,14 +22,14 @@ def topkflows(silkFile, start, stop, interval, k):
         if rec.stime < startTime:
             continue
     
-        #Aggregate flows into the specified time interval
-        if rec.stime > startTime + interval:
+        #Aggregate flows into the specified time frequency
+        if rec.stime > startTime + frequency:
             #Array to keep track of the probability distribution
             Pi = {}
             
             topk = dict(list(sorted(numberOfPacketsPerIP.items(), key=lambda item: item[1], reverse=True))[:k])
 
-            #Loop through each IP flow in the time interval
+            #Loop through each IP flow in the time frequency
             for key, value in topk.items():
                 #Add the probability of the current destination flow having the size that it does to the distribution
                 Pi[str(key)] = value
@@ -38,7 +38,7 @@ def topkflows(silkFile, start, stop, interval, k):
             distributions.append(Pi)
             numberOfPacketsPerIP ={}
             sumOfPackets = 0
-            startTime = startTime + interval
+            startTime = startTime + frequency
     
         #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
         #If it has not been encountered before it is added to the dictionary
@@ -54,8 +54,8 @@ def topkflows(silkFile, start, stop, interval, k):
     json.dump(distributions,json_file)
     json_file.close()
 
-def topkflows2(silkFile, start, stop, interval, k, attackDate, systemId):
-    f = open("Detections/TopKFlows/NetFlow/TopFlowChange."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
+    f = open("Calculations/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,Position,Packets,Percentage")
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -75,8 +75,8 @@ def topkflows2(silkFile, start, stop, interval, k, attackDate, systemId):
         if rec.stime < startTime:
             continue
     
-        #Aggregate flows into the specified time interval
-        if rec.stime > startTime + interval:
+        #Aggregate flows into the specified time frequency
+        if rec.stime > startTime + frequency:
             #Array to keep track of the probability distribution
             Pi = []
             
@@ -87,7 +87,7 @@ def topkflows2(silkFile, start, stop, interval, k, attackDate, systemId):
         
             change = False
             i = 0
-            #Loop through each IP flow in the time interval
+            #Loop through each IP flow in the time frequency
             for key, value in topk.items():
                 exists = False
                 if notTheFirstTime:
@@ -95,12 +95,9 @@ def topkflows2(silkFile, start, stop, interval, k, attackDate, systemId):
                         if str(key) == lastDistribution[j][0]:
                             exists = True
                     if not exists: # and (value/sumOfPackets) >= 0.01:
-                        #print(i+1, str(key), value, (value/sumOfPackets))
                         f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
                         change = True
                     if change:
-                        print(str(startTime))
-                        print("-----------------------------------------------------------------------------------------------------")
                         change = False
                 #Add the probability of the current destination flow having the size that it does to the distribution
                 Pi.append((str(key), value, value/sumOfPackets))
@@ -110,7 +107,7 @@ def topkflows2(silkFile, start, stop, interval, k, attackDate, systemId):
             distributions.append(Pi)
             numberOfPacketsPerIP ={}
             sumOfPackets = 0
-            startTime = startTime + interval
+            startTime = startTime + frequency
             notTheFirstTime = True
     
         #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
