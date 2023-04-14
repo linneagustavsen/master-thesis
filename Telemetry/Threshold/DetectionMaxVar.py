@@ -1,7 +1,9 @@
 from datetime import datetime
 import json
 from HelperFunctions.GetData import *
+from HelperFunctions.IsAttack import isAttack
 from .FindMaxVar import *
+import paho.mqtt.client as mqtt
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
@@ -19,9 +21,31 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
     #Open json file with threshold values
     json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
-    
     json_file_mean_var.close()
     f = open("Detections/Threshold/Telemetry/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
+    f.write("Time,Deviation score,Value,Mean,Variance")
+
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'maxVarDetectionTelemetry'
+    MQTT_PASSWORD = 'maxVarDetectionPass'
+    MQTT_TOPIC = 'detections/modules/telemetry'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client,userdata,result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("MaxVarDetectionTelemetry")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
     maxVar = findMaxVar(json_object_mean_var)
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -29,7 +53,6 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
 
     tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
     
-    f.write("Time,Deviation score,Value,Mean,Variance")
     #Loop through all the tables and the rows and check their deviation from the threshold values
     #Alert detection system if the deviation is higher than a predetermined value
     for table in tables:
@@ -39,7 +62,18 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
             deviation = (row.values["_value"]- mean_row)/maxVar
 
             if deviation > threshold:
-                f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str( row.values["_value"]) + ","+str(mean_row) + "," +str( maxVar))
+                f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(maxVar))
+                alert = {
+                    "Time": row.values["_time"],
+                    "Gateway": systemId,
+                    "Deviation_score": deviation,
+                    "Value": row.values["_value"],
+                    "Mean": mean_row,
+                    "Variance": maxVar,
+                    "Real_label": int(isAttack(row.values["_time"])),
+                    "Attack_type": "Flooding"
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
     f.close()
 
 '''detectionMaxVar("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts" ,"2022-09-21 01:00:00", "2022-09-22 00:00:00")
