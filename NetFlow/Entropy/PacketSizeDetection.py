@@ -3,6 +3,9 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
+import json
+import paho.mqtt.client as mqtt
+from HelperFunctions.IsAttack import isAttack
 
 '''
     Calculates packet size entropy and entropy rate and alerts in case of an anomaly
@@ -27,6 +30,28 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
     packetSizeEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     packetSizeEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'packetSizeEntropyDetectionNetFlow'
+    MQTT_PASSWORD = 'packetSizeEntropyDetectionPass'
+    MQTT_TOPIC = 'detections/modules/netflow'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("PacketSizeEntropyDetectionNetFlow")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+
     #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -71,12 +96,34 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
 
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
+                if packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]) < 0:
+                        attackType = "Same protocol"
+                else:
+                    attackType = "Different protocols"
                 if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdPSEntropy:
                     packetSizeEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
-                
+                    alert = {
+                        "Time": rec.stime,
+                        "Gateway": systemId,
+                        "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
+                        "Value": packetSizeArray[i],
+                        "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
+                        "Real_label": int(isAttack(rec.stime)),
+                        "Attack_type": attackType
+                    }
+                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdPSEntropyRate:
                     packetSizeEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
-                 
+                    alert = {
+                        "Time": rec.stime,
+                        "Gateway": systemId,
+                        "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
+                        "Value": packetSizeArray[i],
+                        "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
+                        "Real_label": int(isAttack(rec.stime)),
+                        "Attack_type": attackType
+                    }
+                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]

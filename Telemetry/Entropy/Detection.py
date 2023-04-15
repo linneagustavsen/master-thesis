@@ -98,18 +98,18 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
         
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
+            if packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]) < 0:
+                attackType = "Same protocol"
+            else:
+                attackType = "Different protocols"
             if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
                 f.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
-                if packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]) < 0:
-                    attackType = "Same protocol"
-                else:
-                    attackType = "Different protocols"
                 alert = {
                     "Time": stopTime,
                     "Gateway": systemId,
-                    "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
-                    "Value": packetSizeRateArray[i],
-                    "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
+                    "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
+                    "Value": packetSizeArray[i],
+                    "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
                     "Real_label": int(isAttack(stopTime)),
                     "Attack_type": attackType
                 }
@@ -117,10 +117,6 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
         if packetSizeRateArray !=  np.nan:
             if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
                 f_rate.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
-                if packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]) < 0:
-                    attackType = "Same protocol"
-                else:
-                    attackType = "Different protocols"
                 alert = {
                     "Time": stopTime,
                     "Gateway": systemId,

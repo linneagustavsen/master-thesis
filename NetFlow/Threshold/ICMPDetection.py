@@ -3,6 +3,9 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
+import paho.mqtt.client as mqtt
+import json
+from HelperFunctions.IsAttack import isAttack
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
@@ -25,6 +28,28 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
     #Write the column titles to the files
     icmpRatioFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     icmpPacketsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'icmpDetectionNetFlow'
+    MQTT_PASSWORD = 'icmpDetectionPass'
+    MQTT_TOPIC = 'detections/modules/netflow'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("ICMPDetectionNetFlow")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     
     #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -69,10 +94,30 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
             if i >=windowSize:
                 if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > thresholdICMPRatio:
                     icmpRatioFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
-                
+                    alert = {
+                        "Time": rec.stime,
+                        "Gateway": systemId,
+                        "Change": abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])),
+                        "Value": icmpRatioArray[i],
+                        "Mean_last_10": np.nanmean(icmpRatioArray[i-windowSize: i-1]),
+                        "Real_label": int(isAttack(rec.stime)),
+                        "Attack_type": "ICMP Flood"
+                        }
+                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
                 if abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])) > thresholdNumberOfICMPPackets:
                     icmpPacketsFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1])))
-                
+                    alert = {
+                        "Time": rec.stime,
+                        "Gateway": systemId,
+                        "Change": abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])),
+                        "Value": icmpPacketsArray[i],
+                        "Mean_last_10": np.nanmean(icmpPacketsArray[i-windowSize: i-1]),
+                        "Real_label": int(isAttack(rec.stime)),
+                        "Attack_type": "ICMP Flood"
+                        }
+                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]

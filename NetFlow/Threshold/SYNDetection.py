@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import paho.mqtt.client as mqtt
 import json
-from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.IsAttack import isAttackFlow
 
 '''
     Calculates the number of SYN packets in a flow and alerts in case of an anomaly
@@ -73,7 +73,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
                         "Change": abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])),
                         "Value": synPacketsPerFlow[i],
                         "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(isAttackFlow(rec.sip, rec.dip)),
                         "Attack_type": "SYN Flood"
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

@@ -97,7 +97,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                         "Real_label": int(isAttack(rec.stime)),
                         "Attack_type": "SYN Flood"
                         }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
