@@ -4,6 +4,7 @@ from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
 from HelperFunctions.IsAttack import *
 from HelperFunctions.StructureData import *
+from NetFlow.Kmeans.ClusterLabelling import labelCluster
 
 '''
     Do K-means clustering on entropy and field data and write clusters to file
@@ -25,6 +26,7 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
+    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):

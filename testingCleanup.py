@@ -86,7 +86,7 @@ print("Finished detectionRandomForestTelemetry")
 print("Finished calculationsRandomForestTelemetry")
 
 ###K-means
-#testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
+testingSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
 print("Finished makeDataSetKmeansTelemetry")
 #kmeansGraphEntropy(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished kmeansGraphEntropy")
@@ -97,9 +97,9 @@ fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__c
 print("Finished kmeansGraph")
 #detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)
 print("Finished detectionKmeansEntropyTelemetry")
-#detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
+detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)
 print("Finished detectionKmeansCombinedTelemetry")
-#detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
+detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
 print("Finished detectionKmeansTelemetry")
 
 ###Entropy
@@ -108,10 +108,11 @@ print("Finished calculationEntropyTelemetry")
 #detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate)
 print("Finished detectionEntropyTelemetry")
 
-baseFile="two-hours-2011-01-02_10-11-sorted.rw"         
+
+baseFile="oslo-gw/dip-in-destination-ips-sorted.rw"         
 systemId = "oslo-gw"
-start = "2011-01-02 10:00:00"
-stop = "2011-01-02 12:00:00"
+start="2011-01-19 06:56:00"
+stop="2011-01-19 08:37:00"
 frequency = timedelta(minutes = 1)
 interval = timedelta(minutes = 5)
 pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
@@ -175,38 +176,38 @@ print("Finished calculationRandomForestNetFlowEntropy")
 
 #Fields
 path = "Training"
-trainingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
+#trainingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
+#testingSet = makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNetFlow testing")
 #detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished detectionRandomForestNetFlowEntropy")
-calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+#calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNetFlowFields")
 
 #Fields no IP
 path = "Training"
-trainingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
+#trainingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow training")
 path = "Testing"
-testingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
+#testingSet = makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate)
 print("Finished makeDataSetNoIPNetFlow testing")
-detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+#detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished detectionRandomForestNoIPNetFlowFields")
-calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+#calculationRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate)
 print("Finished calculationRandomForestNoIPNetFlowFields")
 
 ###K-means
 testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate)
 print("Finished makeDataSetKmeansNetFlow")
-kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
+#kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
 print("Finished kmeansEntropyCalculation")
 kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
 print("Finished kmeansCombinedCalculation")
-kmeansCalculation(silkFile, start, stop, systemId, attackDate)
+#kmeansCalculation(silkFile, start, stop, systemId, attackDate)
 print("Finished kmeansCalculation")
-
+'''
 ###Entropy
 thresholdSrc =  4
 thresholdDst =  4
@@ -235,4 +236,4 @@ thresholdDstEntropyRate = 0.0002
 detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate)
 print("Finished detectionDst")
 detection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, thresholdDstEntropy, thresholdDstEntropyRate, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, thresholdICMPRatio, thresholdNumberOfICMPPackets, thresholdPSEntropy, thresholdPSEntropyRate, thresholdPackets, thresholdBytes, attackDate)
-print("Finished detection")
+print("Finished detection")'''

@@ -3,6 +3,7 @@ from HelperFunctions.GetData import *
 from silk import *
 from HelperFunctions.StructureData import *
 from HelperFunctions.IsAttack import *
+from NetFlow.Kmeans.ClusterLabelling import labelCluster
 
 '''
     Do K-means clustering on fields and write clusters to file
@@ -26,7 +27,7 @@ def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
     sTime = pd.to_datetime(sTime)
     eTime = pd.to_datetime(eTime)
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
-
+    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
     count0 = 0 
     count1 = 0
    

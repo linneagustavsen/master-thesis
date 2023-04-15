@@ -4,6 +4,7 @@ from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
+from Telemetry.Kmeans.ClusterLabelling import labelCluster
 
 '''
     Do K-means clustering on entropy data and field data and write both clusters to file
@@ -24,6 +25,7 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
     timeStamps = pd.read_pickle("Telemetry/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
+    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):

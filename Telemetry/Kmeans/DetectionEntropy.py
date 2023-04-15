@@ -54,6 +54,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
     timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
+    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
     count0 = 0 
     count1 = 0
 
