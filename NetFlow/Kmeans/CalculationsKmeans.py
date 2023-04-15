@@ -19,7 +19,9 @@ def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
     f1 = open("Calculations/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
-    
+    cluster = open("Calculations/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
+
     testingData = getDataNetFlow(silkFile, start, stop)
     sTime, eTime, measurements = structureData(testingData)
     measurements = measurements[:, :-1]
@@ -27,7 +29,9 @@ def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
     sTime = pd.to_datetime(sTime)
     eTime = pd.to_datetime(eTime)
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
-    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
+    attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
+    cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
+
     count0 = 0 
     count1 = 0
    
