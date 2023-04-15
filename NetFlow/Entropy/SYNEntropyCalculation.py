@@ -75,7 +75,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             entropyFlow = generalizedEntropy(10,PiF)
             entropyOfSynPacketsPerFlow.append(entropyFlow)
             
-            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(entropyOfSynPacketsPerSrc[i]) 
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(entropyOfSynPacketsPerSrc[i]) 
                             + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
             #Push the sliding window
             startTime = startTime + frequency

@@ -88,14 +88,14 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
         #Compare the difference of each metric with a threshold
         if packetNumberArray !=  np.nan:
             if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                f_pkts.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+                f_pkts.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
                 alert = {
-                    "Time": startTime,
+                    "Time": stopTime,
                     "Gateway": systemId,
                     "Change": abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])),
                     "Value": packetNumberArray[i],
                     "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),
-                    "Real_label": int(isAttack(startTime)),
+                    "Real_label": int(isAttack(stopTime)),
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
