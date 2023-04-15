@@ -118,7 +118,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             packetNumberArray.append(numberOfPackets(records))
             bytesArray.append(numberOfBytes(records))
 
-            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
                                + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
                                + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
                                + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])

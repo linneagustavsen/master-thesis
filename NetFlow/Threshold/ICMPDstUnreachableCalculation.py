@@ -55,7 +55,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
-            calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
             
             #Push the sliding window
             startTime = startTime + frequency

@@ -59,7 +59,7 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         bytesArray.append(sum(dfEgressBytes))
 
         #If there is not enough stored values to compare with we skip the detection
-        calculations.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
+        calculations.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
                                + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]) +  "," + str(int(isAttack(startTime))))
         #Push the start time by the specified frequency
         startTime = startTime + frequency
