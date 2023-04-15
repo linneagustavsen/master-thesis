@@ -21,9 +21,9 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     cluster = open("Calculations/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
-    #df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+    df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     #df.to_pickle("NetFlow/Kmeans/RawData/Entropy"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    df = pd.read_pickle("NetFlow/Kmeans/RawData/Entropy"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle("NetFlow/Kmeans/RawData/Entropy"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataEntropy(df)
     timeStamps = pd.to_datetime(timeStamps)
 

@@ -3,6 +3,9 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
+import paho.mqtt.client as mqtt
+import json
+from HelperFunctions.IsAttack import isAttack
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
@@ -23,6 +26,28 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
     #Write the column titles to the files
     packetsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'packetsDetectionNetFlow'
+    MQTT_PASSWORD = 'packetsDetectionPass'
+    MQTT_TOPIC = 'detections/modules/netflow'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("PacketsDetectionNetFlow")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+
     #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -63,7 +88,16 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
             if i >=windowSize:
                 if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
                     packetsFile.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
-                
+                    alert = {
+                        "Time": rec.stime,
+                        "Gateway": systemId,
+                        "Change": abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])),
+                        "Value": packetNumberArray[i],
+                        "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),
+                        "Real_label": int(isAttack(rec.stime)),
+                        "Attack_type": "SYN Flood"
+                        }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]

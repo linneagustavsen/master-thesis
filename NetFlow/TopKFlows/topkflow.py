@@ -3,6 +3,10 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import json
+import json
+import paho.mqtt.client as mqtt
+
+from HelperFunctions.IsAttack import isAttack
 
 def topkflows(silkFile, start, stop, frequency, k):
     #Makes a datetime object of the input start time
@@ -57,6 +61,29 @@ def topkflows(silkFile, start, stop, frequency, k):
 def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
     f = open("Calculations/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,Position,Packets,Percentage")
+
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'topkFlowsDetectionNetFlow'
+    MQTT_PASSWORD = 'topKflowsDetectionPass'
+    MQTT_TOPIC = 'detections/modules/netflow'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -97,6 +124,16 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
                     if not exists: # and (value/sumOfPackets) >= 0.01:
                         f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
                         change = True
+                        alert = {
+                            "Time": rec.stime,
+                            "Gateway": systemId,
+                            "Position": i+1,
+                            "Packets": value,
+                            "Percentage": value/sumOfPackets,
+                            "Real_label": int(isAttack(startTime)),
+                            "Attack_type": "Flooding"
+                        }
+                        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                     if change:
                         change = False
                 #Add the probability of the current destination flow having the size that it does to the distribution

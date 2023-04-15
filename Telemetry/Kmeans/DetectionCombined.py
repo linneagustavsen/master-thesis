@@ -5,6 +5,8 @@ from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
 from Telemetry.Kmeans.ClusterLabelling import labelCluster
+import json
+import paho.mqtt.client as mqtt
 
 '''
     Do K-means clustering on entropy data and field data and write both clusters to file
@@ -14,37 +16,68 @@ from Telemetry.Kmeans.ClusterLabelling import labelCluster
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
-    f0 = open("Calculations/Kmeans/Telemetry/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
-    f1 = open("Calculations/Kmeans/Telemetry/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, DBthreshold, c0threshold, c1threshold, attackDate):
+    f0 = open("Detections/Kmeans/Telemetry/Combined."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
-    f1.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'mosquitto'
+    MQTT_PORT = 1883
+    MQTT_USER = 'kMeansCombinedDetectionTelemetry'
+    MQTT_PASSWORD = 'kMeansCombinedDetectionPass'
+    MQTT_TOPIC = 'detections/modules/telemetry'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        print("Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Sensor data published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("KmeansCombinedDetectionTelemetry")
+    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     #df = pd.read_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     measurements = testingSet.values
     timeStamps = pd.read_pickle("Telemetry/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
-    print(labelCluster(measurements, prediction, 0.5, 0.5, 0.5))
-    count0 = 0 
-    count1 = 0
+    attackCluster, db, cd0, cd1 = labelCluster(measurements, prediction, DBthreshold, c0threshold, c1threshold)
+
+    attackType = ""
+    #If it is a burst attack and cluster 1 is very compact, it is the attack cluster
+    if db == 0 and cd1 == 0:
+        attackType = "Same protocol"
+    #If there is no burst and c0 is less compact than c1, c1 is the attack cluster
+    elif db > DBthreshold and cd0 > (cd1 + c0threshold):
+        attackType = "Different protocols"
+    #If there is burst traffic and normal traffic and c1 is less compact than c0, c1 is the attack cluster
+    elif db < DBthreshold and cd1 > (cd0 + c1threshold):
+        attackType = "Same protocol"
+
     for i in range(len(prediction)):
-        line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for measurement in measurements[i]:
-            line += "," + str(measurement)
-        line += "," +str(int(isAttack(timeStamps[i])))
-        
-        if prediction[i] == 0:
+        if prediction[i] == attackCluster:
+            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for measurement in measurements[i]:
+                line += "," + str(measurement)
+            line += "," +str(int(isAttack(timeStamps[i])))
             f0.write(line)
             count0 +=1
-        elif prediction[i] == 1:
-            f1.write(line)
-            count1 += 1
-    print(count0)
-    print(count1)
-    
+
+            alert = {
+                        "Time": timeStamps[i],
+                        "Gateway": systemId,
+                        "Value": measurements[i],
+                        "Real_label": int(isAttack(timeStamps[i])),
+                        "Attack_type": attackType
+                    }
+            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
     f0.close()
-    f1.close()
+
 
 '''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
