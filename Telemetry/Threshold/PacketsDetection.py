@@ -67,7 +67,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_pkts"])
         if df.empty:
             packetNumberArray.append(np.nan)
             startTime = startTime + frequency
