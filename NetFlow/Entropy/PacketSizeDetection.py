@@ -6,6 +6,7 @@ import numpy as np
 import json
 import paho.mqtt.client as mqtt
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates packet size entropy and entropy rate and alerts in case of an anomaly
@@ -30,6 +31,11 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
     packetSizeEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     packetSizeEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
+    json_file_ps = open("NetFlow/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_ps = json.load(json_file_ps)
+    json_file_ps_rate = open("NetFlow/Entropy/Calculations/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_ps_rate = json.load(json_file_ps_rate)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -43,7 +49,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Packet size entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketSizeEntropyDetectionNetFlow")
@@ -103,8 +109,10 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                 if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdPSEntropy:
                     packetSizeEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin_ps["minimum"], maxmin_ps["maximum"]),
                         "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
@@ -115,8 +123,10 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                 if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdPSEntropyRate:
                     packetSizeEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
                         "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),

@@ -7,6 +7,7 @@ import json
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 def topkflows(silkFile, start, stop, frequency, k):
     #Makes a datetime object of the input start time
@@ -75,7 +76,7 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Top k flows detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
@@ -125,8 +126,10 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
                         f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
                         change = True
                         alert = {
-                            "Time": rec.stime,
+                            "sTime": rec.stime- frequency,
+                            "eTime": rec.stime,
                             "Gateway": systemId,
+                            "Deviation_score": normalization(20-i, 0, 20),
                             "Position": i+1,
                             "Packets": value,
                             "Percentage": value/sumOfPackets,

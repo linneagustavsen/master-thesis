@@ -6,6 +6,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
@@ -29,6 +30,11 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
     icmpRatioFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     icmpPacketsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file_packets = open("NetFlow/Threshold/Calculations/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_packets = json.load(json_file_packets)
+    json_file_ratio = open("NetFlow/Threshold/Calculations/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_ratio = json.load(json_file_ratio)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -42,7 +48,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("ICMP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ICMPDetectionNetFlow")
@@ -95,8 +101,10 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                 if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > thresholdICMPRatio:
                     icmpRatioFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])), maxmin_ratio["minimum"], maxmin_ratio["maximum"]),
                         "Change": abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])),
                         "Value": icmpRatioArray[i],
                         "Mean_last_10": np.nanmean(icmpRatioArray[i-windowSize: i-1]),
@@ -108,8 +116,10 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                 if abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])) > thresholdNumberOfICMPPackets:
                     icmpPacketsFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])), maxmin_packets["minimum"], maxmin_packets["maximum"]),
                         "Change": abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])),
                         "Value": icmpPacketsArray[i],
                         "Mean_last_10": np.nanmean(icmpPacketsArray[i-windowSize: i-1]),

@@ -4,6 +4,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttackFlow
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates the number of SYN packets in a flow and alerts in case of an anomaly
@@ -21,6 +22,9 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file_syn = open("NetFlow/Threshold/Calculations/MinMax.syn.json", "r")
+    maxmin_syn = json.load(json_file_syn)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -34,7 +38,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("SYN detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNDetectionNetFlow")
@@ -68,8 +72,10 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
             if rec.packets >= threshold:
                 f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1])))
                 alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime,
+                        "eTime": rec.etime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])), maxmin_syn["minimum"], maxmin_syn["maximum"]),
                         "Change": abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])),
                         "Value": synPacketsPerFlow[i],
                         "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),

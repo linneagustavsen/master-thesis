@@ -6,6 +6,8 @@ from HelperFunctions.Distributions import *
 import json
 import paho.mqtt.client as mqtt
 
+from HelperFunctions.Normalization import normalization
+
 '''
     Calculates entropy, packet and byte count and alerts in case of an anomaly
     Input:  start:                  string, indicating the start time of the data to detect on
@@ -30,6 +32,11 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     f_rate.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin = json.load(json_file)
+    json_file_rate = open("Telemetry/Entropy/Calculations/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_rate = json.load(json_file_rate)
+   
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -43,7 +50,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("EntropyDetectionTelemetry")
@@ -105,8 +112,10 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
                 f.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
                 alert = {
-                    "Time": stopTime,
+                    "sTime": stopTime- frequency,
+                    "eTime": stopTime,
                     "Gateway": systemId,
+                    "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
                     "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
                     "Value": packetSizeArray[i],
                     "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
@@ -118,8 +127,10 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
                 f_rate.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
                 alert = {
-                    "Time": stopTime,
+                    "sTime": stopTime- frequency,
+                    "eTime": stopTime,
                     "Gateway": systemId,
+                    "Deviation_score": normalization(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])), maxmin_rate["minimum"], maxmin_rate["maximum"]),
                     "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
                     "Value": packetSizeRateArray[i],
                     "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),

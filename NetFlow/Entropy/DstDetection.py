@@ -6,6 +6,7 @@ import numpy as np
 import json
 import paho.mqtt.client as mqtt
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates destination IP entropy and entropy rate and alerts in case of an anomaly
@@ -30,6 +31,11 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     dstEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
+    json_file_dip = open("NetFlow/Entropy/Calculations/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_dip = json.load(json_file_dip)
+    json_file_dip_rate = open("NetFlow/Entropy/Calculations/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_dip_rate = json.load(json_file_dip_rate)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -43,7 +49,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Destination flow entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("DestinationFlowEntropyDetectionNetFlow")
@@ -105,9 +111,11 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])) > thresholdDstEntropy:
                     dstEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
                         "Change": abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])), maxmin_dip["minimum"], maxmin_dip["maximum"]),
                         "Value": ipDstArray[i],
                         "Mean_last_10": np.nanmean(ipDstArray[i-windowSize: i-1]),
                         "Real_label": int(isAttack(rec.stime)),
@@ -117,9 +125,11 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])) >  thresholdDstEntropyRate:
                     dstEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
                         "Change": abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
                         "Value": ipDstRateArray[i],
                         "Mean_last_10": np.nanmean(ipDstRateArray[i-windowSize: i-1]),
                         "Real_label": int(isAttack(rec.stime)),

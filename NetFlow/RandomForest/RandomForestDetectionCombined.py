@@ -29,7 +29,7 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Random forest combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedDetectionNetFlow")
@@ -98,7 +98,7 @@ def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Random forest combined no IP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedNoIPDetectionNetFlow")

@@ -1,8 +1,10 @@
 '''
     Structure data to separate the timestamps from the values
     Specific for InfluxDB data
-    Input:  df:             pandas dataframe, dataframe containing values with corresponding timestamps
-    Output: timeStamps:     list
+    Input:  
+            df:             pandas dataframe, dataframe containing values with corresponding timestamps
+    Output: 
+            timeStamps:     list
             measurements:   list
 '''
 def structureDataTelemetry(df):
@@ -13,9 +15,11 @@ def structureDataTelemetry(df):
 '''
     Structure data to separate the timestamps from the values
     Specific for SiLK NetFlow data
-    Input:  df:             pandas dataframe, dataframe containing values with corresponding timestamps
-    Output: sTime:          list
-            eTime:          list
+    Input:  
+            df:             pandas dataframe, dataframe containing values with corresponding timestamps
+    Output: 
+            sTime:          list, contains the start time stamps
+            eTime:          list, contains the end time stamps
             measurements:   list
 '''
 def structureData(df):
@@ -27,8 +31,10 @@ def structureData(df):
 '''
     Structure data to separate the timestamps from the values
     Specific for SiLK NetFlow data to use for entropy calculations
-    Input:  df:             pandas dataframe, dataframe containing values with corresponding timestamps
-    Output: timeStamps:     list
+    Input:  
+            df:             pandas dataframe, dataframe containing values with corresponding timestamps
+    Output: 
+            timeStamps:     list
             measurements:   list
 '''
 def structureDataEntropy(df):

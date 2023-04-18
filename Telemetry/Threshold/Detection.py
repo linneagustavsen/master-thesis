@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 import json
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 import paho.mqtt.client as mqtt
+
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
@@ -23,6 +25,9 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
     f = open("Detections/Threshold/Telemetry/" + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,Deviation_score,Value,Mean,Variance")
 
+    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel.json", "r")
+    maxmin = json.load(json_file)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -36,7 +41,7 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Statistical threshold detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ThresholdDetectionTelemetry")
@@ -62,9 +67,10 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
             if deviation > threshold:
                 f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(variance_row))
                 alert = {
-                    "Time": row.values["_time"],
+                    "sTime": row.values["_time"]- timedelta(seconds = 2),
+                    "eTime": row.values["_time"],
                     "Gateway": systemId,
-                    "Deviation_score": deviation,
+                    "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
                     "Value": row.values["_value"],
                     "Mean": mean_row,
                     "Variance": variance_row,

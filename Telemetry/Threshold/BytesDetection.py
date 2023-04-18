@@ -7,6 +7,8 @@ from HelperFunctions.IsAttack import isAttack
 import json
 import paho.mqtt.client as mqtt
 
+from HelperFunctions.Normalization import normalization
+
 '''
     Calculates entropy, packet and byte count and alerts in case of an anomaly
     Input:  start:                  string, indicating the start time of the data to detect on
@@ -27,6 +29,9 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
     #Write the column titles to the files
     f_bytes.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file = open("Telemetry/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin = json.load(json_file)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -40,7 +45,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionTelemetry")
@@ -89,8 +94,10 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
             if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
                 f_bytes.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
                 alert = {
-                    "Time": stopTime,
+                    "sTime": stopTime- frequency,
+                    "eTime": stopTime,
                     "Gateway": systemId,
+                    "Deviation_score": normalization(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
                     "Change": abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])),
                     "Value": bytesArray[i],
                     "Mean_last_10": np.nanmean(bytesArray[i-windowSize: i-1]),

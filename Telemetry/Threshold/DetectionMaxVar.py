@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 from .FindMaxVar import *
 import paho.mqtt.client as mqtt
 
@@ -25,6 +26,8 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
     f = open("Detections/Threshold/Telemetry/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
     f.write("Time,Deviation score,Value,Mean,Variance")
 
+    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar.json", "r")
+    maxmin = json.load(json_file)
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -38,7 +41,7 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Max var detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("MaxVarDetectionTelemetry")
@@ -64,9 +67,10 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
             if deviation > threshold:
                 f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(maxVar))
                 alert = {
-                    "Time": row.values["_time"],
+                    "sTime": row.values["_time"]- timedelta(seconds = 2),
+                    "eTime": row.values["_time"],
                     "Gateway": systemId,
-                    "Deviation_score": deviation,
+                    "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
                     "Value": row.values["_value"],
                     "Mean": mean_row,
                     "Variance": maxVar,

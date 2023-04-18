@@ -5,6 +5,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates the number of ICMP destination unreachable packets in a flow and alerts in case of an anomaly
@@ -24,6 +25,9 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file = open("NetFlow/Threshold/Calculations/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin = json.load(json_file)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -37,7 +41,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("ICMP destination unreachable detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ICMPDstUnreachableNetFlow")
@@ -83,8 +87,10 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
                 if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])) > threshold:
                     f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime- frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
                         "Change": abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])),
                         "Value": numberOfIcmpDstUnreachablePackets[i],
                         "Mean_last_10": np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]),

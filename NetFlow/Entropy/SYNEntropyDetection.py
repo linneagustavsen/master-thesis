@@ -6,6 +6,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 
 '''
@@ -33,6 +34,13 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
     dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     flowEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     
+    json_file_src = open("NetFlow/Entropy/Calculations/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_src = json.load(json_file_src)
+    json_file_dst = open("NetFlow/Entropy/Calculations/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_dst = json.load(json_file_dst)
+    json_file_flow = open("NetFlow/Entropy/Calculations/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_flow = json.load(json_file_flow)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -46,7 +54,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("SYN entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNEntropyDetectionNetFlow")
@@ -111,8 +119,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 if abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])) > thresholdSrc:
                     srcEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                       "sTime": rec.stime- frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])), maxmin_src["minimum"], maxmin_src["maximum"]),
                         "Change": abs(entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])),
                         "Value": entropyOfSynPacketsPerSrc[i],
                         "Mean_last_10": np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]),
@@ -123,8 +133,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 if abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])) > thresholdDst:
                     dstEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime- frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])), maxmin_dst["minimum"], maxmin_dst["maximum"]),
                         "Change": abs(entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])),
                         "Value": entropyOfSynPacketsPerDst[i],
                         "Mean_last_10": np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]),
@@ -135,8 +147,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 if abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])) > thresholdFlow:
                     flowEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime- frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])), maxmin_flow["minimum"], maxmin_flow["maximum"]),
                         "Change": abs(entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])),
                         "Value": entropyOfSynPacketsPerFlow[i],
                         "Mean_last_10": np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]),

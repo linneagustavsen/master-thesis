@@ -1,4 +1,5 @@
 from silk import *
+from .AttackTimestamps import attackTimestamps
 googleeu_mp = IPv4Addr('34.105.154.156')
 amazonuw2_mp = IPv4Addr('18.236.63.8')
 amazonff_mp = IPv4Addr('3.69.241.159')
@@ -15,14 +16,28 @@ trondheim_mp = IPv4Addr('128.39.65.26')
 ip_addresses_cloud = [googleeu_mp, amazonuw2_mp, amazonff_mp, amazonie_mp, amazonsth_mp, azure_mp, azurene_mp, googlefi_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
 ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
 victim = trondheim_mp
-attackTimestamps = []
 
+'''
+    Checks whether a flow is an attack flow or not
+    Input:
+            sip:    SiLK IPv4Addr object, the source IP of the flow record
+            dip:    SiLK IPv4Addr object, the destination IP of the flow record
+    Output:
+                    boolean, whether the flow is an attack flow or not
+'''
 def isAttackFlow(sip, dip):
     if (sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses):
         return True
     else:
         return False
 
+'''
+    Checks whether a flow is an attack flow or not
+    Input:
+            timeStamp:  datetime object, the timestamp of a potential attack period
+    Output:
+                        boolean, whether the flow is an attack flow or not
+'''
 def isAttack(timeStamp):
     if timeStamp in attackTimestamps:
         return True

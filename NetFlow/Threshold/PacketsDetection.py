@@ -6,6 +6,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
@@ -25,6 +26,9 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
     
     #Write the column titles to the files
     packetsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+
+    json_file_packets = open("NetFlow/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_packets = json.load(json_file_packets)
     
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -39,7 +43,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Packets detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketsDetectionNetFlow")
@@ -89,8 +93,10 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                 if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
                     packetsFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])), maxmin_packets["minimum"], maxmin_packets["maximum"]),
                         "Change": abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])),
                         "Value": packetNumberArray[i],
                         "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),

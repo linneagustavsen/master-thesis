@@ -6,6 +6,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates source IP entropy and entropy rate and alerts in case of an anomaly
@@ -30,6 +31,11 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     srcEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
     srcEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+    json_file_sip = open("NetFlow/Entropy/Calculations/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_sip = json.load(json_file_sip)
+    json_file_sip_rate = open("NetFlow/Entropy/Calculations/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_sip_rate = json.load(json_file_sip_rate)
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -43,7 +49,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Sensor data published to topic", MQTT_TOPIC)
+        print("Source flow entropy published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SourceFlowEntropyDetectionNetFlow")
@@ -105,8 +111,10 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])) > thresholdSrcEntropy:
                     srcEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
+                        "Deviation_score": normalization(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])), maxmin_sip["minimum"], maxmin_sip["maximum"]),
                         "Change": abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])),
                         "Value": ipSrcArray[i],
                         "Mean_last_10": np.nanmean(ipSrcArray[i-windowSize: i-1]),
@@ -117,9 +125,10 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])) > thresholdSrcEntropyRate:
                     srcEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1])))
                     alert = {
-                        "Time": rec.stime,
+                        "sTime": rec.stime - frequency,
+                        "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Change": abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
                         "Value": ipSrcRateArray[i],
                         "Mean_last_10": np.nanmean(ipSrcRateArray[i-windowSize: i-1]),
                         "Real_label": int(isAttack(rec.stime)),
