@@ -23,14 +23,38 @@ from HelperFunctions.Normalization import normalization
             thresholdBytes:         float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
     #Open file to write alerts to
-    f = open("Detections/Entropy/Telemetry/EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_rate = open("Detections/Entropy/Telemetry/EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf = open("Detections/Entropy/Telemetry/TP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf_rate = open("Detections/Entropy/Telemetry/TP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    f_rate.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPf = open("Detections/Entropy/Telemetry/FP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf_rate = open("Detections/Entropy/Telemetry/FP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNf = open("Detections/Entropy/Telemetry/FN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf_rate = open("Detections/Entropy/Telemetry/FN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNf = open("Detections/Entropy/Telemetry/TN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf_rate = open("Detections/Entropy/Telemetry/TN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
@@ -102,48 +126,83 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             #Push the start time by the specified frequency
             startTime = startTime + frequency
             continue
-        
+        attack = isAttack(stopTime- frequency, stopTime)
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
-            if packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]) < 0:
+            change = packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])
+            if change < 0:
                 attackType = "Same protocol"
             else:
                 attackType = "Different protocols"
-            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
-                f.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
+            if abs(change) > thresholdEntropy:
                 alert = {
                     "sTime": stopTime- frequency,
                     "eTime": stopTime,
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
-                    "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
+                    "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                    "Change": abs(change),
                     "Value": packetSizeArray[i],
                     "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
-                    "Real_label": int(isAttack(stopTime)),
+                    "Real_label": int(attack),
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
+            if abs(change) > thresholdEntropy and attack:
+                TPf.write(line)
+            elif abs(change) > thresholdEntropy and not attack:
+                FPf.write(line)
+            elif abs(change) <= thresholdEntropy and attack:
+                FNf.write(line)
+            elif abs(change) <= thresholdEntropy and not attack:
+                TNf.write(line)
+        else:
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNf.write(line)
+            elif not attack:
+                TNf.write(line)
         if packetSizeRateArray !=  np.nan:
-            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
-                f_rate.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
+            change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
+            if abs(change_r) > thresholdEntropyRate:
                 alert = {
                     "sTime": stopTime- frequency,
                     "eTime": stopTime,
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])), maxmin_rate["minimum"], maxmin_rate["maximum"]),
-                    "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
+                    "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
+                    "Change": abs(change_r),
                     "Value": packetSizeRateArray[i],
                     "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
-                    "Real_label": int(isAttack(stopTime)),
+                    "Real_label": int(attack),
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
+            if abs(change) > thresholdEntropyRate and attack:
+                TPf_rate.write(line)
+            elif abs(change) > thresholdEntropyRate and not attack:
+                FPf_rate.write(line)
+            elif abs(change) <= thresholdEntropyRate and attack:
+                FNf_rate.write(line)
+            elif abs(change) <= thresholdEntropyRate and not attack:
+                TNf_rate.write(line)
+        else:
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNf_rate.write(line)
+            elif not attack:
+                TNf_rate.write(line)
         #Push the start time by the specified frequency
         startTime = startTime + frequency
 
-    f.close()
-    f_rate.close()
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()
+    TPf_rate.close()
+    FPf_rate.close()
+    FNf_rate.close()
+    TNf_rate.close()
 
 '''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"

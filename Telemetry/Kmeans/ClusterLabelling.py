@@ -38,4 +38,4 @@ def labelCluster(measurements, predictions, DBthreshold, c0threshold, c1threshol
     elif db < DBthreshold and cd1 > (cd0 + c1threshold):
         attackCluster = 1
 
-    return attackCluster, db, cd0, cd1
+    return attackCluster, db, cd0, cd1, counter0, counter1

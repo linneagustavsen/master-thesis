@@ -24,12 +24,36 @@ from HelperFunctions.Normalization import normalization
 '''
 def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate):
     #Open files to write alerts to
-    dstEntropyFile = open("Detections/Entropy/NetFlow/DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyRateFile = open("Detections/Entropy/NetFlow/DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPdstEntropyFile = open("Detections/Entropy/NetFlow/TP.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPdstEntropyRateFile = open("Detections/Entropy/NetFlow/TP.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    dstEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    dstEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPdstEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPdstEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FPdstEntropyFile = open("Detections/Entropy/NetFlow/FP.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPdstEntropyRateFile = open("Detections/Entropy/NetFlow/FP.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPdstEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPdstEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FNdstEntropyFile = open("Detections/Entropy/NetFlow/FN.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNdstEntropyRateFile = open("Detections/Entropy/NetFlow/FN.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNdstEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNdstEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    TNdstEntropyFile = open("Detections/Entropy/NetFlow/TN.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNdstEntropyRateFile = open("Detections/Entropy/NetFlow/TN.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNdstEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TNdstEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     
     json_file_dip = open("NetFlow/Entropy/Calculations/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip = json.load(json_file_dip)
@@ -100,42 +124,72 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
             #Calculate the generalized entropy rate of this distribution
             ipDstRateArray.append(entropyDip/nd)
             
+            attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
-                if ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]) < 0 and ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]) < 0:
+                change = ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])
+                change_r = ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])
+                if change < 0 and change_r < 0:
                     attackType = "Low-Rate"
-                elif ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]) < 0:
+                elif change_r < 0:
                     attackType = "Flooding"
                 else:
                     attackType = ""
-                if abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])) > thresholdDstEntropy:
-                    dstEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1])))
+                
+                if abs(change) > thresholdDstEntropy:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Change": abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])),
-                        "Deviation_score": normalization(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])), maxmin_dip["minimum"], maxmin_dip["maximum"]),
+                        "Change": abs(change),
+                        "Deviation_score": normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]),
                         "Value": ipDstArray[i],
                         "Mean_last_10": np.nanmean(ipDstArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                if abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])) >  thresholdDstEntropyRate:
-                    dstEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1])))
+                if abs(change_r) >  thresholdDstEntropyRate:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Change": abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])),
-                        "Deviation_score": normalization(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
+                        "Change": abs(change_r),
+                        "Deviation_score": normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
                         "Value": ipDstRateArray[i],
                         "Mean_last_10": np.nanmean(ipDstRateArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]) + ","+ str(abs(change)) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1]))
+                if abs(change) > thresholdDstEntropy and attack:
+                    TPdstEntropyFile.write(line)
+                elif abs(change) > thresholdDstEntropy and not attack:
+                    FPdstEntropyFile.write(line)
+                elif abs(change) <= thresholdDstEntropy and attack:
+                    FNdstEntropyFile.write(line)
+                elif abs(change) <= thresholdDstEntropy and not attack:
+                    TNdstEntropyFile.write(line)
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1]))
+                if abs(change_r) > thresholdDstEntropyRate and attack:
+                    TPdstEntropyRateFile.write(line)
+                elif abs(change_r) > thresholdDstEntropyRate and not attack:
+                    FPdstEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdDstEntropyRate and attack:
+                    FNdstEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdDstEntropyRate and not attack:
+                    TNdstEntropyRateFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNdstEntropyFile.write(line)
+                    FNdstEntropyRateFile.write(line)
+                elif not attack:
+                    TNdstEntropyFile.write(line)
+                    TNdstEntropyRateFile.write(line)
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -144,8 +198,14 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
 
         records.append(rec)
     
-    dstEntropyFile.close()
-    dstEntropyRateFile.close()
+    TPdstEntropyFile.close()
+    TPdstEntropyRateFile.close()
+    FPdstEntropyFile.close()
+    FPdstEntropyRateFile.close()
+    FNdstEntropyFile.close()
+    FNdstEntropyRateFile.close()
+    TNdstEntropyFile.close()
+    TNdstEntropyRateFile.close()
     
     infile.close()
     

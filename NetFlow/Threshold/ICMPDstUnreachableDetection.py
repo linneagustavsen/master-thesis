@@ -25,6 +25,29 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
+     #Open file to write alerts to
+    TPICMPDstUnreachableFile = open("Detections/Threshold/NetFlow/TP.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TPICMPDstUnreachableFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPICMPDstUnreachableFile = open("Detections/Threshold/NetFlow/FP.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPICMPDstUnreachableFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNICMPDstUnreachableFile = open("Detections/Threshold/NetFlow/FN.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNICMPDstUnreachableFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNICMPDstUnreachableFile = open("Detections/Threshold/NetFlow/TN.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNICMPDstUnreachableFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     json_file = open("NetFlow/Threshold/Calculations/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
@@ -84,21 +107,38 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
             
             #If there is enough stored values to compare with we compare the difference of the metric with a threshold
             if i >= windowSize:
-                if abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])) > threshold:
-                    f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])))
+                change = numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])
+                attack = isAttack(rec.stime - frequency, rec.stime)
+                if abs(change) > threshold:
                     alert = {
                         "sTime": rec.stime- frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
-                        "Change": abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                        "protocol": rec.protocol,
+                        "Change": abs(change),
                         "Value": numberOfIcmpDstUnreachablePackets[i],
                         "Mean_last_10": np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": "Flooding"
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))
+                if abs(change) > threshold and attack:
+                    TPICMPDstUnreachableFile.write(line)
+                elif abs(change) > threshold and not attack:
+                    FPICMPDstUnreachableFile.write(line)
+                elif abs(change) <= threshold and attack:
+                    FNICMPDstUnreachableFile.write(line)
+                elif abs(change) <= threshold and not attack:
+                    TNICMPDstUnreachableFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNICMPDstUnreachableFile.write(line)
+                elif not attack:
+                    TNICMPDstUnreachableFile.write(line)
            #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -108,7 +148,10 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
         records.append(rec)
 
     infile.close()
-    f.close()
+    TPICMPDstUnreachableFile.close()
+    FPICMPDstUnreachableFile.close()
+    FNICMPDstUnreachableFile.close()
+    TNICMPDstUnreachableFile.close()
 
 
 #icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/icmp3-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", "oslo-gw", timedelta(minutes = 1), 10, 50, "10.01")

@@ -2,7 +2,6 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
-from HelperFunctions.IsAttack import *
 from HelperFunctions.StructureData import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
 
@@ -22,10 +21,11 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     cluster = open("Calculations/Kmeans/NetFlow/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
-    timeStamps, measurements = structureDataEntropy(testingSet)
+    sTime, eTime, measurements = structureData(testingSet)
     measurements = measurements[:, :-1]
     label = measurements[:,-1]
-    timeStamps = pd.to_datetime(timeStamps)
+    sTime = pd.to_datetime(sTime)
+    eTime = pd.to_datetime(eTime)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
@@ -34,7 +34,7 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
-        line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for j in range(len(measurements[i])):
             #Skip the IP fields
             if j == 0 or j == 1 or j == 16:

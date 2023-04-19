@@ -12,9 +12,18 @@ import json
             interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detection are made on
 '''
-def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate):
-    f = open("Detections/RandomForest/NetFlow/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequency, interval, attackDate):
+    TPf = open("Detections/RandomForest/NetFlow/TP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+
+    FPf = open("Detections/RandomForest/NetFlow/FP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+
+    FNf = open("Detections/RandomForest/NetFlow/FN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+
+    TNf = open("Detections/RandomForest/NetFlow/TN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -52,21 +61,31 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, inter
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                #Skip IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-        
-            f.write(line)
             alert = {
-                    "Time": timeStamps[i],
+                    "sTime": timeStamps[i]- frequency,
+                    "eTime": timeStamps[i],
                     "Gateway": systemId,
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-    f.close()
+
+        line = "\n"  + (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(testingMeasurements[i])):
+            for j in range(len(testingMeasurements[i])):
+                line += "," + str(testingMeasurements[i][j])
+        line += "," +str(testingLabel[i])
+        if predictions[i] == 1 and testingLabel[i]:
+            TPf.write(line)
+        elif predictions[i] == 1 and not testingLabel[i]:
+            FPf.write(line)
+        elif predictions[i] == 0 and testingLabel[i]:
+            FNf.write(line)
+        elif predictions[i] == 0 and not testingLabel[i]:
+            TNf.write(line)
+    
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()

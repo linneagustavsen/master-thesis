@@ -13,7 +13,7 @@ from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
-from NetFlow.TopKFlows.topkflow import topkflows2
+from NetFlow.TopKFlows.topkflowCalculation import topkflows2
 
 '''
     Function to get different calculations on NetFlow data

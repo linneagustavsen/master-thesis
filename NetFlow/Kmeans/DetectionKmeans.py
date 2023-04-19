@@ -2,7 +2,6 @@ from sklearn.cluster import KMeans
 from HelperFunctions.GetData import *
 from silk import *
 from HelperFunctions.StructureData import *
-from HelperFunctions.IsAttack import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
 import json
@@ -17,8 +16,18 @@ import json
             attackDate: string, date of the attack the detections are made on
 '''
 def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c1threshold, attackDate):
-    f0 = open("Detections/Kmeans/NetFlow/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    TPf0 = open("Detections/Kmeans/NetFlow/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FPf0 = open("Detections/Kmeans/NetFlow/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FNf0 = open("Detections/Kmeans/NetFlow/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    TNf0 = open("Detections/Kmeans/NetFlow/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
     cluster = open("Detections/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-Bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
@@ -67,21 +76,39 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
    
     for i in range(len(prediction)):
         if prediction[i] == attackCluster:
-            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(measurements[i])):
-                #Skip the IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(measurements[i][j])
-            line += "," +str(label[i])
-            f0.write(line)
             alert = {
-                        "Time": sTime[i],
+                        "sTime": sTime[i],
+                        "eTime": eTime[i],
                         "Gateway": systemId,
+                        "srcIP":measurements[i][0],
+                        "dstIP": measurements[i][1],
+                        "srcPort": measurements[i][2],
+                        "dstPort": measurements[i][3],
+                        "protocol": measurements[i][4],
                         "Value": measurements[i],
                         "Real_label": label[i],
                         "Attack_type": attackType
                     }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-    f0.close()
+        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(measurements[i])):
+            #Skip the IP fields
+            if j == 0 or j == 1 or j == 16:
+                continue
+            line += "," + str(measurements[i][j])
+        line += "," +str(label[i])
+        if prediction[i] == attackCluster and label[i]:
+            TPf0.write(line)
+        elif prediction[i] == attackCluster and not label[i]:
+            FPf0.write(line)
+        elif prediction[i] != attackCluster and label[i]:
+            FNf0.write(line)
+        elif prediction[i] != attackCluster and not label[i]:
+            TNf0.write(line)
+    
+    TPf0.close()
+    FPf0.close()
+    FNf0.close()
+    TNf0.close()
+    cluster.close()

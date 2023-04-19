@@ -74,7 +74,7 @@ def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, f
         curMeasurements = measurements[i]
         
         #Add a label to the measurements
-        curLabel = isAttack(timestamp)
+        curLabel = isAttack(timestamp - timedelta(seconds = 2), timestamp)
 
         newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize, int(curLabel)])
 

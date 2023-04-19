@@ -192,7 +192,7 @@ def getDataNetFlow(silkFile, start, stop):
         duration.append(rec.duration_secs)
         eTime.append(rec.etime)
         nhIP.append(int(rec.nhip))
-        label.append(int(isAttackFlow(rec.sip, rec.dip)))
+        label.append(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))
 
     data= pd.DataFrame(
     {"sTime": sTime,

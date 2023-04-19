@@ -2,7 +2,6 @@ from sklearn.cluster import KMeans
 from HelperFunctions.GetData import *
 from silk import *
 from HelperFunctions.StructureData import *
-from HelperFunctions.IsAttack import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
 
 '''

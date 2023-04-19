@@ -24,12 +24,32 @@ from HelperFunctions.Normalization import normalization
 '''
 def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate):
     #Open files to write alerts to
-    srcEntropyFile = open("Detections/Entropy/NetFlow/SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcEntropyRateFile = open("Detections/Entropy/NetFlow/SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
+    TPsrcEntropyFile = open("Detections/Entropy/NetFlow/TP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPsrcEntropyRateFile = open("Detections/Entropy/NetFlow/TP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
     #Write the column titles to the files
-    srcEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    srcEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FPsrcEntropyFile = open("Detections/Entropy/NetFlow/FP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPsrcEntropyRateFile = open("Detections/Entropy/NetFlow/FP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FNsrcEntropyFile = open("Detections/Entropy/NetFlow/FN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNsrcEntropyRateFile = open("Detections/Entropy/NetFlow/FN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    TNsrcEntropyFile = open("Detections/Entropy/NetFlow/TN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNsrcEntropyRateFile = open("Detections/Entropy/NetFlow/TN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     json_file_sip = open("NetFlow/Entropy/Calculations/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip = json.load(json_file_sip)
@@ -100,41 +120,72 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
             #Calculate the generalized entropy rate of this distribution
             ipSrcRateArray.append(entropySip/ns)
 
+            attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
-                if ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]) < 0 and ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]) < 0:
+                change = ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])
+                change_r = ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])
+                
+                if change < 0 and change_r < 0:
                     attackType = "Low-Rate"
-                elif ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]) < 0:
+                elif change_r < 0:
                     attackType = "Flooding"
                 else:
                     attackType = ""
-                if abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])) > thresholdSrcEntropy:
-                    srcEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1])))
+                if abs(change) > thresholdSrcEntropy:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])), maxmin_sip["minimum"], maxmin_sip["maximum"]),
-                        "Change": abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]),
+                        "Change": abs(change),
                         "Value": ipSrcArray[i],
                         "Mean_last_10": np.nanmean(ipSrcArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                if abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])) > thresholdSrcEntropyRate:
-                    srcEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1])))
+                if abs(change_r) > thresholdSrcEntropyRate:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
+                        "Deviation_score": normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
+                        "Change": abs(change_r),
                         "Value": ipSrcRateArray[i],
                         "Mean_last_10": np.nanmean(ipSrcRateArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]) + ","+ str(abs(change)) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1]))
+                if abs(change) > thresholdSrcEntropy and attack:
+                    TPsrcEntropyFile.write(line)
+                elif abs(change) > thresholdSrcEntropy and not attack:
+                    FPsrcEntropyFile.write(line)
+                elif abs(change) <= thresholdSrcEntropy and attack:
+                    FNsrcEntropyFile.write(line)
+                elif abs(change) <= thresholdSrcEntropy and not attack:
+                    TNsrcEntropyFile.write(line)
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1]))
+                if abs(change_r) > thresholdSrcEntropyRate and attack:
+                    TPsrcEntropyRateFile.write(line)
+                elif abs(change_r) > thresholdSrcEntropyRate and not attack:
+                    FPsrcEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdSrcEntropyRate and attack:
+                    FNsrcEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdSrcEntropyRate and not attack:
+                    TNsrcEntropyRateFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNsrcEntropyFile.write(line)
+                    FNsrcEntropyRateFile.write(line)
+                elif not attack:
+                    TNsrcEntropyFile.write(line)
+                    TNsrcEntropyRateFile.write(line)
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -144,8 +195,13 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
         records.append(rec)
     
            
-    srcEntropyFile.close()
-    srcEntropyRateFile.close()
-
+    TPsrcEntropyFile.close()
+    TPsrcEntropyRateFile.close()
+    FPsrcEntropyFile.close()
+    FPsrcEntropyRateFile.close()
+    FNsrcEntropyFile.close()
+    FNsrcEntropyRateFile.close()
+    TNsrcEntropyFile.close()
+    TNsrcEntropyRateFile.close()
     infile.close()
     

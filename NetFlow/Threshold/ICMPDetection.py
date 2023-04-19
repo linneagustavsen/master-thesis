@@ -23,12 +23,36 @@ from HelperFunctions.Normalization import normalization
 '''
 def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate):
     #Open file to write alerts to
-    icmpRatioFile = open("Detections/Threshold/NetFlow/ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    icmpPacketsFile = open("Detections/Threshold/NetFlow/ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPicmpRatioFile = open("Detections/Threshold/NetFlow/TP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPicmpPacketsFile = open("Detections/Threshold/NetFlow/TP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
-    icmpRatioFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    icmpPacketsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPicmpRatioFile = open("Detections/Threshold/NetFlow/FP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPicmpPacketsFile = open("Detections/Threshold/NetFlow/FP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    
+    #Write the column titles to the files
+    FPicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNicmpRatioFile = open("Detections/Threshold/NetFlow/FN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNicmpPacketsFile = open("Detections/Threshold/NetFlow/FN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    
+    #Write the column titles to the files
+    FNicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNicmpRatioFile = open("Detections/Threshold/NetFlow/TN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNicmpPacketsFile = open("Detections/Threshold/NetFlow/TN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    
+    #Write the column titles to the files
+    TNicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TNicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     json_file_packets = open("NetFlow/Threshold/Calculations/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
@@ -95,39 +119,71 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
-            
+
+            attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
-                if abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])) > thresholdICMPRatio:
-                    icmpRatioFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])))
+                change_ratio = icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])
+                change_packets = icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])
+                
+
+                if abs(change_ratio) > thresholdICMPRatio:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])), maxmin_ratio["minimum"], maxmin_ratio["maximum"]),
-                        "Change": abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"]),
+                        "protocol": rec.protocol,
+                        "Change": abs(change_ratio),
                         "Value": icmpRatioArray[i],
                         "Mean_last_10": np.nanmean(icmpRatioArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": "ICMP Flood"
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-                if abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])) > thresholdNumberOfICMPPackets:
-                    icmpPacketsFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1])))
+                if abs(change_packets) > thresholdNumberOfICMPPackets:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])), maxmin_packets["minimum"], maxmin_packets["maximum"]),
-                        "Change": abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"]),
+                        "protocol": rec.protocol,
+                        "Change": abs(change_packets),
                         "Value": icmpPacketsArray[i],
                         "Mean_last_10": np.nanmean(icmpPacketsArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": "ICMP Flood"
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"]) + ","+ str(abs(change_ratio)) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1]))
+                if abs(change_ratio) > thresholdICMPRatio and attack:
+                    TPicmpRatioFile.write(line)
+                elif abs(change_ratio) > thresholdICMPRatio and not attack:
+                    FPicmpRatioFile.write(line)
+                elif abs(change_ratio) <= thresholdICMPRatio and attack:
+                    FNicmpRatioFile.write(line)
+                elif abs(change_ratio) <= thresholdICMPRatio and not attack:
+                    TNicmpRatioFile.write(line)
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"]) + ","+ str(abs(change_packets)) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1]))
+                if abs(change_packets) > thresholdNumberOfICMPPackets and attack:
+                    TPicmpPacketsFile.write(line)
+                elif abs(change_packets) > thresholdNumberOfICMPPackets and not attack:
+                    FPicmpPacketsFile.write(line)
+                elif abs(change_packets) <= thresholdNumberOfICMPPackets and attack:
+                    FNicmpPacketsFile.write(line)
+                elif abs(change_packets) <= thresholdNumberOfICMPPackets and not attack:
+                    TNicmpPacketsFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNicmpRatioFile.write(line)
+                    FNicmpPacketsFile.write(line)
+                elif not attack:
+                    TNicmpRatioFile.write(line)
+                    TNicmpPacketsFile.write(line)
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -136,8 +192,14 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
 
         records.append(rec)
     
-    icmpRatioFile.close()
-    icmpPacketsFile.close()
+    TPicmpRatioFile.close()
+    TPicmpPacketsFile.close()
+    FPicmpRatioFile.close()
+    FPicmpPacketsFile.close()
+    FNicmpRatioFile.close()
+    FNicmpPacketsFile.close()
+    TNicmpRatioFile.close()
+    TNicmpPacketsFile.close()
 
     infile.close()
     

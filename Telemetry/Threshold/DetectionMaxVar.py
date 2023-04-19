@@ -23,8 +23,18 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
     json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
-    f = open("Detections/Threshold/Telemetry/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
-    f.write("Time,Deviation score,Value,Mean,Variance")
+    TPf = open("Detections/Threshold/Telemetry/TP.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
+
+    FPf = open("Detections/Threshold/Telemetry/FP.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
+
+    FNf = open("Detections/Threshold/Telemetry/FN.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
+
+    TNf = open("Detections/Threshold/Telemetry/TN.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
+
 
     json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar.json", "r")
     maxmin = json.load(json_file)
@@ -64,8 +74,8 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
             
             deviation = (row.values["_value"]- mean_row)/maxVar
 
+            attack = isAttack(row.values["_time"]-timedelta(seconds = 2), row.values["_time"])
             if deviation > threshold:
-                f.write("\n"  + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(maxVar))
                 alert = {
                     "sTime": row.values["_time"]- timedelta(seconds = 2),
                     "eTime": row.values["_time"],
@@ -74,11 +84,23 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
                     "Value": row.values["_value"],
                     "Mean": mean_row,
                     "Variance": maxVar,
-                    "Real_label": int(isAttack(row.values["_time"])),
+                    "Real_label": int(isAttack(row.values["_time"]-timedelta(seconds = 2), row.values["_time"])),
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-    f.close()
+            line = "\n" + (row.values["_time"]- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(maxVar)
+            if deviation > threshold and attack:
+                TPf.write(line)
+            elif deviation > threshold and not attack:
+                FPf.write(line)
+            elif deviation <= threshold and attack:
+                FNf.write(line)
+            elif deviation <= threshold and not attack:
+                TNf.write(line)
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()
 
 '''detectionMaxVar("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_pkts" ,"2022-09-21 01:00:00", "2022-09-22 00:00:00")
 #detection("trd-gw", "xe-0/1/0", "egress_stats__if_1sec_octets", "2022-10-13 00:00:00", "2022-10-20 00:00:00")

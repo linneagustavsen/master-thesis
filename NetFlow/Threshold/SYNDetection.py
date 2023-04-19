@@ -7,7 +7,7 @@ from HelperFunctions.IsAttack import isAttackFlow
 from HelperFunctions.Normalization import normalization
 
 '''
-    Calculates the number of SYN packets in a flow and alerts in case of an anomaly
+    Calculates the number of SYN syn in a flow and alerts in case of an anomaly
     Input:  silkFile:   string, file with flow records sorted on time
             start:      string, start time of detection 
             stop:       string, stop time of detection 
@@ -18,9 +18,28 @@ from HelperFunctions.Normalization import normalization
 '''
 def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate):
     #Open file to write alerts to
-    f = open("Detections/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPsynFile = open("Detections/Threshold/NetFlow/TP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
     #Write the column titles to the files
-    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPsynFile = open("Detections/Threshold/NetFlow/FP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNsynFile = open("Detections/Threshold/NetFlow/FN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNsynFile = open("Detections/Threshold/NetFlow/TN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     json_file_syn = open("NetFlow/Threshold/Calculations/MinMax.syn.json", "r")
     maxmin_syn = json.load(json_file_syn)
@@ -54,7 +73,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     infile = silkfile_open(silkFile, READ)
 
     #Instantiate empty arrays for the calculated values
-    synPacketsPerFlow = []
+    synSYNPerFlow = []
     
     #Instantiate variables
     i = 0
@@ -65,23 +84,51 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
             break
         if rec.stime < startTime:
             continue
-        synPacketsPerFlow.append(rec.packets)
+        synSYNPerFlow.append(rec.syn)
 
+        attack = isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)
         #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= windowSize:
-            if rec.packets >= threshold:
-                f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1])))
+            change = synSYNPerFlow[i] - np.nanmean(synSYNPerFlow[i-windowSize: i-1])
+            
+            if rec.syn >= threshold:
                 alert = {
                         "sTime": rec.stime,
                         "eTime": rec.etime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])), maxmin_syn["minimum"], maxmin_syn["maximum"]),
-                        "Change": abs(synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])),
-                        "Value": synPacketsPerFlow[i],
-                        "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),
-                        "Real_label": int(isAttackFlow(rec.sip, rec.dip)),
+                        "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
+                        "srcIP": rec.sip,
+                        "dstIP": rec.dip,
+                        "srcPort": rec.sport,
+                        "dstPort": rec.dport,
+                        "protocol": rec.protocol,
+                        "Change": abs(change),
+                        "Value": synSYNPerFlow[i],
+                        "Mean_last_10": np.nanmean(synSYNPerFlow[i-windowSize: i-1]),
+                        "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]) + ","+ str(abs(change)) + "," + str(synSYNPerFlow[i]) + "," + str(np.nanmean(synSYNPerFlow[i-windowSize: i-1]))
+            if abs(change) > threshold and attack:
+                TPsynFile.write(line)
+            elif abs(change) > threshold and not attack:
+                FPsynFile.write(line)
+            elif abs(change) <= threshold and attack:
+                FNsynFile.write(line)
+            elif abs(change) <= threshold and not attack:
+                TNsynFile.write(line)
+        else:
+            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNsynFile.write(line)
+            elif not attack:
+                TNsynFile.write(line)
         i += 1
+    
+    TPsynFile.close()
+    FPsynFile.close()
+    FNsynFile.close()
+    TNsynFile.close()
     infile.close()

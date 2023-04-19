@@ -9,59 +9,31 @@ import paho.mqtt.client as mqtt
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
 
-def topkflows(silkFile, start, stop, frequency, k):
-    #Makes a datetime object of the input start time
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    # Open a silk flow file for reading
-    infile = silkfile_open(silkFile, READ)
 
-    distributions = []
-    #Make dictionaries for how many packets each destination flow has
-    numberOfPacketsPerIP ={}
-    sumOfPackets = 0
-    #Loop through all the flow records in the input file
-    for rec in infile:
-        if rec.etime >= stopTime:
-            break
-        if rec.stime < startTime:
-            continue
-    
-        #Aggregate flows into the specified time frequency
-        if rec.stime > startTime + frequency:
-            #Array to keep track of the probability distribution
-            Pi = {}
-            
-            topk = dict(list(sorted(numberOfPacketsPerIP.items(), key=lambda item: item[1], reverse=True))[:k])
+def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
+    #Open file to write alerts to
+    TPfile = open("Detections/TopKFlows/NetFlow/TP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
-            #Loop through each IP flow in the time frequency
-            for key, value in topk.items():
-                #Add the probability of the current destination flow having the size that it does to the distribution
-                Pi[str(key)] = value
+    #Write the column titles to the files
+    TPfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
+    #Open file to write alerts to
+    FPfile = open("Detections/TopKFlows/NetFlow/FP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
-            distributions.append(Pi)
-            numberOfPacketsPerIP ={}
-            sumOfPackets = 0
-            startTime = startTime + frequency
-    
-        #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
-        #If it has not been encountered before it is added to the dictionary
-        if rec.dip in numberOfPacketsPerIP:
-            numberOfPacketsPerIP[rec.dip] += rec.packets
-        else:
-            numberOfPacketsPerIP[rec.dip] = rec.packets
-        sumOfPackets += rec.packets
-    
+    #Write the column titles to the files
+    FPfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
-    infile.close()
-    json_file = open("NetFlow/TopKFlows/Calculations/topKflowsDict.json", "w")
-    json.dump(distributions,json_file)
-    json_file.close()
+    #Open file to write alerts to
+    FNfile = open("Detections/TopKFlows/NetFlow/FN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
-def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
-    f = open("Calculations/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,Position,Packets,Percentage")
+    #Write the column titles to the files
+    FNfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
+
+    #Open file to write alerts to
+    TNfile = open("Detections/TopKFlows/NetFlow/TN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -117,28 +89,50 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
             i = 0
             #Loop through each IP flow in the time frequency
             for key, value in topk.items():
+                attack = isAttack(rec.stime - frequency, rec.stime)
                 exists = False
                 if notTheFirstTime:
                     for j in range(len(lastDistribution)):
                         if str(key) == lastDistribution[j][0]:
                             exists = True
-                    if not exists: # and (value/sumOfPackets) >= 0.01:
-                        f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
+                    if not exists:
                         change = True
                         alert = {
                             "sTime": rec.stime- frequency,
                             "eTime": rec.stime,
                             "Gateway": systemId,
                             "Deviation_score": normalization(20-i, 0, 20),
+                            "srcIP": rec.sip,
+                            "dstIP": rec.dip,
+                            "srcPort": rec.sport,
+                            "dstPort": rec.dport,
+                            "protocol": rec.protocol,
                             "Position": i+1,
                             "Packets": value,
                             "Percentage": value/sumOfPackets,
-                            "Real_label": int(isAttack(startTime)),
+                            "Real_label": int(attack),
                             "Attack_type": "Flooding"
                         }
                         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                    
+                    line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(20-i,0, 20) + ","+ str(20-i) + "," + str(i+1) + "," + str(value) + "," + str(value/sumOfPackets)
+                    if not exists and attack:
+                        TPfile.write(line)
+                    elif not exists and not attack:
+                        FPfile.write(line)
+                    elif exists and attack:
+                        FNfile.write(line)
+                    elif exists and not attack:
+                        TNfile.write(line)
+
                     if change:
                         change = False
+                else:
+                    line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                    if attack:
+                        FNfile.write(line)
+                    elif not attack:
+                        TNfile.write(line)
                 #Add the probability of the current destination flow having the size that it does to the distribution
                 Pi.append((str(key), value, value/sumOfPackets))
 
@@ -157,4 +151,7 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
         else:
             numberOfPacketsPerIP[rec.dip] = rec.packets
         sumOfPackets += rec.packets
-    
+    TPfile.close()
+    FPfile.close()
+    FNfile.close()
+    TNfile.close()

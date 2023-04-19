@@ -13,8 +13,17 @@ import json
             attackDate:     string, date of the attack the detection are made on
 '''
 def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    TPf = open("Detections/RandomForest/NetFlow/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FPf = open("Detections/RandomForest/NetFlow/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FNf = open("Detections/RandomForest/NetFlow/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    TNf = open("Detections/RandomForest/NetFlow/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -44,8 +53,10 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-    timeStamps = pd.to_datetime(timeStamps)
+    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
+    sTimes = pd.to_datetime(sTimes)
+    eTimes = pd.to_datetime(eTimes)
 
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
@@ -53,26 +64,42 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                #Skip IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-        
-            f.write(line)
             alert = {
-                    "Time": timeStamps[i],
+                    "sTime": sTimes[i],
+                    "eTime": eTimes[i],
                     "Gateway": systemId,
+                    "srcIP":testingMeasurements[i][0],
+                    "dstIP": testingMeasurements[i][1],
+                    "srcPort": testingMeasurements[i][2],
+                    "dstPort": testingMeasurements[i][3],
+                    "protocol": testingMeasurements[i][4],
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-        
-    f.close()
+        line = "\n"  + sTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(testingMeasurements[i])):
+            #Skip IP fields
+            if j == 0 or j == 1 or j == 16:
+                continue
+            line += "," + str(testingMeasurements[i][j])
+        line += "," +str(testingLabel[i])
+
+        if predictions[i] == 1 and testingLabel[i]:
+            TPf.write(line)
+        elif predictions[i] == 1 and not testingLabel[i]:
+            FPf.write(line)
+        elif predictions[i] == 0 and testingLabel[i]:
+            FNf.write(line)
+        elif predictions[i] == 0 and not testingLabel[i]:
+            TNf.write(line)
+    
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()
 '''
     Detect anomalies based on a random forest classifier and write them to file
     Specifically without IPs
@@ -82,8 +109,17 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
             attackDate:     string, date of the attack the detections are made on
 '''
 def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    f = open("Detections/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    TPf = open("Detections/RandomForest/NetFlow/TP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FPf = open("Detections/RandomForest/NetFlow/FP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    FNf = open("Detections/RandomForest/NetFlow/FN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+
+    TNf = open("Detections/RandomForest/NetFlow/TN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -114,8 +150,10 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-    timeStamps = pd.to_datetime(timeStamps)
+    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
+    sTimes = pd.to_datetime(sTimes)
+    eTimes = pd.to_datetime(eTimes)
     
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
@@ -123,19 +161,34 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-        
-            f.write(line)
             alert = {
-                    "Time": timeStamps[i],
+                    "sTime": sTimes[i],
+                    "eTime": eTimes[i],
                     "Gateway": systemId,
+                    "srcPort": testingMeasurements[i][0],
+                    "dstPort": testingMeasurements[i][1],
+                    "protocol": testingMeasurements[i][2],
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-    f.close()
+        line = "\n"  + sTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(testingMeasurements[i])):
+            line += "," + str(testingMeasurements[i][j])
+        line += "," +str(testingLabel[i])
+
+        if predictions[i] == 1 and testingLabel[i]:
+            TPf.write(line)
+        elif predictions[i] == 1 and not testingLabel[i]:
+            FPf.write(line)
+        elif predictions[i] == 0 and testingLabel[i]:
+            FNf.write(line)
+        elif predictions[i] == 0 and not testingLabel[i]:
+            TNf.write(line)
+    
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()

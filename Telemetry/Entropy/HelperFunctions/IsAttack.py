@@ -1,3 +1,5 @@
+from datetime import timedelta
+from datetime import timedelta
 from silk import *
 from .AttackTimestamps import attackTimestamps
 googleeu_mp = IPv4Addr('34.105.154.156')
@@ -25,21 +27,24 @@ victim = trondheim_mp
     Output:
                     boolean, whether the flow is an attack flow or not
 '''
-def isAttackFlow(sip, dip):
-    if (sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses):
+def isAttackFlow(sip, dip, start, end):
+    if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses)) and isAttack(start, end):
         return True
     else:
         return False
 
 '''
-    Checks whether a flow is an attack flow or not
+    Checks whether a period is an attack period or not
     Input:
-            timeStamp:  datetime object, the timestamp of a potential attack period
+            start:  datetime object, the start time of a potential attack period
+            end:    datetime object, the end time of a potential attack period
     Output:
-                        boolean, whether the flow is an attack flow or not
+                        boolean, whether the period is an attack period or not
 '''
-def isAttack(timeStamp):
-    if timeStamp in attackTimestamps:
-        return True
-    else:
-        return False
+def isAttack(start, end):
+    exists = False
+    for i in range(int((end-start).total_seconds())+1):
+        time = start + timedelta(seconds = i)
+        if time.replace(microsecond=0) in attackTimestamps:
+            exists = True
+    return exists

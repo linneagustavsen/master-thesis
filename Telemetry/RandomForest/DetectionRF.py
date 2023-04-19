@@ -1,9 +1,9 @@
+from datetime import timedelta
 import pandas as pd
 import numpy as np
 import json
 import paho.mqtt.client as mqtt
 import pickle
-from HelperFunctions.IsAttack import isAttack
 
 '''
     Detect anomalies based on a random forest classifier
@@ -15,11 +15,18 @@ from HelperFunctions.IsAttack import isAttack
             attackDate:     string, date of the attack the calculations are made on
 '''
 def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
-    f = open("Detections/RandomForest/Telemetry/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_not = open("Detections/RandomForest/Telemetry/NotAlerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
-    f_not.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
-
+    TPf = open("Detections/RandomForest/Telemetry/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
+    
+    FPf = open("Detections/RandomForest/Telemetry/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
+    
+    FNf = open("Detections/RandomForest/Telemetry/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
+    
+    TNf = open("Detections/RandomForest/Telemetry/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
+    
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -55,23 +62,32 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            print("One alert at index:", i, "this had label", testingLabel[i], "in the testing data set")
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-            f.write(line)
             alert = {
-                    "Time": timeStamps[i],
+                    "sTime": timeStamps[i] - timedelta(seconds = 2),
+                    "eTime": timeStamps[i],
                     "Gateway": systemId,
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": "Flooding"
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+        line = "\n" + (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(testingMeasurements[i])):
+            line += "," + str(testingMeasurements[i][j])
+        line += "," +str(testingLabel[i])
 
-    f.close()
-    f_not.close()
+        if predictions[i] == 1 and testingLabel[i]:
+            TPf.write(line)
+        elif predictions[i] == 1 and not testingLabel[i]:
+            FPf.write(line)
+        elif predictions[i] == 0 and testingLabel[i]:
+            FNf.write(line)
+        elif predictions[i] == 0 and not testingLabel[i]:
+            TNf.write(line)
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()
 
 
 '''trainingSet = "Telemetry/RandomForest/Data/TrainingSet.pkl"

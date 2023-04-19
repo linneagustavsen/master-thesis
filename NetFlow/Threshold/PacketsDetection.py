@@ -22,10 +22,28 @@ from HelperFunctions.Normalization import normalization
 '''
 def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
     #Open file to write alerts to
-    packetsFile = open("Detections/Threshold/NetFlow/Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
+    TPpacketsFile = open("Detections/Threshold/NetFlow/TP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
     #Write the column titles to the files
-    packetsFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPpacketsFile = open("Detections/Threshold/NetFlow/FP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNpacketsFile = open("Detections/Threshold/NetFlow/FN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNpacketsFile = open("Detections/Threshold/NetFlow/TN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     json_file_packets = open("NetFlow/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
@@ -85,25 +103,43 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime > startTime + interval:
-            #Store the number of packets and bytes this time interval
+            #Store the number of packets and packets this time interval
             packetNumberArray.append(numberOfPackets(records))
-            
+
+            attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
-                if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                    packetsFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
+                change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
+                
+                if abs(change) > thresholdPackets:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])), maxmin_packets["minimum"], maxmin_packets["maximum"]),
-                        "Change": abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"]),
+                        "Change": abs(change),
                         "Value": packetNumberArray[i],
                         "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"]) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
+                if abs(change) > thresholdPackets and attack:
+                    TPpacketsFile.write(line)
+                elif abs(change) > thresholdPackets and not attack:
+                    FPpacketsFile.write(line)
+                elif abs(change) <= thresholdPackets and attack:
+                    FNpacketsFile.write(line)
+                elif abs(change) <= thresholdPackets and not attack:
+                    TNpacketsFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNpacketsFile.write(line)
+                elif not attack:
+                    TNpacketsFile.write(line)
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -112,7 +148,10 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
 
         records.append(rec)
     
-    packetsFile.close()
+    TPpacketsFile.close()
+    FPpacketsFile.close()
+    FNpacketsFile.close()
+    TNpacketsFile.close()
 
     infile.close()
     

@@ -24,12 +24,36 @@ from HelperFunctions.Normalization import normalization
 '''
 def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPSEntropy, thresholdPSEntropyRate, attackDate):
     #Open files to write alerts to
-    packetSizeEntropyFile = open("Detections/Entropy/NetFlow/PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetSizeEntropyRateFile = open("Detections/Entropy/NetFlow/PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
+    TPpacketSizeEntropyFile = open("Detections/Entropy/NetFlow/TP.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPpacketSizeEntropyRateFile = open("Detections/Entropy/NetFlow/TP.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
     #Write the column titles to the files
-    packetSizeEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    packetSizeEntropyRateFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FPpacketSizeEntropyFile = open("Detections/Entropy/NetFlow/FP.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPpacketSizeEntropyRateFile = open("Detections/Entropy/NetFlow/FP.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    FNpacketSizeEntropyFile = open("Detections/Entropy/NetFlow/FN.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNpacketSizeEntropyRateFile = open("Detections/Entropy/NetFlow/FN.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open files to write alerts to
+    TNpacketSizeEntropyFile = open("Detections/Entropy/NetFlow/TN.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNpacketSizeEntropyRateFile = open("Detections/Entropy/NetFlow/TN.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TNpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     
     json_file_ps = open("NetFlow/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ps = json.load(json_file_ps)
@@ -102,38 +126,67 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
 
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
-                if packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]) < 0:
+                change = packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])
+                change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
+                attack = isAttack(rec.stime - frequency,rec.stime)
+                if change < 0:
                         attackType = "Same protocol"
                 else:
                     attackType = "Different protocols"
-                if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdPSEntropy:
-                    packetSizeEntropyFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
+                if abs(change) > thresholdPSEntropy:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin_ps["minimum"], maxmin_ps["maximum"]),
-                        "Change": abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
+                        "Change": abs(change),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                     }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdPSEntropyRate:
-                    packetSizeEntropyRateFile.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
+                if abs(change_r) > thresholdPSEntropyRate:
                     alert = {
                         "sTime": rec.stime - frequency,
                         "eTime": rec.stime,
                         "Gateway": systemId,
-                        "Deviation_score": normalization(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
-                        "Change": abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])),
+                        "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
+                        "Change": abs(change_r),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
-                        "Real_label": int(isAttack(rec.stime)),
+                        "Real_label": int(attack),
                         "Attack_type": attackType
                     }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
+                if abs(change) > thresholdPSEntropy and attack:
+                    TPpacketSizeEntropyFile.write(line)
+                elif abs(change) > thresholdPSEntropy and not attack:
+                    FPpacketSizeEntropyFile.write(line)
+                elif abs(change) <= thresholdPSEntropy and attack:
+                    FNpacketSizeEntropyFile.write(line)
+                elif abs(change) <= thresholdPSEntropy and not attack:
+                    TNpacketSizeEntropyFile.write(line)
+                
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
+                if abs(change_r) > thresholdPSEntropyRate and attack:
+                    TPpacketSizeEntropyRateFile.write(line)
+                elif abs(change_r) > thresholdPSEntropyRate and not attack:
+                    FPpacketSizeEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdPSEntropyRate and attack:
+                    FNpacketSizeEntropyRateFile.write(line)
+                elif abs(change_r) <= thresholdPSEntropyRate and not attack:
+                    TNpacketSizeEntropyRateFile.write(line)
+            else:
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
+                if attack:
+                    FNpacketSizeEntropyFile.write(line)
+                    FNpacketSizeEntropyRateFile.write(line)
+                elif not attack:
+                    TNpacketSizeEntropyFile.write(line)
+                    TNpacketSizeEntropyRateFile.write(line)
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -142,8 +195,15 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
 
         records.append(rec)
     
-    packetSizeEntropyFile.close()
-    packetSizeEntropyRateFile.close()
+    TPpacketSizeEntropyFile.close()
+    TPpacketSizeEntropyRateFile.close()
+    FPpacketSizeEntropyFile.close()
+    FPpacketSizeEntropyRateFile.close()
+    FNpacketSizeEntropyFile.close()
+    FNpacketSizeEntropyRateFile.close()
+    TNpacketSizeEntropyFile.close()
+    TNpacketSizeEntropyRateFile.close()
+    
 
     infile.close()
     

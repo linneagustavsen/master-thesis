@@ -24,10 +24,28 @@ from HelperFunctions.Normalization import normalization
 
 def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate):
     #Open file to write alerts to
-    f_bytes = open("Detections/Threshold/Telemetry/NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf_bytes = open("Detections/Threshold/Telemetry/TP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    f_bytes.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPf_bytes = open("Detections/Threshold/Telemetry/FP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNf_bytes = open("Detections/Threshold/Telemetry/FN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNf_bytes = open("Detections/Threshold/Telemetry/TN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     json_file = open("Telemetry/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
@@ -73,10 +91,9 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
             bytesArray.append(np.nan)
             continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
-        dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
 
         #If there is not enough datapoints the minute is skipped
-        if len(dfEgressBytes) < 10 or len(dfEgressPackets) < 10:
+        if len(dfEgressBytes) < 10:
             startTime = startTime + frequency
             bytesArray.append(np.nan)
             continue
@@ -89,26 +106,46 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
             startTime = startTime + frequency
             continue
         
+        attack = isAttack(stopTime- frequency, stopTime)
         #Compare the difference of each metric with a threshold
         if bytesArray !=  np.nan:
-            if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
-                f_bytes.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
+            change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
+            if abs(change) > thresholdBytes:
                 alert = {
                     "sTime": stopTime- frequency,
                     "eTime": stopTime,
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])), maxmin["minimum"], maxmin["maximum"]),
-                    "Change": abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])),
+                    "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                    "Change": abs(change),
                     "Value": bytesArray[i],
                     "Mean_last_10": np.nanmean(bytesArray[i-windowSize: i-1]),
-                    "Real_label": int(isAttack(stopTime)),
+                    "Real_label": int(attack),
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1]))
+            if abs(change) > thresholdBytes and attack:
+                TPf_bytes.write(line)
+            elif abs(change) > thresholdBytes and not attack:
+                FPf_bytes.write(line)
+            elif abs(change) <= thresholdBytes and attack:
+                FNf_bytes.write(line)
+            elif abs(change) <= thresholdBytes and not attack:
+                TNf_bytes.write(line)
+        else:
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNf_bytes.write(line)
+            elif not attack:
+                TNf_bytes.write(line)
         #Push the start time by the specified frequency
         startTime = startTime + frequency
 
-    f_bytes.close()
+    TPf_bytes.close()
+    FPf_bytes.close()
+    FNf_bytes.close()
+    TNf_bytes.close()
 
 '''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"

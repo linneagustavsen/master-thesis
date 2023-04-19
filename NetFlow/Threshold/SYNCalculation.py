@@ -39,7 +39,7 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
 
         if rec.packets >= 2:
             calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i]))
-        if isAttackFlow(rec.sip, rec.dip):
+        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ")+"," + str(synPacketsPerFlow[i]))
         i += 1
     infile.close()

@@ -29,7 +29,7 @@ def makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interv
     data = np.empty((len(entropy_timeStamps),len(columTitles)))
     
     for i in range(len(entropy_timeStamps)):
-        curMeasurements = np.concatenate((entropy_measurements[i],isAttack(entropy_timeStamps[i])), axis=None)
+        curMeasurements = np.concatenate((entropy_measurements[i],isAttack(entropy_timeStamps[i]- frequency, entropy_timeStamps[i])), axis=None)
 
         data[i] = curMeasurements
     dataSet = pd.DataFrame(data, columns=columTitles)
