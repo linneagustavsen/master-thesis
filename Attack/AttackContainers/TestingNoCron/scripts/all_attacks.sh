@@ -53,10 +53,8 @@ echo "Start $attack_type attack" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Curl to the victim server
-curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
+curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log &
 
-#Write to file
-echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Execute the attack and write the output to file
 ./attack.sh $attack_type $destination_ip "$attack_script1" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_stats_log1 &
@@ -97,10 +95,8 @@ echo "Finished traceroute to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a 
 echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
 #Curl to the victim server
-curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
+curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log &
 
-#Write to file
-echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 pkill -f "$attack_script1"
 pkill -f "$attack_script2"
 pkill -f "$attack_script3"

@@ -3,7 +3,7 @@ FROM debian:stable-slim
 RUN mkdir /home/output/wiresharkTraces
 RUN mkdir /home/output/logs
 RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils tshark iptables iproute2 procps curl
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y hping3 traceroute slowhttptest moreutils iptables iproute2 procps curl
 #ARG SSH_PRIVATE_KEY
 #RUN mkdir /root/.ssh
 #RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
