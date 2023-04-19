@@ -33,9 +33,6 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, inter
         if predictions[i] == 1:
             line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(testingMeasurements[i])):
-                #Skip IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
                 line += "," + str(testingMeasurements[i][j])
             line += "," +str(testingLabel[i])
         
@@ -43,9 +40,6 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, inter
         if predictions[i] == 0:
             line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(testingMeasurements[i])):
-                if j == 0 or j == 1 or j == 16:
-                    #Skip IP fields
-                    continue
                 line += "," + str(testingMeasurements[i][j])
             line += "," +str(testingLabel[i])
         
