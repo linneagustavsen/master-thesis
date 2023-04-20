@@ -84,14 +84,14 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
             break
         if rec.stime < startTime:
             continue
-        synSYNPerFlow.append(rec.syn)
+        synSYNPerFlow.append(rec.packets)
 
         attack = isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)
         #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= windowSize:
             change = synSYNPerFlow[i] - np.nanmean(synSYNPerFlow[i-windowSize: i-1])
             
-            if rec.syn >= threshold:
+            if rec.packets >= threshold:
                 alert = {
                         "sTime": rec.stime,
                         "eTime": rec.etime,
