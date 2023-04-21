@@ -14,7 +14,7 @@ from HelperFunctions.IsAttack import *
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
+def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, frequency, attackDate):
     p = Path('Calculations')
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
@@ -39,7 +39,7 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
         line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        line += "," +str(int(isAttack(timeStamps[i])))
+        line += "," +str(int(isAttack(timeStamps[i]- frequency, timeStamps[i])))
         
         if prediction[i] == 0:
             f0.write(line)

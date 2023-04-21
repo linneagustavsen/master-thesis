@@ -93,7 +93,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             records = records[sizes[0]:]
             sizes.pop(0)
             i += 1
-        if isAttackFlow(rec.sip, rec.dip):
+        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
         records.append(rec)

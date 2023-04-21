@@ -44,7 +44,7 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
         line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        line += "," +str(int(isAttack(timeStamps[i])))
+        line += "," +str(int(isAttack(timeStamps[i]- timedelta(seconds = 2), timeStamps[i])))
         
         if prediction[i] == 0:
             f0.write(line)

@@ -4,8 +4,6 @@ from .GeneralizedEntropy import *
 import math
 import pandas as pd
 from silk import *
-from .IsAttack import *
-
 '''
     Get data from an InfluxDB
     Input:  

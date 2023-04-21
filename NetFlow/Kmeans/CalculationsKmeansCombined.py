@@ -3,7 +3,6 @@ from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
-from HelperFunctions.IsAttack import *
 from HelperFunctions.StructureData import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
 

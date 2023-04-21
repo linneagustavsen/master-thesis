@@ -42,7 +42,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
         line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        line += "," +str(int(isAttack(timeStamps[i])))
+        line += "," +str(int(isAttack(timeStamps[i] + interval - frequency, timeStamps[i] + interval)))
         
         if prediction[i] == 0:
             f0.write(line)

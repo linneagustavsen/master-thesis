@@ -140,7 +140,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             sizes.pop(0)
             i += 1
         #Check if it is an attack flow
-        if isAttackFlow(rec.sip, rec.dip):
+        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
 
         records.append(rec)
