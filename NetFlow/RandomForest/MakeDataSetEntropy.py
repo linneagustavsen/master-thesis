@@ -1,3 +1,4 @@
+from pathlib import Path
 from HelperFunctions.GetData import *
 from datetime import datetime
 import pandas as pd
@@ -18,11 +19,15 @@ from HelperFunctions.IsAttack import *
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True, exist_ok=False)
     columTitles = ["entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]   
 
     entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle("NetFlow/RandomForest/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df.to_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle(str(q) + "/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
     entropy_timeStamps = pd.to_datetime(entropy_timeStamps)
     

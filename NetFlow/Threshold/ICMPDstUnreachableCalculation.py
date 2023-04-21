@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from datetime import datetime,timedelta
@@ -14,9 +15,13 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate):
+    p = Path('Calculations')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True, exist_ok=False)
     #Open file to write alerts to
-    calculations = open("Calculations/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open(str(q) + "/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open(str(q) + "/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,ICMPDstUnreachable")
     attackFlows.write("sTime,eTime,ICMPDstUnreachable")
@@ -51,7 +56,6 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             sizes.append(thisMinuteSize)
             windowTime += frequency
         if rec.stime > startTime + interval:
-            
             #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
@@ -64,7 +68,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             i += 1
 
         if isAttackFlow(rec.sip, rec.dip):
-            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(numberOfIcmpDstUnreachablePackets[i]))
+            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
         records.append(rec)
         
 

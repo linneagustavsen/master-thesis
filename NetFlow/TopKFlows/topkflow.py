@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -50,12 +51,20 @@ def topkflows(silkFile, start, stop, frequency, k):
     
 
     infile.close()
-    json_file = open("NetFlow/TopKFlows/Calculations/topKflowsDict.json", "w")
+    p = Path('NetFlow')
+    q = p / 'TopKFlows' / 'Calculations'
+    if not q.exists():
+        q.mkdir(parents=True)
+    json_file = open(str(q) + "/topKflowsDict.json", "w")
     json.dump(distributions,json_file)
     json_file.close()
 
 def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
-    f = open("Calculations/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Calculations')
+    q = p / 'TopKFlows' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f = open(str(q) + "/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,Position,Packets,Percentage")
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')

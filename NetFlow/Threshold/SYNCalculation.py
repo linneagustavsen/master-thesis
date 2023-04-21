@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from datetime import datetime
 from HelperFunctions.IsAttack import *
@@ -11,9 +12,14 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def synCalculation(silkFile, start, stop, systemId, attackDate):
+    p = Path('Calculations')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    calculations = open("Calculations/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open("Calculations/Threshold/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    #Open file to write alerts to
+    calculations = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open(str(q) + "/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,synPacketsPerFlow")
     attackFlows.write("sTime,eTime,synPacketsPerFlow")

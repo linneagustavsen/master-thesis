@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
@@ -11,9 +12,13 @@ import numpy as np
             attackDate:     string, date of the attack the detection are made on
 '''
 def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
-    f = open("Detections/RandomForest/NetFlow/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f = open(str(q) + "/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
-    f_not = open("Detections/RandomForest/NetFlow/NotAlerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_not = open(str(q) + "/NotAlerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_not.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
@@ -22,7 +27,11 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    timeStamps = pd.read_pickle(str(q) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
@@ -63,9 +72,13 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
             attackDate:     string, date of the attack the detections are made on
 '''
 def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
-    f = open("Detections/RandomForest/NetFlow/AlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f = open(str(q) + "/AlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
-    f_not = open("Detections/RandomForest/NetFlow/NotAlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_not = open(str(q) + "/NotAlertsNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_not.write("Time,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
@@ -75,7 +88,11 @@ def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    timeStamps = pd.read_pickle(str(q) + "/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])

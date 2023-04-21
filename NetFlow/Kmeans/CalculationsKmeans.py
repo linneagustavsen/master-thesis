@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 from HelperFunctions.GetData import *
 from silk import *
@@ -15,11 +16,15 @@ from NetFlow.Kmeans.ClusterLabelling import labelCluster
             attackDate: string, date of the attack the calculations are made on
 '''
 def kmeansCalculation(silkFile, start, stop, systemId, attackDate):
-    f0 = open("Calculations/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f1 = open("Calculations/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Calculations')
+    q = p / 'Kmeans' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True, exist_ok=False)
+    f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
-    cluster = open("Calculations/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
     testingData = getDataNetFlow(silkFile, start, stop)

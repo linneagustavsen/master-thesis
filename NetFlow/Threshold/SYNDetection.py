@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from datetime import datetime
 import numpy as np
@@ -13,8 +14,12 @@ import numpy as np
             attackDate: string, date of the attack the calculations are made on
 '''
 def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate):
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    f = open("Detections/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 
