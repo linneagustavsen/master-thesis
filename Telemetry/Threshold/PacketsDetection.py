@@ -1,4 +1,5 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -17,8 +18,12 @@ from HelperFunctions.Distributions import *
             attackDate:             string, date of the attack the calculations are made on
 '''
 def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate):
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
     #Open file to write alerts to
-    f_pkts = open("Detections/Threshold/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_pkts = open(str(r) + "/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
     f_pkts.write("Time,Change,Value,Mean_last_"+ str(windowSize))

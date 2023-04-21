@@ -1,6 +1,7 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
-from HelperFunctions.GetData import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
@@ -16,8 +17,12 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
-    f0 = open("Calculations/Kmeans/Telemetry/Entropy.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
-    f1 = open("Calculations/Kmeans/Telemetry/Entropy.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+    p = Path('Calculations')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f0 = open(str(q) + "/Entropy.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+    f1 = open(str(q) + "/Entropy.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
     f0.write("Time,entropy_packet_size,entropy_rate_packet_size,real_label")
     f1.write("Time,entropy_packet_size,entropy_rate_packet_size,real_label")
 

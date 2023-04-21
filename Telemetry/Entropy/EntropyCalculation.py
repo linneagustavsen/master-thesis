@@ -1,4 +1,5 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -17,8 +18,12 @@ from HelperFunctions.IsAttack import isAttack
 '''
 
 def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
+    p = Path('Calculations')
+    q = p / 'Entropy' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    calculations = open("Calculations/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open(str(q) + "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,entropy_packet_size,entropy_rate_packet_size,numberOfPackets,numberOfBytes,real_label")
 

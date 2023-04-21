@@ -1,6 +1,7 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
-from HelperFunctions.GetData import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
 
@@ -20,11 +21,18 @@ from HelperFunctions.Distributions import *
             attackDate:             string, date of the attack the calculations are made on
 '''
 def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
+    p = Path('Detections')
+    q = p / 'Entropy' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
     #Open file to write alerts to
-    f = open("Detections/Entropy/Telemetry/EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_rate = open("Detections/Entropy/Telemetry/EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_pkts = open("Detections/Threshold/Telemetry/NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_bytes = open("Detections/Threshold/Telemetry/NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f = open(str(q) + "EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_rate = open(str(q) + "EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_pkts = open(str(r) + "NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_bytes = open(str(r) + "NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))

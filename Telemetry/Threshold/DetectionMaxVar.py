@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from pathlib import Path
 from HelperFunctions.GetData import *
 from .FindMaxVar import *
 
@@ -16,12 +17,20 @@ from .FindMaxVar import *
             
 '''
 def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate):
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
+    s = Path('Telemetry')
+    q = s / 'Threshold' / 'Thresholds'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open json file with threshold values
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
+    json_file_mean_var = open(str(q) + "/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     
     json_file_mean_var.close()
-    f = open("Detections/Threshold/Telemetry/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
+    f = open(str(r) + "/MaxVar.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(field)+".csv", "a")
 
     maxVar = findMaxVar(json_object_mean_var)
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')

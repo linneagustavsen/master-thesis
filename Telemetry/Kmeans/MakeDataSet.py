@@ -1,10 +1,11 @@
-from HelperFunctions.GetData import *
+from pathlib import Path
 from datetime import datetime,timedelta
 import pandas as pd
 from HelperFunctions.StructureData import *
 import numpy as np
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 
 
 '''
@@ -28,13 +29,17 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
 
-    df.to_pickle("Telemetry/Kmeans/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("Telemetry/Kmeans/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    p = Path('Telemetry')
+    q = p / 'Kmeans' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    df.to_pickle(str(q) +"/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q) +"/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
 
     entropy_df = getEntropyData(startTime, stopTime, systemId, if_name, interval, frequency)
-    entropy_df.to_pickle("Telemetry/Kmeans/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle("Telemetry/Kmeans/RawData/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
+    entropy_df.to_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
     entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)
 
     data = np.empty((len(timeStamps),len(columTitles) ))

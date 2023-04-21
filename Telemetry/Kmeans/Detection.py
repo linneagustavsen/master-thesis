@@ -1,6 +1,7 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
-from HelperFunctions.GetData import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
@@ -15,8 +16,12 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate):
-    f0 = open("Calculations/Kmeans/Telemetry/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f1 = open("Calculations/Kmeans/Telemetry/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Calculations')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
     f1.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
@@ -24,8 +29,12 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, attackDate)
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, if_name, fields)
     
-    #df.to_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    '''p = Path('NetFlow')
+    q = p / 'Kmeans' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)'''
+    #df.to_pickle(str(q) + "Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q) + "Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
     
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)

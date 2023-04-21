@@ -1,3 +1,4 @@
+from matplotlib.path import Path
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
@@ -14,14 +15,22 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate):
-    f0 = open("Calculations/Kmeans/Telemetry/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
-    f1 = open("Calculations/Kmeans/Telemetry/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+    p = Path('Calculations')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f0 = open(str(q) + "/Combined.Cluster0."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
+    f1 = open(str(q) + "/Combined.Cluster1."+ str(systemId) + "." + str(if_name).replace("/","-")+ "." + str(attackDate) + ".csv", "a")
     f0.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
     f1.write("Time,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    #df = pd.read_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    p = Path('Telemetry')
+    q = p / 'Kmeans' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    #df = pd.read_pickle(str(q) +"TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     measurements = testingSet.values
-    timeStamps = pd.read_pickle("Telemetry/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    timeStamps = pd.read_pickle(str(q) +"/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     count0 = 0 
