@@ -12,10 +12,10 @@ MQTT_BROKER = 'mosquitto'
 MQTT_PORT = 1883
 MQTT_USER = 'aggregation'
 MQTT_PASSWORD = 'aggregationPass'
-MQTT_TOPIC = 'detections/modules/#'
+MQTT_TOPIC_INPUT = 'detections/modules/#'
 MQTT_TOPIC_OUTPUT = 'detections/correlation'
 
-class Aggregation:
+class Correlation_MQTT:
     """
         The class is initialized with data fields and database dictionaries.
     """
@@ -41,7 +41,14 @@ class Aggregation:
         
         for node in self.G:
             self.G.nodes[node]['alerts'] = {}
+        
+        self.alertsIP ={}
 
+        self.alertsCorrelated = {}
+    
+    def addAlertToGraph():
+        self.correlation_mqtt.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)].append(payload)
+        
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
         self.mqtt_client.subscribe(self.input)
@@ -50,8 +57,8 @@ class Aggregation:
         The MQTT commands are listened to and appropriate actions are taken for each.
     """
     #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client, userdata, result):
-        print("Aggregation published to topic", MQTT_TOPIC)
+    def on_publish(self, client, userdata, result):
+        print("Aggregation published to topic", self.input)
     
     def on_message(self, client, userdata, msg):
         print('Incoming message to topic {}'.format(msg.topic))
@@ -64,24 +71,17 @@ class Aggregation:
 
         stime = payload.get('sTime')
         etime = payload.get('eTime')
-        fuzzyStartTime = stime - timedelta(seconds = 30)
         gateway = payload.get('Gateway')
-        attack_type = payload.get('Attack_type')
-        exists = False
-        existTime = datetime()
-        for i in range(int((etime-fuzzyStartTime).total_seconds())+1):
-            time = fuzzyStartTime + timedelta(seconds = i)
-            if time.replace(microsecond=0) in self.G.nodes[gateway]['alerts']:
-                exists = True
-                existTime = time
-        
-        if exists:
-            self.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)].append(payload)
-            if len(self.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)]) > 3:
-                #self.mqtt_client.publish(self.output,json.dumps(G))
-                self.driver.send('manyAlerts','Correlation', args=[self.G, gateway,])
-        else:
-            self.alertDB[gateway][etime.replace(microsecond=0)] = [payload]
+
+        self.driver.send('aggregateTime','Correlation', args=[stime, etime, gateway, payload])
+        try:
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
+            self.driver.send('aggregateIPs','Correlation', args=[stime, etime, srcIP, payload])
+            self.driver.send('aggregateIPs','Correlation', args=[stime, etime, dstIP, payload])
+        except Exception as err:
+            print('Message sent to topic {} had no IP addresses. {}'.format(msg.topic, err))
+            return
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -97,164 +97,162 @@ class Aggregation:
             self.mqtt_client.disconnect()
 
 """
-    This class is for correlating alerts from the aggregation.
+    This class is for aggregating and correlating alerts
 """
-class Correlation:
-    def __init__(self, aggregation):
-        self.aggregation = aggregation
+class Correlation_Sender:
+    def __init__(self, correlation_mqtt):
+        self.correlation_mqtt = correlation_mqtt
 
-    def sendMessage(self, attackType, deviation_score, srcIP, dstIP, gateways):
-        self.aggregation.mqtt_client.publish(MQTT_TOPIC_OUTPUT, json.dumps({"Attack_type": attackType, "Deviation_score": deviation_score, "srcIP": srcIP, "dstIP": dstIP, "Gateways": gateways}))
+    def sendMessageRanking(self, attackType, deviation_score, srcIP, dstIP, gateways):
+        self.correlation_mqtt.mqtt_client.publish(MQTT_TOPIC_OUTPUT, json.dumps({"Attack_type": attackType, "Deviation_score": deviation_score, "srcIP": srcIP, "dstIP": dstIP, "Gateways": gateways}))
     
-    def validateRegistration(self, username, name, password, walkieId, role, localServer):
-        usernameInUse = False
-        validServer = False
-        validWalkie = False
-        error = 0
-        for x in self.authMqtt.registeredUsers.keys():
-            if username == x:
-                usernameInUse = True
-                error = 7
-
-        for x in self.authMqtt.localServerInfo.keys():
-            if x == localServer:
-                validServer = True
-
-        for x in self.authMqtt.registeredWalkies.keys():
-            if x == walkieId:
-                validWalkie = True
-
-
-        if usernameInUse:
-            self.authMqtt.driver.send('notValidReg', 'Authentication_server', args=[error,walkieId])
-        elif not validServer:
-            error = 13
-            self.authMqtt.driver.send('notValidReg', 'Authentication_server', args=[error,walkieId])
-        elif not validWalkie:
-            error = 14
-            self.authMqtt.driver.send('notValidReg', 'Authentication_server', args=[error,walkieId])
-        else:
-            self.authMqtt.driver.send('validReg', 'Authentication_server', args=[username, name, password, walkieId, role, localServer])
-
-    """
-        Adds the user that wants to register to the "database"
-    """       
-    def registration(self, username, name, password, walkieId, role, localServer):
-        self.authMqtt.registeredUsers.update({username: [name, password,localServer]})
-
-    """
-        Validates if the user can log in or not by checking if the username and password given matches a user in the database.
-        Also checks if the walkieId given belongs to a valid walkie.
-        If the user is valid to log in a message is sent to the driver with the username, password, walkieId, localServer and token.
-        If a user is not valid the driver is notified and the incident is logged.
-        Token is a unique string of hexadecimal numbers used for message authentication.
-    """ 
-    def validateLogin(self, username, password, walkieId, localServer):
-        sentValid = False
-        validWalkie = False
-        token = ""
-        error = None
+    def aggregateTime(self, stime, etime, gateway, payload):
+        fuzzyStartTime = stime - timedelta(seconds = 30)
+        exists = False
+        existTime = datetime()
+        for i in range(int((etime-fuzzyStartTime).total_seconds())+1):
+            time = fuzzyStartTime + timedelta(seconds = i)
+            if time.replace(microsecond=0) in self.correlation_mqtt.G.nodes[gateway]['alerts']:
+                exists = True
+                existTime = time
         
-        for i in range(32):
-            del i
-            randomNr = random.randint(0, 1)
-            if randomNr == 0:
-                randomUpperLetter = chr(random.randint(ord('A'), ord('F')))
-                token += randomUpperLetter
-            elif randomNr == 1:
-                number = str(random.randint(1, 9))
-                token += number
-
-        for x in self.authMqtt.registeredWalkies.keys():
-            if x == walkieId:
-                validWalkie = True
-
-        for x, y in self.authMqtt.registeredUsers.items():
-            if x == username and y[1] == password and y[2]== localServer and validWalkie:
-                self.authMqtt.driver.send('validLog', 'Authentication_server', args=[username, password, walkieId, token, localServer])
-                sentValid = True
+        if exists:
+            self.correlation_mqtt.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)].append(payload)
+            if len(self.correlation_mqtt.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)]) > 3:
+                deviation_scores = []
+                real_labels = []
+                attack_types = []
+                for alert in self.correlation_mqtt.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)]:
+                    deviation_scores.append(alert["Deviation_score"])
+                    real_labels.append(alert["Real_label"])
+                    attack_types.append(alert["Attack_type"])
+                self.self.correlation_mqtt.driver.send('manyAlertsTime','Correlation', args=[stime, etime, gateway, deviation_scores, real_labels, attack_types])
             else:
-                error = 1
+                self.self.correlation_mqtt.driver.send('notEnough','Correlation')
+        else:
+            self.G.nodes[gateway]['alerts'][etime.replace(microsecond=0)] = [payload]
+            self.self.correlation_mqtt.driver.send('notEnough','Correlation')
+    
+    def aggregateIPs(self, stime, etime, ip, payload):
+        if ip in self.correlation_mqtt.alertsIP:
+            fuzzyStartTime = stime - timedelta(minutes = 15)
+            exists = False
+            existTime = datetime()
+            for i in range(int((etime-fuzzyStartTime).total_seconds())+1):
+                time = fuzzyStartTime + timedelta(seconds = i)
+                if time.replace(microsecond=0) in self.correlation_mqtt.alertsIP[ip]:
+                    exists = True
+                    existTime = time
+            if exists:
+                self.correlation_mqtt.alertsIP[ip][existTime.replace(microsecond=0)].append(payload)
+                if len(self.correlation_mqtt.alertsIP[ip][existTime.replace(microsecond=0)]) > 10:
+                    deviation_scores = []
+                    real_labels = []
+                    attack_types = []
+                    for alert in self.correlation_mqtt.alertsIP[ip][existTime.replace(microsecond=0)]:
+                        deviation_scores.append(alert["Deviation_score"])
+                        real_labels.append(alert["Real_label"])
+                        attack_types.append(alert["Attack_type"])
+                    self.self.correlation_mqtt.driver.send('manyAlertsIPs','Correlation', args=[stime, etime, ip, deviation_scores, real_labels, attack_types])
+                else:
+                    self.self.correlation_mqtt.driver.send('manyAlertsIPs','Correlation')
+            else:
+                self.alertsIP[ip][etime.replace(microsecond=0)] = [payload]
+                self.self.correlation_mqtt.driver.send('notEnough','Correlation')
+        else:
+            self.self.correlation_mqtt.driver.send('notEnough','Correlation')
 
-            
-        if not sentValid:
-            f = open("UnsuccessfulLoginsLog.txt", "a")
-            now = datetime.now()
-            current_time = now.strftime("%H:%M:%S")
-            today = date.today()
-            dateToday = today.strftime("%B %d, %Y")
-            txt = "Date: {}. Time: {}. \nUser with username {} tried to login using {} as password with walkieId {}. This returned the error message {}.\n \n"
-            f.write(txt.format(dateToday, current_time, username,password, walkieId, error))
-            f.close()
-            self.authMqtt.driver.send('notValidLog', 'Authentication_server', args = [error, walkieId])
-            
-    """
-        Updates the database of registered walkie talkies to contain the current user field of the user logged in.
-    """ 
-    def login(self, username, password, walkieId, token, localServer):
-        self.authMqtt.registeredWalkies[walkieId][2] = username
+    def correlateTime(self, stime, etime, gateway, deviation_scores, real_labels, attack_types):
+        exists = False
+        existTimes = []
+        gateways = []
+        for otherGateway in self.correlation_mqtt.G.nodes:
+            if otherGateway == gateway:
+                continue
+            if nx.shortest_path_length < 4:
+                fuzzyStartTime = stime - timedelta(seconds = 30)
+                for i in range(int((etime-fuzzyStartTime).total_seconds())+1):
+                    time = fuzzyStartTime + timedelta(seconds = i)
+                    if time.replace(microsecond=0) in self.correlation_mqtt.G.nodes[otherGateway]['alerts']:
+                        exists = True
+                        existTimes.append(time)
+                
+        if exists:
+            alert = {
+                "sTime": stime,
+                "eTime": etime,
+                "Deviation_score": deviation_scores,
+                "Real_labels": real_labels,
+                "Attack_type": attack_types
+                }
+            self.correlation_mqtt.alertsCorrelated[existTime.replace(microsecond=0)].append(alert)
+            if len(self.correlation_mqtt.G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)]) > 3:
+                self.self.correlation_mqtt.driver.send('manyAlertsTime','Correlation', args=[stime, etime, gateways])
+            else:
+                self.self.correlation_mqtt.driver.send('notEnough','Correlation')
+        else:
+            self.G.nodes[gateway]['alerts'][etime.replace(microsecond=0)] = [payload]
+            self.self.correlation_mqtt.driver.send('notEnough','Correlation')
 
+        self.correlation_mqtt.driver.send('suspicion','Correlation', args=[])
+
+    def correlateIPs(self, stime, etime, ip):
+
+        self.self.correlation_mqtt.driver.send('suspicion','Correlation', args=[])
 t0 = {
     'source': 'initial',
     'target': 'idle'}
 
 t1 = {
-    'trigger': 'loginRequest',
+    'trigger': 'aggregateTime',
     'source': 'idle',
-    'target': 'validating_login',
-    'effect': 'validateLogin(*)'} # Variables are passed to the state machines with the (*) notation.
+    'target': 'aggregation',
+    'effect': 'aggregateTime(*)'} # Variables are passed to the state machines with the (*) notation.
 
 t2 = {
-    'trigger': 'notValidLog',
-    'source': 'validating_login',
-    'effect': 'sendErrorLogin(*)',
-    'target': 'idle'}
+    'trigger': 'aggregateIPs',
+    'source': 'idle',
+    'target': 'aggregation',
+    'effect': 'aggregateIPs(*)'}
 
 t3 = {
-    'trigger': 'validLog',
-    'source': 'validating_login',
-    'target': 'idle',
-    'effect': 'sendMessageLogin(*); login(*)'}
+    'trigger': 'manyAlertsTime',
+    'source': 'aggregation',
+    'target': 'correlation',
+    'effect': 'correlateTime(*)'}
 
 t4 = {
-    'trigger': 'registrationRequest',
-    'source': 'idle',
-    'target': 'validating_registration',
-    'effect': 'validateRegistration(*)'}
+    'trigger': 'manyAlertsIP',
+    'source': 'aggregation',
+    'target': 'correlation',
+    'effect': 'correlateIPs(*)'}
 
 t5 = {
-    'trigger': 'notValidReg',
-    'source': 'validating_registration',
-    'effect': 'sendErrorRegistration(*)',
-    'target': 'idle'}
+    'trigger': 'suspicion',
+    'source': 'correlation',
+    'target': 'idle',
+    'effect': 'sendMessageRanking(*)'}
 
 t6 = {
-    'trigger': 'validReg',
-    'source': 'validating_registration',
-    'target': 'idle',
-    'effect': 'registration(*); sendMessageReg(*)'}
+    'trigger': 'notEnough',
+    'source': 'aggregation',
+    'target': 'idle'}
+
 
 idle = {'name': 'idle'}
 
-validating_login = {
-    'name': 'validating_login',
-    'defer': 'registationRequest; loginRequest; delete_user; log_out'
-}
-
-validating_registration = {
-    'name': 'validation_registration',
-    'defer': 'registationRequest; loginRequest; delete_user; log_out'
-}
+correlation = {'name': 'correlation'}
+aggregation = {'name': 'aggregation'}
 
 driver = stmpy.Driver()
-server = AuthenticationServer_MQTT(MQTT_BROKER, MQTT_PORT, driver, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT)
+correlation_mqtt = Correlation_MQTT(MQTT_BROKER, MQTT_PORT, driver, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT)
 
-authenticationSender = AuthenticationServer_Sender(server)
-machine = stmpy.Machine(name='Authentication_server', transitions=[t0, t1, t2, t3, t4, t5, t6],
-                        obj=authenticationSender, states=[idle, validating_login, validating_registration])
-authenticationSender.stm = machine
+correlation = Correlation_Sender(correlation_mqtt)
+machine = stmpy.Machine(name='Correlation', transitions=[t0, t1, t2, t3, t4, t5, t6],
+                        obj=correlation, states=[idle, aggregation, correlation])
+correlation.stm = machine
 
 
 driver.add_machine(machine)
-server.start()
+correlation_mqtt.start()
 driver.start()
