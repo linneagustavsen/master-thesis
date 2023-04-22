@@ -130,9 +130,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
             continue
         #Implement the sliding window
         if rec.stime > windowTime + frequency:
-            lastSizes = 0
-            for size in sizes:
-                lastSizes += size
+            lastSizes  = sum(sizes)
             thisMinuteSize = len(records) - lastSizes
             sizes.append(thisMinuteSize)
             windowTime += frequency
