@@ -77,8 +77,8 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
         attack = isAttack(timeStamps[i]+ interval - frequency, timeStamps[i]+ interval)
         if prediction[i] == attackCluster:
             alert = {
-                        "sTime": timeStamps[i]- frequency,
-                        "eTime": timeStamps[i],
+                        "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Value": measurements[i],
                         "Real_label": int(attack),

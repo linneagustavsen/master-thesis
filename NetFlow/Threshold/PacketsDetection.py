@@ -116,8 +116,8 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                 
                 if abs(change) > thresholdPackets:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"]),
                         "Change": abs(change),
@@ -128,7 +128,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"]) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"])) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
                 if abs(change) > thresholdPackets and attack:
                     TPpacketsFile.write(line)
                 elif abs(change) > thresholdPackets and not attack:

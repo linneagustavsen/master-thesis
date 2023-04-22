@@ -91,8 +91,8 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold
         attack = isAttack(timeStamps[i] -timedelta(seconds = 2), timeStamps[i])
         if prediction[i] == attackCluster: 
             alert = {
-                        "sTime": timeStamps[i] - timedelta(seconds = 2),
-                        "eTime": timeStamps[i],
+                        "sTime": (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Value": measurements[i],
                         "Real_label": int(attack),

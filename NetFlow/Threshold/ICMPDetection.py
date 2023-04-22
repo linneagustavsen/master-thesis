@@ -132,8 +132,8 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
 
                 if abs(change_ratio) > thresholdICMPRatio:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"]),
                         "protocol": rec.protocol,
@@ -147,8 +147,8 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
 
                 if abs(change_packets) > thresholdNumberOfICMPPackets:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"]),
                         "protocol": rec.protocol,
@@ -160,7 +160,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"]) + ","+ str(abs(change_ratio)) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"])) + ","+ str(abs(change_ratio)) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1]))
                 if abs(change_ratio) > thresholdICMPRatio and attack:
                     TPicmpRatioFile.write(line)
                 elif abs(change_ratio) > thresholdICMPRatio and not attack:
@@ -170,7 +170,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                 elif abs(change_ratio) <= thresholdICMPRatio and not attack:
                     TNicmpRatioFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"]) + ","+ str(abs(change_packets)) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"])) + ","+ str(abs(change_packets)) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1]))
                 if abs(change_packets) > thresholdNumberOfICMPPackets and attack:
                     TPicmpPacketsFile.write(line)
                 elif abs(change_packets) > thresholdNumberOfICMPPackets and not attack:

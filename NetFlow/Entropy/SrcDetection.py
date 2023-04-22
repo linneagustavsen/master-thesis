@@ -142,8 +142,8 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                     attackType = ""
                 if abs(change) > thresholdSrcEntropy:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]),
                         "Change": abs(change),
@@ -155,8 +155,8 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_r) > thresholdSrcEntropyRate:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
                         "Change": abs(change_r),
@@ -167,7 +167,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]) + ","+ str(abs(change)) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"])) + ","+ str(abs(change)) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1]))
                 if abs(change) > thresholdSrcEntropy and attack:
                     TPsrcEntropyFile.write(line)
                 elif abs(change) > thresholdSrcEntropy and not attack:
@@ -177,7 +177,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 elif abs(change) <= thresholdSrcEntropy and not attack:
                     TNsrcEntropyFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1]))
                 if abs(change_r) > thresholdSrcEntropyRate and attack:
                     TPsrcEntropyRateFile.write(line)
                 elif abs(change_r) > thresholdSrcEntropyRate and not attack:

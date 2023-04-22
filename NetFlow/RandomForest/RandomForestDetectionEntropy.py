@@ -72,8 +72,8 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
     for i in range(len(predictions)):
         if predictions[i] == 1:
             alert = {
-                    "sTime": timeStamps[i]- frequency,
-                    "eTime": timeStamps[i],
+                    "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],

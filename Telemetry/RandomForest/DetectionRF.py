@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 from datetime import timedelta
-=======
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
->>>>>>> main
 import pandas as pd
 import numpy as np
 import json
@@ -81,8 +78,8 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     for i in range(len(predictions)):
         if predictions[i] == 1:
             alert = {
-                    "sTime": timeStamps[i] - timedelta(seconds = 2),
-                    "eTime": timeStamps[i],
+                    "sTime": (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],

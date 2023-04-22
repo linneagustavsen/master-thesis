@@ -90,8 +90,8 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
         attack = isAttack(timeStamps[i]+ interval - frequency, timeStamps[i]+ interval)
         if prediction[i] == attackCluster:
             alert = {
-                        "sTime": timeStamps[i]+ interval - frequency,
-                        "eTime": timeStamps[i]+ interval,
+                        "sTime": (timeStamps[i]+ interval - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": (timeStamps[i]+ interval).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Value": measurements[i],
                         "Real_label": int(attack),

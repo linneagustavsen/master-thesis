@@ -77,8 +77,8 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
     for i in range(len(prediction)):
         if prediction[i] == attackCluster:
             alert = {
-                        "sTime": sTime[i],
-                        "eTime": eTime[i],
+                        "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "srcIP":measurements[i][0],
                         "dstIP": measurements[i][1],

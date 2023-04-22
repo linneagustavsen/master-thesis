@@ -7,7 +7,7 @@ interval = timedelta(minutes = 1)
 silkFile = "/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/dip-in-destination-ips-sorted.rw"
 topkflows2(silkFile, start, stop, interval, 20, "19.01", "oslo-gw")
 '''
-import math
+'''import math
 def generalizedEntropy(alpha, Pi):
     sumProb = 0
     for pi in Pi:
@@ -25,4 +25,24 @@ def generalizedEntropy2(alpha, Pi):
     return fraction*math.log(sumProb, 2)
 Pi = [0.1, 0.3, 0.1, 0.2, 0.3]
 print(generalizedEntropy(10, Pi))
-print(generalizedEntropy2(10, Pi))
+print(generalizedEntropy2(10, Pi))'''
+
+
+from datetime import timedelta
+from NetFlow.Threshold.SYNDetection import synDetection
+
+from Telemetry.Entropy.Detection import detectionEntropyTelemetry
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systems = ["oslo-gw"]
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+systemId =  "oslo-gw"
+silkFileSyn = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
+synDetection(silkFileSyn, start, stop, systemId, 10, 2, attackDate)

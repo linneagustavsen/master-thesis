@@ -96,8 +96,8 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                     if not exists:
                         change = True
                         alert = {
-                            "sTime": rec.stime- frequency,
-                            "eTime": rec.stime,
+                            "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             "Gateway": systemId,
                             "Deviation_score": normalization(20-i, 0, 20),
                             "srcIP": int(rec.sip),
@@ -113,7 +113,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                         }
                         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                     
-                    line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(20-i,0, 20) + ","+ str(20-i) + "," + str(i+1) + "," + str(value) + "," + str(value/sumOfPackets)
+                    line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(20-i,0, 20)) + ","+ str(20-i) + "," + str(i+1) + "," + str(value) + "," + str(value/sumOfPackets)
                     if not exists and attack:
                         TPfile.write(line)
                     elif not exists and not attack:

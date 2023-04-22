@@ -86,8 +86,8 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, frequency, D
         attack = isAttack(timeStamps[i]- frequency, timeStamps[i])
         if prediction[i] == attackCluster:
             alert = {
-                        "sTime": timeStamps[i] - frequency,
-                        "eTime": timeStamps[i],
+                        "sTime": (timeStamps[i] - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Value": measurements[i],
                         "Real_label": int(attack),

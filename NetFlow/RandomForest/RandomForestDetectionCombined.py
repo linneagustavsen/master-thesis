@@ -74,8 +74,8 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
     for i in range(len(predictions)):
         if predictions[i] == 1:
             alert = {
-                    "sTime": sTimes[i],
-                    "eTime": eTimes[i],
+                    "sTime": sTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "srcIP":testingMeasurements[i][0],
                     "dstIP": testingMeasurements[i][1],
@@ -179,8 +179,8 @@ def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval
     for i in range(len(predictions)):
         if predictions[i] == 1:
             alert = {
-                    "sTime": sTimes[i],
-                    "eTime": eTimes[i],
+                    "sTime": sTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "srcPort": testingMeasurements[i][0],
                     "dstPort": testingMeasurements[i][1],

@@ -167,8 +167,8 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                     attackType = ""
                 if abs(change) > thresholdFlowEntropy:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Change": abs(change),
                         "Deviation_score": normalization(abs(change),maxmin_flow["minimum"], maxmin_flow["maximum"]),
@@ -180,8 +180,8 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_r) > thresholdFlowEntropyRate:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Change": abs(change_r),
                         "Deviation_score": normalization(abs(change_r),maxmin_flow_rate["minimum"], maxmin_flow_rate["maximum"]),
@@ -193,8 +193,8 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_nf) > thresholdNumberOfFlows:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Change": abs(change_nf),
                         "Deviation_score": normalization(abs(change_nf), maxmin_nf["minimum"], maxmin_nf["maximum"]),
@@ -205,7 +205,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_flow["minimum"], maxmin_flow["maximum"]) + ","+ str(abs(change)) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_flow["minimum"], maxmin_flow["maximum"])) + ","+ str(abs(change)) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-windowSize: i-1]))
                 if abs(change) > thresholdFlowEntropy and attack:
                     TPflowEntropyFile.write(line)
                 elif abs(change) > thresholdFlowEntropy and not attack:
@@ -215,7 +215,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                 elif abs(change) <= thresholdFlowEntropy and not attack:
                     TNflowEntropyFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_flow_rate["minimum"], maxmin_flow_rate["maximum"]) + ","+  str(abs(change_r)) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_flow_rate["minimum"], maxmin_flow_rate["maximum"])) + ","+  str(abs(change_r)) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-windowSize: i-1]))
                 if abs(change_r) > thresholdFlowEntropyRate and attack:
                     TPflowEntropyRateFile.write(line)
                 elif abs(change_r) > thresholdFlowEntropyRate and not attack:
@@ -225,7 +225,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                 elif abs(change_r) <= thresholdFlowEntropyRate and not attack:
                     TNflowEntropyRateFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_nf), maxmin_nf["minimum"], maxmin_nf["maximum"]) + ","+ str(abs(change_nf)) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_nf), maxmin_nf["minimum"], maxmin_nf["maximum"])) + ","+ str(abs(change_nf)) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-windowSize: i-1]))
                 if abs(change_nf) > thresholdNumberOfFlows and attack:
                     TPflowFile.write(line)
                 elif abs(change_nf) > thresholdNumberOfFlows and not attack:

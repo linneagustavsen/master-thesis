@@ -143,8 +143,8 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                     attackType = "Different protocols"
                 if abs(change) > thresholdPSEntropy:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
                         "Change": abs(change),
@@ -156,8 +156,8 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_r) > thresholdPSEntropyRate:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
                         "Change": abs(change_r),
@@ -168,7 +168,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                     }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"])) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
                 if abs(change) > thresholdPSEntropy and attack:
                     TPpacketSizeEntropyFile.write(line)
                 elif abs(change) > thresholdPSEntropy and not attack:
@@ -178,7 +178,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                 elif abs(change) <= thresholdPSEntropy and not attack:
                     TNpacketSizeEntropyFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
                 if abs(change_r) > thresholdPSEntropyRate and attack:
                     TPpacketSizeEntropyRateFile.write(line)
                 elif abs(change_r) > thresholdPSEntropyRate and not attack:

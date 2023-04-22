@@ -167,8 +167,8 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
             
                 if abs(change_src) > thresholdSrc:
                     alert = {
-                       "sTime": rec.stime- frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"]),
                         "protocol": rec.protocol,
@@ -181,8 +181,8 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_dst) > thresholdDst:
                     alert = {
-                        "sTime": rec.stime- frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"]),
                         "protocol": rec.protocol,
@@ -195,8 +195,8 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_flow) > thresholdFlow:
                     alert = {
-                        "sTime": rec.stime- frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"]),
                         "protocol": rec.protocol,
@@ -208,7 +208,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"]) + ","+  str(abs(change_src)) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"])) + ","+  str(abs(change_src)) + "," + str(entropyOfSynPacketsPerSrc[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]))
                 if abs(change_src) > thresholdSrc and attack:
                     TPsrcFile.write(line)
                 elif abs(change_src) > thresholdSrc and not attack:
@@ -218,7 +218,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 elif abs(change_src) <= thresholdSrc and not attack:
                     TNsrcFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"]) + ","+ str(abs(change_dst)) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"])) + ","+ str(abs(change_dst)) + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]))
                 if abs(change_dst) > thresholdDst and attack:
                     TPdstFile.write(line)
                 elif abs(change_dst) > thresholdDst and not attack:
@@ -228,7 +228,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 elif abs(change_dst) <= thresholdDst and not attack:
                     TNdstFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"]) + ","+ str(abs(change_flow)) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"])) + ","+ str(abs(change_flow)) + "," + str(entropyOfSynPacketsPerFlow[i]) + "," + str(np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]))
                 if abs(change_flow) > thresholdFlow and attack:
                     TPflowFile.write(line)
                 elif abs(change_flow) > thresholdFlow and not attack:

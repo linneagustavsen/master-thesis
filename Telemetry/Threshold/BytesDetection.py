@@ -118,8 +118,8 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
             change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
             if abs(change) > thresholdBytes:
                 alert = {
-                    "sTime": stopTime- frequency,
-                    "eTime": stopTime,
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
                     "Change": abs(change),
@@ -130,7 +130,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1]))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1]))
             if abs(change) > thresholdBytes and attack:
                 TPf_bytes.write(line)
             elif abs(change) > thresholdBytes and not attack:

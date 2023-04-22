@@ -87,8 +87,8 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
             attack = isAttack(row.values["_time"]-timedelta(seconds = 2), row.values["_time"])
             if deviation > threshold:
                 alert = {
-                    "sTime": row.values["_time"]- timedelta(seconds = 2),
-                    "eTime": row.values["_time"],
+                    "sTime": (row.values["_time"]- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
                     "Value": row.values["_value"],

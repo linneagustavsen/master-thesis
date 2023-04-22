@@ -119,8 +119,8 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
             change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
             if abs(change) > thresholdPackets:
                 alert = {
-                    "sTime": stopTime- frequency,
-                    "eTime": stopTime,
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
                     "Change": abs(change),
@@ -130,7 +130,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
             if abs(change) > thresholdPackets and attack:
                 TPf_packets.write(line)
             elif abs(change) > thresholdPackets and not attack:

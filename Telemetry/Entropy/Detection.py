@@ -141,8 +141,8 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                 attackType = "Different protocols"
             if abs(change) > thresholdEntropy:
                 alert = {
-                    "sTime": stopTime- frequency,
-                    "eTime": stopTime,
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
                     "Change": abs(change),
@@ -152,7 +152,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
             if abs(change) > thresholdEntropy and attack:
                 TPf.write(line)
             elif abs(change) > thresholdEntropy and not attack:
@@ -171,8 +171,8 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
             if abs(change_r) > thresholdEntropyRate:
                 alert = {
-                    "sTime": stopTime- frequency,
-                    "eTime": stopTime,
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
                     "Change": abs(change_r),
@@ -182,7 +182,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
             if abs(change) > thresholdEntropyRate and attack:
                 TPf_rate.write(line)
             elif abs(change) > thresholdEntropyRate and not attack:
@@ -208,8 +208,8 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     FPf_rate.close()
     FNf_rate.close()
     TNf_rate.close()
-
-'''start = "2022-09-21 01:00:00"
+'''
+start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"

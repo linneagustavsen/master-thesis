@@ -50,7 +50,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     maxmin_syn = json.load(json_file_syn)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'synDetectionNetFlow'
     MQTT_PASSWORD = 'synDetectionPass'
@@ -98,8 +98,8 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
             
             if rec.packets >= threshold:
                 alert = {
-                        "sTime": rec.stime,
-                        "eTime": rec.etime,
+                        "sTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
                         "srcIP": int(rec.sip),
@@ -115,7 +115,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]) + ","+ str(abs(change)) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))
+            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"])) + ","+ str(abs(change)) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))
             if abs(change) > threshold and attack:
                 TPsynFile.write(line)
             elif abs(change) > threshold and not attack:

@@ -146,8 +146,8 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 
                 if abs(change) > thresholdDstEntropy:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Change": abs(change),
                         "Deviation_score": normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]),
@@ -159,8 +159,8 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 if abs(change_r) >  thresholdDstEntropyRate:
                     alert = {
-                        "sTime": rec.stime - frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Change": abs(change_r),
                         "Deviation_score": normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
@@ -171,7 +171,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]) + ","+ str(abs(change)) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"])) + ","+ str(abs(change)) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1]))
                 if abs(change) > thresholdDstEntropy and attack:
                     TPdstEntropyFile.write(line)
                 elif abs(change) > thresholdDstEntropy and not attack:
@@ -181,7 +181,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 elif abs(change) <= thresholdDstEntropy and not attack:
                     TNdstEntropyFile.write(line)
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]) + ","+ str(abs(change_r)) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1]))
                 if abs(change_r) > thresholdDstEntropyRate and attack:
                     TPdstEntropyRateFile.write(line)
                 elif abs(change_r) > thresholdDstEntropyRate and not attack:

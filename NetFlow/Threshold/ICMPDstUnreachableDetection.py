@@ -114,8 +114,8 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
                 attack = isAttack(rec.stime - frequency, rec.stime)
                 if abs(change) > threshold:
                     alert = {
-                        "sTime": rec.stime- frequency,
-                        "eTime": rec.stime,
+                        "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
                         "protocol": rec.protocol,
@@ -127,7 +127,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
                         }
                     mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
                 
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin["minimum"], maxmin["maximum"]) + ","+ str(abs(change)) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))
+                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(numberOfIcmpDstUnreachablePackets[i]) + "," + str(np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))
                 if abs(change) > threshold and attack:
                     TPICMPDstUnreachableFile.write(line)
                 elif abs(change) > threshold and not attack:
