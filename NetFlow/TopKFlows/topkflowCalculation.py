@@ -4,12 +4,8 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import json
-import json
 import paho.mqtt.client as mqtt
-
 from HelperFunctions.IsAttack import isAttack
-from HelperFunctions.Normalization import normalization
-
 from HelperFunctions.Normalization import normalization
 
 def topkflows(silkFile, start, stop, frequency, k):

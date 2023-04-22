@@ -78,7 +78,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     infile = silkfile_open(silkFile, READ)
 
     #Instantiate empty arrays for the calculated values
-    synSYNPerFlow = []
+    synPacketsPerFlow = []
     
     #Instantiate variables
     i = 0
@@ -89,12 +89,12 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
             break
         if rec.stime < startTime:
             continue
-        synSYNPerFlow.append(rec.packets)
+        synPacketsPerFlow.append(rec.packets)
 
         attack = isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)
         #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= windowSize:
-            change = synSYNPerFlow[i] - np.nanmean(synSYNPerFlow[i-windowSize: i-1])
+            change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
             
             if rec.packets >= threshold:
                 alert = {
@@ -108,14 +108,14 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
                         "dstPort": rec.dport,
                         "protocol": rec.protocol,
                         "Change": abs(change),
-                        "Value": synSYNPerFlow[i],
-                        "Mean_last_10": np.nanmean(synSYNPerFlow[i-windowSize: i-1]),
+                        "Value": synPacketsPerFlow[i],
+                        "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]) + ","+ str(abs(change)) + "," + str(synSYNPerFlow[i]) + "," + str(np.nanmean(synSYNPerFlow[i-windowSize: i-1]))
+            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]) + ","+ str(abs(change)) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))
             if abs(change) > threshold and attack:
                 TPsynFile.write(line)
             elif abs(change) > threshold and not attack:
