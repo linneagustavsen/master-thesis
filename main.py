@@ -5,16 +5,15 @@ from NetFlow.Kmeans.CalculationsKmeans import kmeansCalculation
 from NetFlow.Kmeans.CalculationsKmeansCombined import kmeansCombinedCalculation
 from NetFlow.Kmeans.CalculationsKmeansEntropy import kmeansEntropyCalculation
 from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
-from NetFlow.RandomForest.CalculationsRandomForest import *
+from NetFlow.RandomForest.CalculationsRandomForest import calculationsRandomForestNetFlow, calculationsRandomForestNoIPNetFlow
 from NetFlow.RandomForest.CalculationsRandomForestEntropy import calculationRandomForestNetFlowEntropy
 from NetFlow.RandomForest.CalculationsRandomForestFields import calculationRandomForestNetFlowFields, calculationRandomForestNoIPNetFlowFields
-from NetFlow.RandomForest.MakeDataSet import *
+from NetFlow.RandomForest.MakeDataSet import makeDataSetNetFlow, makeDataSetNoIPNetFlow
 from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
 from NetFlow.TopKFlows.topkflow import topkflows2
-
 '''
     Function to get different calculations on NetFlow data
     Input:  baseFile:       string, raw base file with SiLK NetFlow records,

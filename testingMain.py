@@ -5,10 +5,10 @@ from NetFlow.Kmeans.CalculationsKmeans import kmeansCalculation
 from NetFlow.Kmeans.CalculationsKmeansCombined import kmeansCombinedCalculation
 from NetFlow.Kmeans.CalculationsKmeansEntropy import kmeansEntropyCalculation
 from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
-from NetFlow.RandomForest.CalculationsRandomForest import *
+from NetFlow.RandomForest.CalculationsRandomForest import calculationsRandomForestNetFlow, calculationsRandomForestNoIPNetFlow
 from NetFlow.RandomForest.CalculationsRandomForestEntropy import calculationRandomForestNetFlowEntropy
 from NetFlow.RandomForest.CalculationsRandomForestFields import calculationRandomForestNetFlowFields, calculationRandomForestNoIPNetFlowFields
-from NetFlow.RandomForest.MakeDataSet import *
+from NetFlow.RandomForest.MakeDataSet import makeDataSetNetFlow, makeDataSetNoIPNetFlow
 from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
@@ -221,7 +221,7 @@ interval = timedelta(minutes = 5)
 pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
 attackDate="08.02.11"
 
-#main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
+main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 
 trainingBase="two-hours-2011-02-08_10-12-sorted.rw"
