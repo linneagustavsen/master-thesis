@@ -1,10 +1,12 @@
 from datetime import datetime,timedelta
 import json
+from pathlib import Path
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.Normalization import normalization
+from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
@@ -18,21 +20,29 @@ from HelperFunctions.Normalization import normalization
             attackDate: string, date of the attack to detect
 '''
 def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackDate):
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
+    s = Path('Telemetry')
+    q = s / 'Threshold' / 'Thresholds'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open json file with threshold values
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "r")
+    json_file_mean_var = open(str(q) + "/"+str(systemId)+ "." + str(field)+".json", "r")
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
 
-    TPf = open("Detections/Threshold/Telemetry/TP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf = open(str(r) + "TP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    FPf = open("Detections/Threshold/Telemetry/FP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(r) + "FP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    FNf = open("Detections/Threshold/Telemetry/FN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(r) + "FN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    TNf = open("Detections/Threshold/Telemetry/TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(r) + "TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
     json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel.json", "r")

@@ -1,3 +1,4 @@
+from pathlib import Path
 import statistics
 from HelperFunctions.GetData import *
 import json
@@ -5,10 +6,14 @@ from .FFTDenoiser import *
 import numpy as np
 from datetime import datetime
 
-
+p = Path('Telemetry')
+q = p / 'Threshold'
+s = q / 'Schemas'
+if not s.exists():
+    s.mkdir(parents=True)
 #Open json schema files to make json objects from them
-json_file = open("Telemetry/Threshold/Schemas/RawValuesSchema.json", "r")
-json_file_mean_var = open("Telemetry/Threshold/Schemas/MeanVarSchema.json", "r")
+json_file = open(str(s) + "/RawValuesSchema.json", "r")
+json_file_mean_var = open(str(s) + "/MeanVarSchema.json", "r")
 json_object_raw = json.load(json_file)
 json_object_mean_var = json.load(json_file_mean_var)
 json_file.close()
@@ -57,8 +62,11 @@ def thresholdGeneration(systemId, if_name, field, start, stop):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
+    t = q / 'Thresholds'
+    if not t.exists():
+        t.mkdir(parents=True)
     #Write the mean and variance values to a json file      
-    json_file_mean_var = open("Telemetry/Threshold/Thresholds/"+str(systemId)+ "." + str(field)+".json", "w")
+    json_file_mean_var = open(str(t) + "/"+str(systemId)+ "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 

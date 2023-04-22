@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 from datetime import timedelta
+=======
+from pathlib import Path
+from sklearn.ensemble import RandomForestClassifier
+>>>>>>> main
 import pandas as pd
 import numpy as np
 import json
@@ -15,16 +20,21 @@ import pickle
             attackDate:     string, date of the attack the calculations are made on
 '''
 def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
-    TPf = open("Detections/RandomForest/Telemetry/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf = open(str(q) + "/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
     
-    FPf = open("Detections/RandomForest/Telemetry/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
     
-    FNf = open("Detections/RandomForest/Telemetry/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
     
-    TNf = open("Detections/RandomForest/Telemetry/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
     
     #Parameters for the MQTT connection
@@ -49,11 +59,19 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
+    p = Path('Telemetry')
+    q = p / 'RandomForest'
+    r = q / 'RawData'
+    s = q / 'Models'
+    if not q.exists():
+        q.mkdir(parents=True)
+    if not s.exists():
+        s.mkdir(parents=True)
     # Load the model
-    filename = "Telemetry/RandomForest/Models/RandomForestModel."+str(systemId)+ ".pkl"
+    filename = str(s) + "/RandomForestModel."+str(systemId)+ ".pkl"
     classifier_RF = pickle.load(open(filename, 'rb'))
 
-    timeStamps = pd.read_pickle("Telemetry/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    timeStamps = pd.read_pickle(str(r) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
     
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])

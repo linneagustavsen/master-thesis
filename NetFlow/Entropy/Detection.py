@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -30,20 +31,27 @@ import numpy as np
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, thresholdDstEntropy, thresholdDstEntropyRate, thresholdFlowEntropy, thresholdFlowEntropyRate, thresholdNumberOfFlows, thresholdICMPRatio, thresholdNumberOfICMPPackets, thresholdPSEntropy, thresholdPSEntropyRate, thresholdPackets, thresholdBytes, attackDate):
+    p = Path('Detections')
+    q = p / 'Entropy' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    r = p / 'Threshold' / 'NetFlow'
+    if not r.exists():
+        r.mkdir(parents=True)
     #Open file to write alerts to
-    srcEntropyFile = open("Detections/Entropy/NetFlow/SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcEntropyRateFile = open("Detections/Entropy/NetFlow/SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyFile = open("Detections/Entropy/NetFlow/DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyRateFile = open("Detections/Entropy/NetFlow/DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowEntropyFile = open("Detections/Entropy/NetFlow/FlowEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowEntropyRateFile = open("Detections/Entropy/NetFlow/FlowEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowFile = open("Detections/Threshold/NetFlow/NumberOfFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    icmpRatioFile = open("Detections/Threshold/NetFlow/ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    icmpPacketsFile = open("Detections/Threshold/NetFlow/ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetSizeEntropyFile = open("Detections/Entropy/NetFlow/PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetSizeEntropyRateFile = open("Detections/Entropy/NetFlow/PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetsFile = open("Detections/Threshold/NetFlow/Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    bytesFile = open("Detections/Threshold/NetFlow/Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    srcEntropyFile = open(str(q) + "/SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    srcEntropyRateFile = open(str(q) + "/SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    dstEntropyFile = open(str(q) + "/DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    dstEntropyRateFile = open(str(q) + "/DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    flowEntropyFile = open(str(q) + "/FlowEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    flowEntropyRateFile = open(str(q) + "/FlowEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    flowFile = open(str(r) + "/NumberOfFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    icmpRatioFile = open(str(r) + "/ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    icmpPacketsFile = open(str(r) + "/ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    packetSizeEntropyFile = open(str(q) + "/PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    packetSizeEntropyRateFile = open(str(q) + "/PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    packetsFile = open(str(r) + "/Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    bytesFile = open(str(r) + "/Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     srcEntropyFile.write("Time,Change,Value,Mean_last_"+ str(windowSize))
@@ -110,6 +118,11 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime > startTime + interval:
+            if len(records) == 0:
+                startTime = startTime + frequency
+                sizes.pop(0)
+                records.append(rec)
+                continue
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution

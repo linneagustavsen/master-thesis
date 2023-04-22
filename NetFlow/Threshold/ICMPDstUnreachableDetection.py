@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from datetime import datetime,timedelta
@@ -20,8 +21,12 @@ from HelperFunctions.Normalization import normalization
             attackDate: string, date of the attack the calculations are made on
 '''
 def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, threshold, attackDate):
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    f = open("Detections/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f = open(str(q) + "/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
 

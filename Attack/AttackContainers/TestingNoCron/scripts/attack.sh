@@ -17,10 +17,8 @@ function crash {
         echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
         #Curl to the victim server
-        curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
+        curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log &
 
-        #Write to file
-        echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
         ./attack.sh $attack_type $destination_ip "$attack_script"
     elif [ "$was_i_killed" = true ] ; then
         exit   
@@ -37,10 +35,8 @@ function crash {
         echo "Started curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
 
         #Curl to the victim server
-        curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log
+        curl $destination_ip | ts "[%b %d %H:%M:%.S]" |tee -a $curl_log &
 
-        #Write to file
-        echo "Finished curl to $destination_ip" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_log
         ./attack.sh $attack_type $destination_ip "$attack_script"
     fi
 }

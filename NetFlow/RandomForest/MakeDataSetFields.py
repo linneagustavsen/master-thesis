@@ -1,3 +1,4 @@
+from pathlib import Path
 from HelperFunctions.GetData import *
 from datetime import datetime
 import pandas as pd
@@ -15,11 +16,15 @@ import numpy as np
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True, exist_ok=False)
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
 
     df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df.to_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
@@ -42,10 +47,14 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True, exist_ok=False)
     columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "label"]    
     df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle("NetFlow/RandomForest/RawData/NoIP"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/RandomForest/RawData/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df.to_pickle(str(q) + "/NoIP"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q) + "/NoIP"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 

@@ -1,6 +1,7 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
-from HelperFunctions.GetData import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.StructureData import *
 from HelperFunctions.IsAttack import *
 from datetime import datetime
@@ -20,19 +21,24 @@ from Telemetry.Kmeans.ClusterLabelling import labelCluster
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, DBthreshold, c0threshold, c1threshold, attackDate):
-    TPf0 = open("Detections/Kmeans/Telemetry/TP.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf0 = open(str(q) + "/TP.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf0.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    FPf0 = open("Detections/Kmeans/Telemetry/FP.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf0 = open(str(q) + "/FP.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf0.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    FNf0 = open("Detections/Kmeans/Telemetry/FN.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf0 = open(str(q) + "/FN.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf0.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    TNf0 = open("Detections/Kmeans/Telemetry/TN.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf0 = open(str(q) + "/TN.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf0.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
 
-    cluster = open("Detections/Kmeans/Telemetry/Entropy.ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    cluster = open(str(q) + "/Entropy.ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     
     #Parameters for the MQTT connection

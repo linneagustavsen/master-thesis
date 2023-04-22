@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -8,6 +9,7 @@ import json
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.Normalization import normalization
+from HelperFunctionsTelemetry.GetDataTelemetry import getData
 
 '''
     Calculates entropy, packet and byte count and alerts in case of an anomaly
@@ -23,26 +25,30 @@ from HelperFunctions.Normalization import normalization
 '''
 
 def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdBytes, attackDate):
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
     #Open file to write alerts to
-    TPf_bytes = open("Detections/Threshold/Telemetry/TP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf_bytes = open(str(r) + "TP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FPf_bytes = open("Detections/Threshold/Telemetry/FP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf_bytes = open(str(r) + "FP.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FNf_bytes = open("Detections/Threshold/Telemetry/FN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf_bytes = open(str(r) + "FN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    TNf_bytes = open("Detections/Threshold/Telemetry/TN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf_bytes = open(str(r) + "TN.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TNf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))

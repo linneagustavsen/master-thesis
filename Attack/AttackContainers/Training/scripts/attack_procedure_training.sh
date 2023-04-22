@@ -5,7 +5,7 @@ source variables.sh
 
 function interupted {
     iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
-    kill $pid_capture
+    #kill $pid_capture
     #scp -r /home/ somewhere:/home/
     exit
 }
@@ -29,7 +29,7 @@ attack(){
     echo "$1 attack is finished" | ts "[%b %d %H:%M:%.S]" | tee -a $attack_procedure_log
 }
 
-./capture.sh & pid_capture=$!
+#./capture.sh & pid_capture=$!
 
 destination_ip=$machine13_ip
 destination_port=$machine13_port
@@ -85,6 +85,6 @@ attack $attack_type $attack_duration $destination_ip "$attack_script"
 
 iptables -D OUTPUT -d ytelse1.uninett.no -p tcp --tcp-flags RST RST -j DROP
 
-kill $pid_capture
+#kill $pid_capture
 
 #scp -r /home/ somewhere:/home/

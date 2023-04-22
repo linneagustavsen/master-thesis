@@ -80,6 +80,11 @@ def metricCalculation(silkFile, start, stop, frequency, interval):
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime > startTime + interval:
+            if len(records) == 0:
+                startTime = startTime + frequency
+                sizes.pop(0)
+                records.append(rec)
+                continue
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution

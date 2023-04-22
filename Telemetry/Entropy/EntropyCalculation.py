@@ -1,9 +1,11 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctionsTelemetry.GetDataTelemetry import getData
 
 '''
     Calculates entropy and writes calculations to file
@@ -17,8 +19,12 @@ from HelperFunctions.IsAttack import isAttack
 '''
 
 def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
+    p = Path('Calculations')
+    q = p / 'Entropy' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    calculations = open("Calculations/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    calculations = open(str(q) + "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("Time,entropy_packet_size,entropy_rate_packet_size,numberOfPackets,numberOfBytes,real_label")
 
@@ -60,7 +66,7 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
 
         #If there is not enough stored values to compare with we skip the detection
         calculations.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
-                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]) +  "," + str(int(isAttack(stopTime- frequency, stopTime))))
+                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]) +  "," + str(int(isAttack(stopTime - frequency, stopTime))))
         #Push the start time by the specified frequency
         startTime = startTime + frequency
         i += 1

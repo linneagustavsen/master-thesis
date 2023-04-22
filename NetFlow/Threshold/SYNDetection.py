@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from datetime import datetime
 import numpy as np
@@ -17,26 +18,30 @@ from HelperFunctions.Normalization import normalization
             attackDate: string, date of the attack the calculations are made on
 '''
 def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate):
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    TPsynFile = open("Detections/Threshold/NetFlow/TP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPsynFile = open(str(q) + "/TP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FPsynFile = open("Detections/Threshold/NetFlow/FP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPsynFile = open(str(q) + "/FP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FNsynFile = open("Detections/Threshold/NetFlow/FN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNsynFile = open(str(q) + "/FN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    TNsynFile = open("Detections/Threshold/NetFlow/TN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNsynFile = open(str(q) + "/TN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))

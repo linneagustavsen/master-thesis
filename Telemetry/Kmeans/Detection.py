@@ -1,6 +1,7 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
-from HelperFunctions.GetData import *
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
@@ -18,19 +19,24 @@ import paho.mqtt.client as mqtt
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold, c0threshold, c1threshold, attackDate):
-    TPf0 = open("Detections/Kmeans/Telemetry/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf0 = open(str(q) + "/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
-    FPf0 = open("Detections/Kmeans/Telemetry/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf0 = open(str(q) + "/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
-    FNf0 = open("Detections/Kmeans/Telemetry/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf0 = open(str(q) + "/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
-    TNf0 = open("Detections/Kmeans/Telemetry/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf0 = open(str(q) + "/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
 
-    cluster = open("Detections/Kmeans/Telemetry/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -58,8 +64,12 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, if_name, fields)
     
-    #df.to_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle("NetFlow/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    '''p = Path('NetFlow')
+    q = p / 'Kmeans' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)'''
+    #df.to_pickle(str(q) + "Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q) + "Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
     
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)

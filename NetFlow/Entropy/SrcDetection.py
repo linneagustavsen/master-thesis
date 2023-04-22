@@ -1,3 +1,4 @@
+from matplotlib.path import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -23,33 +24,37 @@ from HelperFunctions.Normalization import normalization
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate):
+    p = Path('Detections')
+    q = p / 'Entropy' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open files to write alerts to
-    TPsrcEntropyFile = open("Detections/Entropy/NetFlow/TP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPsrcEntropyRateFile = open("Detections/Entropy/NetFlow/TP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPsrcEntropyFile = open(str(q) + "/TP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPsrcEntropyRateFile = open(str(q) + "/TP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open files to write alerts to
-    FPsrcEntropyFile = open("Detections/Entropy/NetFlow/FP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPsrcEntropyRateFile = open("Detections/Entropy/NetFlow/FP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPsrcEntropyFile = open(str(q) + "/FP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPsrcEntropyRateFile = open(str(q) + "/FP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open files to write alerts to
-    FNsrcEntropyFile = open("Detections/Entropy/NetFlow/FN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNsrcEntropyRateFile = open("Detections/Entropy/NetFlow/FN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNsrcEntropyFile = open(str(q) + "/FN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNsrcEntropyRateFile = open(str(q) + "/FN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FNsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open files to write alerts to
-    TNsrcEntropyFile = open("Detections/Entropy/NetFlow/TN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNsrcEntropyRateFile = open("Detections/Entropy/NetFlow/TN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNsrcEntropyFile = open(str(q) + "/TN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNsrcEntropyRateFile = open(str(q) + "/TN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     json_file_sip = open("NetFlow/Entropy/Calculations/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip = json.load(json_file_sip)
@@ -112,6 +117,11 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
             windowTime += frequency
         #Aggregate flows into the specified time interval
         if rec.stime > startTime + interval:
+            if len(records) == 0:
+                startTime = startTime + frequency
+                sizes.pop(0)
+                records.append(rec)
+                continue
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution

@@ -255,9 +255,12 @@ def icmpDistribution(records):
             icmpPackets += rec.packets
         else:
             packets += rec.packets
-
+    if packets == 0:
+        ratio = 0
+    else:
+        ratio = icmpPackets/packets
     #Return the ratio of ICMP packets to the number of packets of other protocols and the number of ICMP packets
-    return icmpPackets/packets, icmpPackets
+    return ratio, icmpPackets
 
 '''
     Returns the number of packets in an input array of records

@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -21,26 +22,30 @@ from HelperFunctions.Normalization import normalization
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    TPpacketsFile = open("Detections/Threshold/NetFlow/TP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPpacketsFile = open(str(q) + "/TP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FPpacketsFile = open("Detections/Threshold/NetFlow/FP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPpacketsFile = open(str(q) + "/FP.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FNpacketsFile = open("Detections/Threshold/NetFlow/FN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNpacketsFile = open(str(q) + "/FN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    TNpacketsFile = open("Detections/Threshold/NetFlow/TN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNpacketsFile = open(str(q) + "/TN.Packets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TNpacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))

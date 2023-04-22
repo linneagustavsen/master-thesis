@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -7,6 +8,8 @@ import json
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.IsAttack import isAttack
+from HelperFunctions.Normalization import normalization
+
 from HelperFunctions.Normalization import normalization
 
 def topkflows(silkFile, start, stop, frequency, k):
@@ -55,14 +58,21 @@ def topkflows(silkFile, start, stop, frequency, k):
     
 
     infile.close()
-    json_file = open("NetFlow/TopKFlows/Calculations/topKflowsDict.json", "w")
+    p = Path('NetFlow')
+    q = p / 'TopKFlows' / 'Calculations'
+    if not q.exists():
+        q.mkdir(parents=True)
+    json_file = open(str(q) + "/topKflowsDict.json", "w")
     json.dump(distributions,json_file)
     json_file.close()
 
 def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
-    f = open("Calculations/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,Deviation_score,Change,Position,Packets,Percentage")
-
+    p = Path('Calculations')
+    q = p / 'TopKFlows' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    f = open(str(q) + "/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f.write("sTime,eTime,Change,Position,Packets,Percentage")
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -101,7 +111,7 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
                         if str(key) == lastDistribution[j][0]:
                             exists = True
                     if not exists: # and (value/sumOfPackets) >= 0.01:
-                        f.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")  + "," + normalization(20-i,0, 20) + ","+ str(20-i) + "," + str(i+1) + "," + str(value) + "," + str(value/sumOfPackets))
+                        f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(20-i, 0, 20) + ","+  str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
                         change = True
 
                     if change:

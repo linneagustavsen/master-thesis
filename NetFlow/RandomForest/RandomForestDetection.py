@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
@@ -13,16 +14,21 @@ import json
             attackDate:     string, date of the attack the detection are made on
 '''
 def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    TPf = open("Detections/RandomForest/NetFlow/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    
+    TPf = open(str(q) + "/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    FPf = open("Detections/RandomForest/NetFlow/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    FNf = open("Detections/RandomForest/NetFlow/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    TNf = open("Detections/RandomForest/NetFlow/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
     #Parameters for the MQTT connection
@@ -46,17 +52,28 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-
+    
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[:,-1])
 
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    sTimes = pd.read_pickle(str(q) + "/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle(str(q) + "/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTimes = pd.to_datetime(sTimes)
     eTimes = pd.to_datetime(eTimes)
+
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    timeStamps = pd.read_pickle(str(q) +"/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
@@ -109,16 +126,21 @@ def detectionRandomForestNetFlowFields(trainingSet, testingSet, systemId, attack
             attackDate:     string, date of the attack the detections are made on
 '''
 def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, attackDate):
-    TPf = open("Detections/RandomForest/NetFlow/TP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf = open(str(q) + "/TP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    FPf = open("Detections/RandomForest/NetFlow/FP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/FP.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    FNf = open("Detections/RandomForest/NetFlow/FN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/FN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
 
-    TNf = open("Detections/RandomForest/NetFlow/TN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/TN.NoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     
     #Parameters for the MQTT connection
@@ -150,8 +172,12 @@ def detectionRandomForestNoIPNetFlowFields(trainingSet, testingSet, systemId, at
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    sTimes = pd.read_pickle(str(q) + "/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle(str(q) + "/NoIPTesting.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTimes = pd.to_datetime(sTimes)
     eTimes = pd.to_datetime(eTimes)
     

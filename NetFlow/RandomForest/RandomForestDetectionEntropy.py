@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
@@ -13,18 +14,23 @@ import json
             attackDate:     string, date of the attack the detection are made on
 '''
 def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequency, interval, attackDate):
-    TPf = open("Detections/RandomForest/NetFlow/TP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf = open(str(q) + "/TP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    FPf = open("Detections/RandomForest/NetFlow/FP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/FP.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    FNf = open("Detections/RandomForest/NetFlow/FN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/FN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    TNf = open("Detections/RandomForest/NetFlow/TN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/TN.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-    
+
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
     MQTT_PORT = 1883
@@ -52,7 +58,11 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    timeStamps = pd.read_pickle("NetFlow/RandomForest/RawData/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    timeStamps = pd.read_pickle(str(q) + "/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])

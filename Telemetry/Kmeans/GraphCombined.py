@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
@@ -12,9 +13,13 @@ from HelperFunctions.MakePlot import *
             attackDate: string, date of the attack the calculations are made on
 '''
 def kmeansGraphCombined(testingSet, systemId, interval, attackDate):
-    #df = pd.read_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    p = Path('Telemetry')
+    q = p / 'Kmeans' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    #df = pd.read_pickle(str(q) + "/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     measurements = testingSet.values
-    timeStamps = pd.read_pickle("Telemetry/Kmeans/RawData/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    timeStamps = pd.read_pickle(str(q) + "/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     count0 = 0 

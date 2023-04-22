@@ -1,3 +1,4 @@
+from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
@@ -13,16 +14,21 @@ import json
             attackDate:     string, date of the attack the detection are made on
 '''
 def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
-    TPf = open("Detections/RandomForest/NetFlow/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    TPf = open(str(q) + "/NetFlow/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    FPf = open("Detections/RandomForest/NetFlow/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/NetFlow/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    FNf = open("Detections/RandomForest/NetFlow/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/NetFlow/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    TNf = open("Detections/RandomForest/NetFlow/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/NetFlow/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -52,9 +58,13 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    sTimes = pd.read_pickle(str(q) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle(str(q) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTimes = pd.to_datetime(sTimes)
-    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     eTimes = pd.to_datetime(eTimes)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
@@ -109,16 +119,20 @@ def detectionRandomForestNetFlow(trainingSet, testingSet, systemId, interval, at
             attackDate:     string, date of the attack the detections are made on
 '''
 def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate):
-    TPf = open("Detections/RandomForest/NetFlow/TP.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    TPf = open(str(q) + "/NetFlow/TP.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    FPf = open("Detections/RandomForest/NetFlow/FP.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/NetFlow/FP.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    FNf = open("Detections/RandomForest/NetFlow/FN.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/NetFlow/FN.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
 
-    TNf = open("Detections/RandomForest/NetFlow/TN.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/NetFlow/TN.NoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,packet_size_entropy,packet_size_entropy_rate,real_label")
     #Parameters for the MQTT connection
     MQTT_BROKER = 'mosquitto'
@@ -149,9 +163,13 @@ def detectionRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    p = Path('NetFlow')
+    q = p / 'RandomForest' / 'RawData'
+    if not q.exists():
+        q.mkdir(parents=True)
+    sTimes = pd.read_pickle(str(q) + "/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTimes = pd.read_pickle(str(q) + "/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTimes = pd.to_datetime(sTimes)
-    eTimes = pd.read_pickle("NetFlow/RandomForest/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     eTimes = pd.to_datetime(eTimes)
 
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])

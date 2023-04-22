@@ -1,6 +1,8 @@
 from datetime import datetime,timedelta
+from pathlib import Path
 import numpy as np
-from HelperFunctions.GetData import *
+from HelperFunctions.IsAttack import isAttack
+from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
 import json
@@ -19,38 +21,41 @@ from HelperFunctions.Normalization import normalization
             windowSize:             int, represents a multiplier of frequency, how far back we want to compare the value with
             thresholdEntropy:       float, values over this threshold will cause an alert
             thresholdEntropyRate:   float, values over this threshold will cause an alert
-            thresholdPackets:       float, values over this threshold will cause an alert
-            thresholdBytes:         float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
 def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
+    p = Path('Detections')
+    q = p / 'Entropy' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
     #Open file to write alerts to
-    TPf = open("Detections/Entropy/Telemetry/TP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf_rate = open("Detections/Entropy/Telemetry/TP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf = open(str(q) + "/TP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf_rate = open(str(q) + "/TP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FPf = open("Detections/Entropy/Telemetry/FP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf_rate = open("Detections/Entropy/Telemetry/FP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(q) + "/FP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf_rate = open(str(q) + "/FP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FNf = open("Detections/Entropy/Telemetry/FN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf_rate = open("Detections/Entropy/Telemetry/FN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(q) + "/FN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf_rate = open(str(q) + "/FN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    TNf = open("Detections/Entropy/Telemetry/TN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf_rate = open("Detections/Entropy/Telemetry/TN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(q) + "/TN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf_rate = open(str(q) + "/TN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))

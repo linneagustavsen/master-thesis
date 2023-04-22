@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -22,33 +23,37 @@ from HelperFunctions.Normalization import normalization
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate):
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     #Open file to write alerts to
-    TPicmpRatioFile = open("Detections/Threshold/NetFlow/TP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPicmpPacketsFile = open("Detections/Threshold/NetFlow/TP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPicmpRatioFile = open(str(q) + "/TP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPicmpPacketsFile = open(str(q) + "/TP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
     TPicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TPicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FPicmpRatioFile = open("Detections/Threshold/NetFlow/FP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPicmpPacketsFile = open("Detections/Threshold/NetFlow/FP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPicmpRatioFile = open(str(q) + "/FP.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPicmpPacketsFile = open(str(q) + "/FP.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
     FPicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FPicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    FNicmpRatioFile = open("Detections/Threshold/NetFlow/FN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNicmpPacketsFile = open("Detections/Threshold/NetFlow/FN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNicmpRatioFile = open(str(q) + "/FN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNicmpPacketsFile = open(str(q) + "/FN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
     FNicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     FNicmpPacketsFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
     #Open file to write alerts to
-    TNicmpRatioFile = open("Detections/Threshold/NetFlow/TN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNicmpPacketsFile = open("Detections/Threshold/NetFlow/TN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNicmpRatioFile = open(str(q) + "/TN.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNicmpPacketsFile = open(str(q) + "/TN.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
     #Write the column titles to the files
     TNicmpRatioFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
