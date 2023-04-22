@@ -27,8 +27,9 @@ def kmeansCombinedCalculation(testingSet, systemId, interval, attackDate):
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
     sTime, eTime, measurements = structureData(testingSet)
-    measurements = measurements[:, :-1]
     label = measurements[:,-1]
+    measurements = measurements[:, :-1]
+
     sTime = pd.to_datetime(sTime)
     eTime = pd.to_datetime(eTime)
 

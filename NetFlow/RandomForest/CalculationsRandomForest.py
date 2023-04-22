@@ -89,8 +89,8 @@ def calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, inter
     q = p / 'RandomForest' / 'RawData'
     if not q.exists():
         q.mkdir(parents=True)
-    sTime = pd.read_pickle(str(q) + "/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
-    eTime = pd.read_pickle(str(q) + "/RawData/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
+    sTime = pd.read_pickle(str(q) + "/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
+    eTime = pd.read_pickle(str(q) + "/NoIPTesting."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTime = pd.to_datetime(sTime)
     eTime = pd.to_datetime(eTime)
 

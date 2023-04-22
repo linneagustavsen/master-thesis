@@ -13,7 +13,7 @@ from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
 from NetFlow.Threshold.SYNCalculation import synCalculation
-from NetFlow.TopKFlows.topkflowCalculation import topkflows2
+from NetFlow.TopKFlows.topkflow import topkflows2
 
 '''
     Function to get different calculations on NetFlow data
@@ -91,10 +91,10 @@ def kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, freq
     for systemId in systems:
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
         #normal
-        kmeansCalculation(silkFile, start, stop, systemId, attackDate)
+        #kmeansCalculation(silkFile, start, stop, systemId, attackDate)
         print("Finished kmeans flow field calculations")
         #entropy
-        kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
+        #kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
         testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
@@ -149,24 +149,24 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         trainingFile = pathToRawFiles+systemId + "/"+ trainingBase
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
         
-        trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)        
-        testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+        #trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)        
+        #testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        #calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations on all fields")
 
-        trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
-        testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+        #trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        #testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        #calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations without IPs")
 
-        trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
-        testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
+        #trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        #testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        #calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
         print("Finished Random Forest calculations on entropy")
 
-        trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
-        testingSet = makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
-        calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+        #trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
+        #testingSet = makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
+        #calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
         print("Finished Random Forest calculations on fields")
 
         trainingSet = makeDataSetNoIPNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
@@ -210,29 +210,27 @@ def randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopR
         print("Finished Random Forest calculations on entropy")
 
 #Attack 1
-baseFile="twelve-hours-2023-03-08_08-20-sorted.rw"         
-systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
-            "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-            "ma2-gw", "narvik-gw4"]
-start = "2023-03-08 08:00:00"
-stop = "2023-03-08 20:00:00"
-startCombined = "2023-03-08 10:00:00"
-stopCombined = "2023-03-08 16:00:00"
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systems = ["oslo-gw"]
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
 frequency = timedelta(minutes = 1)
 interval = timedelta(minutes = 5)
-pathToRawFiles="<PATH TO RAW FILES>/"
-attackDate="08.03"
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
 
 main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 
-trainingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
-testingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
-startRFTraining = "2023-03-08 10:00:00"
-stopRFTraining = "2023-03-08 15:00:00"
-startRFTesting = "2023-03-08 15:00:00"
-stopRFTesting = "2023-03-08 16:00:00"
-randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
+trainingBase="two-hours-2011-02-08_10-12-sorted.rw"
+testingBase="two-hours-2011-02-08_10-12-sorted.rw"
+startRFTraining = "2011-02-08 10:00:00"
+stopRFTraining = "2011-02-08 11:00:00"
+startRFTesting = "2011-02-08 11:00:00"
+stopRFTesting = "2011-02-08 12:00:00"
+#randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
@@ -243,64 +241,3 @@ interval = timedelta(minutes = 15)
 main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
-
-
-#Attack number 2
-baseFile="twelve-hours-2023-03-17_08-20-sorted.rw"         
-systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
-            "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-            "ma2-gw", "narvik-gw4"]
-start = "2023-03-17 08:00:00"
-stop = "2023-03-17 20:00:00"
-startCombined = "2023-03-17 10:00:00"
-stopCombined = "2023-03-17 16:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 5)
-pathToRawFiles="<PATH TO RAW FILES>/"
-attackDate="17.03"
-
-main(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
-
-trainingBase="twelve-hours-2023-03-17_08-20-sorted.rw"
-testingBase="twelve-hours-2023-03-24_08-20-sorted.rw"
-startRFTraining = "2023-03-17 12:00:00"
-stopRFTraining = "2023-03-17 14:00:00"
-startRFTesting = "2023-03-24 14:30:00"
-stopRFTesting = "2023-03-24 19:00:00"
-randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
-
-interval = timedelta(minutes = 10)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
-randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
-
-interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
-randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
-
-#Attack number 3
-baseFile="twelve-hours-2023-03-24_08-20-sorted.rw"         
-systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
-            "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-            "ma2-gw", "narvik-gw4"]
-start = "2023-03-24 08:00:00"
-stop = "2023-03-24 20:00:00"
-startCombined = "2023-03-24 14:00:00"
-stopCombined = "2023-03-24 19:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 5)
-pathToRawFiles="<PATH TO RAW FILES>/"
-attackDate="24.03"
-
-main(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
-
-interval = timedelta(minutes = 10)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
-
-interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)

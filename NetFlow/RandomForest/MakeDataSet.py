@@ -24,14 +24,14 @@ def makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, pat
     q = p / 'RandomForest' / 'RawData'
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    df.to_pickle(q / path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(q / path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df.to_pickle(str(q) + "/" + path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #df = pd.read_pickle(str(q) + "/" +  path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     sTime, eTime, measurements = structureData(df)
     data = np.empty((len(sTime),len(columTitles)))
 
     entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle(q / path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle(q / path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
+    entropy_df.to_pickle(str(q) + "/" +  path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    #entropy_df = pd.read_pickle(str(q) + "/" +  path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
     entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
 
     now = datetime.now()

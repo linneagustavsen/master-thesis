@@ -23,7 +23,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
         q.mkdir(parents=True, exist_ok=False)
     #Open file to write alerts to
     calculations = open(str(q) + "/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open(str(q) + "/NetFlow/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    attackFlows = open(str(q) + "/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     calculations.write("sTime,eTime,srcEntropy,dstEntropy,flowEntropy")
