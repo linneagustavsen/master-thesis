@@ -23,7 +23,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
     calculations = open(str(q) + "/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open(str(q) + "/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("Time,ICMPDstUnreachable")
+    calculations.write("sTime,eTime,ICMPDstUnreachable")
     attackFlows.write("sTime,eTime,ICMPDstUnreachable")
     
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -59,7 +59,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
             #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
             
-            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
+            calculations.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(numberOfIcmpDstUnreachablePackets[i]))
             
             #Push the sliding window
             startTime = startTime + frequency

@@ -12,15 +12,15 @@ import numpy as np
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculation are made on
 '''
-def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate):
+def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
     f = open(str(q) + "/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    f.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     f_not = open(str(q) + "/NotAlerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_not.write("Time,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    f_not.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[:,-1])
@@ -40,25 +40,17 @@ def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, int
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
+        line = "\n"  + (timeStamps[i] - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        for j in range(len(testingMeasurements[i])):
+            #Skip the IP fields
+            if j == 0 or j == 1 or j == 16:
+                continue
+            line += "," + str(testingMeasurements[i][j])
+        line += "," +str(testingLabel[i])
+
         if predictions[i] == 1:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                #Skip the IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-        
             f.write(line)
         if predictions[i] == 0:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                #Skip the IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(testingMeasurements[i][j])
-            line += "," +str(testingLabel[i])
-        
             f_not.write(line)
 
     f.close()

@@ -19,10 +19,8 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Open file to write alerts to
     #Open file to write alerts to
     calculations = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    attackFlows = open(str(q) + "/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("Time,synPacketsPerFlow")
-    attackFlows.write("sTime,eTime,synPacketsPerFlow")
+    calculations.write("sTime,eTime,synPacketsPerFlow,real_label")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -44,8 +42,6 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
         synPacketsPerFlow.append(rec.packets)
 
         if rec.packets >= 2:
-            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i]))
-        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
-            attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ")+"," + str(synPacketsPerFlow[i]))
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i]) + "," + int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))
         i += 1
     infile.close()

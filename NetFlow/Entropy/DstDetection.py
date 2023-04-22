@@ -69,7 +69,6 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
             if len(records) == 0:
                 startTime = startTime + frequency
                 sizes.pop(0)
-                i += 1
                 records.append(rec)
                 continue
             #Find the probability distribution based on how many packets there is in each destination flow in this time interval

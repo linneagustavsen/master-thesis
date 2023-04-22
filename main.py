@@ -161,7 +161,7 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
 
         trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
         testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
         print("Finished Random Forest calculations on entropy")
 
         trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
@@ -206,7 +206,7 @@ def randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopR
 
         trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
         testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, attackDate)
+        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
         print("Finished Random Forest calculations on entropy")
 
 #Attack 1

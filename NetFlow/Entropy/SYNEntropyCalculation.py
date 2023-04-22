@@ -26,7 +26,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     attackFlows = open(str(q) + "/NetFlow/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    calculations.write("Time,srcEntropy,dstEntropy,flowEntropy")
+    calculations.write("sTime,eTime,srcEntropy,dstEntropy,flowEntropy")
     attackFlows.write("sTime,eTime")
     
     #Makes datetime objects of the input times
@@ -65,7 +65,6 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             if len(records) == 0:
                 startTime = startTime + frequency
                 sizes.pop(0)
-                i += 1
                 records.append(rec)
                 continue
             #Find the probability distribution based on how many SYN packets there is in each source flow in this time interval
@@ -86,7 +85,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             entropyFlow = generalizedEntropy(10,PiF)
             entropyOfSynPacketsPerFlow.append(entropyFlow)
             
-            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(entropyOfSynPacketsPerSrc[i]) 
+            calculations.write("\n" +  (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") +  "," + str(entropyOfSynPacketsPerSrc[i]) 
                             + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
             #Push the sliding window
             startTime = startTime + frequency

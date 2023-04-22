@@ -121,7 +121,6 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
             if len(records) == 0:
                 startTime = startTime + frequency
                 sizes.pop(0)
-                i += 1
                 records.append(rec)
                 continue
             #Find the probability distribution based on how many packets there is in each source flow in this time interval
