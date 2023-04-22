@@ -106,7 +106,7 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
                         if str(key) == lastDistribution[j][0]:
                             exists = True
                     if not exists: # and (value/sumOfPackets) >= 0.01:
-                        f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + normalization(20-i, 0, 20) + ","+  str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
+                        f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(20-i, 0, 20)) + ","+  str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets)))
                         change = True
                     if change:
                         change = False

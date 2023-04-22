@@ -42,9 +42,6 @@ def calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, int
     for i in range(len(predictions)):
         line = "\n"  + (timeStamps[i] - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
         for j in range(len(testingMeasurements[i])):
-            #Skip the IP fields
-            if j == 0 or j == 1 or j == 16:
-                continue
             line += "," + str(testingMeasurements[i][j])
         line += "," +str(testingLabel[i])
 
