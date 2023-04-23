@@ -1,54 +1,100 @@
-from datetime import timedelta, datetime
-import json
+from datetime import datetime, timedelta
+
+import pandas as pd
+from Correlation.NetworkGraph import NetworkGraph
+from Correlation.statemachine import Correlation_Sender
 import paho.mqtt.client as mqtt
-import networkx as nx
+from threading import Thread
+import json
 
-def aggregation():
-    #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
-    MQTT_PORT = 1883
-    MQTT_USER = 'aggregation'
-    MQTT_PASSWORD = 'aggregationPass'
-    MQTT_TOPIC = 'detections/modules/#'
-    MQTT_TOPIC_OUTPUT = 'detections/aggregation'
+#Parameters for the MQTT connection
+MQTT_BROKER = 'mosquitto'
+MQTT_PORT = 1883
+MQTT_USER = 'aggregation'
+MQTT_PASSWORD = 'aggregationPass'
+MQTT_TOPIC_INPUT = 'detections/modules/#'
+MQTT_TOPIC_OUTPUT_TIME = 'detections/aggregation/time'
+MQTT_TOPIC_OUTPUT_IPS = 'detections/aggregation/ips'
 
-    alertDB = {
-            "Time": [{"Time": 0,
-                "Gateway": 0,
-                "Change": 0,
-                "Value": 0,
-                "Mean_last_10": 0,
-                "Real_label": 0,
-                "Attack_type": 0}]
-            }
-    
+class Aggregation:
+    """
+        The class is initialized with data fields and database dictionaries.
+    """
+    def __init__(self, broker, port, inputTopic, outputTopicTime, outputTopicIPs, graph):
+        self.port = port
+        self.broker = broker
+        self.input = inputTopic
+        self.outputTime = outputTopicTime
+        self.outputIPs = outputTopicIPs
+        self.graph = graph
 
-    G = nx.Graph()
-    G.add_nodes_from(["bergen-gw3", "bergen-gw4", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", "ifi2-gw", 
-                "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-                "ma2-gw", "narvik-gw4", "tullin-gw2", "tullin-gw1"])
-    G.add_edges_from([("trd-gw", "rodbergvn-gw2"),("narvik-kv-gw","trd-gw"), ("trd-gw", "teknobyen-gw2"), ("trd-gw", "oslo-gw1"), ("trd-gw", "hovedbygget-gw"),
-                  ("teknobyen-gw2", "teknobyen-gw1"), ("teknobyen-gw2","ifi2-gw5"), ("narvik-kv-gw", "teknobyen-gw2"), ("narvik-kv-gw", "ifi2-gw5"), ("narvik-kv-gw", "stangnes-gw"),
-                  ("narvik-kv-gw", "tromso-fh-gw"), ("narvik-kv-gw", "narvik-gw3"), ("narvik-kv-gw", "narvik-gw4"), ("tromso-fh-gw",  "ma2-gw"), ("tromso-fh-gw", "tromso-gw5"),
-                  ("ma2-gw", "tromso-gw5"), ("ma2-gw","narvik-gw3"), ("ma2-gw", "narvik-gw4"), ("narvik-gw3", "narvik-gw4"), ("narvik-gw3", "hovedbygget-gw"), 
-                  ("hovedbygget-gw", "tullin-gw2"), ("hovedbygget-gw", "hoytek-gw2"),("ifi2-gw5", "oslo-gw1"), ("ifi2-gw5", "ifi2-gw"), ("ifi2-gw", "bergen-gw4"),
-                  ("ifi2-gw", "tullin-gw1"), ("ifi2-gw", "oslo-gw1"), ("oslo-gw1", "tullin-gw1"), ("tullin-gw1", "tullin-gw2"), ("tullin-gw2", "hoytek-gw2"),
-                  ("tullin-gw1", "bergen-gw3"), ("rodbergvn-gw2", "stangnes-gw"), ("bergen-gw3", "bergen-gw4"), ("bergen-gw3", "hoytek-gw2"), ("narvik-kv-gw", "ifi2-gw"),
-                  ("oslo-gw1", "narvik-kv-gw")])
+        self.alertDB = {}
+        for node in self.graph:
+            self.alertDB[node] = {}
+
+    def addAlertToExistingTimestampGraph(self, gateway, interval, alert):
+        self.alertDB[gateway][interval].append(alert)
     
-    for node in G:
-        G.nodes[node]['alerts'] = {}
-    
-    #Function that is called when the sensor is connected to the MQTT broker
-    def on_connect(client, userdata, flags, rc):
+    def addTimestampToGraph(self, gateway, interval, alert):
+        self.alertDB[gateway][interval] = [alert]
+
+    def removeTimestampFromGraph(self, gateway, interval):
+        del self.alertDB[gateway][interval]
+
+    def getTimes(self, gateway):
+        return self.alertDB[gateway]
+
+    def getAlerts(self, gateway, interval):
+        return self.alertDB[gateway][interval]
+
+
+    def aggregateTime(self, stime, etime, gateway, payload):
+        stime = pd.Timestamp(stime)
+        etime = pd.Timestamp(etime)
+        fuzzyStartTime = stime - timedelta(seconds = 30)
+        interval = pd.Interval(fuzzyStartTime, etime, closed='left')
+        exists = False
+        overlappingAlerts = 0
+        deviation_scores = []
+        real_labels = []
+        attack_types = []
+
+        for time, alerts in self.getTimes(gateway):
+            if interval.overlaps(time):
+                exists = True
+                overlappingAlerts += len(alerts)
+                for alert in alerts:
+                    deviation_scores.append(alert["Deviation_score"])
+                    real_labels.append(alert["Real_label"])
+                    attack_types.append(alert["Attack_type"])
+        if exists:
+            self.addAlertToExistingTimestampGraph(gateway, interval, payload)
+            if overlappingAlerts > 3:
+                
+                message = {'sTime': stime,
+                        'eTime': etime,
+                        'Gateway': gateway,
+                        'Deviation_scores': deviation_scores,
+                        'Real_labels': real_labels,
+                        'Attack_types': attack_types,
+                        'alertDB': self.alertDB}
+                
+                self.mqtt_client.publish(self.outputTime, json.dumps(message))
+        else:
+            self.addTimestampToGraph(gateway, interval, payload)
+
+
+    """
+        The MQTT commands are listened to and appropriate actions are taken for each.
+    """
+    def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
-        mqtt_client.subscribe(MQTT_TOPIC)
+        self.mqtt_client.subscribe(self.input)
 
-    #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client, userdata, result):
-        print("Aggregation published to topic", MQTT_TOPIC)
+    def on_publish(self, client, userdata, result):
+        print("Aggregation published to topic", self.input)
     
-    def on_message(client, userdata, msg):
+    def on_message(self, client, userdata, msg):
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
@@ -59,34 +105,33 @@ def aggregation():
 
         stime = payload.get('sTime')
         etime = payload.get('eTime')
-        fuzzyStartTime = stime - timedelta(seconds = 30)
         gateway = payload.get('Gateway')
-        attack_type = payload.get('Attack_type')
-        exists = False
-        existTime = datetime()
-        for i in range(int((etime-fuzzyStartTime).total_seconds())+1):
-            time = fuzzyStartTime + timedelta(seconds = i)
-            if time.replace(microsecond=0) in G.nodes[gateway]['alerts']:
-                exists = True
-                existTime = time
+
+        self.aggregateTime(stime, etime, gateway, payload)
         
-        if exists:
-            G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)].append(payload)
-            if len(G.nodes[gateway]['alerts'][existTime.replace(microsecond=0)]) > 3:
-                mqtt_client.publish(MQTT_TOPIC_OUTPUT,json.dumps(G))
-        else:
-            alertDB[gateway][etime.replace(microsecond=0)] = [payload]
+        try:
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
+            self.mqtt_client.publish(self.outputIPs, msg)
+
+        except Exception as err:
+            print('Message sent to topic {} had no IP addresses. {}'.format(msg.topic, err))
+            return
+
+    def start(self):
+        self.mqtt_client = mqtt.Client()
+        self.mqtt_client.on_message = self.on_message
+        self.mqtt_client.on_connect = self.on_connect
         
-      
+        self.mqtt_client.connect(self.broker, self.port)
+        try:
+            thread = Thread(target=self.mqtt_client.loop_forever)
+            thread.start()
+            
+        except KeyboardInterrupt:
+            print("Interrupted")
+            self.mqtt_client.disconnect()
 
-    #Connects to the MQTT broker with password and username
-    mqtt_client = mqtt.Client("aggregation")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
-    mqtt_client.on_publish = on_publish
-    mqtt_client.on_connect = on_connect
-    mqtt_client.on_message = on_message
-    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start() 
-
-
-
+graph = NetworkGraph()
+aggregation = Aggregation(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT_TIME, MQTT_TOPIC_OUTPUT_IPS, graph)
+aggregation.start()
