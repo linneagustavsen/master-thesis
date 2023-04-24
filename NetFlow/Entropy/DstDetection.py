@@ -1,4 +1,4 @@
-from matplotlib.path import Path
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -66,7 +66,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     maxmin_dip_rate = json.load(json_file_dip_rate)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'dstEntropyDetectionNetFlow'
     MQTT_PASSWORD = 'dstEntropyDetectionPass'

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from datetime import date
 
 #Parameters for the MQTT connection
-MQTT_BROKER = 'mosquitto'
+MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'correlation'
 MQTT_PASSWORD = 'correlationPass'
@@ -29,11 +29,11 @@ class Correlation_IPs:
     def addAlertsIP(self, ip, interval, alert):
         self.alertsIP[ip] = {interval:[alert]}
 
-    def addAlertToExistingTimestampAlertsIP(self, ip, interval, alert):
-        self.alertsIP[ip][interval].append(alert)
-
     def addTimestampAndAlertToAlertsIP(self, ip, interval, alert):
-        self.alertsIP[ip][interval] = [alert]
+        if interval in self.getTimesAlertsIP(ip):
+            self.alertsIP[ip][interval].append(alert)
+        else:
+            self.alertsIP[ip][interval] = [alert]
 
     def getTimesAlertsIP(self, ip):
         return self.alertsIP[ip]
@@ -42,37 +42,43 @@ class Correlation_IPs:
         return self.alertsIP[ip][interval]
 
     def correlateIPs(self, stime, etime, ip, payload):
+        stime = pd.Timestamp(stime)
+        etime = pd.Timestamp(etime)
+        fuzzyStartTime = stime - timedelta(minutes = 15)
+        interval = pd.Interval(fuzzyStartTime, etime, closed='left')
         if ip in self.alertsIP:
-
-            stime = pd.Timestamp(stime)
-            etime = pd.Timestamp(etime)
-            fuzzyStartTime = stime - timedelta(minutes = 15)
-            interval = pd.Interval(fuzzyStartTime, etime, closed='left')
             exists = False
             overlappingAlerts = 0
             deviation_scores = []
             real_labels = []
             attack_types = []
 
-            for time, alerts in self.getTimesAlertsIP(ip):
+            for time in self.getTimesAlertsIP(ip):
                 if interval.overlaps(time):
                     exists = True
+                    alerts = self.getAlertsIP(ip, time)
                     overlappingAlerts += len(alerts)
                     for alert in alerts:
                         deviation_scores.append(alert["Deviation_score"])
                         real_labels.append(alert["Real_label"])
                         attack_types.append(alert["Attack_type"])
             if exists:
-                self.addAlertToExistingTimestampAlertsIP(ip, interval, payload)
+                self.addTimestampAndAlertToAlertsIP(ip, interval, payload)
                 if overlappingAlerts > 10:
-                    message = { 'sTime': stime,
-                                'eTime': etime,
+                    labels = {}
+                    for element in real_labels:
+                        if element in labels:
+                            labels[element] += 1
+                        else:
+                            labels[element] = 1
+                    message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                                'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'IP': ip,
                                 'Deviation_scores': deviation_scores,
-                                'Real_labels': real_labels,
-                                'Attack_types': attack_types
+                                'Real_labels': labels,
+                                'Attack_types': list(set(attack_types))
                                 }
-                    self.mqtt_client.publish(self.outputIPs, json.dumps(message))
+                    self.mqtt_client.publish(self.output, json.dumps(message))
             else:
                 self.addTimestampAndAlertToAlertsIP(ip, interval, payload)
         else:
@@ -118,6 +124,3 @@ class Correlation_IPs:
         except KeyboardInterrupt:
             print("Interrupted")
             self.mqtt_client.disconnect()
-
-correlation = Correlation_IPs(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT)
-correlation.start()

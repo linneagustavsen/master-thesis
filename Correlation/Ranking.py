@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from numpy import mean
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
@@ -7,12 +8,18 @@ from threading import Thread
 import json
 
 #Parameters for the MQTT connection
-MQTT_BROKER = 'mosquitto'
+MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'aggregation'
 MQTT_PASSWORD = 'aggregationPass'
 MQTT_TOPIC_INPUT = 'detections/correlation'
 MQTT_TOPIC_OUTPUT = 'detections/ranking'
+p = Path('Detections')
+q = p / 'Correlation' 
+if not q.exists():
+    q.mkdir(parents=True)
+rankingFile = open(str(q) + "/Ranking.csv", "a")
+rankingFile.write("Position,sTime,eTime,Gateways,Deviation_score,Attack_type,Real_labels")
 
 class Ranking:
     """
@@ -25,38 +32,62 @@ class Ranking:
         self.output = outputTopic
         self.graph = graph
         self.ranking = []
+        
+    def writeRankingToFile(self):
+        line = ""
+        position = 0
+        for alert in self.ranking:
+            line += "\n"
+            line += str(position) + ","
+            line += alert['sTime'].strftime("%Y-%m-%dT%H:%M:%SZ") + ","
+            line += alert['eTime'].strftime("%Y-%m-%dT%H:%M:%SZ") + ","
+            line += str(alert['Gateways']) + ","
+            line += str(alert['Deviation_score']) + ","
+            line += str(alert['Attack_type']) + ","
+            line += str(alert['Real_labels'])
+            position +=1
+        line += "\n"
+        rankingFile.write(line)
 
     def rank(self, stime, etime, gateways, deviation_scores, real_labels, attack_types):
-        if ranking > 0:
+        stime = datetime.strptime(stime, "%Y-%m-%dT%H:%M:%SZ")
+        etime = datetime.strptime(etime, "%Y-%m-%dT%H:%M:%SZ")
+        if len(self.ranking) > 0:
             newRanking = []
             i = 0
-            for position, alert in ranking:
+            print("\nRANK")
+            print(self.ranking)
+            
+            for alert in self.ranking:
+                print(alert)
                 if alert['sTime'] > stime - timedelta(minutes=15):
-                    if alert['deviation_score'] < mean(deviation_scores):
-                        newAlert = {
+                    newRanking.append(alert)
+
+            newAlert = {
                         "sTime": stime,
                         "eTime": etime,
                         "Gateways": gateways,
-                        "Deviation_scores": deviation_scores,
+                        "Deviation_score": mean(deviation_scores),
                         "Real_labels": real_labels,
                         "Attack_type": attack_types
                         }
-                        newRanking[i] = newAlert
-                        i+=1
-                        newRanking[i] = alert
-                    else:
-                        newRanking[i] = alert
-                        i+=1
+            print("\nNew")
+            newRanking.append(newAlert)
+            newRanking = sorted(newRanking, key=lambda x: x["Deviation_score"], reverse=True)
+            print(newRanking)
+            self.ranking = newRanking
         else:
             newAlert = {
                     "sTime": stime,
                     "eTime": etime,
                     "Gateways": gateways,
-                    "Deviation_scores": mean(deviation_scores),
+                    "Deviation_score": mean(deviation_scores),
                     "Real_labels": real_labels,
                     "Attack_type": attack_types
                     }
-            ranking.append({0: newAlert})
+            self.ranking.append(newAlert)
+        self.writeRankingToFile()
+        
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
     """
@@ -98,7 +129,3 @@ class Ranking:
         except KeyboardInterrupt:
             print("Interrupted")
             self.mqtt_client.disconnect()
-
-graph = NetworkGraph()
-ranking = Ranking(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT, graph)
-ranking.start()

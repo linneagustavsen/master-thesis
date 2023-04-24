@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from datetime import date
 
 #Parameters for the MQTT connection
-MQTT_BROKER = 'mosquitto'
+MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'correlation'
 MQTT_PASSWORD = 'correlationPass'
@@ -27,6 +27,29 @@ class Correlation_Time:
         self.graph = graph
         self.alertsCorrelated = {}
 
+    def decodeAlertDB(self, alertDB):
+        newAlertDB = {}
+        for gateway in alertDB:
+            newAlertDB[gateway] = {}
+            for time in alertDB[gateway]:
+                start = pd.Timestamp(time.split(",")[0])
+                end = pd.Timestamp(time.split(",")[1])
+                interval = pd.Interval(start, end, closed='both')
+                newAlertDB[gateway][interval] = alertDB[gateway][time]
+        return newAlertDB
+    
+    def removeTimestampFromCorrelation(self, interval):
+        del self.alertsCorrelated[interval]
+
+    def addAlertToExistingTimestamp(self, existingTime, interval, alert):
+        existingAlerts = self.alertsCorrelated[existingTime]
+        existingAlerts.append(alert)
+        if interval in self.alertsCorrelated:
+            self.alertsCorrelated[interval].extend(existingAlerts)
+        else:
+            self.alertsCorrelated[interval] = existingAlerts
+        del self.alertsCorrelated[existingTime]
+
     def correlateTime(self, stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB):
         #for gateway, timestamps in payload:
             #If gateway1 is close to gateway2 and they have the same fuzzy timestamps
@@ -38,16 +61,20 @@ class Correlation_Time:
 
         exists = False
         existsCorrelated = False
+        existingTimes = []
+        removeTimes = []
         gateways = [gateway]
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
         fuzzyStartTime = stime - timedelta(seconds = 30)
         interval = pd.Interval(fuzzyStartTime, etime, closed='left')
-        for otherGateway in self.graph:
+
+        for otherGateway in self.graph.G:
             if otherGateway == gateway:
                 continue
-            if nx.shortest_path_length(self.graph, gateway, otherGateway) < 4:
-                for time, alerts in alertDB[otherGateway]:
+            if nx.shortest_path_length(self.graph.G, gateway, otherGateway) < 4:
+                for time in alertDB[otherGateway]:
+                    alerts = alertDB[otherGateway][time]
                     if interval.overlaps(time):
                         exists = True
                         gateways.append(otherGateway)
@@ -55,33 +82,52 @@ class Correlation_Time:
                             deviation_scores.append(alert["Deviation_score"])
                             real_labels.append(alert["Real_label"])
                             attack_types.append(alert["Attack_type"])
-
-        for time, alerts in self.alertsCorrelated:
+        print("\nalertsCorrelated")
+        print(self.alertsCorrelated)
+        for time in self.alertsCorrelated:
+            if time.left < stime - timedelta(minutes=15):
+                removeTimes.append(time)
+                continue
+            alerts = self.alertsCorrelated[time]
             if interval.overlaps(time):
                 existsCorrelated = True
+                existingTimes.append(time)
                 for alert in alerts:
                     gateways.extend(alert['Gateways'])
                     deviation_scores.extend(alert["Deviation_scores"])
                     real_labels.extend(alert["Real_labels"])
                     attack_types.extend(alert["Attack_types"])
-                    
+        for time in removeTimes:
+            self.removeTimestampFromCorrelation(time)
         alert = {
                     "sTime": stime,
                     "eTime": etime,
                     "Gateways": gateways,
                     "Deviation_scores": deviation_scores,
                     "Real_labels": real_labels,
-                    "Attack_type": attack_types
-                    }             
-        if exists and existsCorrelated:
-            self.alertsCorrelated[interval].append(alert)
-            self.mqtt_client.publish(self.output, json.dumps(alert))
-        elif exists:
-            self.alertsCorrelated[interval] = [alert]
-            self.mqtt_client.publish(self.output, json.dumps(alert))
-        elif existsCorrelated:
-            self.alertsCorrelated[interval].append(alert)
-            self.mqtt_client.publish(self.output, json.dumps(alert))
+                    "Attack_types": attack_types
+                    }
+
+        if exists or existsCorrelated:
+            labels = {}
+            for element in real_labels:
+                if element in labels:
+                    labels[element] += 1
+                else:
+                    labels[element] = 1
+        
+            message = {
+                    "sTime": stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateways": list(set(gateways)),
+                    "Deviation_scores": deviation_scores,
+                    "Real_labels": labels,
+                    "Attack_type": list(set(attack_types))
+                    }
+            self.mqtt_client.publish(self.output, json.dumps(message))
+        if existsCorrelated:
+            for existingTime in existingTimes:
+                self.addAlertToExistingTimestamp(existingTime, interval, alert)
         else:
             self.alertsCorrelated[interval] = [alert]
 
@@ -111,6 +157,7 @@ class Correlation_Time:
         real_labels = payload.get('Real_labels')
         attack_types = payload.get('Attack_types')
         alertDB = payload.get('alertDB')
+        alertDB = self.decodeAlertDB(alertDB)
 
         self.correlateTime(stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB)
 
@@ -127,7 +174,3 @@ class Correlation_Time:
         except KeyboardInterrupt:
             print("Interrupted")
             self.mqtt_client.disconnect()
-
-graph = NetworkGraph()
-correlation = Correlation_Time(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT, graph)
-correlation.start()

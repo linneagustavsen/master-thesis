@@ -15,14 +15,14 @@ from silk import *
     Output: 
             df:         pandas dataframe, dataframe containing the data from the database
 '''
-def getData(start, stop, systemId, if_name, fields):
+def getData(start, stop, bucket, systemId, if_name, fields):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
     query_api = client.query_api()
     columns = ["_time"]
 
     #Build query for database
-    query = 'from(bucket: "skogul/1mnd")\
+    query = 'from(bucket: "' + bucket +'")\
                 |> range(start: ' + start + ', stop: ' + stop + ')\
                 |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
                 |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
