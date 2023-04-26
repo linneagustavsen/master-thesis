@@ -49,7 +49,7 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
     json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar.json", "r")
     maxmin = json.load(json_file)
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'maxVarDetectionTelemetry'
     MQTT_PASSWORD = 'maxVarDetectionPass'

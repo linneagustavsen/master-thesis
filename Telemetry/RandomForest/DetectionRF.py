@@ -35,7 +35,7 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     TNf.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,entropy_packet_size,entropy_rate_packet_size,real_label")
     
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'randomForestDetectionTelemetry'
     MQTT_PASSWORD = 'randomForestDetectionPass'

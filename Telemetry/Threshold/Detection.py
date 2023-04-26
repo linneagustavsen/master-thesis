@@ -49,7 +49,7 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'thresholdDetectionTelemetry'
     MQTT_PASSWORD = 'thresholdDetectionPass'

@@ -30,10 +30,7 @@ print(generalizedEntropy2(10, Pi))'''
 
 from datetime import timedelta, datetime
 import math
-from NetFlow.Threshold.SYNDetection import synDetection
-
-from Telemetry.Entropy.Detection import detectionEntropyTelemetry
-
+from time import sleep
 '''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
 start = "2011-02-08 10:00:00"
@@ -130,10 +127,29 @@ value2 = [ 2, 3, 4, 5, 6]
 value3 = [ 3, 4, 5, 6, 7]
 value4 = [ 4, 5, 6, 7, 8]
 value5 = [ 5, 6, 7, 8, 9]
-'''
+''''''
 alert = {
                 "Attack_type": '',
                 "Deviation_score": 2
             }
 
-print(type(alert["Attack_type"]))
+print(type(alert["Attack_type"]))'''
+
+stime = datetime(2011,1,2,14,30)
+now = datetime.now()
+print(stime, now.replace(year=2011, month=1, day=2))
+print((now.replace(year=2011, month=1, day=2) - stime).total_seconds())
+
+def simulateRealTime(timeNow, stime, attackDate):
+    attackDate = attackDate.split(".")
+    attackYear = 2000 + int(attackDate[2])
+    attackMonth = int(attackDate[1])
+    attackDay = int(attackDate[0])
+    if stime > timeNow:
+        duration = math.ceil((stime- timeNow.replace(year=attackYear, month=attackMonth, day=attackDay)).total_seconds())
+    else:
+        duration = 0
+    sleep(duration)
+
+attackDate = "08.02.11"
+print(simulateRealTime(datetime.now(), stime, attackDate))

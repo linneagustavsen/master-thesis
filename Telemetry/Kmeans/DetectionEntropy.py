@@ -42,7 +42,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'kMeansEntropyDetectionTelemetry'
     MQTT_PASSWORD = 'kMeansEntropyDetectionPass'

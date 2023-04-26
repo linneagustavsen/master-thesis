@@ -1,9 +1,13 @@
+from datetime import timedelta,datetime
 from pathlib import Path
+import pickle
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 import paho.mqtt.client as mqtt
 import json
+
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Detect anomalies based on a random forest classifier and write them to file
@@ -13,7 +17,7 @@ import json
             interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detection are made on
 '''
-def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequency, interval, attackDate):
+def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interval, attackDate):
     p = Path('Detections')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -32,7 +36,7 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
     TNf.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'randomForestEntropyDetectionNetFlow'
     MQTT_PASSWORD = 'randomForestEntropyDetectionPass'
@@ -52,17 +56,23 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
-    trainingLabel = np.array(trainingSet.iloc[:,-1])
-
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
-    classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True)
-    timeStamps = pd.read_pickle(str(q) + "/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
+    q = p / 'RandomForest'
+    r = q / 'RawData'
+    s = q / 'Models'
+    if not r.exists():
+        q = Path('RandomForest')
+        r = q / 'RawData'
+    if not s.exists():
+        q = Path('RandomForest')
+        s= q / 'Models'
+        
+    # Load the model
+    filename = str(s) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    classifier_RF = pickle.load(open(filename, 'rb'))
+
+    timeStamps = pd.read_pickle(str(r) + "/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
@@ -70,12 +80,13 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
+        simulateRealTime(datetime.now(), timeStamps[i], attackDate)
         if predictions[i] == 1:
             alert = {
                     "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "Value": testingMeasurements[i],
+                    "Value": testingMeasurements[i].tolist(),
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
                 }
@@ -99,3 +110,28 @@ def detectionRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, frequ
     FPf.close()
     FNf.close()
     TNf.close()
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+p = Path('NetFlow')
+q = p / 'RandomForest' / 'DataSets'
+if not q.exists():
+    q = Path('RandomForest')
+    q = q / 'DataSets'
+testingPath = q / 'Testing'
+
+
+testingSet= pd.read_pickle(str(testingPath) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+
+detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interval, attackDate)

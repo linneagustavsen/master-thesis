@@ -2,12 +2,13 @@ from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import json
 import paho.mqtt.client as mqtt
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates destination IP entropy and entropy rate and alerts in case of an anomaly
@@ -60,9 +61,14 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     TNdstEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TNdstEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     
-    json_file_dip = open("NetFlow/Entropy/Calculations/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
+    p = Path('NetFlow')
+    q = p / 'Entropy' / 'Calculations'
+    if not q.exists():
+        q = Path('Entropy')
+        q = q / 'Calculations'
+    json_file_dip = open(str(q) + "/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip = json.load(json_file_dip)
-    json_file_dip_rate = open("NetFlow/Entropy/Calculations/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dip_rate = open(str(q) + "/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip_rate = json.load(json_file_dip_rate)
 
     #Parameters for the MQTT connection
@@ -135,6 +141,7 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
             attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of each metric with a threshold
             if i >=windowSize:
+                
                 change = ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1])
                 change_r = ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1])
                 if change < 0 and change_r < 0:
@@ -143,7 +150,8 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                     attackType = "Flooding"
                 else:
                     attackType = ""
-                
+
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdDstEntropy:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -217,3 +225,18 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     
     infile.close()
     
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, attackDate)

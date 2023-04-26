@@ -2,7 +2,7 @@ import json
 import paho.mqtt.client as mqtt
 
 #Parameters for the MQTT connection
-MQTT_BROKER = 'mosquitto'
+MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'SYNDetection'
 MQTT_PASSWORD = 'synpass'

@@ -7,6 +7,7 @@ import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates the number of ICMP destination unreachable packets in a flow and alerts in case of an anomaly
@@ -53,11 +54,17 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
 
     #Write the column titles to the files
     TNICMPDstUnreachableFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    json_file = open("NetFlow/Threshold/Calculations/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
+    
+    p = Path('NetFlow')
+    q = p / 'Threshold' / 'Calculations'
+    if not q.exists():
+        q = Path('Threshold')
+        q = q / 'Calculations'
+    json_file = open(str(q) + "/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'icmpDstUnreachableDetectionNetFlow'
     MQTT_PASSWORD = 'icmpDstUnreachableDetectionPass'
@@ -107,11 +114,13 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
         if rec.stime > startTime + interval:
             #Find the number of ICMP Destination unavailable packets in this time interval
             numberOfIcmpDstUnreachablePackets.append(numberOfPackets(records))
-            
+
+            attack = isAttack(rec.stime - frequency, rec.stime)
             #If there is enough stored values to compare with we compare the difference of the metric with a threshold
             if i >= windowSize:
                 change = numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])
-                attack = isAttack(rec.stime - frequency, rec.stime)
+
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > threshold:
                     alert = {
                         "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -158,3 +167,19 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
 
 
 #icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/icmp3-in-sorted.rw", "2011-01-03 00:00:00", "2011-01-10 00:00:00", "oslo-gw", timedelta(minutes = 1), 10, 50, "10.01")
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+silkFile = pathToRawFiles+systemId + "/icmp3-two-hours-2011-02-08_10-12-sorted.rw"
+icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, attackDate)

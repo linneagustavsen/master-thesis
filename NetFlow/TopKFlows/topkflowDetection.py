@@ -1,3 +1,4 @@
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -6,35 +7,41 @@ import json
 import paho.mqtt.client as mqtt
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
 def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
+    p = Path('Detections')
+    q = p / 'TopKFlows' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
     #Open file to write alerts to
-    TPfile = open("Detections/TopKFlows/NetFlow/TP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPfile = open(str(q) + "/TP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TPfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
     #Open file to write alerts to
-    FPfile = open("Detections/TopKFlows/NetFlow/FP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPfile = open(str(q) + "/FP.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FPfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
     #Open file to write alerts to
-    FNfile = open("Detections/TopKFlows/NetFlow/FN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNfile = open(str(q) + "/FN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     FNfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
     #Open file to write alerts to
-    TNfile = open("Detections/TopKFlows/NetFlow/TN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNfile = open(str(q) + "/TN.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     TNfile.write("sTime,eTime,Deviation_score,Change,Value,Packets,Percentage")
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'topkFlowsDetectionNetFlow'
     MQTT_PASSWORD = 'topKflowsDetectionPass'
@@ -95,6 +102,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                             exists = True
                     if not exists:
                         change = True
+                        simulateRealTime(datetime.now(), rec.stime, attackDate)
                         alert = {
                             "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                             "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -153,3 +161,17 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
     FPfile.close()
     FNfile.close()
     TNfile.close()
+
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+topkflows(silkFile, start, stop, frequency, 20, attackDate, systemId)

@@ -1,14 +1,15 @@
-from matplotlib.path import Path
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import json
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates bi-directional flow entropy and entropy rate and alerts in case of an anomaly
@@ -73,15 +74,20 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
     TNflowEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TNflowFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-    json_file_flow = open("NetFlow/Entropy/Calculations/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
+    p = Path('NetFlow')
+    q = p / 'Entropy' / 'Calculations'
+    if not q.exists():
+        q = Path('Entropy')
+        q = q / 'Calculations'
+    json_file_flow = open(str(q) + "/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
-    json_file_flow_rate = open("NetFlow/Entropy/Calculations/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow_rate = open(str(q) + "/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow_rate = json.load(json_file_flow_rate)
-    json_file_nf = open("NetFlow/Entropy/Calculations/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_nf = open(str(q) + "/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_nf = json.load(json_file_nf)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'flowEntropyDetectionNetFlow'
     MQTT_PASSWORD = 'flowEntropyDetectionPass'
@@ -165,6 +171,8 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                     attackType = "Flooding"
                 else:
                     attackType = ""
+                    
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdFlowEntropy:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -265,4 +273,18 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
     TNflowFile.close()
 
     infile.close()
-    
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, 0, attackDate)

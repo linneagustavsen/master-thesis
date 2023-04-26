@@ -106,3 +106,29 @@ interval = timedelta(minutes=5)
 testingSet = makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval, attackDate)
 testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 '''
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate)
+p = Path('NetFlow')
+q = p / 'Kmeans' / 'DataSets'
+
+if not q.exists():
+    q = Path('Kmeans')
+    q = q / 'DataSets'
+testingPath = q / 'Testing'
+
+if not testingPath.exists():
+    testingPath.mkdir()
+testingSet.to_pickle(str(testingPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")

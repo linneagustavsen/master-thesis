@@ -1,9 +1,11 @@
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
+from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from HelperFunctions.StructureData import *
-from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
 import json
 
@@ -16,23 +18,27 @@ import json
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
-    TPf0 = open("Detections/Kmeans/NetFlow/TP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    p = Path('Detections')
+    q = p / 'Kmeans' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    TPf0 = open(str(q) + "/TP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     
-    FPf0 = open("Detections/Kmeans/NetFlow/FP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf0 = open(str(q) + "/FP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    FNf0 = open("Detections/Kmeans/NetFlow/FN.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf0 = open(str(q) + "/FN.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    TNf0 = open("Detections/Kmeans/NetFlow/TN.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf0 = open(str(q) + "/TN.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
 
-    cluster = open("Detections/Kmeans/NetFlow/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    cluster = open(str(q) + "/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'kMeansCombinedDetectionNetFlow'
     MQTT_PASSWORD = 'kmeansCombinedDetectionPass'
@@ -74,7 +80,8 @@ def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0thres
     elif db < DBthreshold and cd1 > (cd0 + c1threshold):
         attackType = "Same protocol"
 
-    for i in range(len(prediction)):        
+    for i in range(len(prediction)):
+        simulateRealTime(datetime.now(), eTime[i], attackDate)      
         if prediction[i] == attackCluster:
             alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -85,7 +92,7 @@ def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0thres
                         "srcPort": measurements[i][2],
                         "dstPort": measurements[i][3],
                         "protocol": measurements[i][4],
-                        "Value": measurements[i],
+                        "Value": measurements[i].tolist(),
                         "Real_label": label[i],
                         "Attack_type": attackType
                     }
@@ -112,3 +119,28 @@ def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0thres
     FNf0.close()
     TNf0.close()
     cluster.close()
+
+
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+p = Path('NetFlow')
+q = p / 'Kmeans' / 'DataSets'
+if not q.exists():
+    q = Path('Kmeans')
+    q = q / 'DataSets'
+testingPath = q / 'Testing'
+
+testingSet = pd.read_pickle(str(testingPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+
+detectionKmeansCombined(testingSet, systemId, interval, 0.5, 0, 0, attackDate)

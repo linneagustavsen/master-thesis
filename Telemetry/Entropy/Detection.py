@@ -67,7 +67,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     maxmin_rate = json.load(json_file_rate)
    
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'entropyDetectionTelemetry'
     MQTT_PASSWORD = 'entropyDetectionPass'

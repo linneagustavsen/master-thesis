@@ -8,6 +8,7 @@ import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates source IP entropy and entropy rate and alerts in case of an anomaly
@@ -18,7 +19,7 @@ from HelperFunctions.Normalization import normalization
             systemId:                       string, name of the system to collect and calculate on
             frequency:                      timedelta object, frequency of metric calculation
             interval:                       timedelta object, size of the sliding window which the calculation is made on
-            windowSize:              from matplotlib.path import Path       int, represents a multiplier of frequency, how far back we want to compare the value with
+            windowSize:              from pathlib import Path       int, represents a multiplier of frequency, how far back we want to compare the value with
             thresholdSrcEntropy:            float, values over this threshold will cause an alert
             thresholdSrcEntropyRate:        float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
@@ -56,9 +57,14 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     TNsrcEntropyFile = open(str(q) + "/TN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNsrcEntropyRateFile = open(str(q) + "/TN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
-    json_file_sip = open("NetFlow/Entropy/Calculations/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
+    p = Path('NetFlow')
+    q = p / 'Entropy' / 'Calculations'
+    if not q.exists():
+        q = Path('Entropy')
+        q = q / 'Calculations'
+    json_file_sip = open(str(q) + "/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip = json.load(json_file_sip)
-    json_file_sip_rate = open("NetFlow/Entropy/Calculations/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_sip_rate = open(str(q) + "/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip_rate = json.load(json_file_sip_rate)
 
     #Parameters for the MQTT connection
@@ -140,6 +146,8 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                     attackType = "Flooding"
                 else:
                     attackType = ""
+                
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdSrcEntropy:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -213,3 +221,17 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     TNsrcEntropyRateFile.close()
     infile.close()
     
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+
+detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, attackDate)

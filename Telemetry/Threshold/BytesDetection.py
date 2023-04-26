@@ -57,7 +57,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'bytesDetectionTelemetry'
     MQTT_PASSWORD = 'bytesDetectionPass'

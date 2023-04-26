@@ -1,11 +1,12 @@
 from pathlib import Path
 from silk import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttackFlow
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates the number of SYN syn in a flow and alerts in case of an anomaly
@@ -46,7 +47,12 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     #Write the column titles to the files
     TNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-    json_file_syn = open("NetFlow/Threshold/Calculations/MinMax.syn.json", "r")
+    p = Path('NetFlow')
+    q = p / 'Threshold' / 'Calculations'
+    if not q.exists():
+        q = Path('Threshold')
+        q = q / 'Calculations'
+    json_file_syn = open(str(q) + "/MinMax.syn.json", "r")
     maxmin_syn = json.load(json_file_syn)
 
     #Parameters for the MQTT connection
@@ -96,6 +102,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
             
+            simulateRealTime(datetime.now(), rec.etime, attackDate)
             if rec.packets >= threshold:
                 alert = {
                         "sTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -137,3 +144,17 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     FNsynFile.close()
     TNsynFile.close()
     infile.close()
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
+windowSize = 10
+synDetection(silkFile, start, stop, systemId, windowSize, 2, attackDate)

@@ -2,12 +2,13 @@ from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
 '''
@@ -69,21 +70,20 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
     TNdstFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TNflowFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-
-    #Open file to write alerts to
-    srcEntropyFile = open(str(q) + "/SYNSourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyFile = open(str(q) + "/SYNDestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcFile = open(str(q) + "/SYNFlowIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
-    json_file_src = open("NetFlow/Entropy/Calculations/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
+    p = Path('NetFlow')
+    q = p / 'Entropy' / 'Calculations'
+    if not q.exists():
+        q = Path('Entropy')
+        q = q / 'Calculations'
+    json_file_src = open(str(q) + "/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_src = json.load(json_file_src)
-    json_file_dst = open("NetFlow/Entropy/Calculations/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dst = open(str(q) + "/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dst = json.load(json_file_dst)
-    json_file_flow = open("NetFlow/Entropy/Calculations/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow = open(str(q) + "/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'synEntropyDetectionNetFlow'
     MQTT_PASSWORD = 'synEntropyDetectionPass'
@@ -120,7 +120,6 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
 
     i = 0
     sizes = []
-    lastMinuteSize = 0
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
@@ -164,7 +163,8 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 change_src = entropyOfSynPacketsPerSrc[i] - np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1])
                 change_dst = entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])
                 change_flow = entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])
-            
+
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change_src) > thresholdSrc:
                     alert = {
                         "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -270,3 +270,18 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
     FNflowFile.close()
     TNflowFile.close()
 
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
+windowSize = 10
+
+synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, 0, attackDate)

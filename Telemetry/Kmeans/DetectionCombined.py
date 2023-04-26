@@ -1,4 +1,4 @@
-from matplotlib.path import Path
+from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
@@ -38,7 +38,7 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, frequency, D
     cluster = open(str(q) + "/Combined.ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'kMeansCombinedDetectionTelemetry'
     MQTT_PASSWORD = 'kMeansCombinedDetectionPass'

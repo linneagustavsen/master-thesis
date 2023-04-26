@@ -39,7 +39,7 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold
     cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'kMeanDetectionTelemetry'
     MQTT_PASSWORD = 'kMeansDetectionPass'

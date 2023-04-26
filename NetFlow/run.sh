@@ -1,5 +1,5 @@
-#!bin/bash
-exec python3 TopKFlows/topkflow.py &
+#!/bin/bash
+exec python3 TopKFlows/topkflowDetection.py &
 exec python3 Threshold/BytesDetection.py &
 exec python3 Threshold/ICMPDetection.py & 
 exec python3 Threshold/ICMPDstUnreachableDetection.py & 
@@ -7,6 +7,8 @@ exec python3 Threshold/PacketsDetection.py &
 exec python3 Threshold/SYNDetection.py &
 exec python3 RandomForest/RandomForestDetection.py &
 exec python3 RandomForest/RandomForestDetectionCombined.py &
+exec python3 RandomForest/RandomForestDetectionNoIP.py &
+exec python3 RandomForest/RandomForestDetectionCombinedNoIP.py &
 exec python3 RandomForest/RandomForestDetectionEntropy.py &
 exec python3 Kmeans/DetectionKmeans.py &
 exec python3 Kmeans/DetectionKmeansCombined.py &

@@ -8,6 +8,7 @@ import paho.mqtt.client as mqtt
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Calculates entropy and other metrics and alerts in case of an anomaly
@@ -50,11 +51,16 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
     #Write the column titles to the files
     TNbytesFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-    json_file_bytes = open("NetFlow/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    p = Path('NetFlow')
+    q = p / 'Threshold' / 'Calculations'
+    if not q.exists():
+        q = Path('Threshold')
+        q = q / 'Calculations'
+    json_file_bytes = open(str(q) + "/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_bytes = json.load(json_file_bytes)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'bytesDetectionNetFlow'
     MQTT_PASSWORD = 'bytesDetectionPass'
@@ -112,6 +118,7 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
             if i >=windowSize:
                 change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
                 
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdBytes:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -156,3 +163,17 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
 
     infile.close()
     
+
+baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+systemId = "oslo-gw1"
+start = "2011-02-08 10:00:00"
+stop = "2011-02-08 12:00:00"
+startCombined = "2011-02-08 10:00:00"
+stopCombined = "2011-02-08 12:00:00"
+frequency = timedelta(minutes = 1)
+interval = timedelta(minutes = 10)
+pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
+attackDate="08.02.11"
+silkFile = pathToRawFiles+systemId + "/"+ baseFile
+windowSize = 10
+detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, attackDate)
