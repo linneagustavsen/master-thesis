@@ -39,7 +39,7 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
     intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
-
+    j = 0
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
@@ -65,11 +65,11 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
         bytesArray.append(sum(dfEgressBytes))
 
         #If there is not enough stored values to compare with we skip the detection
-        calculations.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
-                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]) +  "," + str(int(isAttack(stopTime - frequency, stopTime))))
+        calculations.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(packetSizeArray[j]) + "," + str(packetSizeRateArray[j])
+                               + "," + str(packetNumberArray[j]) + "," + str(bytesArray[j]) +  "," + str(int(isAttack(stopTime - frequency, stopTime))))
         #Push the start time by the specified frequency
         startTime = startTime + frequency
-        i += 1
+        j += 1
 
     calculations.close()
 '''

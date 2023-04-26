@@ -9,19 +9,19 @@ MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'correlation'
 MQTT_PASSWORD = 'correlationPass'
-MQTT_TOPIC_INPUT = 'detections/aggregation/ips'
+MQTT_TOPIC_INPUT = 'detections/aggregation/attackType'
 MQTT_TOPIC_OUTPUT = 'detections/correlation'
 
 """
     This class is for correlating alerts
 """
-class Correlation_IPs:
+class Correlation_Attack_types:
     def __init__(self, broker, port, inputTopic, outputTopic):
         self.port = port
         self.broker = broker
         self.input = inputTopic
         self.output = outputTopic
-        self.alertsIP ={}
+        self.alertsAttack ={}
 
     def countElements(self, listOfElements):
         counter = {}
@@ -32,44 +32,43 @@ class Correlation_IPs:
                 counter[element] = 1
         return counter
 
-    def addAlertsIP(self, ip, interval, alert):
-        if ip in self.alertsIP:
-            if interval in self.getTimesAlertsIP(ip):
-                self.alertsIP[ip][interval].append(alert)
+
+    def addAlert(self, attackType, interval, alert):
+        if attackType in self.alertsAttack:
+            if interval in self.getTimes(attackType):
+                self.alertsAttack[attackType][interval].append(alert)
             else:
-                self.alertsIP[ip][interval]= [alert]
+                self.alertsAttack[attackType] = {interval:[alert]}
         else:
-                self.alertsIP[ip] = {interval:[alert]}
+                self.alertsAttack[attackType] = {interval:[alert]}
 
-    def getTimesAlertsIP(self, ip):
-        return self.alertsIP[ip]
+    def getTimes(self, attackType):
+        return self.alertsAttack[attackType]
     
-    def getAlertsIP(self, ip, interval):
-        return self.alertsIP[ip][interval]
+    def getAlerts(self, attackType, interval):
+        return self.alertsAttack[attackType][interval]
     
-    def removeTimestampFromIP(self, ip, interval):
-        del self.alertsIP[ip][interval]
+    def removeTimestampFromAttackType(self, attackType, interval):
+        print("\n removeTimestampFromAttackType")
+        print(self.alertsAttack)
+        del self.alertsAttack[attackType][interval]
 
-    def correlateIPs(self, stime, etime, ip, payload):
+    def correlateAttackTypes(self, stime, etime, attackType, payload):
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
         fuzzyStartTime = stime - timedelta(minutes = 15)
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
 
-        if ip in self.alertsIP:
-            print("\nalertsIP[ip]", ip)
-            print(self.alertsIP[ip])
-            print("\n")
+        if attackType in self.alertsAttack:
             exists = False
             existingTimes = []
             overlappingAlerts = 1
             gateways = [payload.get('Gateway')]
             deviation_scores = []
             real_labels = []
-            attack_types = []
             removeTimes = []
 
-            for time in self.getTimesAlertsIP(ip):
+            for time in self.getTimes(attackType):
                 if time.left < stime - timedelta(minutes = 15):
                     removeTimes.append(time)
                     continue
@@ -77,35 +76,33 @@ class Correlation_IPs:
                 if interval.overlaps(time):
                     exists = True
                     existingTimes.append(time)
-                    alerts = self.getAlertsIP(ip, time)
+                    alerts = self.getAlerts(attackType, time)
                     overlappingAlerts += len(alerts)
 
                     for alert in alerts:
                         gateways.append(alert['Gateway'])
                         deviation_scores.append(alert["Deviation_score"])
                         real_labels.append(alert["Real_label"])
-                        attack_types.append(alert["Attack_type"])
-            
+    
             for time in removeTimes:
-                self.removeTimestampFromIP(ip, time)
+                self.removeTimestampFromAttackType(attackType, time)
                 if time in existingTimes:
                     existingTimes.remove(time)
-            print("\nOverlappingAlerts")
-            print(overlappingAlerts)
-            print("\n")
             if exists:
                 for existingTime in existingTimes:
-                    self.addAlertsIP(ip, existingTime, payload)
-   
+                    self.addAlert(attackType, existingTime, payload)
+
+                print("\nOverlappingAlerts")
+                print(overlappingAlerts)
+                print("\n")
                 if overlappingAlerts > 3:
-                    
+
                     message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                'IP': ip,
                                 'Gateways': list(set(gateways)),
                                 'Deviation_scores': deviation_scores,
                                 'Real_labels': self.countElements(real_labels),
-                                'Attack_types': self.countElements(attack_types)
+                                'Attack_types': {attackType: overlappingAlerts}
                                 }
                     
                     self.mqtt_client.publish(self.output, json.dumps(message))
@@ -113,9 +110,9 @@ class Correlation_IPs:
                     print(message)
                     print("\n")
             else:
-                self.addAlertsIP(ip, interval, payload)
+                self.addAlert(attackType, interval, payload)
         else:
-            self.addAlertsIP(ip, interval, payload)
+            self.addAlert(attackType, interval, payload)
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
@@ -138,18 +135,16 @@ class Correlation_IPs:
 
         stime = payload.get('sTime')
         etime = payload.get('eTime')
-        srcIP = payload.get('srcIP')
-        dstIP = payload.get('dstIP')
+        attackType = payload.get('Attack_type')
 
-        self.correlateIPs(stime, etime, srcIP, payload)
-        self.correlateIPs(stime, etime, dstIP, payload)
+        self.correlateAttackTypes(stime, etime, attackType, payload)
 
     def start(self):
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_publish = self.on_publish
-
+        
         self.mqtt_client.connect(self.broker, self.port)
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)

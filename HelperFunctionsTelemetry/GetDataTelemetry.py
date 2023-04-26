@@ -25,7 +25,6 @@ def getData(start, stop, bucket, systemId, if_name, fields):
     query = 'from(bucket: "' + bucket +'")\
                 |> range(start: ' + start + ', stop: ' + stop + ')\
                 |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-                |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
                 |> filter(fn: (r) => '
     for i in range(len(fields)):
         query += 'r["_field"] == "' + fields[i] + '"'
@@ -47,6 +46,51 @@ def getData(start, stop, bucket, systemId, if_name, fields):
 
     return df
 
+def getDataBytes(start, stop, bucket, systemId):
+    client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
+
+    query_api = client.query_api()
+
+    #Build query for database
+    query = 'from(bucket: "' + bucket +'")\
+                |> range(start: ' + start + ', stop: ' + stop + ')\
+                |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
+                |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_octets" or r["_field"] == "ingress_stats__if_1sec_octets")\
+                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+                |> map(fn: (r) => ({_time: r._time, bytes: r.egress_stats__if_1sec_octets + r.ingress_stats__if_1sec_octets}))'\
+
+    #Make a data frame from the output of the query
+    df = query_api.query_data_frame(query=query)
+
+    #Clean up dataframe
+    if not df.empty:
+        df = df.drop(columns=['result', 'table'])
+
+    return df
+
+def getDataPackets(start, stop, bucket, systemId):
+    client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
+
+    query_api = client.query_api()
+
+    #Build query for database
+    query = 'from(bucket: "' + bucket +'")\
+                |> range(start: ' + start + ', stop: ' + stop + ')\
+                |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
+                |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_pkts" or r["_field"] == "ingress_stats__if_1sec_pkts")\
+                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+                |> map(fn: (r) => ({_time: r._time, packets: r.egress_stats__if_1sec_pkts + r.ingress_stats__if_1sec_pkts}))'\
+
+
+    #Make a data frame from the output of the query
+    df = query_api.query_data_frame(query=query)
+
+    #Clean up dataframe
+    if not df.empty:
+        df = df.drop(columns=['result', 'table'])
+
+    return df
+
 '''
     Get data from an InfluxDB
     Input:  
@@ -58,16 +102,15 @@ def getData(start, stop, bucket, systemId, if_name, fields):
     Output: 
             tables:     flux table list, table containing the data from the database
 '''
-def getDataTables(start, stop, systemId, if_name, field):
+def getDataTables(start, stop, systemId, bucket, field):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
     query_api = client.query_api()
 
     #Build query
-    query = 'from(bucket: "skogul/1mnd")\
+    query = 'from(bucket: "' + bucket + '")\
             |> range(start: ' + start + ', stop: ' + stop + ')\
             |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-            |> filter(fn: (r) => r["if_name"] == "' + if_name + '")\
             |> filter(fn: (r) => r["_field"] == "' + field + '")\
             |> group()        \
             |> keep(columns: ["_value", "_time"])'

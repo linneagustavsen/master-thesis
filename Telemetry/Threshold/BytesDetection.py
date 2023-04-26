@@ -86,7 +86,7 @@ def detectionBytesTelemetry(start, stop, systemId, if_name, interval, frequency,
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
     intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
-
+ 
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval

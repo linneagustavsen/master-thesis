@@ -45,7 +45,7 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
     TNf = open(str(r) + "TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel.json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel." + str(field)+".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection

@@ -27,6 +27,22 @@ class Correlation_Time:
         self.graph = graph
         self.alertsCorrelated = {}
 
+    def countElements(self, listOfElements):
+        counter = {}
+        for element in listOfElements:
+            if element in counter:
+                counter[element] += 1
+            else:
+                counter[element] = 1
+        return counter
+    
+    def addElementToCounterDict(self, element, counterDict):
+        if element in counterDict:
+            counterDict[element] += 1
+        else:
+            counterDict[element] = 1
+        return counterDict
+    
     def decodeAlertDB(self, alertDB):
         newAlertDB = {}
         for gateway in alertDB:
@@ -41,14 +57,11 @@ class Correlation_Time:
     def removeTimestampFromCorrelation(self, interval):
         del self.alertsCorrelated[interval]
 
-    def addAlertToExistingTimestamp(self, existingTime, interval, alert):
-        existingAlerts = self.alertsCorrelated[existingTime]
-        existingAlerts.append(alert)
+    def addAlertToExistingTimestamp(self, interval, alert):
         if interval in self.alertsCorrelated:
-            self.alertsCorrelated[interval].extend(existingAlerts)
+            self.alertsCorrelated[interval].append(alert)
         else:
-            self.alertsCorrelated[interval] = existingAlerts
-        del self.alertsCorrelated[existingTime]
+            self.alertsCorrelated[interval] = alert
 
     def correlateTime(self, stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB):
         #for gateway, timestamps in payload:
@@ -59,46 +72,53 @@ class Correlation_Time:
                     #generate an alert for that time, that attack type, and the highest deviation score (or the mean)
                     #send the alert to the alert ranking
 
-        exists = False
+        timeExists = False
         existsCorrelated = False
         existingTimes = []
         removeTimes = []
         gateways = [gateway]
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
-        fuzzyStartTime = stime - timedelta(seconds = 30)
-        interval = pd.Interval(fuzzyStartTime, etime, closed='left')
+        fuzzyStartTime = stime - timedelta(seconds = 2)
+        interval = pd.Interval(fuzzyStartTime, etime, closed='both')
 
         for otherGateway in self.graph.G:
             if otherGateway == gateway:
                 continue
+
             if nx.shortest_path_length(self.graph.G, gateway, otherGateway) < 4:
                 for time in alertDB[otherGateway]:
-                    alerts = alertDB[otherGateway][time]
                     if interval.overlaps(time):
-                        exists = True
+                        timeExists = True
                         gateways.append(otherGateway)
+                        alerts = alertDB[otherGateway][time]
+
                         for alert in alerts:
                             deviation_scores.append(alert["Deviation_score"])
                             real_labels.append(alert["Real_label"])
                             attack_types.append(alert["Attack_type"])
-        print("\nalertsCorrelated")
-        print(self.alertsCorrelated)
-        for time in self.alertsCorrelated:
+
+        '''for time in self.alertsCorrelated:
             if time.left < stime - timedelta(minutes=15):
                 removeTimes.append(time)
                 continue
-            alerts = self.alertsCorrelated[time]
+
             if interval.overlaps(time):
                 existsCorrelated = True
                 existingTimes.append(time)
+                alerts = self.alertsCorrelated[time]
+
                 for alert in alerts:
                     gateways.extend(alert['Gateways'])
                     deviation_scores.extend(alert["Deviation_scores"])
                     real_labels.extend(alert["Real_labels"])
-                    attack_types.extend(alert["Attack_types"])
-        for time in removeTimes:
-            self.removeTimestampFromCorrelation(time)
+                    attack_types.extend(alert["Attack_types"])'''
+
+        '''for time in removeTimes:
+            #self.removeTimestampFromCorrelation(time)
+            if time in existingTimes:
+                    existingTimes.remove(time)'''
+
         alert = {
                     "sTime": stime,
                     "eTime": etime,
@@ -108,28 +128,27 @@ class Correlation_Time:
                     "Attack_types": attack_types
                     }
 
-        if exists or existsCorrelated:
-            labels = {}
-            for element in real_labels:
-                if element in labels:
-                    labels[element] += 1
-                else:
-                    labels[element] = 1
-        
+        if timeExists or existsCorrelated:
+
             message = {
                     "sTime": stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateways": list(set(gateways)),
                     "Deviation_scores": deviation_scores,
-                    "Real_labels": labels,
-                    "Attack_type": list(set(attack_types))
+                    "Real_labels": self.countElements(real_labels),
+                    "Attack_types": self.countElements(attack_types)
                     }
+            
+            print("\nPublished message to topic", self.output)
+            print(message)
+            print("\n")
             self.mqtt_client.publish(self.output, json.dumps(message))
-        if existsCorrelated:
+
+        '''if existsCorrelated:
             for existingTime in existingTimes:
-                self.addAlertToExistingTimestamp(existingTime, interval, alert)
+                self.addAlertToExistingTimestamp(existingTime, alert)
         else:
-            self.alertsCorrelated[interval] = [alert]
+            self.alertsCorrelated[interval] = [alert]'''
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
@@ -139,13 +158,13 @@ class Correlation_Time:
         self.mqtt_client.subscribe(self.input)
 
     def on_publish(self, client, userdata, result):
-        print("Aggregation published to topic", self.input)
+        print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            print(payload)
+            #print(payload)
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
@@ -165,6 +184,7 @@ class Correlation_Time:
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.on_connect = self.on_connect
+        self.mqtt_client.on_publish = self.on_publish
         
         self.mqtt_client.connect(self.broker, self.port)
         try:

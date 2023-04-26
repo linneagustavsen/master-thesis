@@ -1,4 +1,4 @@
-from matplotlib.path import Path
+from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -18,7 +18,7 @@ from HelperFunctions.Normalization import normalization
             systemId:                       string, name of the system to collect and calculate on
             frequency:                      timedelta object, frequency of metric calculation
             interval:                       timedelta object, size of the sliding window which the calculation is made on
-            windowSize:                     int, represents a multiplier of frequency, how far back we want to compare the value with
+            windowSize:              from matplotlib.path import Path       int, represents a multiplier of frequency, how far back we want to compare the value with
             thresholdSrcEntropy:            float, values over this threshold will cause an alert
             thresholdSrcEntropyRate:        float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
@@ -62,7 +62,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     maxmin_sip_rate = json.load(json_file_sip_rate)
 
     #Parameters for the MQTT connection
-    MQTT_BROKER = 'mosquitto'
+    MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
     MQTT_USER = 'srcEntropyDetectionNetFlow'
     MQTT_PASSWORD = 'srcEntropyDetectionPass'

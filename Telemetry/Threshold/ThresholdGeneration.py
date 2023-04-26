@@ -2,6 +2,8 @@ from pathlib import Path
 import statistics
 from HelperFunctions.GetData import *
 import json
+
+from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 from .FFTDenoiser import *
 import numpy as np
 from datetime import datetime
@@ -29,11 +31,11 @@ json_file_mean_var.close()
             stop:       string, indicates the stop time of the training period
 '''
 
-def thresholdGeneration(systemId, if_name, field, start, stop):
+def thresholdGeneration(systemId, field, start, stop):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, field)
+    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, field)
 
     #Loop through all the tables and the rows and store them in a json structure based on weekday, hour, and minute
     for table in tables:

@@ -28,12 +28,13 @@ print(generalizedEntropy(10, Pi))
 print(generalizedEntropy2(10, Pi))'''
 
 
-from datetime import timedelta
+from datetime import timedelta, datetime
+import math
 from NetFlow.Threshold.SYNDetection import synDetection
 
 from Telemetry.Entropy.Detection import detectionEntropyTelemetry
 
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
+'''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
 start = "2011-02-08 10:00:00"
 stop = "2011-02-08 12:00:00"
@@ -45,4 +46,94 @@ pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
 attackDate="08.02.11"
 systemId =  "oslo-gw"
 silkFileSyn = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
-synDetection(silkFileSyn, start, stop, systemId, 10, 2, attackDate)
+synDetection(silkFileSyn, start, stop, systemId, 10, 2, attackDate)'''
+
+'''start = ['2022-09-22 00:00:00', '2023-01-25 00:00:00']
+stop = ['2022-10-22 00:00:00', '2023-02-23 00:00:00']
+startTime = datetime.strptime(start[0], '%Y-%m-%d %H:%M:%S')
+stopTime = datetime.strptime(stop[0], '%Y-%m-%d %H:%M:%S')
+intervalTime = (stopTime - startTime).total_seconds()/86400
+print(math.ceil(intervalTime))'''
+'''
+def priority_getter(value):
+    print("\n")
+    print(value)
+    priority = {
+        "Flooding": 0,
+        "SYN Flood": 1,
+        "Same protocol": 2,
+        "Low-Rate": 3,
+        "Different protocols": 4,
+        None: 5
+    }
+    highestKey = max(value["Attack_type"], key= lambda x: value["Attack_type"][x])
+    print(highestKey)
+    if highestKey == None:
+        newValue = dict((i,value["Attack_type"][i]) for i in value["Attack_type"] if i!=None)
+        highestKey = max(newValue, key= lambda x: newValue[x])
+    print(highestKey)
+    return priority.get(highestKey)
+
+
+alert = {
+                "Attack_type": {'Low-Rate': 1},
+                "Deviation_score": 2
+            }
+alert2 = {
+                "Attack_type": {"SYN Flood": 2, None:100},
+                "Deviation_score": 1
+            }
+alert3 = {
+                "Attack_type": {"Flooding":3, "Low-Rate":100},
+                "Deviation_score": 5
+            }
+alert4 = {
+                "Attack_type": {"Flooding":101, "Low-Rate":100},
+                "Deviation_score": 3
+            }
+alert5 = {
+                "Attack_type": {None:1000, "Low-Rate":100},
+                "Deviation_score": 3
+            }
+values = [alert, alert2, alert3, alert4, alert5]
+values = sorted(values, key=lambda x: x["Deviation_score"], reverse=True)
+print(values)
+print(sorted(values, key=priority_getter))
+
+[{  
+    'Attack_type': 
+        {'Flooding': 101, 'Low-Rate': 100}, 
+    'Deviation_score': 3}, 
+{   
+    'Attack_type': 
+        {'SYN Flood': 2, None: 100}, 
+    'Deviation_score': 1}, 
+{   
+    'Attack_type': 
+        {'Flooding': 3, 'Low-Rate': 100}, 
+    'Deviation_score': 5}, 
+{   
+    'Attack_type': 
+        {None: 1000, 'Low-Rate': 100}, 
+    'Deviation_score': 3}, 
+{   
+    'Attack_type': 
+        {'Low-Rate': 1},
+    'Deviation_score': 2
+    
+}]
+
+values = [ 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+value1 = [ 1, 2, 3, 4, 5]
+value2 = [ 2, 3, 4, 5, 6]
+value3 = [ 3, 4, 5, 6, 7]
+value4 = [ 4, 5, 6, 7, 8]
+value5 = [ 5, 6, 7, 8, 9]
+'''
+alert = {
+                "Attack_type": '',
+                "Deviation_score": 2
+            }
+
+print(type(alert["Attack_type"]))

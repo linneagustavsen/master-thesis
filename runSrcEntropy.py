@@ -1,5 +1,5 @@
 from datetime import timedelta
-from NetFlow.Entropy.DstDetection import detectionDst
+from NetFlow.Entropy.SrcDetection import detectionSrc
 
 
 baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
@@ -13,4 +13,4 @@ interval = timedelta(minutes = 10)
 pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
 attackDate="08.02.11"
 silkFile = pathToRawFiles+systemId + "/"+ baseFile
-detectionDst(silkFile, start, stop, systemId, frequency, interval, 10, 0, 0, attackDate)
+detectionSrc(silkFile, start, stop, "bergen-gw4", frequency, interval, 10, 0, 0, attackDate)

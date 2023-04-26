@@ -11,8 +11,9 @@ MQTT_PASSWORD = 'aggregationPass'
 MQTT_TOPIC_INPUT = 'detections/modules/#'
 MQTT_TOPIC_OUTPUT_TIME = 'detections/aggregation/time'
 MQTT_TOPIC_OUTPUT_IPS = 'detections/aggregation/ips'
+MQTT_TOPIC_OUTPUT_ATTACK_TYPE = 'detections/aggregation/attackType'
 
 
 graph = NetworkGraph()
-aggregation = Aggregation(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT_TIME, MQTT_TOPIC_OUTPUT_IPS, graph)
+aggregation = Aggregation(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT_TIME, MQTT_TOPIC_OUTPUT_IPS, MQTT_TOPIC_OUTPUT_ATTACK_TYPE, graph)
 aggregation.start()
