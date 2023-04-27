@@ -68,14 +68,14 @@ def detectionRandomForestNetFlowFields(testingSet, systemId, attackDate):
         s= q / 'Models'
 
     # Load the model
-    filename = str(s) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    filename = str(s) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
     classifier_RF = pickle.load(open(filename, 'rb'))
     
     sTimes = pd.read_pickle(str(r) + "/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["sTime"].to_numpy()
     eTimes = pd.read_pickle(str(r) + "/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["eTime"].to_numpy()
     sTimes = pd.to_datetime(sTimes)
     eTimes = pd.to_datetime(eTimes)
-
+    
     testingMeasurements = np.array(testingSet.iloc[:,  0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
 
@@ -92,6 +92,7 @@ def detectionRandomForestNetFlowFields(testingSet, systemId, attackDate):
                     "srcPort": testingMeasurements[i][2],
                     "dstPort": testingMeasurements[i][3],
                     "protocol": testingMeasurements[i][4],
+                    "Deviation_score": None,
                     "Value": testingMeasurements[i].tolist(),
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
@@ -139,7 +140,6 @@ if not q.exists():
     q = Path('RandomForest')
     q = q / 'DataSets'
 testingPath = q / 'Testing'
-
 
 testingSet = pd.read_pickle(str(testingPath) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 

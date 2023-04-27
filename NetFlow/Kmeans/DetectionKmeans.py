@@ -92,6 +92,7 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
                         "srcPort": measurements[i][2],
                         "dstPort": measurements[i][3],
                         "protocol": measurements[i][4],
+                        "Deviation_score": None,
                         "Value": measurements[i].tolist(),
                         "Real_label": label[i],
                         "Attack_type": attackType

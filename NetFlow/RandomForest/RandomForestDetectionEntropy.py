@@ -72,7 +72,7 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
     filename = str(s) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
     classifier_RF = pickle.load(open(filename, 'rb'))
 
-    timeStamps = pd.read_pickle(str(r) + "/Training.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
+    timeStamps = pd.read_pickle(str(r) + "/Testing.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["time"].to_numpy()
     timeStamps = pd.to_datetime(timeStamps)
 
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
@@ -86,6 +86,7 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
                     "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
+                    "Deviation_score": None,
                     "Value": testingMeasurements[i].tolist(),
                     "Real_label": testingLabel[i],
                     "Attack_type": ""

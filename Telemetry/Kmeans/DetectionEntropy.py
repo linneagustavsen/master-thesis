@@ -93,6 +93,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
                         "sTime": (timeStamps[i]+ interval - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": (timeStamps[i]+ interval).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
+                        "Deviation_score": None,
                         "Value": measurements[i],
                         "Real_label": int(attack),
                         "Attack_type": attackType

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
 from threading import Thread
@@ -26,11 +27,11 @@ class Aggregation:
         self.outputIPs = outputTopicIPs
         self.outputAttackTypes = outputTopicAttackTypes
         self.graph = graph
+        self.alertCounter = 0
 
         self.alertDB = {}
         for node in self.graph.G:
             self.alertDB[node] = {}
-
 
     def countElements(self, listOfElements):
         counter = {}
@@ -131,6 +132,7 @@ class Aggregation:
 
     def on_message(self, client, userdata, msg):
         print('Incoming message to topic {}'.format(msg.topic))
+        self.alertCounter += 1
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
             print(payload)
@@ -165,4 +167,11 @@ class Aggregation:
             
         except KeyboardInterrupt:
             print("Interrupted")
+            p = Path('Detections')
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsAggregation.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
             self.mqtt_client.disconnect()

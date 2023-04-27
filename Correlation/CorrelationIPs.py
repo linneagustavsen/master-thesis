@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
 from threading import Thread
@@ -22,6 +23,7 @@ class Correlation_IPs:
         self.input = inputTopic
         self.output = outputTopic
         self.alertsIP ={}
+        self.alertCounter = 0
 
     def countElements(self, listOfElements):
         counter = {}
@@ -128,6 +130,7 @@ class Correlation_IPs:
         print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
+        self.alertCounter += 1
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
@@ -157,4 +160,11 @@ class Correlation_IPs:
             
         except KeyboardInterrupt:
             print("Interrupted")
+            p = Path('Detections')
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationIPs.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
             self.mqtt_client.disconnect()

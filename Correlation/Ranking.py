@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import statistics
-from numpy import mean
+import numpy as np
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
@@ -27,6 +27,7 @@ class Ranking:
         self.output = outputTopic
         self.graph = graph
         self.ranking = []
+        self.alertCounter = 0
         
     def writeRankingToFile(self):
         p = Path('Detections')
@@ -91,7 +92,7 @@ class Ranking:
                         "sTime": stime,
                         "eTime": etime,
                         "Gateways": gateways,
-                        "Deviation_score": {"mean": mean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
+                        "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
                         "Real_labels": real_labels,
                         "Attack_types": attack_types
                         }
@@ -105,7 +106,7 @@ class Ranking:
                     "sTime": stime,
                     "eTime": etime,
                     "Gateways": gateways,
-                    "Deviation_score": {"mean": mean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
+                    "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
                     "Real_labels": real_labels,
                     "Attack_types": attack_types
                     }
@@ -124,6 +125,7 @@ class Ranking:
         print("Ranking published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
+        self.alertCounter += 1
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
@@ -154,4 +156,11 @@ class Ranking:
             
         except KeyboardInterrupt:
             print("Interrupted")
+            p = Path('Detections')
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
             self.mqtt_client.disconnect()

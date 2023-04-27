@@ -87,6 +87,7 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
                         "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
+                        "Deviation_score": None,
                         "Value": measurements[i].tolist(),
                         "Real_label": int(attack),
                         "Attack_type": attackType

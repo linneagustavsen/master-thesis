@@ -92,6 +92,7 @@ def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0thres
                         "srcPort": measurements[i][2],
                         "dstPort": measurements[i][3],
                         "protocol": measurements[i][4],
+                        "Deviation_score": None,
                         "Value": measurements[i].tolist(),
                         "Real_label": label[i],
                         "Attack_type": attackType

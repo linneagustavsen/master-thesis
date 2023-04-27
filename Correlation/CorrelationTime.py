@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
@@ -26,6 +27,7 @@ class Correlation_Time:
         self.output = outputTopic
         self.graph = graph
         self.alertsCorrelated = {}
+        self.alertCounter = 0
 
     def countElements(self, listOfElements):
         counter = {}
@@ -161,6 +163,7 @@ class Correlation_Time:
         print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
+        self.alertCounter += 1
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
@@ -193,4 +196,11 @@ class Correlation_Time:
             
         except KeyboardInterrupt:
             print("Interrupted")
+            p = Path('Detections')
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
             self.mqtt_client.disconnect()

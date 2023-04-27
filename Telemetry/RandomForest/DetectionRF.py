@@ -81,6 +81,7 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
                     "sTime": (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
+                    "Deviation_score": None,
                     "Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": "Flooding"

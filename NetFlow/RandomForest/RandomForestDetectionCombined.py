@@ -92,6 +92,7 @@ def detectionRandomForestNetFlow(testingSet, systemId, interval, attackDate):
                     "srcPort": testingMeasurements[i][2],
                     "dstPort": testingMeasurements[i][3],
                     "protocol": testingMeasurements[i][4],
+                    "Deviation_score": None,
                     "Value": testingMeasurements[i].tolist(),
                     "Real_label": testingLabel[i],
                     "Attack_type": ""

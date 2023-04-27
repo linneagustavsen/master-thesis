@@ -91,6 +91,7 @@ def detectionRandomForestNoIPNetFlowFields(testingSet, systemId, attackDate):
                     "srcPort": testingMeasurements[i][0],
                     "dstPort": testingMeasurements[i][1],
                     "protocol": testingMeasurements[i][2],
+                    "Deviation_score": None,
                     "Value": testingMeasurements[i].tolist(),
                     "Real_label": testingLabel[i],
                     "Attack_type": ""
