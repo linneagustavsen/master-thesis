@@ -239,7 +239,7 @@ kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequen
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
@@ -270,12 +270,12 @@ stopRFTesting = "2023-03-24 19:00:00"
 randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 10)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
@@ -297,9 +297,9 @@ main(baseFile, systems, start, stop, startCombined, stopCombined, frequency, int
 kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 
 interval = timedelta(minutes = 10)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 
 interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
