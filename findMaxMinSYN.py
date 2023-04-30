@@ -39,7 +39,7 @@ def synEntropyCalculation(silkFile, start, stop, frequency, interval):
     #Loop through all the flow records
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         synSYNPerFlow.append(rec.packets)

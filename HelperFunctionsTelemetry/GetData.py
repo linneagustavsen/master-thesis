@@ -42,7 +42,7 @@ def getDataNetFlow(silkFile, start, stop):
 
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         sIP.append(int(rec.sip))
@@ -140,7 +140,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
 

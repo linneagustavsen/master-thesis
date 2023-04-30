@@ -100,7 +100,7 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         #Implement the sliding window

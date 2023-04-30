@@ -16,8 +16,8 @@ def flowDistribution(records):
     #Loop through each flow record in the time interval
     for rec in records:
         #Define a bi-directional flow as the connection between a source and destination IP address
-        flow = (rec.sip, rec.dip)
-        reverse_flow = (rec.dip, rec.sip)
+        flow = (int(rec.sip), int(rec.dip))
+        reverse_flow = (int(rec.dip), int(rec.sip))
 
         #Find the index of the current flow in the dictionary if it exists
         #If not add it to the dictionary 
@@ -63,7 +63,7 @@ def uniDirFlowDistribution(records):
    #Loop through each flow record in the time interval
     for rec in records:
         #Define a uni-directional flow as the connection between a source and destination IP address
-        flow = (rec.sip, rec.dip)
+        flow = (int(rec.sip), int(rec.dip))
 
         #Find the index of the current flow in the dictionary if it exists
         #If not add it to the dictionary 
@@ -107,10 +107,10 @@ def ipDestinationDistribution(records):
     for rec in records:
         #If the current flow has the same destination IP as a previous flow the number of packets is added to the record of that destination IP
         #If it has not been encountered before it is added to the dictionary
-        if rec.dip in numberOfPacketsPerIP:
-            numberOfPacketsPerIP[rec.dip] += rec.packets
+        if int(rec.dip) in numberOfPacketsPerIP:
+            numberOfPacketsPerIP[int(rec.dip)] += rec.packets
         else:
-            numberOfPacketsPerIP[rec.dip] = rec.packets
+            numberOfPacketsPerIP[int(rec.dip)] = rec.packets
         sumOfPackets += rec.packets
 
     #Array to keep track of the probability distribution
@@ -143,9 +143,9 @@ def ipSourceDistribution(records):
         #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
         #If it has not been encountered before it is added to the dictionary
         if rec.sip in numberOfPacketsPerIP:
-            numberOfPacketsPerIP[rec.sip] += rec.packets
+            numberOfPacketsPerIP[int(rec.sip)] += rec.packets
         else:
-            numberOfPacketsPerIP[rec.sip] = rec.packets
+            numberOfPacketsPerIP[int(rec.sip)] = rec.packets
         sumOfPackets += rec.packets
 
     #Array to keep track of the probability distribution

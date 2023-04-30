@@ -30,7 +30,7 @@ def thresholdGeneration(systemId, field):
 
     buckets = ["october", "february"]
     for bucket in buckets:
-        print("started on bucket", bucket)
+        print("started on bucket", bucket, "for system", systemId, "field:", field)
         startTime = datetime.strptime(start[counter], '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime(stop[counter], '%Y-%m-%d %H:%M:%S')
         intervalTime = (stopTime - startTime).total_seconds()/86400
@@ -66,6 +66,13 @@ def thresholdGeneration(systemId, field):
     for weekday in range(7):
         for hour in range(24):
             for minute in range(60):
+                if len(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]) < 2:
+                    json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = None
+                    json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = None
+                    print("\n This time didnt have enough: weekday", str(weekday), "hour", str(hour), "minute", str(minute))
+                    print(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)])
+                    continue
+
                 mean_this_minute = denoisedMean[time.index(str(weekday) + " " + str(hour) + ":" + str(minute))]
                 variance_this_minute = statistics.stdev(json_object_raw["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)],xbar = mean_this_minute)
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
@@ -79,11 +86,15 @@ def thresholdGeneration(systemId, field):
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
-systemId = "oslo-gw1"
+systems = ["trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
+           "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
+            "ma2-gw", "narvik-gw4"]
 fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
 
-for field in fields:
-    thresholdGeneration(systemId, field)
+
+for system in systems:
+    for field in fields:
+        thresholdGeneration(system, field)
 '''systemId = "oslo-gw1"
 fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
 for field in fields:

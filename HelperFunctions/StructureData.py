@@ -42,3 +42,14 @@ def structureDataEntropy(df):
     measurements = df.values[:,1:]
     return timeStamps, measurements
 
+
+def structureDataNumpyArrays(npArray):
+    sTime = npArray[:,0]
+    eTime = npArray[:,1]
+    measurements = npArray[:,2:]
+    return sTime, eTime, measurements
+
+def structureDataEntropyNumpyArrays(npArray):
+    timeStamps = npArray[:, 0]
+    measurements = npArray[:,1:]
+    return timeStamps, measurements

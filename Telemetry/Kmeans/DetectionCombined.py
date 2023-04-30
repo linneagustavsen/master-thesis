@@ -17,23 +17,23 @@ import paho.mqtt.client as mqtt
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, frequency, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansCombinedTelemetry(testingSet, systemId, frequency, DBthreshold, c0threshold, c1threshold, attackDate):
     p = Path('Detections')
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
 
     TPf0 = open(str(q) + "/TP.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    TPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
     FPf0 = open(str(q) + "/FP.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    FPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
     FNf0 = open(str(q) + "/FN.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    FNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
     TNf0 = open(str(q) + "/TN.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    TNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
     cluster = open(str(q) + "/Combined.ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")

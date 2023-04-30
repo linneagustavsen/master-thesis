@@ -18,22 +18,15 @@ import pandas as pd
     Output: 
             dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interval, attackDate):
+def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
-    p = Path('NetFlow')
-    q = p / 'Kmeans' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True)
     df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle(str(q) + "/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q) + "/TestingData.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    sTime, eTime, measurements = structureData(df)
+    sTime, eTime, measurements = structureDataNumpyArrays(df)
     data = np.empty((len(sTime),len(columTitles)))
-    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle(str(q) + "/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle(str(q) + "/TestingDataEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
+
+    entropy_df = getEntropyDataNetFlow(silkFile, start.strftime("%Y-%m-%d %H:%M:%S"), stop.strftime("%Y-%m-%d %H:%M:%S"), frequency, interval)
+    entropy_timeStamps, entropy_measurements = structureDataEntropyNumpyArrays(entropy_df)
 
     now = datetime.now()
 
@@ -44,8 +37,9 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interva
     lastMinute = now.minute
 
     for i in range(len(sTime)):
-        timestamp = datetime.utcfromtimestamp(((sTime[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
         
+        #timestamp = datetime.utcfromtimestamp(((sTime[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
+        timestamp = sTime[i]
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day
@@ -92,7 +86,7 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, frequency, interva
     
     testingSet = pd.DataFrame(data, columns=columTitles)
     sTimes = pd.to_datetime(sTime)
-    eTimes = pd.to_datetime(sTime)
+    eTimes = pd.to_datetime(eTime)
     testingSet.insert(0, "sTime", sTimes)
     testingSet.insert(1, "eTime", eTimes)
     return testingSet
@@ -106,7 +100,7 @@ interval = timedelta(minutes=5)
 testingSet = makeTestingDataCombined(silkFile, start, stop, systemId, frequency, interval, attackDate)
 testingSet.to_pickle("NetFlow/Kmeans/RawData/TestingDataCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 '''
-
+'''
 baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systemId = "oslo-gw1"
 start = "2011-02-08 10:00:00"
@@ -132,3 +126,4 @@ testingPath = q / 'Testing'
 if not testingPath.exists():
     testingPath.mkdir()
 testingSet.to_pickle(str(testingPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+'''

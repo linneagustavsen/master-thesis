@@ -36,7 +36,7 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Loop through all the flow records
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         synPacketsPerFlow.append(rec.packets)

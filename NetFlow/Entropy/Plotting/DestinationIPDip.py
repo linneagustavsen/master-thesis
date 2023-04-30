@@ -41,7 +41,7 @@ def metricCalculation(silkFile, start, stop, interval):
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         #Aggregate flows into the specified time interval

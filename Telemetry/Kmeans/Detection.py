@@ -25,16 +25,16 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold
         q.mkdir(parents=True)
 
     TPf0 = open(str(q) + "/TP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
+    TPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
 
     FPf0 = open(str(q) + "/FP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
+    FPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
 
     FNf0 = open(str(q) + "/FN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
+    FNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
 
     TNf0 = open(str(q) + "/TN.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf0.write("sTime,eTime,egress_queue_info__0__avg_buffer_occupancy,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,real_label")
+    TNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
 
     cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")

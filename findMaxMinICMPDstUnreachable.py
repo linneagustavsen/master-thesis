@@ -40,7 +40,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, interval, wind
     sizes = []
     for rec in infile:
         if rec.etime >= stopTime:
-            break
+            continue
         if rec.stime < startTime:
             continue
         #Implement the sliding window
