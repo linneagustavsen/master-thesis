@@ -91,10 +91,10 @@ def kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, freq
     for systemId in systems:
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
         #normal
-        #kmeansCalculation(silkFile, start, stop, systemId, attackDate)
+        kmeansCalculation(silkFile, start, stop, systemId, attackDate)
         print("Finished kmeans flow field calculations")
         #entropy
-        #kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
+        kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
         testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
@@ -149,24 +149,24 @@ def randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRF
         trainingFile = pathToRawFiles+systemId + "/"+ trainingBase
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
         
-        #trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)        
-        #testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        #calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+        trainingSet = makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)        
+        testingSet = makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        calculationsRandomForestNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations on all fields")
 
-        #trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
-        #testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        #calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
+        trainingSet = makeDataSetNoIPNetFlow(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        testingSet = makeDataSetNoIPNetFlow(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        calculationsRandomForestNoIPNetFlow(trainingSet, testingSet, systemId, interval, attackDate)
         print("Finished Random Forest calculations without IPs")
 
-        #trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
-        #testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
-        #calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
+        trainingSet = makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, systemId, frequency, interval, "Training", attackDate)
+        testingSet = makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, systemId, frequency, interval, "Testing", attackDate)
+        calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
         print("Finished Random Forest calculations on entropy")
 
-        #trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
-        #testingSet = makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
-        #calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
+        trainingSet = makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
+        testingSet = makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, systemId, "Testing", attackDate)
+        calculationRandomForestNetFlowFields(trainingSet, testingSet, systemId, attackDate)
         print("Finished Random Forest calculations on fields")
 
         trainingSet = makeDataSetNoIPNetFlowFields(trainingFile, startRFTraining, stopRFTraining, systemId, "Training", attackDate)
@@ -211,7 +211,7 @@ def randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopR
 
 #Attack 1
 baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systems = ["oslo-gw"]
+systems = ["oslo-gw1"]
 start = "2011-02-08 10:00:00"
 stop = "2011-02-08 12:00:00"
 startCombined = "2011-02-08 10:00:00"
@@ -230,7 +230,7 @@ startRFTraining = "2011-02-08 10:00:00"
 stopRFTraining = "2011-02-08 11:00:00"
 startRFTesting = "2011-02-08 11:00:00"
 stopRFTesting = "2011-02-08 12:00:00"
-#randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
+randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
@@ -238,6 +238,6 @@ kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequen
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
-main2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
+main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
 kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)

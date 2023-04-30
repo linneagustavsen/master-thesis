@@ -1,3 +1,4 @@
+import json
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -24,6 +25,10 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
         q.mkdir(parents=True, exist_ok=False)
     calculations = open(str(q) + "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open(str(q) + "/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    srcDistributionDict ={}
+    dstDistributionDict ={}
+    flowDistributionDict ={}
+    packetSizeDistributionDict ={}
 
     #Write the column titles to the files
     calculations.write("sTime,eTime,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
@@ -89,6 +94,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             ipSrcArray.append(entropySip)
             #Calculate the generalized entropy rate of this distribution
             ipSrcRateArray.append(entropySip/ns)
+            srcDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiSIP
 
             #Find the probability distribution based on how many packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
@@ -97,6 +103,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             ipDstArray.append(entropyDip)
             #Calculate the generalized entropy rate of this distribution
             ipDstRateArray.append(entropyDip/nd)
+            dstDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiDIP
             
             #Find the probability distribution based on how many packets there is in each bi-directional flow in this time interval
             PiF, nf = flowDistribution(records)
@@ -105,6 +112,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             flowArray.append(entropyFlow)
             #Calculate the generalized entropy rate of this distribution
             flowRateArray.append(entropyFlow/nf)
+            flowDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiF
 
             #Store the number of bi-directional flows in this time interval
             numberOfFlows.append(nf)
@@ -121,6 +129,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             packetSizeArray.append(entropyPacketSize)
             #Calculate the generalized entropy rate of this distribution
             packetSizeRateArray.append(entropyPacketSize/nps)
+            packetSizeDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiPS
 
             #Store the number of packets and bytes this time interval
             packetNumberArray.append(numberOfPackets(records))
@@ -146,5 +155,21 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     attackFlows.close()
 
     infile.close()
+
+    json_file = open(str(q) + "/srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(srcDistributionDict,json_file)
+    json_file.close()
+
+    json_file = open(str(q) + "/dstIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(dstDistributionDict,json_file)
+    json_file.close()
+
+    json_file = open(str(q) + "/flowDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(flowDistributionDict,json_file)
+    json_file.close()
+
+    json_file = open(str(q) + "/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(packetSizeDistributionDict,json_file)
+    json_file.close()
 '''    
 metricCalculation("/home/linneafg/silk-data/RawDataFromFilter/one-day-2011-01-10_11-sorted.rw", "2011-01-10 00:00:00", "2011-01-11 00:00:00",timedelta(minutes = 1), timedelta(minutes = 5))'''
