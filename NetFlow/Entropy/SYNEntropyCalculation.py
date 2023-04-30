@@ -1,4 +1,4 @@
-import json
+import pickle
 from pathlib import Path
 from silk import *
 from HelperFunctions.Distributions import *
@@ -107,14 +107,14 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     calculations.close()
     attackFlows.close()
 
-    json_file = open(str(q) + "/SYN.srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
-    json.dump(srcDistributionDict,json_file)
+    json_file = open(str(q) + "/SYN.srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    pickle.dump(srcDistributionDict,json_file)
     json_file.close()
 
-    json_file = open(str(q) + "/SYN.dstIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
-    json.dump(dstDistributionDict,json_file)
+    json_file = open(str(q) + "/SYN.dstIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    pickle.dump(dstDistributionDict,json_file)
     json_file.close()
 
-    json_file = open(str(q) + "/SYN.flowDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
-    json.dump(flowDistributionDict,json_file)
+    json_file = open(str(q) + "/SYN.flowDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    pickle.dump(flowDistributionDict,json_file)
     json_file.close()

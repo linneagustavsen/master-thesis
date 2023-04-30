@@ -14,7 +14,7 @@ from NetFlow.Kmeans.ClusterLabelling import labelCluster
             systemId:   string, name of the system to collect and calculate on
             attackDate: string, date of the attack the calculations are made on
 '''
-def kmeansCalculation(silkFile, start, stop, frequency, systemId, attackDate):
+def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackDate):
     p = Path('Calculations')
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():
@@ -24,11 +24,11 @@ def kmeansCalculation(silkFile, start, stop, frequency, systemId, attackDate):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
-    intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
+    intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
  
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
-        stopTime = startTime + frequency
+        stopTime = startTime + clusterFrequency
         f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
@@ -70,4 +70,4 @@ def kmeansCalculation(silkFile, start, stop, frequency, systemId, attackDate):
         f0.close()
         f1.close()
 
-        startTime += frequency
+        startTime += clusterFrequency

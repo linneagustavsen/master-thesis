@@ -86,20 +86,20 @@ def main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, a
             pathToRawFiles: string, path to the SiLK NetFlow records,
             attackDate:     string, date of the attack the calculations are made on
 '''
-def kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate):        
+def kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate):        
     #Kmeans
     for systemId in systems:
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
         #normal
-        kmeansCalculation(silkFile, start, stop, systemId, attackDate)
+        kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackDate)
         print("Finished kmeans flow field calculations")
         #entropy
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        #testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
-        kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
+        kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
 
 '''
@@ -116,7 +116,7 @@ def kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, freq
             pathToRawFiles: string, path to the SiLK NetFlow records,
             attackDate:     string, date of the attack the calculations are made on
 '''
-def kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate):        
+def kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate):        
     #Kmeans
     for systemId in systems:
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
@@ -124,9 +124,9 @@ def kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, fre
         kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
         print("Finished kmeans entropy calculations")
         #combined
-        testingSet = makeDataSetKmeansNetFlow(silkFile, startCombined, stopCombined, systemId, frequency, interval, attackDate)
+        #testingSet = makeDataSetKmeansNetFlow(silkFile, clusterFrequency, systemId, frequency, interval, attackDate)
         print("Finished with making combined testing data")
-        kmeansCombinedCalculation(testingSet, systemId, interval, attackDate)
+        kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency, systemId, interval, attackDate)
         print("Finished kmeans flow field  and entropy calculations")
 
 
@@ -220,11 +220,12 @@ startCombined = "2023-03-08 10:00:00"
 stopCombined = "2023-03-08 16:00:00"
 frequency = timedelta(minutes = 1)
 interval = timedelta(minutes = 5)
+clusterFrequency = timedelta(minutes = 15)
 pathToRawFiles="<PATH TO RAW FILES>/"
 attackDate="08.03"
 
 main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)       
 
 trainingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
 testingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
@@ -236,12 +237,12 @@ randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTrai
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)       
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 
@@ -260,7 +261,7 @@ pathToRawFiles="<PATH TO RAW FILES>/"
 attackDate="17.03"
 
 main(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)       
 
 trainingBase="twelve-hours-2023-03-17_08-20-sorted.rw"
 testingBase="twelve-hours-2023-03-24_08-20-sorted.rw"
@@ -272,12 +273,12 @@ randomForestMain(trainingBase, testingBase, systems, startRFTraining, stopRFTrai
 
 interval = timedelta(minutes = 10)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)       
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 interval = timedelta(minutes = 15)
 main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate)
-kmeansMain2(baseFile, systems, start, stop, startCombined, stopCombined, frequency, interval, pathToRawFiles, attackDate)        
+kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)        
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
 #Attack number 3
