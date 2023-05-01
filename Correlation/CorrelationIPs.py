@@ -59,9 +59,6 @@ class Correlation_IPs:
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
 
         if ip in self.alertsIP:
-            print("\nalertsIP[ip]", ip)
-            print(self.alertsIP[ip])
-            print("\n")
             exists = False
             existingTimes = []
             overlappingAlerts = 1
@@ -92,9 +89,7 @@ class Correlation_IPs:
                 self.removeTimestampFromIP(ip, time)
                 if time in existingTimes:
                     existingTimes.remove(time)
-            print("\nOverlappingAlerts")
-            print(overlappingAlerts)
-            print("\n")
+
             if exists:
                 for existingTime in existingTimes:
                     self.addAlertsIP(ip, existingTime, payload)
@@ -111,9 +106,6 @@ class Correlation_IPs:
                                 }
                     
                     self.mqtt_client.publish(self.output, json.dumps(message))
-                    print("\nPublished message to topic", self.output)
-                    print(message)
-                    print("\n")
             else:
                 self.addAlertsIP(ip, interval, payload)
         else:

@@ -27,15 +27,15 @@ def labelCluster(measurements, predictions, DBthreshold, c0threshold, c1threshol
     cd0 = 2*np.sum(distances0)/counter0
     cd1 = 2*np.sum(distances1)/counter1
 
-    attackCluster = 0
-    #If it is a burst attack and cluster 1 is very compact, it is the attack cluster
+    attackCluster = 1
+    #If it is a burst attack and c1 is empty, c0 is the attack cluster
     if db == 0 and cd1 == 0:
-        attackCluster = 1
-    #If there is no burst and c0 is less compact than c1, c1 is the attack cluster
+        attackCluster = 0
+    #If there is no burst and c0 is less compact than c1, c0 is the attack cluster
     elif db > DBthreshold and cd0 > (cd1 + c0threshold):
-        attackCluster = 1
+        attackCluster = 0
     #If there is burst traffic and normal traffic and c1 is less compact than c0, c1 is the attack cluster
     elif db < DBthreshold and cd1 > (cd0 + c1threshold):
-        attackCluster = 1
+        attackCluster = 0
 
     return attackCluster, db, cd0, cd1, counter0, counter1

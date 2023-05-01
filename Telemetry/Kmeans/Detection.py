@@ -76,15 +76,21 @@ def detectionKmeansTelemetry(start, stop, systemId, if_name, fields, DBthreshold
     attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, DBthreshold, c0threshold, c1threshold)
     cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
 
+    if attackCluster == 0:
+        attackClusterDiameter = cd0
+        nonAttackClusterDiameter = cd1
+    elif attackCluster == 1:
+        attackClusterDiameter = cd1
+        nonAttackClusterDiameter = cd0
     attackType = ""
-    #If it is a burst attack and cluster 1 is very compact, it is the attack cluster
-    if db == 0 and cd1 == 0:
+    #If it is a burst attack and non attack cluster is empty
+    if db == 0 and nonAttackClusterDiameter == 0:
         attackType = "Same protocol"
-    #If there is no burst and c0 is less compact than c1, c1 is the attack cluster
-    elif db > DBthreshold and cd0 > (cd1 + c0threshold):
+    #If there is no burst and attack cluster is less compact than normal traffic
+    elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
         attackType = "Different protocols"
-    #If there is burst traffic and normal traffic and c1 is less compact than c0, c1 is the attack cluster
-    elif db < DBthreshold and cd1 > (cd0 + c1threshold):
+    #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
+    elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
         attackType = "Same protocol"
     
     for i in range(len(prediction)):
