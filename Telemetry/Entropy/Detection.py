@@ -119,7 +119,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
             continue
 
         #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nps = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
+        PiPS,nps,packetSizeDistributionDict = packetSizeDistributionDetection(dfEgressBytes, dfEgressPackets)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
@@ -145,6 +145,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict,
                     "Change": abs(change),
                     "Value": packetSizeArray[i],
                     "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
@@ -175,6 +176,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict,
                     "Change": abs(change_r),
                     "Value": packetSizeRateArray[i],
                     "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),

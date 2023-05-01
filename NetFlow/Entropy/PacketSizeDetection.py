@@ -131,7 +131,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                 records.append(rec)
                 continue
             #Find the probability distribution based on how big the packets are this time interval
-            PiPS,nps = packetSizeDistributionNetFlow(records)
+            PiPS,nps,packetSizeDistributionDict = packetSizeDistributionDetectionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             packetSizeArray.append(entropyPacketSize)
@@ -156,6 +156,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
+                        "Packet_size_distribution": packetSizeDistributionDict,
                         "Change": abs(change),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
@@ -169,6 +170,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
+                        "Packet_size_distribution": packetSizeDistributionDict,
                         "Change": abs(change_r),
                         "Value": packetSizeArray[i],
                         "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
