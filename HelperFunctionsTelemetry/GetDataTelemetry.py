@@ -15,7 +15,7 @@ from silk import *
     Output: 
             df:         pandas dataframe, dataframe containing the data from the database
 '''
-def getData(start, stop, bucket, systemId, if_name, fields):
+def getData(start, stop, bucket, systemId, fields):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
     query_api = client.query_api()
@@ -131,7 +131,7 @@ def getDataTables(start, stop, systemId, bucket, field):
     Output: 
             entropy:    pandas dataframe, dataframe containing the entropy of packet size and the entropy rate of packet size
 '''
-def getEntropyData(start, stop, systemId, if_name, interval, frequency):
+def getEntropyData(start, stop, systemId, interval, frequency):
     intervalTime = (stop - start).total_seconds()/frequency.total_seconds()
 
     packetSizeArray = []
@@ -142,7 +142,7 @@ def getEntropyData(start, stop, systemId, if_name, interval, frequency):
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets", "egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_octets", "egress_stats__if_1sec_pkts"])
         
         #If there is not enough data points the minute is skipped
         if df.empty:

@@ -90,7 +90,7 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, frequency, DBthreshol
                         "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": None,
-                        "Value": measurements[i],
+                        #"Value": measurements[i],
                         "Real_label": int(attack),
                         "Attack_type": attackType
                     }

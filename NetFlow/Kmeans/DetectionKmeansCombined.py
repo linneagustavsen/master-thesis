@@ -91,10 +91,10 @@ def detectionKmeansCombined(testingSet, systemId, interval, DBthreshold, c0thres
                         "dstIP": measurements[i][1],
                         "srcPort": measurements[i][2],
                         "dstPort": measurements[i][3],
-                        "protocol": measurements[i][4],
+                        "Protocol": measurements[i][4],
                         "Deviation_score": None,
-                        "Value": measurements[i].tolist(),
-                        "Real_label": label[i],
+                        '''"Value": measurements[i].tolist(),
+                        "Real_label": label[i],'''
                         "Attack_type": attackType
                     }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

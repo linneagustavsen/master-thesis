@@ -142,7 +142,7 @@ def ipSourceDistribution(records):
     for rec in records:
         #If the current flow has the same source IP as a previous flow the number of packets is added to the record of that source IP
         #If it has not been encountered before it is added to the dictionary
-        if rec.sip in numberOfPacketsPerIP:
+        if int(rec.sip) in numberOfPacketsPerIP:
             numberOfPacketsPerIP[int(rec.sip)] += rec.packets
         else:
             numberOfPacketsPerIP[int(rec.sip)] = rec.packets

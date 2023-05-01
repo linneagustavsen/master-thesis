@@ -18,7 +18,7 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
             attackDate: string, date of the attack the calculations are made on
 '''
 
-def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate):
+def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, attackDate):
     p = Path('Calculations')
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
@@ -44,7 +44,7 @@ def calculationEntropyTelemetry(start, stop, systemId, if_name, interval, freque
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
         #If there is no data for this interval we skip the calculations
         if df.empty:
             startTime = startTime + frequency

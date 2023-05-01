@@ -178,10 +178,10 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
-                        "Change": abs(change),
+                        #"Change": abs(change),
                         "Deviation_score": normalization(abs(change),maxmin_flow["minimum"], maxmin_flow["maximum"]),
-                        "Value": flowArray[i],
-                        "Mean_last_10": np.nanmean(flowArray[i-windowSize: i-1]),
+                        #"Value": flowArray[i],
+                        #"Mean_last_10": np.nanmean(flowArray[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }
@@ -191,10 +191,10 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
-                        "Change": abs(change_r),
+                        #"Change": abs(change_r),
                         "Deviation_score": normalization(abs(change_r),maxmin_flow_rate["minimum"], maxmin_flow_rate["maximum"]),
-                        "Value": flowRateArray[i],
-                        "Mean_last_10": np.nanmean(flowRateArray[i-windowSize: i-1]),
+                        #"Value": flowRateArray[i],
+                        #"Mean_last_10": np.nanmean(flowRateArray[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }
@@ -204,10 +204,10 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
-                        "Change": abs(change_nf),
+                        #"Change": abs(change_nf),
                         "Deviation_score": normalization(abs(change_nf), maxmin_nf["minimum"], maxmin_nf["maximum"]),
-                        "Value": numberOfFlows[i],
-                        "Mean_last_10": np.nanmean(numberOfFlows[i-windowSize: i-1]),
+                        #"Value": numberOfFlows[i],
+                        #"Mean_last_10": np.nanmean(numberOfFlows[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }

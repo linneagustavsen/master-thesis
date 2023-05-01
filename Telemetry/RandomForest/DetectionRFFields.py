@@ -22,17 +22,17 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     if not q.exists():
         q.mkdir(parents=True)
 
-    TPf = open(str(q) + "/TP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    TPf = open(str(q) + "/Fields.TP.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
     
-    FPf = open(str(q) + "/FP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    FPf = open(str(q) + "/Fields.FP.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
     
-    FNf = open(str(q) + "/FN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    FNf = open(str(q) + "/Fields.FN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
     
-    TNf = open(str(q) + "/TN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    TNf = open(str(q) + "/Fields.TN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
     
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -65,10 +65,10 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     if not s.exists():
         s.mkdir(parents=True)
     # Load the model
-    filename = str(s) + "/RandomForestModel."+str(systemId)+ ".pkl"
+    filename = str(s) + "/RandomForestModel.Fields."+str(systemId)+ ".pkl"
     classifier_RF = pickle.load(open(filename, 'rb'))
 
-    timeStamps = pd.read_pickle(str(r) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    timeStamps = pd.read_pickle(str(r) + "/Fields.Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
     
     testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
     testingLabel = np.array(testingSet.iloc[:,-1])
@@ -82,7 +82,7 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
                     "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
-                    "Value": testingMeasurements[i],
+                    #"Value": testingMeasurements[i],
                     "Real_label": testingLabel[i],
                     "Attack_type": "Flooding"
                 }

@@ -91,9 +91,9 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
                     "eTime": row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
-                    "Value": row.values["_value"],
+                    '''"Value": row.values["_value"],
                     "Mean": mean_row,
-                    "Variance": maxVar,
+                    "Variance": maxVar,'''
                     "Real_label": int(isAttack(row.values["_time"]-timedelta(seconds = 2), row.values["_time"])),
                     "Attack_type": "Flooding"
                 }

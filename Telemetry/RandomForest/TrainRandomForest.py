@@ -12,7 +12,7 @@ import pickle
             trainingSet:    pandas dataframe, training data set
             systemId:       string, name of the system to train the model on
 '''
-def trainRandomForestTelemetry(trainingSet, systemId):
+def trainRandomForestTelemetry(trainingSet, type, systemId):
     trainingMeasurements = np.array(trainingSet.iloc[:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[:,-1])
 
@@ -20,7 +20,7 @@ def trainRandomForestTelemetry(trainingSet, systemId):
     classifier_RF = RandomForestClassifier(n_estimators = 100)
     classifier_RF.fit(trainingMeasurements, trainingLabel)
 
-    filename = "Telemetry/RandomForest/Models/RandomForestModel."+str(systemId)+ ".pkl"
+    filename = "Telemetry/RandomForest/Models/RandomForestModel."+ str(type) + "."+str(systemId)+ ".pkl"
     pickle.dump(classifier_RF, open(filename, 'wb'))
 
 

@@ -13,15 +13,15 @@ from datetime import timedelta,datetime
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interval, attackDate):
+def calculationsRandomForestTelemetryCombined(trainingSet, testingSet, systemId, interval, attackDate):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
-    f = open(str(q) + "/Alerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_not = open(str(q) + "/NotAlerts."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("Time,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
-    f_not.write("Time,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    f = open(str(q) + "/Alerts.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_not = open(str(q) + "/NotAlerts.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    f_not.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
 
     trainingMeasurements = np.array(trainingSet.iloc[1:, 0:-1])
     trainingLabel = np.array(trainingSet.iloc[1:,-1])
@@ -34,7 +34,7 @@ def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interva
     q = p / 'RandomForest' / 'RawData'
     if not q.exists():
         q.mkdir(parents=True)
-    timeStamps = pd.read_pickle(str(q) + "/Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    timeStamps = pd.read_pickle(str(q) + "/Combined.Testing."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
     
     testingMeasurements = np.array(testingSet.iloc[1:,  0:-1])
     testingLabel = np.array(testingSet.iloc[1:,-1])
@@ -43,13 +43,13 @@ def calculationsRandomForestTelemetry(trainingSet, testingSet, systemId, interva
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         if predictions[i] == 1:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            line = "\n"  + (timeStamps[i]- timedelta(seconds=2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(testingMeasurements[i])):
                 line += "," + str(testingMeasurements[i][j])
             line += "," +str(testingLabel[i])
             f.write(line)
         if predictions[i] == 0:
-            line = "\n"  + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            line = "\n"  + (timeStamps[i]- timedelta(seconds=2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(testingMeasurements[i])):
                 line += "," + str(testingMeasurements[i][j])
             line += "," +str(testingLabel[i])

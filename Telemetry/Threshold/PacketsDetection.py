@@ -24,7 +24,7 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
             thresholdPackets:       float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdPackets, attackDate):
+def detectionPacketsTelemetry(start, stop, systemId, interval, frequency, windowSize, thresholdPackets, attackDate):
     p = Path('Detections')
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
@@ -91,7 +91,7 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_pkts"])
         if df.empty:
             packetNumberArray.append(np.nan)
             startTime = startTime + frequency
@@ -123,9 +123,9 @@ def detectionPacketsTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
-                    "Change": abs(change),
+                    '''"Change": abs(change),
                     "Value": packetNumberArray[i],
-                    "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),
+                    "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),'''
                     "Real_label": int(attack),
                     "Attack_type": "Flooding"
                 }

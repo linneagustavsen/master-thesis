@@ -127,10 +127,10 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change),
                         "Value": numberOfIcmpDstUnreachablePackets[i],
-                        "Mean_last_10": np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "Flooding"
                         }

@@ -157,10 +157,10 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
-                        "Change": abs(change),
+                        #"Change": abs(change),
                         "Deviation_score": normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]),
-                        "Value": ipDstArray[i],
-                        "Mean_last_10": np.nanmean(ipDstArray[i-windowSize: i-1]),
+                        #"Value": ipDstArray[i],
+                        #"Mean_last_10": np.nanmean(ipDstArray[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }
@@ -170,10 +170,10 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
-                        "Change": abs(change_r),
+                        #"Change": abs(change_r),
                         "Deviation_score": normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
-                        "Value": ipDstRateArray[i],
-                        "Mean_last_10": np.nanmean(ipDstRateArray[i-windowSize: i-1]),
+                        #"Value": ipDstRateArray[i],
+                        #"Mean_last_10": np.nanmean(ipDstRateArray[i-windowSize: i-1]),
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }

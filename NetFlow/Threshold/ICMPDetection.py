@@ -142,10 +142,10 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_ratio), maxmin_ratio["minimum"], maxmin_ratio["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change_ratio),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change_ratio),
                         "Value": icmpRatioArray[i],
-                        "Mean_last_10": np.nanmean(icmpRatioArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(icmpRatioArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "ICMP Flood"
                         }
@@ -157,10 +157,10 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_packets), maxmin_packets["minimum"], maxmin_packets["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change_packets),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change_packets),
                         "Value": icmpPacketsArray[i],
-                        "Mean_last_10": np.nanmean(icmpPacketsArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(icmpPacketsArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "ICMP Flood"
                         }

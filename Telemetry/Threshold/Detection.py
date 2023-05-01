@@ -91,9 +91,9 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
                     "eTime": row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
-                    "Value": row.values["_value"],
+                    '''"Value": row.values["_value"],
                     "Mean": mean_row,
-                    "Variance": variance_row,
+                    "Variance": variance_row,'''
                     "Real_label": int(attack),
                     "Attack_type": "Flooding"
                 }

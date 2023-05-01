@@ -112,10 +112,10 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                             "dstIP": int(rec.dip),
                             "srcPort": rec.sport,
                             "dstPort": rec.dport,
-                            "protocol": rec.protocol,
-                            "Position": i+1,
+                            "Protocol": rec.protocol,
+                            '''"Position": i+1,
                             "Packets": value,
-                            "Percentage": value/sumOfPackets,
+                            "Percentage": value/sumOfPackets,'''
                             "Real_label": int(attack),
                             "Attack_type": "Flooding"
                         }

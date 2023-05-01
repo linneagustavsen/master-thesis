@@ -7,7 +7,6 @@ from HelperFunctions.StructureData import *
 import numpy as np
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
-from .CheckLabel import *
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -21,25 +20,25 @@ from .CheckLabel import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate):
+def makeDataSetRandomForestCombinedTelemetry(systemId, start, stop, interval, frequency, path, attackDate):
     columTitles = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "entropy_packet_size", "entropy_rate_packet_size", "label"]
     
     fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, if_name, fields)
+    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, fields)
 
     p = Path('Telemetry')
     q = p / 'RandomForest' / 'RawData'
     if not q.exists():
         q.mkdir(parents=True)
-    df.to_pickle(str(q) + "/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    df.to_pickle(str(q) + "/Combined."+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle(str(q) + "/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
 
-    entropy_df = getEntropyData(startTime, stopTime, systemId, if_name, interval, frequency)
-    entropy_df.to_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    entropy_df = getEntropyData(startTime, stopTime, systemId, interval, frequency)
+    entropy_df.to_pickle(str(q) + "/Combined."+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #entropy_df = pd.read_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
     entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)
 
@@ -80,7 +79,7 @@ def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, f
         curMeasurements = measurements[i]
         
         #Add a label to the measurements
-        curLabel = isAttack(timestamp - timedelta(seconds = 2), timestamp)
+        curLabel = int(isAttack(timestamp - timedelta(seconds = 2), timestamp))
 
         newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize, int(curLabel)])
 
@@ -88,8 +87,7 @@ def makeDataSetRandomForestTelemetry(systemId, if_name, start, stop, interval, f
 
         data[i] = curMeasurements
     
-    dataSet = pd.DataFrame(data, columns=columTitles)
-    return dataSet
+    return data
 
 '''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"

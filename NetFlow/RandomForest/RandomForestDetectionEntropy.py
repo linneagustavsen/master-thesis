@@ -87,8 +87,8 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
                     "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
-                    "Value": testingMeasurements[i].tolist(),
-                    "Real_label": testingLabel[i],
+                    '''"Value": testingMeasurements[i].tolist(),
+                    "Real_label": testingLabel[i],'''
                     "Attack_type": ""
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

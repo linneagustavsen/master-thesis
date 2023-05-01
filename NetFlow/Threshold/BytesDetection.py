@@ -125,9 +125,9 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_bytes["minimum"], maxmin_bytes["maximum"]),
-                        "Change": abs(change),
+                       ''' "Change": abs(change),
                         "Value": bytesArray[i],
-                        "Mean_last_10": np.nanmean(bytesArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(bytesArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "Flooding"
                         }

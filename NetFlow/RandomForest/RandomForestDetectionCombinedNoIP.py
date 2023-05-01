@@ -89,10 +89,10 @@ def detectionRandomForestNoIPNetFlow(testingSet, systemId, interval, attackDate)
                     "Gateway": systemId,
                     "srcPort": testingMeasurements[i][0],
                     "dstPort": testingMeasurements[i][1],
-                    "protocol": testingMeasurements[i][2],
+                    "Protocol": testingMeasurements[i][2],
                     "Deviation_score": None,
-                    "Value": testingMeasurements[i].tolist(),
-                    "Real_label": testingLabel[i],
+                    '''"Value": testingMeasurements[i].tolist(),
+                    "Real_label": testingLabel[i],'''
                     "Attack_type": ""
                 }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

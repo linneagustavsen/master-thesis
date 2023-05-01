@@ -171,10 +171,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change_src),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change_src),
                         "Value": entropyOfSynPacketsPerSrc[i],
-                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerSrc[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
@@ -185,10 +185,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change_dst),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change_dst),
                         "Value": entropyOfSynPacketsPerDst[i],
-                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
@@ -199,10 +199,10 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"]),
-                        "protocol": rec.protocol,
-                        "Change": abs(change_flow),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change_flow),
                         "Value": entropyOfSynPacketsPerFlow[i],
-                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }

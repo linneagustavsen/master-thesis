@@ -105,7 +105,7 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
 
-            data.append([startTime.strftime("%Y-%m-%d %H:%M"), entropySip, entropySip/ns, entropyDip, entropyDip/nd, entropyFlow, 
+            data.append([startTime, entropySip, entropySip/ns, entropyDip, entropyDip/nd, entropyFlow, 
                                 entropyFlow/nf, nf, icmpRatio, icmpPackets, entropyPacketSize, entropyPacketSize/nps, 
                                 numberOfPackets(records), numberOfBytes(records)])
 

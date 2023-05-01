@@ -113,10 +113,10 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
                         "dstIP": int(rec.dip),
                         "srcPort": rec.sport,
                         "dstPort": rec.dport,
-                        "protocol": rec.protocol,
-                        "Change": abs(change),
+                        "Protocol": rec.protocol,
+                        '''"Change": abs(change),
                         "Value": synPacketsPerFlow[i],
-                        "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }

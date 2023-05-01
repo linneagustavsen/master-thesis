@@ -23,7 +23,7 @@ from HelperFunctions.Normalization import normalization
             thresholdEntropyRate:   float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
     p = Path('Detections')
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
@@ -102,7 +102,7 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
         if df.empty:
             packetSizeArray.append(np.nan)
             packetSizeRateArray.append(np.nan)
@@ -146,9 +146,9 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
                     "Packet_size_distribution": packetSizeDistributionDict,
-                    "Change": abs(change),
+                    '''"Change": abs(change),
                     "Value": packetSizeArray[i],
-                    "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
+                    "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),'''
                     "Real_label": int(attack),
                     "Attack_type": attackType
                 }
@@ -177,9 +177,9 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
                     "Packet_size_distribution": packetSizeDistributionDict,
-                    "Change": abs(change_r),
+                    '''"Change": abs(change_r),
                     "Value": packetSizeRateArray[i],
-                    "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
+                    "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),'''
                     "Real_label": int(attack),
                     "Attack_type": attackType
                 }

@@ -47,7 +47,7 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
         curMinute = timestamp.minute
         
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            indexArray = np.where(entropy_timeStamps == timestamp.replace(second = 0, microsecond = 0))
             if len(indexArray[0]) == 0:
                 continue
             indexInTimeArray = indexArray[0][0]

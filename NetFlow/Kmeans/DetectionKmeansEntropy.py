@@ -88,8 +88,8 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
                         "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": None,
-                        "Value": measurements[i].tolist(),
-                        "Real_label": int(attack),
+                        '''"Value": measurements[i].tolist(),
+                        "Real_label": int(attack),'''
                         "Attack_type": attackType
                     }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

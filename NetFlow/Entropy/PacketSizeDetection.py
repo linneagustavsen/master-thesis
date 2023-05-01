@@ -157,9 +157,9 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
                         "Packet_size_distribution": packetSizeDistributionDict,
-                        "Change": abs(change),
+                        '''"Change": abs(change),
                         "Value": packetSizeArray[i],
-                        "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": attackType
                     }
@@ -171,9 +171,9 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
                         "Packet_size_distribution": packetSizeDistributionDict,
-                        "Change": abs(change_r),
+                        '''"Change": abs(change_r),
                         "Value": packetSizeArray[i],
-                        "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": attackType
                     }

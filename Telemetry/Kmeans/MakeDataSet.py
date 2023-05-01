@@ -20,14 +20,14 @@ from HelperFunctionsTelemetry.GetDataTelemetry import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate):
+def makeDataSetKmeansTelemetry(systemId, start, stop, interval, frequency, path, attackDate):
     columTitles = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets","entropy_packet_size", "entropy_rate_packet_size"]
     
     fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
+    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, fields)
 
     p = Path('Telemetry')
     q = p / 'Kmeans' / 'RawData'
@@ -37,7 +37,7 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
     #df = pd.read_pickle(str(q) +"/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     timeStamps, measurements = structureDataTelemetry(df)
 
-    entropy_df = getEntropyData(startTime, stopTime, systemId, if_name, interval, frequency)
+    entropy_df = getEntropyData(startTime, stopTime, systemId, interval, frequency)
     entropy_df.to_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #entropy_df = pd.read_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
     entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)

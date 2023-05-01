@@ -154,9 +154,9 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]),
-                        "Change": abs(change),
+                        '''"Change": abs(change),
                         "Value": ipSrcArray[i],
-                        "Mean_last_10": np.nanmean(ipSrcArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(ipSrcArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }
@@ -167,9 +167,9 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
-                        "Change": abs(change_r),
+                        '''"Change": abs(change_r),
                         "Value": ipSrcRateArray[i],
-                        "Mean_last_10": np.nanmean(ipSrcRateArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(ipSrcRateArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": attackType
                         }

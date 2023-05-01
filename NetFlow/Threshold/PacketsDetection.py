@@ -127,9 +127,9 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
                         "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_packets["minimum"], maxmin_packets["maximum"]),
-                        "Change": abs(change),
+                        '''"Change": abs(change),
                         "Value": packetNumberArray[i],
-                        "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),
+                        "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),'''
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
