@@ -36,9 +36,9 @@ from Telemetry.Kmeans.Graph import kmeansGraph
 from Telemetry.Kmeans.GraphCombined import kmeansGraphCombined
 from Telemetry.Kmeans.GraphEntropy import kmeansGraphEntropy
 from Telemetry.Kmeans.MakeDataSet import makeDataSetKmeansTelemetry
-from Telemetry.RandomForest.CalculationRF import calculationsRandomForestTelemetry
-from Telemetry.RandomForest.DetectionRF import  detectionRandomForestTelemetry
-from Telemetry.RandomForest.MakeDataSet import makeDataSetRandomForestTelemetry
+from Telemetry.RandomForest.CalculationRFCombined import calculationsRandomForestTelemetry
+from Telemetry.RandomForest.DetectionRFCombined import  detectionRandomForestTelemetry
+from Telemetry.RandomForest.MakeDataSetCombined import makeDataSetRandomForestTelemetry
 from Telemetry.Threshold.BytesDetection import detectionBytesTelemetry
 from Telemetry.Threshold.Detection import detectionTelemetry
 from Telemetry.Threshold.DetectionMaxVar import detectionMaxVar
