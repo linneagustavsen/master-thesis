@@ -20,7 +20,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
     q = p / 'RandomForest' / 'RawData'
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
+    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "label"]   
 
     df = getDataNetFlow(silkFile, start, stop)
     df.to_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")

@@ -62,7 +62,7 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
     df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     #df.to_pickle("NetFlow/Kmeans/RawData/Entropy"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/Kmeans/RawData/Entropy"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    timeStamps, measurements = structureDataEntropy(df)
+    startTimes, timeStamps, measurements = structureDataNumpyArrays(df)
     timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)

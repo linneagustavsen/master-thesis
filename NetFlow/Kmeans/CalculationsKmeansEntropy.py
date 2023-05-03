@@ -28,8 +28,10 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
 
     df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    timeStamps, measurements = structureDataEntropyNumpyArrays(df)
-    timeStamps = pd.to_datetime(timeStamps)
+    if len(df) <2:
+        return
+    timeIntervals, measurements, labels = structureDataEntropyNumpyArrays(df)
+    #timeStamps = pd.to_datetime(timeStamps)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
@@ -38,10 +40,10 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
-        line = "\n"  + (timeStamps[i]-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + (timeIntervals[i].right - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
-        line += "," +str(int(isAttack(timeStamps[i] + interval -frequency, timeStamps[i] + interval)))
+        line += "," +str(int(labels[i]))
         
         if prediction[i] == 0:
             f0.write(line)

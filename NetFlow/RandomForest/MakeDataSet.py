@@ -18,7 +18,7 @@ import numpy as np
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","packet_size_entropy","packet_size_entropy_rate", "label"]    
+    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","packet_size_entropy","packet_size_entropy_rate", "label"]    
     df = getDataNetFlow(silkFile, start, stop)
     p = Path('NetFlow')
     q = p / 'RandomForest' / 'RawData'

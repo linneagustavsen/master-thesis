@@ -51,5 +51,6 @@ def structureDataNumpyArrays(npArray):
 
 def structureDataEntropyNumpyArrays(npArray):
     timeStamps = npArray[:, 0]
-    measurements = npArray[:,1:]
-    return timeStamps, measurements
+    measurements = npArray[:,1:-1]
+    labels = npArray[:,-1]
+    return timeStamps, measurements, labels

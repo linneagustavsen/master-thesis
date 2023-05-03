@@ -85,7 +85,7 @@ def getDataNetFlow(silkFile, start, stop):
      "ece": ece,
      "cwr": cwr,
      "duration": duration,
-     "nestHopIP": nhIP,
+     "nextHopIP": nhIP,
      "label": label
     })
     return data

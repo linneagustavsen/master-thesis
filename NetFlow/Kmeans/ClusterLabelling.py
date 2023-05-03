@@ -3,12 +3,38 @@ from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
 
 def labelCluster(measurements, predictions, DBthreshold, c0threshold, c1threshold):
-    db = davies_bouldin_score(measurements, predictions)
+    counter0 = np.count_nonzero(predictions == 0)
+    counter1 = np.count_nonzero(predictions == 1)
 
     n_features = measurements.shape[1]
 
-    counter0 = np.count_nonzero(predictions == 0)
-    counter1 = np.count_nonzero(predictions == 1)
+    if counter0 == 0:
+        sumOfMeasurements1 = np.zeros(n_features)
+        indices1 = np.where(predictions == 1)[0]
+
+        sumOfMeasurements1 = np.sum(measurements[indices1], axis=0)
+
+        sc1 = sumOfMeasurements1 / counter1
+
+        distances1 = euclidean_distances(measurements[indices1], [sc1])
+
+        cd1 = 2*np.sum(distances1)/counter1
+        return 1, 0, 0, cd1, counter0, counter1
+    if counter1 == 0:
+        sumOfMeasurements0 = np.zeros(n_features)
+
+        indices0 = np.where(predictions == 0)[0]
+
+        sumOfMeasurements0 = np.sum(measurements[indices0], axis=0)
+
+        sc0 = sumOfMeasurements0 / counter0
+
+        distances0 = euclidean_distances(measurements[indices0], [sc0])
+
+        cd0 = 2*np.sum(distances0)/counter0
+        return 0, 0, cd0, 0, counter0, counter1
+
+    db = davies_bouldin_score(measurements, predictions)
 
     sumOfMeasurements0 = np.zeros(n_features)
     sumOfMeasurements1 = np.zeros(n_features)

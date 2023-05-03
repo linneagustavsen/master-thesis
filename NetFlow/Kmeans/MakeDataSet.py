@@ -19,14 +19,19 @@ import pandas as pd
             dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
+    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     
     df = getDataNetFlow(silkFile, start, stop)
+    if len(df)== 0:
+        return []
     sTime, eTime, measurements = structureDataNumpyArrays(df)
     data = np.empty((len(sTime),len(columTitles)))
 
     entropy_df = getEntropyDataNetFlow(silkFile, start.strftime("%Y-%m-%d %H:%M:%S"), stop.strftime("%Y-%m-%d %H:%M:%S"), frequency, interval)
-    entropy_timeStamps, entropy_measurements = structureDataEntropyNumpyArrays(entropy_df)
+    if len(entropy_df)== 0:
+        return []
+    
+    entropy_intervals, entropy_measurements, entropy_labels = structureDataEntropyNumpyArrays(entropy_df)
 
     now = datetime.now()
 
@@ -35,11 +40,10 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
     lastDay = now.day
     lastHour = now.hour
     lastMinute = now.minute
-
-    for i in range(len(sTime)):
+    counter = 0
+    for timestamp in sTime:
         
         #timestamp = datetime.utcfromtimestamp(((sTime[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
-        timestamp = sTime[i]
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day
@@ -47,7 +51,10 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
         curMinute = timestamp.minute
         
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
-            indexArray = np.where(entropy_timeStamps == timestamp.replace(second = 0, microsecond = 0))
+            for entropy_interval in entropy_intervals:
+                if timestamp.replace(second = 0, microsecond = 0) in entropy_interval:
+                    indexArray = np.where(entropy_intervals == entropy_interval)
+            
             if len(indexArray[0]) == 0:
                 continue
             indexInTimeArray = indexArray[0][0]
@@ -76,14 +83,15 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
         packetNumberArray = entropy_measurements[indexInTimeArray][11]
         bytesArray = entropy_measurements[indexInTimeArray][12]
 
-        curMeasurements = measurements[i][:-1]
+        curMeasurements = measurements[counter][:-1]
 
-        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, packetSizeArray, packetSizeRateArray, packetNumberArray, bytesArray, measurements[i][-1]])
+        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, packetSizeArray, packetSizeRateArray, packetNumberArray, bytesArray, measurements[counter][-1]])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 
-        data[i] = curMeasurements
-    
+        data[counter] = curMeasurements
+        counter += 1
+
     testingSet = pd.DataFrame(data, columns=columTitles)
     sTimes = pd.to_datetime(sTime)
     eTimes = pd.to_datetime(eTime)

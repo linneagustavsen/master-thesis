@@ -22,7 +22,7 @@ def getDataNetFlow(silkFile, start, stop):
     data = []
     i = 0
     for rec in infile:
-        if rec.etime >= stop:
+        if rec.etime > stop:
             continue
         if rec.stime < start:
             continue
@@ -62,10 +62,12 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     sizes = []
 
     data = []
+    attackFlows = []
     print(start, stop)
+    counter = 0
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime:
             continue
         if rec.stime < startTime:
             continue
@@ -104,17 +106,29 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             PiPS,nps = packetSizeDistributionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
-
-            data.append([startTime, entropySip, entropySip/ns, entropyDip, entropyDip/nd, entropyFlow, 
+            if counter == 0:
+                timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(startTime + interval), closed="both")
+            else:
+                timeInterval = pd.Interval(pd.Timestamp(startTime + interval - frequency), pd.Timestamp(startTime + interval), closed="right")
+            label = 0
+            for timestamp in attackFlows:
+                if timestamp in timeInterval:
+                    label = 1
+            
+            data.append([timeInterval, entropySip, entropySip/ns, entropyDip, entropyDip/nd, entropyFlow, 
                                 entropyFlow/nf, nf, icmpRatio, icmpPackets, entropyPacketSize, entropyPacketSize/nps, 
-                                numberOfPackets(records), numberOfBytes(records)])
+                                numberOfPackets(records), numberOfBytes(records), label])
 
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
-
+            counter += 1
         records.append(rec)
+        #Check if it is an attack flow
+        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
+            attackFlows.append(rec.stime)
+
     data = np.array(data)
     print(len(data))
     return data
