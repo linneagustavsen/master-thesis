@@ -110,10 +110,29 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate):
 
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        trainingSet = np.load(f, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        testingSet = np.load(f, allow_pickle=True)
+
+    fieldsFile = str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    fieldsFileNoIP = str(dsPath) + "/Training/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFileNoIP).exists():
+        with open(str(fieldsFileNoIP), 'rb') as f:
+            trainingSet = np.load(f, allow_pickle=True)
+    elif Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df0 = np.load(f, allow_pickle=True)
+        df1 = np.delete(df0, np.s_[2:4],1)
+        trainingSet = np.delete(df1, -2,1)
+
+    fieldsFileTesting = str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    fieldsFileNoIPTesting = str(dsPath) + "/Testing/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFileNoIPTesting).exists():
+        with open(str(fieldsFileNoIPTesting), 'rb') as f:
+            testingSet = np.load(f, allow_pickle=True)
+    elif Path(fieldsFileTesting).exists():
+        with open(str(fieldsFileTesting), 'rb') as f:
+            df2 = np.load(f, allow_pickle=True)
+        df3 = np.delete(df2, np.s_[2:4],1)
+        testingSet = np.delete(df3, -2,1)
+        
 
     trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet)    
     trainingLabel=trainingLabel.astype('int')  

@@ -229,7 +229,7 @@ kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, interval
 
 trainingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
 testingBase="twelve-hours-2023-03-08_08-20-sorted.rw"
-startRFTraining = "2023-03-08 10:00:00"
+startRFTraining = "2023-03-08 14:00:00"
 stopRFTraining = "2023-03-08 15:00:00"
 startRFTesting = "2023-03-08 15:00:00"
 stopRFTesting = "2023-03-08 16:00:00"

@@ -46,7 +46,7 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate):
         return 
     if len(testingSet) ==0:
         return 
-    trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet)    
+    trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet) 
     trainingLabel=trainingLabel.astype('int')  
 
     sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)
@@ -111,10 +111,31 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
 
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        trainingSet = np.load(f, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        testingSet = np.load(f, allow_pickle=True)
+
+    fieldsFile = str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    fieldsFileNoIP = str(dsPath) + "/Training/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFileNoIP).exists():
+        with open(str(fieldsFileNoIP), 'rb') as f:
+            trainingSet = np.load(f, allow_pickle=True)
+    elif Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df0 = np.load(f, allow_pickle=True)
+        df1 = np.delete(df0, np.s_[2:4], 1)
+        trainingSet = np.delete(df1, 16, 1)
+
+    fieldsFileTesting = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    fieldsFileNoIPTesting = str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFileNoIPTesting).exists():
+        with open(str(fieldsFileNoIPTesting), 'rb') as f:
+            testingSet = np.load(f, allow_pickle=True)
+    elif Path(fieldsFileTesting).exists():
+        with open(str(fieldsFileTesting), 'rb') as f:
+            df2 = np.load(f, allow_pickle=True)
+        print("\n")
+        print(df2)
+        df3 = np.delete(df2, np.s_[2:4],1)
+        testingSet = np.delete(df3, 16, 1)
+        print(testingSet[0])
 
     if len(trainingSet) ==0:
         return 
@@ -136,7 +157,7 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
         for j in range(len(testingMeasurements[i])):
             line += "," + str(testingMeasurements[i][j])
         line += "," +str(testingLabel[i])
-        
+        #print(testingMeasurements[i][16])
         if predictions[i] == 1:
             f.write(line)
         '''if predictions[i] == 0:

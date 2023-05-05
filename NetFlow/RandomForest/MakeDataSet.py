@@ -36,7 +36,9 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
 
     if len(df) <2:
         return []
+    print(df[0])
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
+    print(measurements[0])
     data = []
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
@@ -102,9 +104,7 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
         times = [sTime[counter], eTime[counter]]
 
         times.extend(curMeasurements)
-
         times.extend(newMeasurements)
-
         data.append(times)
 
         counter +=1
@@ -132,20 +132,29 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     p = Path('NetFlow')
     q = p /'RandomForest'/ 'DataSets' 
-    fieldsFile = str(q) + "/" + str(path) +"/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    if Path(fieldsFile).exists():
-        with open(str(fieldsFile), 'rb') as f:
+
+    fieldsFile = str(q) + "/" + str(path) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    fieldsFileNoIP = str(q) + "/" + str(path) +"/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFileNoIP).exists():
+        with open(str(fieldsFileNoIP), 'rb') as f:
             df = np.load(f, allow_pickle=True)
+    elif Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df0 = np.load(f, allow_pickle=True)
+        df1 = np.delete(df0, np.s_[2:4],1)
+        df = np.delete(df1, -2,1)
     else:
-        print("Cant find", fieldsFile)
+        print("Cant find", fieldsFileNoIP)
         if not q.exists():
             q.mkdir(parents=True, exist_ok=False)
         df = getDataNetFlowNoIP(silkFile, startTime, stopTime)
-        with open(str(fieldsFile), 'wb') as f:
+        with open(str(fieldsFileNoIP), 'wb') as f:
             np.save(f, df)
     if len(df) <2:
         return []
+    print(df[0])
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
+    print(measurements[0])
     data = []
 
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
@@ -216,7 +225,7 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
         counter += 1
     data = np.array(data)
  
-    with open(str(q) + "/" +str(path) + "//CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+    with open(str(q) + "/" +str(path) + "/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
         np.save(f, data)
     #return data
     
