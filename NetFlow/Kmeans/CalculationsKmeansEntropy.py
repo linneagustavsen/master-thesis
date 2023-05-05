@@ -4,6 +4,7 @@ from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.StructureData import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 '''
     Do K-means clustering on entropy data and write clusters to file
@@ -26,6 +27,8 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     f1.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     cluster = open(str(q) + "/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
+    f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
 
     df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     if len(df) <2:
@@ -40,7 +43,7 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     count0 = 0 
     count1 = 0
     for i in range(len(prediction)):
-        line = "\n"  + (timeIntervals[i].right - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
         line += "," +str(int(labels[i]))
@@ -54,3 +57,7 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     
     f0.close()
     f1.close()
+    f_scores.write("\n"+str(confusion_matrix(labels, prediction)) + ","+ str(accuracy_score(labels, prediction)) + ","+ 
+                   str(f1_score(labels,prediction)) + ","+ str(recall_score(labels,prediction)) + ","+ 
+                   str(precision_score(labels,prediction)))
+    f_scores.close()

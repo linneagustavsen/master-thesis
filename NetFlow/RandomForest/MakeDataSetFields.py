@@ -15,26 +15,22 @@ import numpy as np
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    data = getDataNetFlow(silkFile, startTime, stopTime)
+
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
+    q = p /'RandomForest'/ 'DataSets' / str(path)
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "label"]   
+    with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+        np.save(f, data)
 
-    df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    sTime, eTime, measurements = structureData(df)
-    data = np.empty((len(sTime),len(columTitles)))
-
-    for i in range(len(sTime)):
-        curMeasurements = np.concatenate((measurements[i][:-1], measurements[i][-1]), axis=None)
-
-        data[i] = curMeasurements
-    dataSet = pd.DataFrame(data, columns=columTitles)
+    if len(data) <2:
+        return []
     
-    return dataSet
+    return data
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -46,21 +42,19 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+def makeDataSetNoIPNetFlowFields(silkFile, start, stop, path, systemId, attackDate):  
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    data = getDataNetFlowNoIP(silkFile, startTime, stopTime)
+
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "label"]    
-    df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle(str(q) + "/NoIP"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q) + "/NoIP"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    sTime, eTime, measurements = structureData(df)
-    data = np.empty((len(sTime),len(columTitles)))
+    with open(str(q) + "/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+        np.save(f, data)
 
-    for i in range(len(sTime)):
-        curMeasurements = np.concatenate((measurements[i][2:-2], measurements[i][-1]), axis=None)
-
-        data[i] = curMeasurements
-    dataSet = pd.DataFrame(data, columns=columTitles)
-    return dataSet
+    if len(data) <2:
+        return []
+    
+    #return data

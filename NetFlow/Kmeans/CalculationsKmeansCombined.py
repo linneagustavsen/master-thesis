@@ -6,6 +6,7 @@ from HelperFunctions.StructureData import *
 from HelperFunctions.StructureData import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
 from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 '''
     Do K-means clustering on entropy and field data and write clusters to file
@@ -43,7 +44,8 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
         f1IP = open(str(ipPath) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
         f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-        
+        f_scores = open(str(q) + "/Combined.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
         cluster = open(str(q) + "/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
         
@@ -90,4 +92,8 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
         f0IP.close()
         f1IP.close()
         cluster.close()
+        f_scores.write("\n"+str(confusion_matrix(label, prediction)) + ","+ str(accuracy_score(label, prediction)) + ","+ 
+                   str(f1_score(label,prediction)) + ","+ str(recall_score(label,prediction)) + ","+ 
+                   str(precision_score(label,prediction)))
+        f_scores.close()
         startTime += clusterFrequency

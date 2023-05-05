@@ -31,6 +31,8 @@ print(generalizedEntropy2(10, Pi))'''
 from datetime import timedelta, datetime
 import math
 from time import sleep
+
+import numpy as np
 '''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
 start = "2011-02-08 10:00:00"
@@ -134,7 +136,7 @@ alert = {
             }
 
 print(type(alert["Attack_type"]))'''
-
+'''
 stime = datetime(2011,1,2,14,30)
 now = datetime.now()
 print(stime, now.replace(year=2011, month=1, day=2))
@@ -152,4 +154,24 @@ def simulateRealTime(timeNow, stime, attackDate):
     sleep(duration)
 
 attackDate = "08.02.11"
-print(simulateRealTime(datetime.now(), stime, attackDate))
+print(simulateRealTime(datetime.now(), stime, attackDate))'''
+
+'''curMeasurements = [2360456726, 3218895927, 53533, 46975, 6, 1, 1500, 0, 0, 0, 0, 1, 0, 0, 0, 0.0, 0]
+      
+newMeasurements = [5.991120021222172, 6.363242439058301e-05, 5.1317477208111, 0.0002481142832669874, 6.369418930049736, 4.8367496886958085e-05, 2.1297057992113126, 0.0014419132019033937, 0]
+       
+times = [datetime(2011, 1, 3, 8, 0), datetime(2011, 1, 3, 8, 0)]
+        
+times.extend(curMeasurements)
+print(times)
+times.extend(newMeasurements)
+print(times)
+data = [times, times, times, times,times]'''
+test1 = [[1,2,3,4],
+ [5,6,7,8],
+ [9,10,11,12],
+ [13,14,15,16],
+ [17,18,19,20]]
+print(test1)
+test2 =np.delete(test1, np.s_[2:4],1)
+print(test2)

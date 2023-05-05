@@ -20,11 +20,12 @@ import pandas as pd
 '''
 def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
-    
-    df = getDataNetFlow(silkFile, start, stop)
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    df = getDataNetFlow(silkFile, startTime, stopTime)
     if len(df)== 0:
         return []
-    sTime, eTime, measurements = structureDataNumpyArrays(df)
+    sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
     data = np.empty((len(sTime),len(columTitles)))
 
     entropy_df = getEntropyDataNetFlow(silkFile, start.strftime("%Y-%m-%d %H:%M:%S"), stop.strftime("%Y-%m-%d %H:%M:%S"), frequency, interval)
@@ -83,9 +84,9 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
         packetNumberArray = entropy_measurements[indexInTimeArray][11]
         bytesArray = entropy_measurements[indexInTimeArray][12]
 
-        curMeasurements = measurements[counter][:-1]
+        curMeasurements = measurements[counter]
 
-        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, packetSizeArray, packetSizeRateArray, packetNumberArray, bytesArray, measurements[counter][-1]])
+        newMeasurements = np.array([ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, numberOfFlows, icmpRatioArray, icmpPacketsArray, packetSizeArray, packetSizeRateArray, packetNumberArray, bytesArray, labels[counter]])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 

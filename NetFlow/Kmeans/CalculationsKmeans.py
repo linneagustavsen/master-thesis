@@ -4,6 +4,7 @@ from HelperFunctions.GetData import *
 from silk import *
 from HelperFunctions.StructureData import *
 from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 '''
     Do K-means clustering on fields and write clusters to file
@@ -42,6 +43,8 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
         f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
         f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
+        f_scores = open(str(q) + "/Score.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
         
         cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
@@ -50,11 +53,8 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
         if len(testingData) <2:
             startTime += clusterFrequency
             continue
-        sTime, eTime, measurements = structureDataNumpyArrays(testingData)
-        
-        label = measurements[:,-1]
-        measurements = measurements[:, :-1]
-        
+        sTime, eTime, measurements, label = structureDataNumpyArrays(testingData)
+
         sTime = pd.to_datetime(sTime)
         eTime = pd.to_datetime(eTime)
         prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
@@ -90,4 +90,8 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
         f0IP.close()
         f1IP.close()
         cluster.close()
+        f_scores.write("\n"+str(confusion_matrix(label, prediction)) + ","+ str(accuracy_score(label, prediction)) + ","+ 
+                   str(f1_score(label,prediction)) + ","+ str(recall_score(label,prediction)) + ","+ 
+                   str(precision_score(label,prediction)))
+        f_scores.close()
         startTime += clusterFrequency

@@ -31,11 +31,45 @@ def getDataNetFlow(silkFile, start, stop):
                             int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
                             int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration_secs, int(rec.nhip), 
                             int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))])
+        if i % 1000000 == 0:
+            print("i")
+            print(i)
+            print(rec.stime)
+            print("\n")
         i+=1
     data = np.array(data)
     print(len(data))
     return data
 
+'''
+    Get data from an raw SiLK file of NetFlow records
+    Input:  
+            silkFile:   string, path to the raw SiLK file sorted on time
+            start:      datetime object, indicating the start time of the data wanted
+            stop:       datetime object, indicating the stop time of the data wanted
+    Output: 
+            df:         pandas dataframe, dataframe containing the data from the SiLK file 
+'''
+def getDataNetFlowNoIP(silkFile, start, stop):
+    infile = silkfile_open(silkFile, READ)
+    print(start,stop)
+
+    data = []
+    i = 0
+    for rec in infile:
+        if rec.etime > stop:
+            continue
+        if rec.stime < start:
+            continue
+
+        data.append([rec.stime, rec.etime, rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                            int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration_secs, 
+                            int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))])
+        i+=1
+    data = np.array(data)
+    print(len(data))
+    return data
 '''
     Get data from an raw SiLK file of NetFlow records
     Use the data to calculate the entropy and entropy rate of packet size
