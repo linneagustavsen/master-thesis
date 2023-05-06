@@ -26,7 +26,7 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
     #Open file to write alerts to
     calculations = open(str(q) + "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("Time,entropy_packet_size,entropy_rate_packet_size,numberOfPackets,numberOfBytes,real_label")
+    calculations.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,numberOfPackets,numberOfBytes,real_label")
 
     #Instantiate empty arrays for the calculated values
     packetSizeArray = []
