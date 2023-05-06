@@ -18,19 +18,22 @@ import numpy as np
 def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    data = getDataNetFlow(silkFile, startTime, stopTime)
-
     p = Path('NetFlow')
-    q = p /'RandomForest'/ 'DataSets' / str(path)
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
-        np.save(f, data)
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    if len(data) <2:
-        return []
-    
-    return data
+    fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(fieldsFile).exists():
+        print("Cant find", fieldsFile)
+        data = getDataNetFlow(silkFile, startTime, stopTime)
+
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, data)
+
+        if len(data) <2:
+            return []
+    #return data
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier

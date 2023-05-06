@@ -15,7 +15,7 @@ from HelperFunctions.StructureData import structureDataEntropyNumpyArrays
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculation are made on
 '''
-def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate):
+def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate, estimator):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -29,10 +29,10 @@ def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate):
     
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        trainingSet = np.load(f, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        testingSet = np.load(f, allow_pickle=True)
+    with open(str(dsPath) + "/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
+        trainingSet = np.load(trainingFile, allow_pickle=True)
+    with open(str(dsPath) + "/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as testingFile:
+        testingSet = np.load(testingFile, allow_pickle=True)
     if len(trainingSet) ==0:
         return 
     if len(testingSet) ==0:
@@ -44,7 +44,7 @@ def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate):
     testingIntervals, testingMeasurements, testingLabel = structureDataEntropyNumpyArrays(testingSet)    
     testingLabel=testingLabel.astype('int')  
 
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
+    classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     predictions = classifier_RF.predict(testingMeasurements)

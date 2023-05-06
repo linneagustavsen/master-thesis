@@ -34,11 +34,13 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
         with open(str(fieldsFile), 'wb') as f:
             np.save(f, df)
 
-    if len(df) <2:
-        return []
-    print(df[0])
+    if len(df) == 0:
+        with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, np.array([]))
+        return
+
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
-    print(measurements[0])
+
     data = []
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
@@ -52,8 +54,10 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
         with open(str(entropyFile), 'wb') as f:
             np.save(f, entropy_df)
 
-    if len(entropy_df) <2:
-        return []
+    if len(entropy_df) == 0:
+        with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, np.array([]))
+        return
     entropy_intervals, entropy_measurements, entropy_labels = structureDataEntropyNumpyArrays(entropy_df)
 
     now = datetime.now()
@@ -141,6 +145,8 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
     elif Path(fieldsFile).exists():
         with open(str(fieldsFile), 'rb') as f:
             df0 = np.load(f, allow_pickle=True)
+        if len(df0) <2:
+            return []
         df1 = np.delete(df0, np.s_[2:4],1)
         df = np.delete(df1, -2,1)
     else:
@@ -152,9 +158,7 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
             np.save(f, df)
     if len(df) <2:
         return []
-    print(df[0])
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
-    print(measurements[0])
     data = []
 
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
@@ -229,23 +233,3 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
         np.save(f, data)
     #return data
     
-    
-'''silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-01_10-11-sorted.rw"
-start = "2011-01-01 10:00:00"
-stop = "2011-01-01 12:00:00"
-systemId = "oslo-gw"
-frequency = timedelta(minutes=1)
-interval = timedelta(minutes=5)
-trainingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Training")
-trainingSet.to_pickle("NetFlow/RandomForest/RawData/TrainingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-print(trainingSet.head)    
-
-silkFile="/home/linneafg/silk-data/RawDataFromFilter/two-hours-2011-01-02_10-11-sorted.rw"
-start = "2011-01-02 10:00:00"
-stop = "2011-01-02 12:00:00"
-systemId = "oslo-gw"
-frequency = timedelta(minutes=1)
-interval = timedelta(minutes=5)
-testingSet = makeDataSetNetFlow(silkFile, start, stop, systemId, frequency, interval, "Testing")
-testingSet.to_pickle("NetFlow/RandomForest/RawData/TestingSet."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-print(testingSet.head)'''

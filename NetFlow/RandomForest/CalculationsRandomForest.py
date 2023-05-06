@@ -15,7 +15,7 @@ from HelperFunctions.StructureData import structureDataNumpyArrays
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def calculationsRandomForestNetFlow(systemId, interval, attackDate):
+def calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -38,10 +38,10 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate):
 
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        trainingSet = np.load(f, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        testingSet = np.load(f, allow_pickle=True)
+    with open(str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
+        trainingSet = np.load(trainingFile, allow_pickle=True)
+    with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as testingFile:
+        testingSet = np.load(testingFile, allow_pickle=True)
     if len(trainingSet) ==0:
         return 
     if len(testingSet) ==0:
@@ -52,7 +52,7 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate):
     sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)
     testingLabel=testingLabel.astype('int')    
 
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
+    classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     sTime = pd.to_datetime(sTime)
@@ -97,7 +97,7 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate):
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
+def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimator):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -115,27 +115,32 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
     fieldsFile = str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     fieldsFileNoIP = str(dsPath) + "/Training/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(fieldsFileNoIP).exists():
-        with open(str(fieldsFileNoIP), 'rb') as f:
-            trainingSet = np.load(f, allow_pickle=True)
+        with open(str(fieldsFileNoIP), 'rb') as trainingFile:
+            trainingSet = np.load(trainingFile, allow_pickle=True)
+        if len(trainingSet) ==0:
+            return 
     elif Path(fieldsFile).exists():
-        with open(str(fieldsFile), 'rb') as f:
-            df0 = np.load(f, allow_pickle=True)
+        with open(str(fieldsFile), 'rb') as trainingFile:
+            df0 = np.load(trainingFile, allow_pickle=True)
+        if len(df0) ==0:
+            return
         df1 = np.delete(df0, np.s_[2:4], 1)
         trainingSet = np.delete(df1, 16, 1)
 
     fieldsFileTesting = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     fieldsFileNoIPTesting = str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(fieldsFileNoIPTesting).exists():
-        with open(str(fieldsFileNoIPTesting), 'rb') as f:
-            testingSet = np.load(f, allow_pickle=True)
+        with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
+            testingSet = np.load(testingFile, allow_pickle=True)
+        if len(testingSet) ==0:
+            return 
     elif Path(fieldsFileTesting).exists():
-        with open(str(fieldsFileTesting), 'rb') as f:
-            df2 = np.load(f, allow_pickle=True)
-        print("\n")
-        print(df2)
+        with open(str(fieldsFileTesting), 'rb') as testingFile:
+            df2 = np.load(testingFile, allow_pickle=True)
+        if len(df2) ==0:
+            return
         df3 = np.delete(df2, np.s_[2:4],1)
         testingSet = np.delete(df3, 16, 1)
-        print(testingSet[0])
 
     if len(trainingSet) ==0:
         return 
@@ -145,7 +150,7 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
     trainingLabel=trainingLabel.astype('int')  
     sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
     testingLabel=testingLabel.astype('int')  
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
+    classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     sTime = pd.to_datetime(sTime)
@@ -157,7 +162,6 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate):
         for j in range(len(testingMeasurements[i])):
             line += "," + str(testingMeasurements[i][j])
         line += "," +str(testingLabel[i])
-        #print(testingMeasurements[i][16])
         if predictions[i] == 1:
             f.write(line)
         '''if predictions[i] == 0:

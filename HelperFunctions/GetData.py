@@ -87,6 +87,8 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
+    starting = startTime
+    pushed = False
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
@@ -105,6 +107,9 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             continue
         if rec.stime < startTime:
             continue
+        if rec.stime >= starting and not pushed:
+            startTime = rec.stime.replace(microsecond = 0, second = 0)
+            pushed = True
         #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes  = sum(sizes)
@@ -141,9 +146,9 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             if counter == 0:
-                timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(startTime + interval), closed="both")
+                timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="both")
             else:
-                timeInterval = pd.Interval(pd.Timestamp(startTime + interval - frequency), pd.Timestamp(startTime + interval), closed="right")
+                timeInterval = pd.Interval(pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0) - frequency), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="right")
             label = 0
             for timestamp in attackFlows:
                 if timestamp in timeInterval:

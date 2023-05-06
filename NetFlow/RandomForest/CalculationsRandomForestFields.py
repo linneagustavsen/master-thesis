@@ -14,7 +14,7 @@ from HelperFunctions.StructureData import structureDataNumpyArrays
             systemId:       string, name of the system to collect and detct on  
             attackDate:     string, date of the attack the detection are made on
 '''
-def calculationRandomForestNetFlowFields(systemId, attackDate):
+def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -38,10 +38,10 @@ def calculationRandomForestNetFlowFields(systemId, attackDate):
     
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        trainingSet = np.load(f, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as f:
-        testingSet = np.load(f, allow_pickle=True)
+    with open(str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
+        trainingSet = np.load(trainingFile, allow_pickle=True)
+    with open(str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as testingFile:
+        testingSet = np.load(testingFile, allow_pickle=True)
 
     if len(trainingSet) ==0:
         return 
@@ -52,7 +52,7 @@ def calculationRandomForestNetFlowFields(systemId, attackDate):
     trainingLabel=trainingLabel.astype('int')  
     sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
     testingLabel=testingLabel.astype('int')  
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
+    classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     sTime = pd.to_datetime(sTime)
@@ -96,7 +96,7 @@ def calculationRandomForestNetFlowFields(systemId, attackDate):
             systemId:       string, name of the system to collect and detect on  
             attackDate:     string, date of the attack the detections are made on
 '''
-def calculationRandomForestNoIPNetFlowFields(systemId, attackDate):
+def calculationRandomForestNoIPNetFlowFields(systemId, attackDate, estimator):
     p = Path('Calculations')
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
@@ -114,22 +114,26 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate):
     fieldsFile = str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     fieldsFileNoIP = str(dsPath) + "/Training/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(fieldsFileNoIP).exists():
-        with open(str(fieldsFileNoIP), 'rb') as f:
-            trainingSet = np.load(f, allow_pickle=True)
+        with open(str(fieldsFileNoIP), 'rb') as trainingFile:
+            trainingSet = np.load(trainingFile, allow_pickle=True)
     elif Path(fieldsFile).exists():
-        with open(str(fieldsFile), 'rb') as f:
-            df0 = np.load(f, allow_pickle=True)
+        with open(str(fieldsFile), 'rb') as trainingFile:
+            df0 = np.load(trainingFile, allow_pickle=True)
+        if len(df0) ==0:
+            return 
         df1 = np.delete(df0, np.s_[2:4],1)
         trainingSet = np.delete(df1, -2,1)
 
     fieldsFileTesting = str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     fieldsFileNoIPTesting = str(dsPath) + "/Testing/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(fieldsFileNoIPTesting).exists():
-        with open(str(fieldsFileNoIPTesting), 'rb') as f:
-            testingSet = np.load(f, allow_pickle=True)
+        with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
+            testingSet = np.load(testingFile, allow_pickle=True)
     elif Path(fieldsFileTesting).exists():
-        with open(str(fieldsFileTesting), 'rb') as f:
-            df2 = np.load(f, allow_pickle=True)
+        with open(str(fieldsFileTesting), 'rb') as testingFile:
+            df2 = np.load(testingFile, allow_pickle=True)
+        if len(df2) ==0:
+            return 
         df3 = np.delete(df2, np.s_[2:4],1)
         testingSet = np.delete(df3, -2,1)
         
@@ -138,7 +142,7 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate):
     trainingLabel=trainingLabel.astype('int')  
     sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
     testingLabel=testingLabel.astype('int')  
-    classifier_RF = RandomForestClassifier(n_estimators = 100)
+    classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
     sTime = pd.to_datetime(sTime)

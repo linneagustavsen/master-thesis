@@ -15,14 +15,19 @@ import numpy as np
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
 def makeDataSetNetFlowEntropy(silkFile, start, stop, frequency, interval, path, systemId, attackDate):
-    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
     p = Path('NetFlow')
-    q = p /'RandomForest'/ 'DataSets' / str(path)
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    with open(str(q) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
-        np.save(f, entropy_df)
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    if len(entropy_df) <2:
-        return []
-    #return entropy_df
+    entropyFile = str(q) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(entropyFile).exists():
+        print("Cant find", entropyFile)
+        entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, entropy_df)
+
+        if len(entropy_df) <2:
+            return []
+    
