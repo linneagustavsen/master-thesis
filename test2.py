@@ -33,6 +33,7 @@ import math
 from time import sleep
 
 import numpy as np
+from sklearn.metrics import confusion_matrix
 '''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
 start = "2011-02-08 10:00:00"
@@ -167,7 +168,7 @@ print(times)
 times.extend(newMeasurements)
 print(times)
 data = [times, times, times, times,times]'''
-test1 = np.array([[1,2,3,4,10],
+'''test1 = np.array([[1,2,3,4,10],
  [5,6,7,8,10],
  [9,10,11,12,10],
  [13,14,15,16,10],
@@ -175,4 +176,7 @@ test1 = np.array([[1,2,3,4,10],
 print(test1)
 print(test1.ndim)
 test2 =np.delete(test1, np.s_[2:4],1)
-print(test2)
+print(test2)'''
+print(confusion_matrix([0,1,0,1],[1,1,1,0]))
+tn, fp, fn, tp = confusion_matrix([0,1,0,1],[1,1,1,0]).ravel()
+print(tn, fp, fn, tp)
