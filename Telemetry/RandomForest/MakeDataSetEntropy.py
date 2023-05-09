@@ -20,20 +20,17 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getEntropyData
 '''
 def makeDataSetTelemetryEntropy(start, stop, systemId, bucket, frequency, interval, path, attackDate):
     p = Path('Telemetry')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["packet_size_entropy","packet_size_entropy_rate", "label"]   
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    entropy_df = getEntropyData(start, stop, systemId, interval, frequency)
-    entropy_df.to_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)
-    entropy_timeStamps = pd.to_datetime(entropy_timeStamps)
-    
-    data = np.empty((len(entropy_timeStamps),len(columTitles)))
-    
-    for i in range(len(entropy_timeStamps)):
-        curMeasurements = np.concatenate((entropy_measurements[i],isAttack(entropy_timeStamps[i]- frequency, entropy_timeStamps[i])), axis=None)
+    entropyFile = str(q) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    if not Path(entropyFile).exists():
+        print("Cant find", entropyFile)
 
-        data[i] = curMeasurements
-    return data
+        startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+        entropy_df = getEntropyData(startTime, stopTime, systemId, bucket, interval, frequency)
+
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb') as f:
+            entropy_df.to_pickle(f)

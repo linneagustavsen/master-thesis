@@ -66,7 +66,7 @@ def week6(silkFile, start, stop, frequency, interval):
 
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime + frequency:
             continue
         if rec.stime < startTime:
             continue

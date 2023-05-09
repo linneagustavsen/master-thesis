@@ -33,6 +33,7 @@ import math
 from time import sleep
 
 import numpy as np
+import pandas as pd
 from sklearn.metrics import confusion_matrix
 '''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
@@ -177,6 +178,11 @@ print(test1)
 print(test1.ndim)
 test2 =np.delete(test1, np.s_[2:4],1)
 print(test2)'''
-print(confusion_matrix([0,1,0,1],[1,1,1,0]))
+'''print(confusion_matrix([0,1,0,1],[1,1,1,0]))
 tn, fp, fn, tp = confusion_matrix([0,1,0,1],[1,1,1,0]).ravel()
-print(tn, fp, fn, tp)
+print(tn, fp, fn, tp)'''
+
+
+with open("Telemetry/Kmeans/DataSets/Fields.attack.08.03.23.stopTime.15.30.00.narvik-gw3.pkl", 'rb') as f:
+    df = pd.read_pickle(f)
+print(df)

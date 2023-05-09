@@ -52,7 +52,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     lastMinuteSize = 0
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime + frequency:
             continue
         if rec.stime < startTime:
             continue

@@ -1,9 +1,12 @@
 from influxdb_client import InfluxDBClient
-from .Distributions import *
-from .GeneralizedEntropy import *
+
+from HelperFunctions.Distributions import packetSizeDistribution
+from HelperFunctions.GeneralizedEntropy import generalizedEntropy
 import math
 import pandas as pd
 from silk import *
+
+from HelperFunctions.IsAttack import isAttack
 '''
     Get data from an InfluxDB
     Input:  
@@ -131,44 +134,51 @@ def getDataTables(start, stop, systemId, bucket, field):
     Output: 
             entropy:    pandas dataframe, dataframe containing the entropy of packet size and the entropy rate of packet size
 '''
-def getEntropyData(start, stop, systemId, interval, frequency):
+def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
     intervalTime = (stop - start).total_seconds()/frequency.total_seconds()
 
     packetSizeArray = []
     packetSizeRateArray = []
     timeArray = []
+    labels = []
     startTime = start
-
+    counter = 0
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_octets", "egress_stats__if_1sec_pkts"])
-        
-        #If there is not enough data points the minute is skipped
-        if df.empty:
-            #Push the start time by the specified frequency
+        dfBytes = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId)
+        dfPackets = getDataPackets(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId)
+
+        #If there is no data for this interval we skip the calculations
+        if dfBytes.empty or dfPackets.empty:
             startTime = startTime + frequency
             continue
-        egressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
-        egressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
-        
-        timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
+        dfBytes = dfBytes["bytes"].to_numpy()
+        dfPackets = dfPackets["packets"].to_numpy()
+
+        if counter == 0:
+            timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(stopTime), closed="both")
+        else:
+            timeInterval =pd.Interval(pd.Timestamp(stopTime - frequency),pd.Timestamp(stopTime), closed="right") 
+   
+        timeArray.append(timeInterval)
 
         #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nps = packetSizeDistribution(egressBytes, egressPackets)
+        PiPS,nps = packetSizeDistribution(dfBytes, dfPackets)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
         #Calculate the generalized entropy rate of this distribution
         packetSizeRateArray.append(entropyPacketSize/nps)
-
+        labels.append(int(isAttack(timeInterval.left, timeInterval.right)))
         #Push the start time by the specified frequency
         startTime = startTime + frequency
-
+        counter +=1
     entropy = pd.DataFrame(
-    {"_time": timeArray,
+    {"time": timeArray,
      "entropy_packet_size": packetSizeArray,
-     "entropy_rate_packet_size": packetSizeRateArray
+     "entropy_rate_packet_size": packetSizeRateArray,
+     "labels": labels
     })
 
     return entropy

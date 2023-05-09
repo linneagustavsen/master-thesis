@@ -33,16 +33,16 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
 
-    TPf = open(str(r) + "TP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf = open(str(r) + "/TP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    FPf = open(str(r) + "FP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf = open(str(r) + "/FP." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FPf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    FNf = open(str(r) + "FN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf = open(str(r) + "/FN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     FNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    TNf = open(str(r) + "TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf = open(str(r) + "/TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
     json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel." + str(field)+".json", "r")

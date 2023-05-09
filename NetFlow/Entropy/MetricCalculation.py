@@ -1,4 +1,5 @@
 import pickle
+import pandas as pd
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -37,6 +38,8 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
+    starting = startTime
+    pushed = False
 
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
@@ -66,13 +69,17 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     #Instantiate variables
     i = 0
     sizes = []
+    attackFlowArray = []
 
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime + frequency:
             continue
         if rec.stime < startTime:
             continue
+        if rec.stime >= starting and not pushed:
+            startTime = rec.stime.replace(microsecond = 0, second = 0)
+            pushed = True
         #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes  = sum(sizes)
@@ -133,11 +140,20 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             packetNumberArray.append(numberOfPackets(records))
             bytesArray.append(numberOfBytes(records))
 
-            calculations.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
+            if i == 0:
+                timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="both")
+            else:
+                timeInterval = pd.Interval(pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0) - frequency), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="right")
+            label = 0
+            for timestamp in attackFlowArray:
+                if timestamp in timeInterval:
+                    label = 1
+
+            calculations.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(ipSrcArray[i]) + "," + str(ipSrcRateArray[i]) 
                                + "," + str(ipDstArray[i]) + "," + str(ipDstRateArray[i]) + "," + str(flowArray[i]) 
                                + "," + str(flowRateArray[i]) + "," + str(numberOfFlows[i]) + "," + str(icmpRatioArray[i]) 
                                + "," + str(icmpPacketsArray[i])+ "," + str(packetSizeArray[i]) + "," + str(packetSizeRateArray[i])
-                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]))
+                               + "," + str(packetNumberArray[i]) + "," + str(bytesArray[i]) + "," + str(label))
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -146,7 +162,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
         #Check if it is an attack flow
         if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
             attackFlows.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + ","+ rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"))
-
+            attackFlowArray.append(rec.stime)
         records.append(rec)
     
     calculations.close()

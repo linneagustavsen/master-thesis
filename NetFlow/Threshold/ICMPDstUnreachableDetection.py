@@ -101,7 +101,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
     i = 0
     sizes = []
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime + frequency:
             continue
         if rec.stime < startTime:
             continue

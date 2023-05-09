@@ -13,6 +13,8 @@ def findMaxVar(jsonObject):
                 #Find the variance of each minute
                 varianceNow = jsonObject["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] 
                 #Compare the variance of this minute with the maximum variance of the week
+                if varianceNow == None:
+                    continue
                 if varianceNow > maxVar:
                     maxVar = varianceNow
     return maxVar

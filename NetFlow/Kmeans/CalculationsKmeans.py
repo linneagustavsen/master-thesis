@@ -35,21 +35,35 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
-        f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
         f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
-        f0IP = open(str(ipPath) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
-        f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        f0IP = open(str(ipPath) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
         f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
-        f_scores = open(str(q) + "/Score.attack."+str(attackDate)+ ".stopTime."+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        f_scores = open(str(q) + "/Score.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
         
-        cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ ".stopTime"+str(stopTime)+ "."+str(systemId)+ ".csv", "a")
+        cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
+        
+        dataPath = Path('NetFlow')
+        dp = dataPath /'Kmeans'/ 'DataSets' 
+        fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"
+        if Path(fieldsFile).exists():
+            with open(str(fieldsFile), 'rb') as f:
+                testingData = pd.read_pickle(f)
+        else:
+            print("Cant find", fieldsFile)
+            testingData = getDataNetFlow(silkFile, startTime, stopTime)
 
-        testingData = getDataNetFlow(silkFile, startTime, stopTime)
+            if not dp.exists():
+                dp.mkdir(parents=True, exist_ok=False)
+            with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:
+                testingData.to_pickle(f)
+
         if len(testingData) <2:
             startTime += clusterFrequency
             continue
@@ -61,9 +75,6 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
         attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
         cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
 
-        count0 = 0 
-        count1 = 0
-    
         for i in range(len(prediction)):
             line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -79,11 +90,11 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
             if prediction[i] == 0:
                 f0.write(line)
                 f0IP.write(lineIPs)
-                count0 +=1
+
             elif prediction[i] == 1:
                 f1.write(line)
                 f1IP.write(lineIPs)
-                count1 += 1
+
                 
         f0.close()
         f1.close()

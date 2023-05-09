@@ -1,6 +1,5 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
-from HelperFunctions.GetData import getData
 import pandas as pd
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.StructureData import structureDataTelemetry
@@ -18,21 +17,35 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetTelemetryFields(start, stop, bucket, systemId, path, attackDate):
+def makeDataSetTelemetryFields(start, stop, bucket, fields, systemId, path, attackDate):
     p = Path('Telemetry')
-    q = p / 'RandomForest' / 'RawData'
+    q = p / 'RandomForest' / 'DataSets' / str(path)
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkt", "ingress_stats__if_1sec_pkt", "egress_stats__if_1sec_octet", "ingress_stats__if_1sec_octet", "label"]   
+    fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(fieldsFile).exists():
+        print("Cant find", fieldsFile)
+        startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    df = getData(start, stop, bucket, systemId, columTitles[:-1])
-    df.to_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    timeStamps, measurements = structureDataTelemetry(df)
-    data = np.empty((len(timeStamps),len(columTitles)))
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId, fields)
+        if len(df) == 0:
+            with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+                np.save(f, np.array([]))
+            return
+        timeStamps, measurements = structureDataTelemetry(df)
 
-    for i in range(len(timeStamps)):
-        curMeasurements = np.concatenate((measurements[i], int(isAttack(timeStamps[i] - timedelta(seconds = 2), timeStamps[i]))), axis=None)
+        data = []
 
-        data[i] = curMeasurements
-    
-    return data
+        for i in range(len(timeStamps)):
+            times = [timeStamps[i]]
+            times.extend(measurements[i]) 
+            times.append(int(isAttack(timeStamps[i] - timedelta(seconds = 2), timeStamps[i])))
+
+            data.append(times)
+        data = np.array(data)
+
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, data)

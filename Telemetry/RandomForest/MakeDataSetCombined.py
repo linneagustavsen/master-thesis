@@ -20,29 +20,56 @@ from HelperFunctions.GeneralizedEntropy import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSetRandomForestCombinedTelemetry(systemId, start, stop, interval, frequency, path, attackDate):
-    columTitles = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "entropy_packet_size", "entropy_rate_packet_size", "label"]
-    
-    fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
-
+def makeDataSetRandomForestCombinedTelemetry(start, stop, systemId, bucket, fields, interval, frequency, path, attackDate):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), systemId, fields)
 
     p = Path('Telemetry')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True)
-    df.to_pickle(str(q) + "/Combined."+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q) + "/"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    timeStamps, measurements = structureDataTelemetry(df)
+    q = p / 'RandomForest' / 'DataSets'
+    fieldsFile = str(q) + "/" + str(path) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df = np.load(f, allow_pickle=True)
+        
+        if len(df) == 0:
+            with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+                np.save(f, np.array([]))
+            return
+        timeStamps, measurements, labels = structureDataEntropyNumpyArrays(df)
+    else:
+        print("Cant find", fieldsFile)
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),bucket, systemId, fields)
+        if len(df) == 0:
+            with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+                np.save(f, np.array([]))
+            return
+        timeStamps, measurements = structureDataTelemetry(df)
+        with open(str(fieldsFile), 'wb') as f:
+            np.save(f, df)
 
-    entropy_df = getEntropyData(startTime, stopTime, systemId, interval, frequency)
-    entropy_df.to_pickle(str(q) + "/Combined."+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
-    entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)
 
-    data = np.empty((len(timeStamps),len(columTitles)))
+    entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    if Path(entropyFile).exists():
+        with open(str(entropyFile), 'rb') as f:
+            entropy_df = pd.read_pickle(f)
+    else:
+        print("Cant find", entropyFile)
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        entropy_df = getEntropyData(startTime, stopTime, systemId,  bucket, interval, frequency)
+        with open(str(entropyFile), 'wb') as f:
+            entropy_df.to_pickle(f)
+
+    if len(entropy_df) == 0:
+        with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, np.array([]))
+        return
+    
+    entropy_intervals, entropy_measurements, labels = structureDataEntropy(entropy_df)
+
+    data = []
 
     now = datetime.now()
 
@@ -51,9 +78,9 @@ def makeDataSetRandomForestCombinedTelemetry(systemId, start, stop, interval, fr
     lastDay = now.day
     lastHour = now.hour
     lastMinute = now.minute
-    
-    for i in range(len(timeStamps)):
-        timestamp = timeStamps[i]
+    counter = 0
+    for timestamp in timeStamps:
+        timestamp = timestamp.replace(tzinfo=None)
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day
@@ -63,7 +90,10 @@ def makeDataSetRandomForestCombinedTelemetry(systemId, start, stop, interval, fr
         #Check if the current timestamp is the same as the last one
         #If so, do not search through the entropy timestamp array
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            for entropy_interval in entropy_intervals:
+                if timestamp.replace(second = 0, microsecond = 0) in entropy_interval:
+                    indexArray = np.where(entropy_intervals == entropy_interval)
+            
             if len(indexArray[0]) == 0:
                 continue
             indexInTimeArray = indexArray[0][0]
@@ -76,18 +106,22 @@ def makeDataSetRandomForestCombinedTelemetry(systemId, start, stop, interval, fr
         #Find the corresponding entropy measurements for this timestamp
         entropyPacketSize = entropy_measurements[indexInTimeArray][0]
         entropyRatePacketSize = entropy_measurements[indexInTimeArray][1]
-        curMeasurements = measurements[i]
+        curMeasurements = measurements[counter]
         
         #Add a label to the measurements
-        curLabel = int(isAttack(timestamp - timedelta(seconds = 2), timestamp))
+        curLabel = labels[indexInTimeArray]
 
-        newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize, int(curLabel)])
+        newMeasurements = [entropyPacketSize, entropyRatePacketSize, int(curLabel)]
+        times = [timeStamps[counter]]
+        times.extend(curMeasurements)
+        times.extend(newMeasurements)
+        data.append(times)
 
-        curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
-
-        data[i] = curMeasurements
-    
-    return data
+        counter += 1
+    data = np.array(data)
+    with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+        np.save(f, data)
+    #return data
 
 '''start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"

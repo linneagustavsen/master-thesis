@@ -91,7 +91,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
 
     #Loop through all the flow records
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime:
             continue
         if rec.stime < startTime:
             continue

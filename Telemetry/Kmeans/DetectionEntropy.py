@@ -68,8 +68,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
     df = getEntropyData(startTime, stopTime, systemId, if_name, interval, frequency)
     #df.to_pickle("NetFlow/Kmeans/RawData/Testing.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
     #df = pd.read_pickle("NetFlow/Kmeans/RawData/Testing.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    timeStamps, measurements = structureDataTelemetry(df)
-    timeStamps = pd.to_datetime(timeStamps)
+    timeIntervals, measurements, labels = structureDataEntropy(df)
 
     prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
     attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, DBthreshold, c0threshold, c1threshold)
@@ -93,11 +92,11 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
         attackType = "Same protocol"
 
     for i in range(len(prediction)):
-        attack = isAttack(timeStamps[i]+ interval - frequency, timeStamps[i]+ interval)
+        attack = isAttack(timeIntervals[i].left, timeIntervals[i].right)
         if prediction[i] == attackCluster:
             alert = {
-                        "sTime": (timeStamps[i]+ interval - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": (timeStamps[i]+ interval).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "sTime": timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": None,
                         #"Value": measurements[i],
@@ -106,7 +105,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, if_name, interval, fr
                     }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-        line = "\n"  + (timeStamps[i]+ interval - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + (timeStamps[i]+ interval).strftime("%Y-%m-%dT%H:%M:%SZ")
+        line = "\n"  + timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
         line += "," +str(int(attack))

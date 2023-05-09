@@ -43,7 +43,7 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
     sizes = []
    
     for rec in infile:
-        if rec.etime >= stopTime:
+        if rec.etime > stopTime + frequency:
             continue
         if rec.stime < startTime:
             continue
