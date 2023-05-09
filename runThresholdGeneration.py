@@ -8,6 +8,7 @@ import numpy as np
 
 from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 from Telemetry.Threshold.FFTDenoiser import fft_denoiser
+from Telemetry.Threshold.StatisticalModelCalculations import statisticalModelCalculations
 
 
 def thresholdGeneration(systemId, field):
@@ -89,12 +90,15 @@ def thresholdGeneration(systemId, field):
 systems = ["trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
            "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
             "ma2-gw", "narvik-gw4"]
-fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
+field = "egress_queue_info__0__cur_buffer_occupancy"
 
-
-for system in systems:
-    for field in fields:
-        thresholdGeneration(system, field)
+start = "2023-03-08 08:00:00"
+stop = "2023-03-08 20:00:00"
+attackDate="08.03.23"
+bucket = "april"
+for systemId in systems:
+    thresholdGeneration(systemId, field)
+    statisticalModelCalculations(start, stop, systemId, bucket, field, attackDate)
 '''systemId = "oslo-gw1"
 fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
 for field in fields:

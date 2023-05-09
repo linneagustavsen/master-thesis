@@ -11,7 +11,7 @@ from HelperFunctions.IsAttack import *
             systemId:   string, name of the system to calculate on
             attackDate: string, date of the attack the calculations are made on
 '''
-def synCalculation(silkFile, start, stop, systemId, attackDate):
+def xmasCalculation(silkFile, start, stop, systemId, attackDate):
     p = Path('Calculations')
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

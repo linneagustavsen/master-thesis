@@ -106,9 +106,7 @@ def randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTest
             print("The file Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
         
-systems = ["narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["ifi2-gw5", "oslo-gw1"]
 
 start = "2023-03-08 08:00:00"
 stop = "2023-03-08 20:00:00"
