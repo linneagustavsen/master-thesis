@@ -5,9 +5,7 @@ import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
-from HelperFunctions.IsAttack import isAttack
 from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes, getDataPackets
-from runThresholdGeneration import thresholdGeneration
 
 '''
     Calculates entropy and writes calculations to file
@@ -113,10 +111,10 @@ def findMinMaxEntropyTelemetry(systemId, interval, frequency):
             j += 1
         counter += 1
 
-    json_file = open("Telemetry/Entropy/Calculations/MinMax.MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "w")
+    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": minPS, "maximum": maxPS},json_file)
     json_file.close()
-    json_file = open("Telemetry/Entropy/Calculations/MinMax.MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "w")
+    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": minPS_r, "maximum": maxPS_r},json_file)
     json_file.close()
     json_file = open("Telemetry/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
@@ -126,18 +124,3 @@ def findMinMaxEntropyTelemetry(systemId, interval, frequency):
     json.dump({"minimum": minBytes, "maximum": maxBytes},json_file)
     json_file.close()
 
-
-systemId = "oslo-gw1"
-interval = timedelta(minutes = 1)
-frequency = timedelta(minutes = 10)
-findMinMaxEntropyTelemetry(systemId, interval, frequency)
-
-'''
-start = "2022-09-21 01:00:00"
-stop = "2022-09-22 00:00:00"
-systemId = "trd-gw"
-if_name = "xe-0/1/0"
-interval = timedelta(minutes = 5)
-frequency = timedelta(minutes = 1)
-attackDate = "21.09"
-calculationEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, attackDate)'''

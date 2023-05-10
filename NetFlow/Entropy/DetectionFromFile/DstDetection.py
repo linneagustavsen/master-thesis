@@ -25,42 +25,18 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdDstEntropyRate:        float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate):
+def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate):
     p = Path('Detections')
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
     #Open files to write alerts to
-    TPdstEntropyFile = open(str(q) + "/TP.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPdstEntropyRateFile = open(str(q) + "/TP.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r = open(str(q) + "/Scores.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPdstEntropyFile.write("number")
-    TPdstEntropyRateFile.write("number")
-
-    #Open files to write alerts to
-    FPdstEntropyFile = open(str(q) + "/FP.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPdstEntropyRateFile = open(str(q) + "/FP.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPdstEntropyFile.write("number")
-    FPdstEntropyRateFile.write("number")
-
-    #Open files to write alerts to
-    FNdstEntropyFile = open(str(q) + "/FN.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNdstEntropyRateFile = open(str(q) + "/FN.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNdstEntropyFile.write("number")
-    FNdstEntropyRateFile.write("number")
-
-    #Open files to write alerts to
-    TNdstEntropyFile = open(str(q) + "/TN.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNdstEntropyRateFile = open(str(q) + "/TN.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    TNdstEntropyFile.write("number")
-    TNdstEntropyRateFile.write("number")
+    scores.write("TP,FP,FN,TN")
+    scores_r.write("TP,FP,FN,TN")
     
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
@@ -108,6 +84,25 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    
+    attackIntervals = []
+    
+    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    for i in range(len(sTimeAttacks)):
+        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            continue
+        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+        
+        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
+            attackIntervals.append(lastInterval)
+        else:
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
@@ -118,9 +113,22 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     falseNegatives_r = 0
     trueNegatives_r  =0
 
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
-        attack = sTime[i] in sTimeAttacks.values or eTime[i] in eTimeAttacks.values
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime + frequency:
+            break
+        if sTime[i] < startTime:
+            continue
+
+        attack = False
+        for timeInterval in attackIntervals:
+            if sTime[i] in timeInterval or eTime[i] in timeInterval:
+                attack = True
         if i >=windowSize:
             change = dstEntropy[i] - np.nanmean(dstEntropy[i-windowSize: i-1])
             change_r = dstEntropyRate[i] - np.nanmean(dstEntropyRate[i-windowSize: i-1])
@@ -130,8 +138,8 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 attackType = "Flooding"
             else:
                 attackType = ""
-
-            simulateRealTime(datetime.now(), sTime[i], attackDate)
+            print("still running 3")
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdDstEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -170,44 +178,15 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 falseNegatives_r += 1
             elif abs(change_r) <= thresholdDstEntropyRate and not attack:
                 trueNegatives_r += 1
-    else:
-        if attack:
-            falseNegatives += 1
-            falseNegatives_r += 1
-        elif not attack:
-            trueNegatives += 1
-            trueNegatives_r += 1
-    TPdstEntropyFile.write(truePositives)
-    FPdstEntropyFile.write(falsePositives)
-    FNdstEntropyFile.write(falseNegatives)
-    TNdstEntropyFile.write(trueNegatives)
+        else:
+            if attack:
+                falseNegatives += 1
+                falseNegatives_r += 1
+            elif not attack:
+                trueNegatives += 1
+                trueNegatives_r += 1
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()
 
-    TPdstEntropyRateFile.write(truePositives_r)
-    FPdstEntropyRateFile.write(falsePositives_r)
-    FNdstEntropyRateFile.write(falseNegatives_r)
-    TNdstEntropyRateFile.write(trueNegatives_r)
-        
-    TPdstEntropyFile.close()
-    TPdstEntropyRateFile.close()
-    FPdstEntropyFile.close()
-    FPdstEntropyRateFile.close()
-    FNdstEntropyFile.close()
-    FNdstEntropyRateFile.close()
-    TNdstEntropyFile.close()
-    TNdstEntropyRateFile.close()
-
-
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systemId = "oslo-gw1"
-start = "2011-02-08 10:00:00"
-stop = "2011-02-08 12:00:00"
-startCombined = "2011-02-08 10:00:00"
-stopCombined = "2011-02-08 12:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="08.02.11"
-silkFile = pathToRawFiles+systemId + "/"+ baseFile
-windowSize = 10
-
-detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, attackDate)
+    scores_r.write("\n"+ str(truePositives_r)+ "," + str(falsePositives_r)+ "," + str(falseNegatives_r)+ "," + str(trueNegatives_r))
+    scores_r.close()

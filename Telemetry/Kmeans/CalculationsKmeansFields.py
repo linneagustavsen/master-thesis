@@ -30,7 +30,7 @@ def calculationsKmeansFieldsTelemetry(start, stop, systemId, bucket, clusterFreq
  
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        cluster0 = open(str(q) + "/Fields.Cluster0.attack"+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        cluster0 = open(str(q) + "/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
         cluster1 = open(str(q) + "/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster1.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
@@ -51,7 +51,6 @@ def calculationsKmeansFieldsTelemetry(start, stop, systemId, bucket, clusterFreq
         else:
             print("Cant find", fieldsFile)
             df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId, fields)
-            print(df)
             if not dp.exists():
                 dp.mkdir(parents=True, exist_ok=False)
             with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:

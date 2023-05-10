@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
@@ -6,6 +6,8 @@ import numpy as np
 import json
 import paho.mqtt.client as mqtt
 import pickle
+
+from HelperFunctions.SimulateRealTime import simulateRealTime
 
 '''
     Detect anomalies based on a random forest classifier
@@ -16,24 +18,7 @@ import pickle
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
-    p = Path('Detections')
-    q = p / 'RandomForest' / 'Telemetry'
-    if not q.exists():
-        q.mkdir(parents=True)
-
-    TPf = open(str(q) + "/Fields.TP.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
-    
-    FPf = open(str(q) + "/Fields.FP.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
-    
-    FNf = open(str(q) + "/Fields.FN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
-    
-    TNf = open(str(q) + "/Fields.TN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
-    
+def detectionRandomForestTelemetry(systemId, attackDate):
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -56,59 +41,22 @@ def detectionRandomForestTelemetry(testingSet, systemId, interval, attackDate):
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    p = Path('Telemetry')
-    q = p / 'RandomForest'
-    r = q / 'RawData'
-    s = q / 'Models'
-    if not q.exists():
-        q.mkdir(parents=True)
-    if not s.exists():
-        s.mkdir(parents=True)
-    # Load the model
-    filename = str(s) + "/RandomForestModel.Fields."+str(systemId)+ ".pkl"
-    classifier_RF = pickle.load(open(filename, 'rb'))
+    alerts = pd.read_csv("Calculations0803/RandomForest/Telemetry/Alerts.Fields.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    sTime = pd.to_datetime(alerts["sTime"])
+    eTime = pd.to_datetime(alerts["eTime"])
 
-    timeStamps = pd.read_pickle(str(r) + "/Fields.Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
-    
-    testingMeasurements = np.array(testingSet.iloc[:, 0:-1])
-    testingLabel = np.array(testingSet.iloc[:,-1])
+    real_label = alerts["real_label"]
 
-    #Predict the label of the testing data set
-    predictions = classifier_RF.predict(testingMeasurements)
-    for i in range(len(predictions)):
-        if predictions[i] == 1:
-            alert = {
-                    "sTime": (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+    for i in range(len(sTime)):
+        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+       
+        alert = {
+                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
                     #"Value": testingMeasurements[i],
-                    "Real_label": testingLabel[i],
+                    "Real_label": real_label[i],
                     "Attack_type": "Flooding"
                 }
-            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-        line = "\n" + (timeStamps[i] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            line += "," + str(testingMeasurements[i][j])
-        line += "," +str(testingLabel[i])
-
-        if predictions[i] == 1 and testingLabel[i]:
-            TPf.write(line)
-        elif predictions[i] == 1 and not testingLabel[i]:
-            FPf.write(line)
-        elif predictions[i] == 0 and testingLabel[i]:
-            FNf.write(line)
-        elif predictions[i] == 0 and not testingLabel[i]:
-            TNf.write(line)
-    TPf.close()
-    FPf.close()
-    FNf.close()
-    TNf.close()
-
-
-'''trainingSet = "Telemetry/RandomForest/Data/TrainingSet.pkl"
-testingSet = "Telemetry/RandomForest/Data/TestingSet.pkl"
-systemId = "trd-gw"
-interval = timedelta(minutes = 5)
-attackDate = "21.09"
-detectionRFTelemetry(trainingSet, testingSet, systemId, interval, attackDate)'''
+        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

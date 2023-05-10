@@ -1,5 +1,6 @@
 from datetime import datetime,timedelta
 from pathlib import Path
+import pickle
 import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -33,6 +34,7 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
     packetSizeRateArray = []
     packetNumberArray = []
     bytesArray = []
+    packetSizeDistributionDict ={}
 
     #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -61,7 +63,8 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
         packetSizeArray.append(entropyPacketSize)
         #Calculate the generalized entropy rate of this distribution
         packetSizeRateArray.append(entropyPacketSize/nps)
-
+        packetSizeDistributionDict[stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiPS
+        
         #Store the number of packets and bytes this time interval
         packetNumberArray.append(sum(dfPackets))
         bytesArray.append(sum(dfBytes))
@@ -78,3 +81,7 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
         j += 1
 
     calculations.close()
+
+    distributionFile = open(str(q) + "/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "wb")
+    pickle.dump(packetSizeDistributionDict,distributionFile)
+    distributionFile.close()

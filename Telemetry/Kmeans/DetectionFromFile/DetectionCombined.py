@@ -2,6 +2,7 @@ from pathlib import Path
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.GetData import *
+from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from datetime import datetime,timedelta
 from HelperFunctions.IsAttack import *
@@ -17,26 +18,15 @@ import paho.mqtt.client as mqtt
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombinedTelemetry(testingSet, systemId, frequency, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansCombinedTelemetry(start, stop, systemId, clusterFrequency, interval, DBthreshold, c0threshold, c1threshold, attackDate):
     p = Path('Detections')
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
 
-    TPf0 = open(str(q) + "/TP.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
+    scores = open(str(q) + "/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")
 
-    FPf0 = open(str(q) + "/FP.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
-
-    FNf0 = open(str(q) + "/FN.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
-
-    TNf0 = open(str(q) + "/TN.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNf0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,entropy_packet_size,entropy_rate_packet_size,real_label")
-
-    cluster = open(str(q) + "/Combined.ClusterLabelling.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -59,74 +49,112 @@ def detectionKmeansCombinedTelemetry(testingSet, systemId, frequency, DBthreshol
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    p = Path('Telemetry')
-    q = p / 'Kmeans' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True)
-    #df = pd.read_pickle(str(q) +"TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    measurements = testingSet.values
-    timeStamps = pd.read_pickle(str(q) +"/Testing.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  = 0
 
-    prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
-    attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, DBthreshold, c0threshold, c1threshold)
-    cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
-    if attackCluster == 0:
-        attackClusterDiameter = cd0
-        nonAttackClusterDiameter = cd1
-    elif attackCluster == 1:
-        attackClusterDiameter = cd1
-        nonAttackClusterDiameter = cd0
-    attackType = ""
-    #If it is a burst attack and non attack cluster is empty
-    if db == 0 and nonAttackClusterDiameter == 0:
-        attackType = "Same protocol"
-    #If there is no burst and attack cluster is less compact than normal traffic
-    elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
-        attackType = "Different protocols"
-    #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
-    elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
-        attackType = "Same protocol"
+    intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
 
-    for i in range(len(prediction)):
-        attack = isAttack(timeStamps[i]- frequency, timeStamps[i])
-        if prediction[i] == attackCluster:
-            alert = {
-                        "sTime": (timeStamps[i] - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": None,
-                        #"Value": measurements[i],
-                        "Real_label": int(attack),
-                        "Attack_type": attackType
-                    }
-            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+    srcPortsCluster = []
+    dstPortsCluster = []
+    protocolCluster = []
 
-        line = "\n"  + (timeStamps[i] - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeStamps[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for measurement in measurements[i]:
-            line += "," + str(measurement)
-        line += "," +str(int(attack))
+    sTimeCluster = []
 
-        if prediction[i] == attackCluster and attack:
-            TPf0.write(line)
-        elif prediction[i] == attackCluster and not attack:
-            FPf0.write(line)
-        elif prediction[i] != attackCluster and attack:
-            FNf0.write(line)
-        elif prediction[i] != attackCluster and not attack:
-            TNf0.write(line)
+    eTimeCluster = []
+
+    real_labels = []
+
+    attackTypes = []
+
+    #Loop for every minute in a week
+    for i in range(math.ceil(intervalTime)):
+        stopTime = startTime + clusterFrequency
+        attackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        if attackCluster["AttackCluster"][0] == 0:
+            cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+
+            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        
+        elif attackCluster["AttackCluster"][0] == 1:
+            cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+
+            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        
+        labelsForNonAttackCluster = nonAttackCluster["real_label"]
+
+        for label in labelsForNonAttackCluster:
+            if label == 0:
+                trueNegatives += 1
+            elif label == 1:
+                falseNegatives += 1
+        
+        sTime = pd.to_datetime(cluster["sTime"])
+        eTime = pd.to_datetime(cluster["eTime"])
+
+        srcPort = cluster["srcPort"]
+        dstPort = cluster["dstPort"]
+        protocol = cluster["protocol"]
+
+        labels = cluster["real_label"]
+
+        db = attackCluster["Davies-bouldin-score"][0]
+        attackType = ""
+        #If it is a burst attack and non attack cluster is empty
+        if db == 0 and nonAttackClusterDiameter == 0:
+            attackType = "Same protocol"
+        #If there is no burst and attack cluster is less compact than normal traffic
+        elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
+            attackType = "Different protocols"
+        #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
+        elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
+            attackType = "Same protocol"
+        
+        attackTypes.append(attackType)
     
-    TPf0.close()
-    FPf0.close()
-    FNf0.close()
-    TNf0.close()
-    cluster.close()
+        sTimeCluster.extend(sTime)
+        eTimeCluster.extend(eTime)
+        srcPortsCluster.extend(srcPort)
+        dstPortsCluster.extend(dstPort)
+        protocolCluster.extend(protocol)
+        real_labels.extend(labels)
 
-'''start = "2022-09-21 01:00:00"
-stop = "2022-09-22 00:00:00"
-systemId = "trd-gw"
-if_name = "xe-0/1/0"
-attackDate = "21.09"
-fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
+        startTime += clusterFrequency
 
-detectionKmeansCombinedTelemetry(testingSet, systemId, if_name, attackDate)'''
+    counter = 0
+    for i in range(len(sTimeCluster)):
+        sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
+        eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
+        #simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
+        attackType = ""
+        if sTimeCluster[i] < startTime + clusterFrequency:
+            attackType = attackTypes[counter]
+        if sTimeCluster[i] > startTime + clusterFrequency:
+            counter += 1
+            attackType = attackTypes[counter]
+            startTime += clusterFrequency
+        alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": None,
+                    "Real_label": int(real_labels[i]),
+                    "Attack_type": attackType
+                }
+        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
+        if real_labels[i]:
+            truePositives += 1
+        elif not real_labels[i]:
+            falsePositives += 1
+    
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()

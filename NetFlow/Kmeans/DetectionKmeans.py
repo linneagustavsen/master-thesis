@@ -87,7 +87,7 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
         attackType = "Same protocol"
    
     for i in range(len(prediction)):
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        #simulateRealTime(datetime.now(), eTime[i], attackDate)
         if prediction[i] == attackCluster:
             alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

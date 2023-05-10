@@ -48,6 +48,8 @@ def thresholdGeneration(systemId, field):
             for table in tables:
                 for row in table.records:
                     json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    if row.values["_value"] != 0:
+                        print(row.values["_time"], row.values["_value"])
         counter += 1
 
     mean = []
@@ -79,13 +81,13 @@ def thresholdGeneration(systemId, field):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
-    t = q / 'Thresholds'
+    '''t = q / 'Thresholds'
     if not t.exists():
         t.mkdir(parents=True)
     #Write the mean and variance values to a json file      
     json_file_mean_var = open(str(t) + "/"+str(systemId)+ "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
-    json_file_mean_var.close()
+    json_file_mean_var.close()'''
 
 systems = ["trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
            "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
@@ -98,7 +100,7 @@ attackDate="08.03.23"
 bucket = "april"
 for systemId in systems:
     thresholdGeneration(systemId, field)
-    statisticalModelCalculations(start, stop, systemId, bucket, field, attackDate)
+    #statisticalModelCalculations(start, stop, systemId, bucket, field, attackDate)
 '''systemId = "oslo-gw1"
 fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
 for field in fields:

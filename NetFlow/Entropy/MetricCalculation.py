@@ -26,8 +26,8 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
         q.mkdir(parents=True, exist_ok=False)
     calculations = open(str(q) + "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open(str(q) + "/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcDistributionDict ={}
-    dstDistributionDict ={}
+    '''srcDistributionDict ={}
+    dstDistributionDict ={}'''
     packetSizeDistributionDict ={}
 
     #Write the column titles to the files
@@ -100,7 +100,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             ipSrcArray.append(entropySip)
             #Calculate the generalized entropy rate of this distribution
             ipSrcRateArray.append(entropySip/ns)
-            srcDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiSIP
+            #srcDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiSIP
 
             #Find the probability distribution based on how many packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
@@ -109,7 +109,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             ipDstArray.append(entropyDip)
             #Calculate the generalized entropy rate of this distribution
             ipDstRateArray.append(entropyDip/nd)
-            dstDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiDIP
+            #dstDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiDIP
             
             #Find the probability distribution based on how many packets there is in each bi-directional flow in this time interval
             PiF, nf = flowDistribution(records)
@@ -170,15 +170,15 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
 
     infile.close()
 
-    json_file = open(str(q) + "/srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    '''json_file = open(str(q) + "/srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
     pickle.dump(srcDistributionDict,json_file)
     json_file.close()
 
     json_file = open(str(q) + "/dstIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
     pickle.dump(dstDistributionDict,json_file)
-    json_file.close()
+    json_file.close()'''
 
-    json_file = open(str(q) + "/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    json_file = open(str(q) + "/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "wb")
     pickle.dump(packetSizeDistributionDict,json_file)
     json_file.close()
 '''    

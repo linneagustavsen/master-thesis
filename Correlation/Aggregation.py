@@ -50,12 +50,12 @@ class Aggregation:
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
         if alertDB == 0:
-            if interval in self.getTimes(gateway):
+            if interval in self.getTimes(gateway, self.alertDB):
                 self.alertDB[gateway][interval].append(alert)
             else:
                 self.alertDB[gateway][interval] = [alert]
         elif alertDB == 1:
-            if interval in self.getTimes(gateway):
+            if interval in self.getTimes(gateway, self.alertDBDistribution):
                 self.alertDBDistribution[gateway][interval].append(alert)
             else:
                 self.alertDBDistribution[gateway][interval] = [alert]
@@ -229,7 +229,7 @@ class Aggregation:
             self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
             print("Aggregation published to topic", self.outputIPs)
         if packetSizeDistribution != None:
-            self.aggregateTimeDistribution(self, stime, etime, gateway, packetSizeDistribution, payload)
+            self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

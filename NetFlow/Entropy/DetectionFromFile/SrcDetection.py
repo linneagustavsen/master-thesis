@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -24,38 +25,18 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdSrcEntropyRate:        float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate):
+def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate):
     p = Path('Detections')
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
     #Open files to write alerts to
-    TPsrcEntropyFile = open(str(q) + "/TP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPsrcEntropyRateFile = open(str(q) + "/TP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r = open(str(q) + "/Scores.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    TPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    FPsrcEntropyFile = open(str(q) + "/FP.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPsrcEntropyRateFile = open(str(q) + "/FP.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    FPsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    FNsrcEntropyFile = open(str(q) + "/FN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNsrcEntropyRateFile = open(str(q) + "/FN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNsrcEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    FNsrcEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    TNsrcEntropyFile = open(str(q) + "/TN.SourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNsrcEntropyRateFile = open(str(q) + "/TN.SourceIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")
+    scores_r.write("TP,FP,FN,TN")
 
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
@@ -88,150 +69,123 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    
+    data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
-    #Makes datetime objects of the input times
+    sTime = pd.to_datetime(data["sTime"])
+    eTime = pd.to_datetime(data["eTime"])
+
+    ipSrcArray = data["srcEntropy"]
+    ipSrcRateArray = data["srcEntropyRate"]
+    
+    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
+    eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
+    attackIntervals = []
+    
+    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    for i in range(len(sTimeAttacks)):
+        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            continue
+        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+        
+        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
+            attackIntervals.append(lastInterval)
+        else:
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  = 0
+
+    truePositives_r = 0
+    falsePositives_r = 0
+    falseNegatives_r = 0
+    trueNegatives_r  = 0
+
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    windowTime = startTime
-
-    # Open a silk flow file for reading
-    infile = silkfile_open(silkFile, READ)
-
-    #Instantiate empty arrays for the calculated values
-    records = []
-    
-    ipSrcArray = []
-    ipSrcRateArray = []
-
-    #Instantiate variables
-    i = 0
-    sizes = []
-
     #Loop through all the flow records in the input file
-    for rec in infile:
-        if rec.etime > stopTime + frequency:
+    for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime + frequency:
+            break
+        if sTime[i] < startTime:
             continue
-        if rec.stime < startTime:
-            continue
-        #Implement the sliding window
-        if rec.stime > windowTime + frequency:
-            lastSizes  = sum(sizes)
-            thisMinuteSize = len(records) - lastSizes
-            sizes.append(thisMinuteSize)
-            windowTime += frequency
-        #Aggregate flows into the specified time interval
-        if rec.stime > startTime + interval:
-            if len(records) == 0:
-                startTime = startTime + frequency
-                sizes.pop(0)
-                records.append(rec)
-                continue
-            #Find the probability distribution based on how many packets there is in each source flow in this time interval
-            PiSIP, ns = ipSourceDistribution(records)
-            #Calculate the generalized entropy of this distribution
-            entropySip = generalizedEntropy(10,PiSIP)
-            ipSrcArray.append(entropySip)
-            #Calculate the generalized entropy rate of this distribution
-            ipSrcRateArray.append(entropySip/ns)
 
-            attack = isAttack(rec.stime - frequency, rec.stime)
-            #If there is enough stored values to compare with we compare the difference of each metric with a threshold
-            if i >=windowSize:
-                change = ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])
-                change_r = ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])
-                
-                if change < 0 and change_r < 0:
-                    attackType = "Low-Rate"
-                elif change_r < 0:
-                    attackType = "Flooding"
-                else:
-                    attackType = ""
-                
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
-                if abs(change) > thresholdSrcEntropy:
-                    alert = {
-                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]),
-                        '''"Change": abs(change),
-                        "Value": ipSrcArray[i],
-                        "Mean_last_10": np.nanmean(ipSrcArray[i-windowSize: i-1]),'''
-                        "Real_label": int(attack),
-                        "Attack_type": attackType
-                        }
-                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                if abs(change_r) > thresholdSrcEntropyRate:
-                    alert = {
-                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
-                        '''"Change": abs(change_r),
-                        "Value": ipSrcRateArray[i],
-                        "Mean_last_10": np.nanmean(ipSrcRateArray[i-windowSize: i-1]),'''
-                        "Real_label": int(attack),
-                        "Attack_type": attackType
-                        }
-                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"])) + ","+ str(abs(change)) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1]))
-                if abs(change) > thresholdSrcEntropy and attack:
-                    TPsrcEntropyFile.write(line)
-                elif abs(change) > thresholdSrcEntropy and not attack:
-                    FPsrcEntropyFile.write(line)
-                elif abs(change) <= thresholdSrcEntropy and attack:
-                    FNsrcEntropyFile.write(line)
-                elif abs(change) <= thresholdSrcEntropy and not attack:
-                    TNsrcEntropyFile.write(line)
-                
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1]))
-                if abs(change_r) > thresholdSrcEntropyRate and attack:
-                    TPsrcEntropyRateFile.write(line)
-                elif abs(change_r) > thresholdSrcEntropyRate and not attack:
-                    FPsrcEntropyRateFile.write(line)
-                elif abs(change_r) <= thresholdSrcEntropyRate and attack:
-                    FNsrcEntropyRateFile.write(line)
-                elif abs(change_r) <= thresholdSrcEntropyRate and not attack:
-                    TNsrcEntropyRateFile.write(line)
+        attack = False
+        for timeInterval in attackIntervals:
+            if sTime[i] in timeInterval or eTime[i] in timeInterval:
+                attack = True
+        #If there is enough stored values to compare with we compare the difference of each metric with a threshold
+        if i >=windowSize:
+            change = ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])
+            change_r = ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])
+            
+            if change < 0 and change_r < 0:
+                attackType = "Low-Rate"
+            elif change_r < 0:
+                attackType = "Flooding"
             else:
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
-                if attack:
-                    FNsrcEntropyFile.write(line)
-                    FNsrcEntropyRateFile.write(line)
-                elif not attack:
-                    TNsrcEntropyFile.write(line)
-                    TNsrcEntropyRateFile.write(line)
-            #Push the sliding window
-            startTime = startTime + frequency
-            records = records[sizes[0]:]
-            sizes.pop(0)
-            i += 1
+                attackType = ""
+            
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            if abs(change) > thresholdSrcEntropy:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change), maxmin_sip["minimum"], maxmin_sip["maximum"]),
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                    }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            if abs(change_r) > thresholdSrcEntropyRate:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change_r), maxmin_sip_rate["minimum"], maxmin_sip_rate["maximum"]),
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                    }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            if abs(change) > thresholdSrcEntropy and attack:
+                truePositives += 1
+            elif abs(change) > thresholdSrcEntropy and not attack:
+                falsePositives += 1
+            elif abs(change) <= thresholdSrcEntropy and attack:
+                falseNegatives +=1
+            elif abs(change) <= thresholdSrcEntropy and not attack:
+                trueNegatives += 1
+            
+            if abs(change_r) > thresholdSrcEntropyRate and attack:
+                truePositives_r += 1
+            elif abs(change_r) > thresholdSrcEntropyRate and not attack:
+                falsePositives_r += 1
+            elif abs(change_r) <= thresholdSrcEntropyRate and attack:
+                falseNegatives_r += 1
+            elif abs(change_r) <= thresholdSrcEntropyRate and not attack:
+                trueNegatives_r += 1
+        else:
+            if attack:
+                falseNegatives += 1
+                falseNegatives_r += 1
+            elif not attack:
+                trueNegatives += 1
+                trueNegatives_r += 1
 
-        records.append(rec)
-    
-           
-    TPsrcEntropyFile.close()
-    TPsrcEntropyRateFile.close()
-    FPsrcEntropyFile.close()
-    FPsrcEntropyRateFile.close()
-    FNsrcEntropyFile.close()
-    FNsrcEntropyRateFile.close()
-    TNsrcEntropyFile.close()
-    TNsrcEntropyRateFile.close()
-    infile.close()
-    
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systemId = "oslo-gw1"
-start = "2011-02-08 10:00:00"
-stop = "2011-02-08 12:00:00"
-startCombined = "2011-02-08 10:00:00"
-stopCombined = "2011-02-08 12:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="08.02.11"
-silkFile = pathToRawFiles+systemId + "/"+ baseFile
-windowSize = 10
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()
 
-detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, attackDate)
+    scores_r.write("\n"+ str(truePositives_r)+ "," + str(falsePositives_r)+ "," + str(falseNegatives_r)+ "," + str(trueNegatives_r))
+    scores_r.close()

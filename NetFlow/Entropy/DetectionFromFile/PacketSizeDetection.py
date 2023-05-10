@@ -1,4 +1,6 @@
+import os
 from pathlib import Path
+import pandas as pd
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -24,42 +26,18 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdPSEntropyRate:         float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdPSEntropy, thresholdPSEntropyRate, attackDate):
+def detectionPS(start, stop, systemId, frequency, interval, windowSize, thresholdPSEntropy, thresholdPSEntropyRate, attackDate):
     p = Path('Detections')
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
     #Open files to write alerts to
-    TPpacketSizeEntropyFile = open(str(q) + "/TP.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TPpacketSizeEntropyRateFile = open(str(q) + "/TP.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r = open(str(q) + "/Scores.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    TPpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    FPpacketSizeEntropyFile = open(str(q) + "/FP.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FPpacketSizeEntropyRateFile = open(str(q) + "/FP.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    FPpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    FNpacketSizeEntropyFile = open(str(q) + "/FN.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    FNpacketSizeEntropyRateFile = open(str(q) + "/FN.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    FNpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open files to write alerts to
-    TNpacketSizeEntropyFile = open(str(q) + "/TN.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    TNpacketSizeEntropyRateFile = open(str(q) + "/TN.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    TNpacketSizeEntropyFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-    TNpacketSizeEntropyRateFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    scores.write("TP,FP,FN,TN")
+    scores_r.write("TP,FP,FN,TN")
     
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
@@ -93,151 +71,134 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    #Makes datetime objects of the input times
+    data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+
+    sTime = pd.to_datetime(data["sTime"])
+    eTime = pd.to_datetime(data["eTime"])
+
+
+    packetSizeEntropy = data["packetSizeEntropy"]
+    packetSizeEntropyRate = data["packetSizeEntropyRate"]
+    if os.path.exists("Calculations0803/Entropy/NetFlow/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"):
+        packetSizeDistributionDict = pd.read_pickle("Calculations0803/Entropy/NetFlow/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    if os.path.exists("Calculations0803/Entropy/NetFlow/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json"):
+        jsonFilePS = open("Calculations0803/Entropy/NetFlow/packetSizeDistributions.300secInterval.attack.08.03.bergen-gw3.json", "r")
+        packetSizeDistributionDict = json.load(jsonFilePS)
+    
+    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
+    eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
+    attackIntervals = []
+    
+    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    for i in range(len(sTimeAttacks)):
+        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            continue
+        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+        
+        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
+            attackIntervals.append(lastInterval)
+        else:
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  = 0
+
+    truePositives_r = 0
+    falsePositives_r = 0
+    falseNegatives_r = 0
+    trueNegatives_r  = 0
+
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    windowTime = startTime
-
-    # Open a silk flow file for reading
-    infile = silkfile_open(silkFile, READ)
-
-    #Instantiate empty arrays for the calculated values
-    records = []
-
-    packetSizeArray = []
-    packetSizeRateArray = []
-    
-    #Instantiate variables
-    i = 0
-    sizes = []
-
     #Loop through all the flow records in the input file
-    for rec in infile:
-        if rec.etime > stopTime + frequency:
+    for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime + frequency:
+            break
+        if sTime[i] < startTime:
             continue
-        if rec.stime < startTime:
-            continue
-        #Implement the sliding window
-        if rec.stime > windowTime + frequency:
-            lastSizes  = sum(sizes)
-            thisMinuteSize = len(records) - lastSizes
-            sizes.append(thisMinuteSize)
-            windowTime += frequency
-        #Aggregate flows into the specified time interval
-        if rec.stime > startTime + interval:
-            if len(records) == 0:
-                startTime = startTime + frequency
-                sizes.pop(0)
-                records.append(rec)
-                continue
-            #Find the probability distribution based on how big the packets are this time interval
-            PiPS,nps,packetSizeDistributionDict = packetSizeDistributionDetectionNetFlow(records)
-            #Calculate the generalized entropy of this distribution
-            entropyPacketSize = generalizedEntropy(10, PiPS)
-            packetSizeArray.append(entropyPacketSize)
-            #Calculate the generalized entropy rate of this distribution
-            packetSizeRateArray.append(entropyPacketSize/nps)
+
+        attack = False
+        for timeInterval in attackIntervals:
+            if sTime[i] in timeInterval or eTime[i] in timeInterval:
+                attack = True
+        #If there is enough stored values to compare with we compare the difference of each metric with a threshold
+        if i >=windowSize:
+            change = packetSizeEntropy[i] - np.nanmean(packetSizeEntropy[i-windowSize: i-1])
+            change_r = packetSizeEntropyRate[i] - np.nanmean(packetSizeEntropyRate[i-windowSize: i-1])
             
-            attack = isAttack(rec.stime - frequency,rec.stime)
-            #If there is enough stored values to compare with we compare the difference of each metric with a threshold
-            if i >=windowSize:
-                change = packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])
-                change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
-                
-                
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
-                if change < 0:
-                        attackType = "Same protocol"
-                else:
-                    attackType = "Different protocols"
-                if abs(change) > thresholdPSEntropy:
-                    alert = {
-                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
-                        "Packet_size_distribution": packetSizeDistributionDict,
-                        '''"Change": abs(change),
-                        "Value": packetSizeArray[i],
-                        "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),'''
-                        "Real_label": int(attack),
-                        "Attack_type": attackType
-                    }
-                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                if abs(change_r) > thresholdPSEntropyRate:
-                    alert = {
-                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
-                        "Packet_size_distribution": packetSizeDistributionDict,
-                        '''"Change": abs(change_r),
-                        "Value": packetSizeArray[i],
-                        "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),'''
-                        "Real_label": int(attack),
-                        "Attack_type": attackType
-                    }
-                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"])) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
-                if abs(change) > thresholdPSEntropy and attack:
-                    TPpacketSizeEntropyFile.write(line)
-                elif abs(change) > thresholdPSEntropy and not attack:
-                    FPpacketSizeEntropyFile.write(line)
-                elif abs(change) <= thresholdPSEntropy and attack:
-                    FNpacketSizeEntropyFile.write(line)
-                elif abs(change) <= thresholdPSEntropy and not attack:
-                    TNpacketSizeEntropyFile.write(line)
-                
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
-                if abs(change_r) > thresholdPSEntropyRate and attack:
-                    TPpacketSizeEntropyRateFile.write(line)
-                elif abs(change_r) > thresholdPSEntropyRate and not attack:
-                    FPpacketSizeEntropyRateFile.write(line)
-                elif abs(change_r) <= thresholdPSEntropyRate and attack:
-                    FNpacketSizeEntropyRateFile.write(line)
-                elif abs(change_r) <= thresholdPSEntropyRate and not attack:
-                    TNpacketSizeEntropyRateFile.write(line)
+            thisPacketSizeDistributionDict = {}
+            thisInterval = pd.Interval(sTime[i], eTime[i], closed="both")
+            for time in packetSizeDistributionDict:
+                if pd.Timestamp(time).replace(tzinfo=None) in thisInterval:
+                    thisPacketSizeDistributionDict = packetSizeDistributionDict[time]
+            
+            if change < 0:
+                    attackType = "Same protocol"
             else:
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
-                if attack:
-                    FNpacketSizeEntropyFile.write(line)
-                    FNpacketSizeEntropyRateFile.write(line)
-                elif not attack:
-                    TNpacketSizeEntropyFile.write(line)
-                    TNpacketSizeEntropyRateFile.write(line)
-            #Push the sliding window
-            startTime = startTime + frequency
-            records = records[sizes[0]:]
-            sizes.pop(0)
-            i += 1
+                attackType = "Different protocols"
 
-        records.append(rec)
-    
-    TPpacketSizeEntropyFile.close()
-    TPpacketSizeEntropyRateFile.close()
-    FPpacketSizeEntropyFile.close()
-    FPpacketSizeEntropyRateFile.close()
-    FNpacketSizeEntropyFile.close()
-    FNpacketSizeEntropyRateFile.close()
-    TNpacketSizeEntropyFile.close()
-    TNpacketSizeEntropyRateFile.close()
-    
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            if abs(change) > thresholdPSEntropy:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change), maxmin_ps["minimum"], maxmin_ps["maximum"]),
+                    "Packet_size_distribution": thisPacketSizeDistributionDict,
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            if abs(change_r) > thresholdPSEntropyRate:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
+                    "Packet_size_distribution": thisPacketSizeDistributionDict,
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            if abs(change) > thresholdPSEntropy and attack:
+                truePositives += 1
+            elif abs(change) > thresholdPSEntropy and not attack:
+                falsePositives += 1
+            elif abs(change) <= thresholdPSEntropy and attack:
+                falseNegatives +=1
+            elif abs(change) <= thresholdPSEntropy and not attack:
+                trueNegatives += 1
+            
+            if abs(change_r) > thresholdPSEntropyRate and attack:
+                truePositives_r += 1
+            elif abs(change_r) > thresholdPSEntropyRate and not attack:
+                falsePositives_r += 1
+            elif abs(change_r) <= thresholdPSEntropyRate and attack:
+                falseNegatives_r += 1
+            elif abs(change_r) <= thresholdPSEntropyRate and not attack:
+                trueNegatives_r += 1
+        else:
+            if attack:
+                falseNegatives +=1
+                falseNegatives_r += 1
+            elif not attack:
+                trueNegatives += 1
+                trueNegatives_r += 1
 
-    infile.close()
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()
 
-
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systemId = "oslo-gw1"
-start = "2011-02-08 10:00:00"
-stop = "2011-02-08 12:00:00"
-startCombined = "2011-02-08 10:00:00"
-stopCombined = "2011-02-08 12:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="08.02.11"
-silkFile = pathToRawFiles+systemId + "/"+ baseFile
-windowSize = 10
-
-detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, 0, attackDate)
+    scores_r.write("\n"+ str(truePositives_r)+ "," + str(falsePositives_r)+ "," + str(falseNegatives_r)+ "," + str(trueNegatives_r))
+    scores_r.close()

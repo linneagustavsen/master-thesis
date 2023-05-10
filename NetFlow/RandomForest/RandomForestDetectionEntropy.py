@@ -80,7 +80,7 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
-        simulateRealTime(datetime.now(), timeStamps[i], attackDate)
+        #simulateRealTime(datetime.now(), timeStamps[i], attackDate)
         if predictions[i] == 1:
             alert = {
                     "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

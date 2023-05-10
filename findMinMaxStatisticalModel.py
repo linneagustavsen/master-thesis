@@ -2,10 +2,6 @@ from datetime import datetime,timedelta
 import json
 from pathlib import Path
 from HelperFunctions.GetData import *
-from HelperFunctions.IsAttack import isAttack
-import paho.mqtt.client as mqtt
-
-from HelperFunctions.Normalization import normalization
 from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 from Telemetry.Threshold.FindMaxVar import findMaxVar
 
@@ -68,10 +64,3 @@ def findMinMaxStatisticalModel(systemId, field, start, stop):
     json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "w")
     json.dump({"minimum": minVarNormal, "maximum": maxVarNormal},json_file)
     json_file.close()
-
-systemId = "oslo-gw1"
-fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
-start = "2023-02-23 00:00:00"
-stop = "2023-03-07 00:00:00"
-for field in fields:
-    findMinMaxStatisticalModel(systemId, field, start, stop)

@@ -36,11 +36,11 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
         f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
         f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
         f0IP = open(str(ipPath) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
         f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
         f_scores = open(str(q) + "/Score.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")

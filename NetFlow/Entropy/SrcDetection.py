@@ -147,7 +147,7 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
                 else:
                     attackType = ""
                 
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
+                #simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdSrcEntropy:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

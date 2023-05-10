@@ -82,7 +82,7 @@ def detectionRandomForestNoIPNetFlowFields(testingSet, systemId, attackDate):
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
-        simulateRealTime(datetime.now(), eTimes[i], attackDate)
+        #simulateRealTime(datetime.now(), eTimes[i], attackDate)
         if predictions[i] == 1:
             alert = {
                     "sTime": sTimes[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

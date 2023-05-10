@@ -102,7 +102,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                             exists = True
                     if not exists:
                         change = True
-                        simulateRealTime(datetime.now(), rec.stime, attackDate)
+                        #simulateRealTime(datetime.now(), rec.stime, attackDate)
                         alert = {
                             "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                             "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),

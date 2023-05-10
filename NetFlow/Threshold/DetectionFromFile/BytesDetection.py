@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 from silk import *
 from HelperFunctions.Distributions import *
 from HelperFunctions.GeneralizedEntropy import *
@@ -22,34 +23,16 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdBytes:                 float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
+def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
     p = Path('Detections')
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
     #Open file to write alerts to
-    TPbytesFile = open(str(q) + "/TP.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPbytesFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FPbytesFile = open(str(q) + "/FP.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPbytesFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FNbytesFile = open(str(q) + "/FN.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNbytesFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    TNbytesFile = open(str(q) + "/TN.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    TNbytesFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    scores.write("TP,FP,FN,TN")
 
     p = Path('NetFlow')
     q = p / 'Threshold' / 'Calculations'
@@ -81,99 +64,85 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    #Makes datetime objects of the input times
+    data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+
+    sTime = pd.to_datetime(data["sTime"])
+    eTime = pd.to_datetime(data["eTime"])
+
+
+    bytesArray = data["numberOfBytes"]
+
+    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
+    eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
+   
+    attackIntervals = []
+    
+    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    for i in range(len(sTimeAttacks)):
+        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            continue
+        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+        
+        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            attackIntervals.remove(lastInterval)
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
+            attackIntervals.append(lastInterval)
+        else:
+            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+            attackIntervals.append(lastInterval)
+
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  =0
+
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    windowTime = startTime
-
-    # Open a silk flow file for reading
-    infile = silkfile_open(silkFile, READ)
-
-    #Instantiate empty arrays for the calculated values
-    records = []
-    
-    bytesArray = []
-    #Instantiate variables
-    i = 0
-    sizes = []
-
     #Loop through all the flow records in the input file
-    for rec in infile:
-        if rec.etime > stopTime + frequency:
+    for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime + frequency:
+            break
+        if sTime[i] < startTime:
             continue
-        if rec.stime < startTime:
-            continue
-        #Implement the sliding window
-        if rec.stime > windowTime + frequency:
-            lastSizes  = sum(sizes)
-            thisMinuteSize = len(records) - lastSizes
-            sizes.append(thisMinuteSize)
-            windowTime += frequency
-        #Aggregate flows into the specified time interval
-        if rec.stime > startTime + interval:
-            bytesArray.append(numberOfBytes(records))
+
+        attack = False
+        for timeInterval in attackIntervals:
+            if sTime[i] in timeInterval or eTime[i] in timeInterval:
+                attack = True
+        if i >=windowSize:
+            change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
             
-            attack = isAttack(rec.stime - frequency, rec.stime)
-            #If there is enough stored values to compare with we compare the difference of each metric with a threshold
-            if i >=windowSize:
-                change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
-                
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
-                if abs(change) > thresholdBytes:
-                    alert = {
-                        "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "Gateway": systemId,
-                        "Deviation_score": normalization(abs(change), maxmin_bytes["minimum"], maxmin_bytes["maximum"]),
-                       ''' "Change": abs(change),
-                        "Value": bytesArray[i],
-                        "Mean_last_10": np.nanmean(bytesArray[i-windowSize: i-1]),'''
-                        "Real_label": int(attack),
-                        "Attack_type": "Flooding"
-                        }
-                    mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-                
-                line = "\n" + (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_bytes["minimum"], maxmin_bytes["maximum"])) + ","+ str(abs(change)) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1]))
-                if abs(change) > thresholdBytes and attack:
-                    TPbytesFile.write(line)
-                elif abs(change) > thresholdBytes and not attack:
-                    FPbytesFile.write(line)
-                elif abs(change) <= thresholdBytes and attack:
-                    FNbytesFile.write(line)
-                elif abs(change) <= thresholdBytes and not attack:
-                    TNbytesFile.write(line)
-            else:
-                line = "\n" + (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")
-                if attack:
-                    FNbytesFile.write(line)
-                elif not attack:
-                    TNbytesFile.write(line)
-            #Push the sliding window
-            startTime = startTime + frequency
-            records = records[sizes[0]:]
-            sizes.pop(0)
-            i += 1
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            if abs(change) > thresholdBytes:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change), maxmin_bytes["minimum"], maxmin_bytes["maximum"]),
+                    "Real_label": int(attack),
+                    "Attack_type": "Flooding"
+                    }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            if abs(change) > thresholdBytes and attack:
+                truePositives += 1
+            elif abs(change) > thresholdBytes and not attack:
+                falsePositives += 1
+            elif abs(change) <= thresholdBytes and attack:
+                falseNegatives +=1
+            elif abs(change) <= thresholdBytes and not attack:
+                trueNegatives += 1
+        else:
+            if attack:
+                falseNegatives += 1
+            elif not attack:
+                trueNegatives += 1
 
-        records.append(rec)
-    
-    TPbytesFile.close()
-    FPbytesFile.close()
-    FNbytesFile.close()
-    TNbytesFile.close()
-
-    infile.close()
-    
-
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systemId = "oslo-gw1"
-start = "2011-02-08 10:00:00"
-stop = "2011-02-08 12:00:00"
-startCombined = "2011-02-08 10:00:00"
-stopCombined = "2011-02-08 12:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="08.02.11"
-silkFile = pathToRawFiles+systemId + "/"+ baseFile
-windowSize = 10
-detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, windowSize, 0, attackDate)
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()

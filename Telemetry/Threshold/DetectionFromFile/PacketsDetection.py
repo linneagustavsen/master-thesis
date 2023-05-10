@@ -9,6 +9,7 @@ import json
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctionsTelemetry.GetDataTelemetry import getData
 
 
@@ -24,34 +25,16 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
             thresholdPackets:       float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionPacketsTelemetry(start, stop, systemId, interval, frequency, windowSize, thresholdPackets, attackDate):
+def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
     p = Path('Detections')
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
         r.mkdir(parents=True)
     #Open file to write alerts to
-    TPf_packets = open(str(r) + "TP.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(r) + "/Scores.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPf_packets.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FPf_packets = open(str(r) + "FP.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPf_packets.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FNf_packets = open(str(r) + "FN.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNf_packets.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    TNf_packets = open(str(r) + "TN.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    TNf_packets.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    scores.write("TP,FP,FN,TN")
     
     json_file = open("Telemetry/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
@@ -78,91 +61,60 @@ def detectionPacketsTelemetry(start, stop, systemId, interval, frequency, window
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    #Instantiate empty arrays for the calculated values
-    packetNumberArray = []
+    data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
-    #Makes datetime objects of the input times
+    sTime = pd.to_datetime(data["sTime"])
+    eTime = pd.to_datetime(data["eTime"])
+
+
+    packetNumberArray = data["numberOfPackets"]
+    real_label = data["real_label"]
+ 
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  =0
+
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    
-    intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
-
-    #Loop for every minute in a week
-    for i in range(math.ceil(intervalTime)):
-        stopTime = startTime + interval
-        #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_pkts"])
-        if df.empty:
-            packetNumberArray.append(np.nan)
-            startTime = startTime + frequency
-            continue
-        dfEgressPackets = df["egress_stats__if_1sec_pkts"].to_numpy()
-
-        #If there is not enough datapoints the minute is skipped
-        if len(dfEgressPackets) < 10:
-            packetNumberArray.append(np.nan)
-            startTime = startTime + frequency
+    #Loop through all the flow records in the input file
+    for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime + frequency:
+            break
+        if sTime[i] < startTime:
             continue
 
-        #Store the number of packets and bytes this time interval
-        packetNumberArray.append(sum(dfEgressPackets))
-
-        #If there is not enough stored values to compare with we skip the detection
-        if i < windowSize:
-            #Push the start time by the specified frequency
-            startTime = startTime + frequency
-            continue
-        
-        attack = isAttack(stopTime- frequency, stopTime)
+        attack = real_label[i]
         #Compare the difference of each metric with a threshold
-        if packetNumberArray !=  np.nan:
+        if i >= windowSize:
             change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
+            
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdPackets:
                 alert = {
-                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                   "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
-                    '''"Change": abs(change),
-                    "Value": packetNumberArray[i],
-                    "Mean_last_10": np.nanmean(packetNumberArray[i-windowSize: i-1]),'''
                     "Real_label": int(attack),
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1]))
             if abs(change) > thresholdPackets and attack:
-                TPf_packets.write(line)
+                truePositives += 1
             elif abs(change) > thresholdPackets and not attack:
-                FPf_packets.write(line)
+                falsePositives += 1
             elif abs(change) <= thresholdPackets and attack:
-                FNf_packets.write(line)
+                falseNegatives +=1
             elif abs(change) <= thresholdPackets and not attack:
-                TNf_packets.write(line)
+                trueNegatives += 1
         else:
-            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
             if attack:
-                FNf_packets.write(line)
+                falseNegatives +=1
             elif not attack:
-                TNf_packets.write(line)
-        #Push the start time by the specified frequency
-        startTime = startTime + frequency
+                trueNegatives += 1
 
-    TPf_packets.close()
-    FPf_packets.close()
-    FNf_packets.close()
-    TNf_packets.close()
-
-'''start = "2022-09-21 01:00:00"
-stop = "2022-09-22 00:00:00"
-systemId = "trd-gw"
-if_name = "xe-0/1/0"
-interval = timedelta(minutes = 5)
-frequency = timedelta(minutes = 1)
-attackDate = "21.09"
-windowSize = 10
-thresholdEntropy = 0.5
-thresholdEntropyRate = 0.005
-thresholdPackets = 1000
-thresholdPackets = 1000
-detectionPacketsTelemetry(systemId, if_name, start, stop, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdPackets, attackDate)'''
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()

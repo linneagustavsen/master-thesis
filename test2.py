@@ -156,7 +156,7 @@ def simulateRealTime(timeNow, stime, attackDate):
     sleep(duration)
 
 attackDate = "08.02.11"
-print(simulateRealTime(datetime.now(), stime, attackDate))'''
+print(#simulateRealTime(datetime.now(), stime, attackDate))'''
 
 '''curMeasurements = [2360456726, 3218895927, 53533, 46975, 6, 1, 1500, 0, 0, 0, 0, 1, 0, 0, 0, 0.0, 0]
       

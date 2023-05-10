@@ -95,9 +95,9 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
             packetsCluster1.append(packets1[i])
         startTime += clusterFrequency
 
-    axs[0].plot(sTimeCluster0 ,packetsCluster0, color="#162931", label="Cluster 0")
+    axs[0].scatter(sTimeCluster0 ,packetsCluster0, color="#162931", label="Cluster 0")
 
-    axs[1].plot(sTimeCluster1 ,packetsCluster1, color="#E76F51", label="Cluster 1")
+    axs[1].scatter(sTimeCluster1 ,packetsCluster1, color="#E76F51", label="Cluster 1")
 
     axs[0].xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -120,7 +120,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[1].tick_params(axis='both', which='major', labelsize=12)
     axs[1].legend()
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Combined/Packets.Scatter."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
     plt.close()
 
 
@@ -137,3 +137,4 @@ for systemId in systems:
             plotKmeansFields(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
         else:
             plotKmeansFields(startKmeans, stopKmeans, interval, clusterFrequency, systemId, attackDate)
+    break

@@ -172,7 +172,7 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
                 else:
                     attackType = ""
                     
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
+                #simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdFlowEntropy:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

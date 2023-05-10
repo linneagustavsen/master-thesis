@@ -23,7 +23,7 @@ def calculationsRandomForestTelemetryEntropy(systemId, interval, attackDate):
         q.mkdir(parents=True)
     f = open(str(q) + "/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #f_not = open(str(q) + "/NotAlerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("sTime,eTime,entropy_rate_packet_size,real_label")
+    f.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
     #f_not.write("sTime,eTime,entropy_rate_packet_size,real_label")
     f_scores = open(str(q) + "/Score.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("confusion_matrix,accuracy,f1,recall,precision")

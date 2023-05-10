@@ -20,7 +20,7 @@ def xmasCalculation(silkFile, start, stop, systemId, attackDate):
     #Open file to write alerts to
     calculations = open(str(q) + "/Xmas.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("sTime,eTime,fin,syn,rst,psh,ack,urg,ece,cwr,srcPort,dstPort,real_label")
+    calculations.write("sTime,eTime,fin,syn,rst,psh,ack,urg,ece,cwr,srcPort,dstPort,protocol,real_label")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -42,6 +42,6 @@ def xmasCalculation(silkFile, start, stop, systemId, attackDate):
                                 str(rec.tcpflags.fin)+ "," + str(rec.tcpflags.syn)+ "," + str(rec.tcpflags.rst)+ "," + 
                                 str(rec.tcpflags.psh)+ "," + str(rec.tcpflags.ack) + "," + str(rec.tcpflags.urg) + "," + 
                                 str(rec.tcpflags.ece) + "," + str(rec.tcpflags.cwr)+ ","+ str(rec.sport)+ ","+ str(rec.dport)+  "," + 
-                                str(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))))
+                                str(rec.protocol) + ","+ str(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))))
         i += 1
     infile.close()

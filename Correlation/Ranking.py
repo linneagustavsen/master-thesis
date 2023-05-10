@@ -58,11 +58,13 @@ class Ranking:
         def priority_getter(value):
             priority = {
                 "Flooding": 1,
-                "SYN Flood": 2,
-                "Same protocol": 3,
-                "Low-Rate": 4,
-                "Different protocols": 5, 
-                "": 6
+                "ICMP Flood": 2,
+                "SYN Flood": 3,
+                "Same protocol": 4,
+                "Xmas": 5,
+                "Low-Rate": 6,
+                "Different protocols": 7, 
+                "": 8
             }
         
             highestKey = max(value["Attack_types"], key= lambda x: value["Attack_types"][x])

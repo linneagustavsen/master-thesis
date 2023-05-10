@@ -164,7 +164,7 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
                 change_dst = entropyOfSynPacketsPerDst[i] - np.nanmean(entropyOfSynPacketsPerDst[i-windowSize: i-1])
                 change_flow = entropyOfSynPacketsPerFlow[i] - np.nanmean(entropyOfSynPacketsPerFlow[i-windowSize: i-1])
 
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
+                #simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change_src) > thresholdSrc:
                     alert = {
                         "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

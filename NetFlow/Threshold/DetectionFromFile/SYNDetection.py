@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 from silk import *
 from datetime import datetime, timedelta
 import numpy as np
@@ -18,34 +19,16 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             threshold:  int, values over this threshold will cause an alert
             attackDate: string, date of the attack the calculations are made on
 '''
-def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackDate):
+def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
     p = Path('Detections')
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
     #Open file to write alerts to
-    TPsynFile = open(str(q) + "/TP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    TPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FPsynFile = open(str(q) + "/FP.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FPsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    FNsynFile = open(str(q) + "/FN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    FNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
-
-    #Open file to write alerts to
-    TNsynFile = open(str(q) + "/TN.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    TNsynFile.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    scores.write("TP,FP,FN,TN")
 
     p = Path('NetFlow')
     q = p / 'Threshold' / 'Calculations'
@@ -77,84 +60,66 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
+    data = pd.read_csv("Calculations0803/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+
+    sTime = pd.to_datetime(data["sTime"])
+    eTime = pd.to_datetime(data["eTime"])
+
+    synPacketsPerFlow = data["synPacketsPerFlow"]
+    srcPort = data["srcPort"]
+    dstPort = data["dstPort"]
+    #protocol = data["protocol"]
+    real_label = data["real_label"]
+
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives  =0
+
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-
-    # Open a silk flow file for reading
-    infile = silkfile_open(silkFile, READ)
-
-    #Instantiate empty arrays for the calculated values
-    synPacketsPerFlow = []
-    
-    #Instantiate variables
-    i = 0
-
-    #Loop through all the flow records
-    for rec in infile:
-        if rec.etime > stopTime:
+    #Loop through all the flow records in the input file
+    for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime:
+            break
+        if sTime[i] < startTime:
             continue
-        if rec.stime < startTime:
-            continue
-        synPacketsPerFlow.append(rec.packets)
 
-        attack = isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)
-        #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
-            
-            simulateRealTime(datetime.now(), rec.etime, attackDate)
-            if rec.packets >= threshold:
+            attack = real_label[i]
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            if synPacketsPerFlow[i] >= threshold:
                 alert = {
-                        "sTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        "eTime": rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
-                        "srcIP": int(rec.sip),
-                        "dstIP": int(rec.dip),
-                        "srcPort": rec.sport,
-                        "dstPort": rec.dport,
-                        "Protocol": rec.protocol,
-                        '''"Change": abs(change),
-                        "Value": synPacketsPerFlow[i],
-                        "Mean_last_10": np.nanmean(synPacketsPerFlow[i-windowSize: i-1]),'''
+                        '''"srcIP": int(rec.sip),
+                        "dstIP": int(rec.dip),'''
+                        "srcPort": int(srcPort[i]),
+                        "dstPort": int(dstPort[i]),
+                        #"Protocol": protocol[i],
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"])) + ","+ str(abs(change)) + "," + str(synPacketsPerFlow[i]) + "," + str(np.nanmean(synPacketsPerFlow[i-windowSize: i-1]))
-            if abs(change) > threshold and attack:
-                TPsynFile.write(line)
-            elif abs(change) > threshold and not attack:
-                FPsynFile.write(line)
-            elif abs(change) <= threshold and attack:
-                FNsynFile.write(line)
-            elif abs(change) <= threshold and not attack:
-                TNsynFile.write(line)
+            if synPacketsPerFlow[i] > threshold and attack:
+                truePositives += 1
+            elif synPacketsPerFlow[i] > threshold and not attack:
+                falsePositives += 1
+            elif synPacketsPerFlow[i] <= threshold and attack:
+                falseNegatives +=1
+            elif synPacketsPerFlow[i] <= threshold and not attack:
+                trueNegatives += 1
         else:
-            line = "\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ")
             if attack:
-                FNsynFile.write(line)
+                falseNegatives += 1
             elif not attack:
-                TNsynFile.write(line)
-        i += 1
+                trueNegatives += 1
     
-    TPsynFile.close()
-    FPsynFile.close()
-    FNsynFile.close()
-    TNsynFile.close()
-    infile.close()
-
-baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
-systemId = "oslo-gw1"
-start = "2011-02-08 10:00:00"
-stop = "2011-02-08 12:00:00"
-startCombined = "2011-02-08 10:00:00"
-stopCombined = "2011-02-08 12:00:00"
-frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-pathToRawFiles="/home/linneafg/silk-data/RawDataFromFilter/"
-attackDate="08.02.11"
-silkFile = pathToRawFiles+systemId + "/tcp-syn-"+ baseFile
-windowSize = 10
-synDetection(silkFile, start, stop, systemId, windowSize, 2, attackDate)
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
+    scores.close()
