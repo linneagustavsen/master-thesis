@@ -21,7 +21,8 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
         stop = datetime.strptime(string[1], format).replace(year=2023)
         axs.axvspan(start, stop, facecolor="#F9CAA4")
 
-    
+    clusterLabels = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+
     cluster0 = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     cluster1 = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     sTime0 = pd.to_datetime(cluster0["sTime"])
@@ -99,30 +100,39 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
             print("happened")
             newPackets1.append(packets1[counter1])
             counter1 +=1
+    labelPlot1 = ""
+    labelPlot2 = ""
+    if clusterLabels["AttackCluster"][0] == 0:
+        labelPlot1 = "Attack cluster"
+        labelPlot2 = "Normal cluster"
+    elif clusterLabels["AttackCluster"][0] == 1:
+        labelPlot2 = "Attack cluster"
+        labelPlot1 = "Normal cluster"
+    axs.plot(timeAxis ,newPackets0, color="#162931", label=labelPlot1)
 
-    axs.plot(timeAxis ,newPackets0, color="#162931", label="Cluster 0")
-
-    axs.plot(timeAxis ,newPackets1, color="#E76F51", label="Cluster 1")
+    axs.plot(timeAxis ,newPackets1, color="#E76F51", label=labelPlot2)
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
     axs.set_title("Packets in each cluster")
+    axs.title.set_size(20)
     axs.set_xlabel('Time')
     axs.set_ylabel("Packets")
-    axs.tick_params(axis='both', which='major', labelsize=12)
+    axs.tick_params(axis='both', which='major', labelsize=17)
     axs.legend()
     
     
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Entropy/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
     plt.close()
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
+systems = ["bergen-gw3"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
