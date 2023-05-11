@@ -78,19 +78,43 @@ class Ranking:
         return sorted(values, key=priority_getter)
 
     def rank(self, stime, etime, gateways, deviation_scores, real_labels, attack_types):
+        deviation_scores = list(filter(lambda x: x is not None, deviation_scores))
+
         stime = datetime.strptime(stime, "%Y-%m-%dT%H:%M:%SZ")
         etime = datetime.strptime(etime, "%Y-%m-%dT%H:%M:%SZ")
-        print("\nRanking")
-        print(self.ranking)
-        print(attack_types)
-        print("\n")
+
         if len(self.ranking) > 0:
             newRanking = []
             
             for alert in self.ranking:
                 if alert['sTime'] > stime - timedelta(minutes=15):
                     newRanking.append(alert)
-            newAlert = {
+            if len(deviation_scores) > 2:
+                newAlert = {
+                            "sTime": stime,
+                            "eTime": etime,
+                            "Gateways": gateways,
+                            "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
+                            "Real_labels": real_labels,
+                            "Attack_types": attack_types
+                            }
+            else:
+                newAlert = {
+                            "sTime": stime,
+                            "eTime": etime,
+                            "Gateways": gateways,
+                            "Deviation_score": {"mean": np.nanmean(deviation_scores)},
+                            "Real_labels": real_labels,
+                            "Attack_types": attack_types
+                            }
+
+            newRanking.append(newAlert)
+            newRanking = sorted(newRanking, key=lambda x: x["Deviation_score"]["mean"], reverse=True)
+            newRanking = self.sortByAttackType(newRanking)
+            self.ranking = newRanking
+        else:
+            if len(deviation_scores) > 2:
+                newAlert = {
                         "sTime": stime,
                         "eTime": etime,
                         "Gateways": gateways,
@@ -98,20 +122,15 @@ class Ranking:
                         "Real_labels": real_labels,
                         "Attack_types": attack_types
                         }
-
-            newRanking.append(newAlert)
-            newRanking = sorted(newRanking, key=lambda x: x["Deviation_score"]["mean"], reverse=True)
-            newRanking = self.sortByAttackType(newRanking)
-            self.ranking = newRanking
-        else:
-            newAlert = {
-                    "sTime": stime,
-                    "eTime": etime,
-                    "Gateways": gateways,
-                    "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
-                    "Real_labels": real_labels,
-                    "Attack_types": attack_types
-                    }
+            else:
+                newAlert = {
+                        "sTime": stime,
+                        "eTime": etime,
+                        "Gateways": gateways,
+                        "Deviation_score": {"mean": np.nanmean(deviation_scores)},
+                        "Real_labels": real_labels,
+                        "Attack_types": attack_types
+                        }
             self.ranking.append(newAlert)
         self.writeRankingToFile()
         print("Wrote ranking to file")

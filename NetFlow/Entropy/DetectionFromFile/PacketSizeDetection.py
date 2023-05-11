@@ -148,7 +148,7 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
             else:
                 attackType = "Different protocols"
 
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdPSEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

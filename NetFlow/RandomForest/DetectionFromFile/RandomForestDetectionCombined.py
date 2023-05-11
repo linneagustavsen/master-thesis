@@ -50,7 +50,7 @@ def detectionRandomForestNetFlow(systemId, interval, attackDate):
     real_label = alerts["real_label"]
 
     for i in range(len(sTime)):
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

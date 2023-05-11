@@ -120,7 +120,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
             if i >= windowSize:
                 change = numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])
 
-                #simulateRealTime(datetime.now(), rec.stime, attackDate)
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > threshold:
                     alert = {
                         "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -130,7 +130,7 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
             change_ratio = icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])
             change_packets = icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])
             
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change_ratio) > thresholdICMPRatio:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

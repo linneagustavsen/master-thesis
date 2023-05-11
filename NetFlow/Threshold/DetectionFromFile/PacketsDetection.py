@@ -117,7 +117,7 @@ def detectionPacketsNetFlow(start, stop, systemId, frequency, interval, windowSi
         if i >=windowSize:
             change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
             
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdPackets:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

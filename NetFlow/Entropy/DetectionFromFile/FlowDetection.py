@@ -156,7 +156,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
             else:
                 attackType = ""
                 
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdFlowEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

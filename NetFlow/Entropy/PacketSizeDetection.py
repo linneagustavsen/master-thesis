@@ -145,7 +145,7 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
                 change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
                 
                 
-                #simulateRealTime(datetime.now(), rec.stime, attackDate)
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if change < 0:
                         attackType = "Same protocol"
                 else:

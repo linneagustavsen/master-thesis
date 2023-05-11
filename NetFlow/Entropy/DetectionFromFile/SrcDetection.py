@@ -137,7 +137,7 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
             else:
                 attackType = ""
             
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdSrcEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

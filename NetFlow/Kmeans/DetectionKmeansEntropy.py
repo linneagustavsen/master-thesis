@@ -87,7 +87,7 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
         attackType = "Same protocol"
     for i in range(len(prediction)):
         attack = labels[i]
-        #simulateRealTime(datetime.now(), timeIntervals[i].right, attackDate)
+        simulateRealTime(datetime.now(), timeIntervals[i].right, attackDate)
         if prediction[i] == attackCluster:
             alert = {
                         "sTime": timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ"),

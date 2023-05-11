@@ -116,7 +116,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
             else:
                 attackType = "Different protocols"
 
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             
             if abs(change) > thresholdEntropy:
                 alert = {

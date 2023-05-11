@@ -139,7 +139,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
             else:
                 attackType = ""
             print("still running 3")
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdDstEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -98,7 +98,9 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
         attackType = "Same protocol"
         
     for i in range(len(sTime)):
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
         
         alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

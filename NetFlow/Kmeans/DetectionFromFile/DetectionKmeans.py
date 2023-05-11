@@ -134,7 +134,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        #simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
+        simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
         attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]

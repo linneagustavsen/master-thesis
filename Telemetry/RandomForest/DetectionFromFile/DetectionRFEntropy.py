@@ -51,7 +51,7 @@ def detectionRandomForestEntropyTelemetry(systemId, interval, attackDate):
     for i in range(len(sTime)):
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
 
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

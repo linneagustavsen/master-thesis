@@ -102,7 +102,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
             
-            #simulateRealTime(datetime.now(), rec.etime, attackDate)
+            simulateRealTime(datetime.now(), rec.etime, attackDate)
             if rec.packets >= threshold:
                 alert = {
                         "sTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),

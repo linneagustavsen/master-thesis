@@ -118,7 +118,7 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
             if i >=windowSize:
                 change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
                 
-                #simulateRealTime(datetime.now(), rec.stime, attackDate)
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdBytes:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -95,7 +95,7 @@ def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1thres
         attackType = "Same protocol"
         
     for i in range(len(sTime)):
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
         
         alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -73,7 +73,7 @@ def xmasCalculation(start, stop, systemId, attackDate):
             continue
 
         attack = real_label[i]
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

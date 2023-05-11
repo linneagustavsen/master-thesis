@@ -90,7 +90,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
             attack = real_label[i]
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if synPacketsPerFlow[i] >= threshold:
                 alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
