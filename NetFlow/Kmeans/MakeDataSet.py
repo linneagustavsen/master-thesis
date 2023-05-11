@@ -18,19 +18,34 @@ import pandas as pd
     Output: 
             dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetKmeansNetFlow(silkFile, start, stop, frequency, interval):
+def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getDataNetFlow(silkFile, startTime, stopTime)
-    if len(df)== 0:
-        return []
+    
+    p = Path('NetFlow')
+    dp = p / 'Kmeans' / 'DataSets'
+
+    fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"
+    if Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df = pd.read_pickle(f)
+    else:
+        print("Cant find", fieldsFile)
+        df = df = getDataNetFlow(silkFile, startTime, stopTime)
+
+        if not dp.exists():
+            dp.mkdir(parents=True, exist_ok=False)
+        with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:
+            df.to_pickle(f)
+    if len(df) == 0:
+        return pd.DataFrame([])
+    
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
     data = np.empty((len(sTime),len(columTitles)))
 
-    entropy_df = getEntropyDataNetFlow(silkFile, start.strftime("%Y-%m-%d %H:%M:%S"), stop.strftime("%Y-%m-%d %H:%M:%S"), frequency, interval)
     if len(entropy_df)== 0:
-        return []
+        return pd.DataFrame([])
     
     entropy_intervals, entropy_measurements, entropy_labels = structureDataEntropyNumpyArrays(entropy_df)
 

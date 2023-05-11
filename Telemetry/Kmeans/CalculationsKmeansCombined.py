@@ -58,6 +58,7 @@ def calculationsKmeansCombinedTelemetry(start, stop, systemId, bucket, interval,
 
         testingSet =  makeDataSetKmeansTelemetry(startTime, stopTime, entropy_df, systemId, bucket, fields, attackDate)
         if len(testingSet) == 0:
+            startTime += clusterFrequency
             continue
         measurements = testingSet.values
         timeStamps = pd.read_pickle(str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl")["_time"].to_numpy()

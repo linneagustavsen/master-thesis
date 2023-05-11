@@ -30,7 +30,22 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
 
-    df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+    dataPath = Path('NetFlow')
+    dp = dataPath /'Kmeans'/ 'DataSets' 
+
+    entropyFile = str(dp) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    if Path(entropyFile).exists():
+        with open(str(entropyFile), 'rb') as f:
+            df = pd.read_pickle(f)
+    else:
+        print("Cant find", entropyFile)
+        df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
+        
+        if not dp.exists():
+            dp.mkdir(parents=True, exist_ok=False)
+        with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb') as f:
+            df.to_pickle(f)
+
     if len(df) <2:
         return
     timeIntervals, measurements, labels = structureDataEntropyNumpyArrays(df)

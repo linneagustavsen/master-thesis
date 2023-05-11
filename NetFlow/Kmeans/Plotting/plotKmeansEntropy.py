@@ -120,6 +120,8 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
     axs.title.set_size(20)
     axs.set_xlabel('Time')
     axs.set_ylabel("Packets")
+    axs.ylabel.set_size(15)
+    axs.xlabel.set_size(15)
     axs.tick_params(axis='both', which='major', labelsize=17)
     axs.legend()
     

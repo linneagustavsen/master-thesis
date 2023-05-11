@@ -209,7 +209,7 @@ def randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopR
         calculationRandomForestNetFlowEntropy(trainingSet, testingSet, systemId, interval, frequency, attackDate)
         print("Finished Random Forest calculations on entropy")
 
-#Attack 1
+'''#Attack 1
 baseFile="twelve-hours-2023-03-08_08-20-sorted.rw"         
 systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
             "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
@@ -245,7 +245,7 @@ main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attac
 kmeansMain2(baseFile, systems, start, stop, clusterFrequency, frequency, interval, pathToRawFiles, attackDate)       
 randomForestMain2(trainingBase, testingBase, systems, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, interval, pathToRawFiles, attackDate)
 
-
+'''
 #Attack number 2
 baseFile="twelve-hours-2023-03-17_08-20-sorted.rw"         
 systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 

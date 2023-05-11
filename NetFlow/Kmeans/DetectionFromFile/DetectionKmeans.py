@@ -73,7 +73,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        attackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ ".stopTime" + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        attackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         if len(attackCluster) == 0:
             continue
         if attackCluster["AttackCluster"][0] == 0:
@@ -81,10 +81,10 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime" + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         elif attackCluster["AttackCluster"][0] == 1:
-            cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime" + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 

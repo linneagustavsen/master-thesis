@@ -120,6 +120,8 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[0].set_title("Packets in each cluster")
     axs[0].title.set_size(20)
     axs[0].set_xlabel('Time')
+    axs[0].ylabel.set_size(15)
+    axs[0].xlabel.set_size(15)
     axs[0].set_ylabel("Packets")
     axs[0].set_ylim([0,maxValue])
     axs[0].tick_params(axis='both', which='major', labelsize=17)
@@ -132,11 +134,13 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     )
     axs[1].set_xlabel('Time')
     axs[1].set_ylabel("Packets")
+    axs[1].ylabel.set_size(15)
+    axs[1].xlabel.set_size(15)
     axs[1].tick_params(axis='both', which='major', labelsize=17)
     axs[1].set_ylim([0,maxValue])
     axs[1].legend()
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Combined/Packets.Scatter."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack0803/NetFlow/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
     plt.close()
 
 
