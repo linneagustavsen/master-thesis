@@ -17,6 +17,10 @@ def thresholdGeneration(systemId, field):
     s = q / 'Schemas'
     if not s.exists():
         s.mkdir(parents=True)
+
+    pathWeeklyPattern = q / 'Calculations' / 'WeeklyPattern'
+    if not pathWeeklyPattern.exists():
+        pathWeeklyPattern.mkdir(parents=True)
     #Open json schema files to make json objects from them
     json_file = open(str(s) + "/RawValuesSchema.json", "r")
     json_file_mean_var = open(str(s) + "/MeanVarSchema.json", "r")
@@ -24,6 +28,31 @@ def thresholdGeneration(systemId, field):
     json_object_mean_var = json.load(json_file_mean_var)
     json_file.close()
     json_file_mean_var.close()
+
+    json_file_week1 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week1 = json.load(json_file_week1)
+    json_file_week1.close()
+    json_file_week2 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week2 = json.load(json_file_week2)
+    json_file_week2.close()
+    json_file_week3 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week3 = json.load(json_file_week3)
+    json_file_week3.close()
+    json_file_week4 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week4 = json.load(json_file_week4)
+    json_file_week4.close()
+    json_file_week5 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week5 = json.load(json_file_week5)
+    json_file_week5.close()
+    json_file_week6 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week6 = json.load(json_file_week6)
+    json_file_week6.close()
+    json_file_week7 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week7 = json.load(json_file_week7)
+    json_file_week7.close()
+    json_file_week8 = open(str(s) + "/RawValuesSchema.json", "r")
+    json_object_week8 = json.load(json_file_week8)
+    json_file_week8.close()
 
     counter = 0
     start = ['2022-09-22 00:00:00', '2023-01-25 00:00:00']
@@ -48,9 +77,55 @@ def thresholdGeneration(systemId, field):
             for table in tables:
                 for row in table.records:
                     json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    if row.values["_value"] != 0:
-                        print(row.values["_time"], row.values["_value"])
+                    if stopTime < datetime.strptime("2022-09-29 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_object_week1["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2022-10-06 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week1 = open(str(pathWeeklyPattern) + "/Week1."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week1,json_file_week1)
+                        json_file_week1.close()
+
+                        json_object_week2["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week2 = open(str(pathWeeklyPattern) + "/Week2."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week2,json_file_week2)
+                        json_file_week2.close()
+
+                        json_object_week3["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2022-10-20 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week3 = open(str(pathWeeklyPattern) + "/Week3."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week3,json_file_week3)
+                        json_file_week3.close()
+
+                        json_object_week4["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif startTime > datetime.strptime("2023-01-26 00:00:00", '%Y-%m-%d %H:%M:%S') and stopTime < datetime.strptime("2023-02-02 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week4 = open(str(pathWeeklyPattern) + "/Week4."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week4,json_file_week4)
+                        json_file_week4.close()
+
+                        json_object_week5["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2023-01-09 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week5 = open(str(pathWeeklyPattern) + "/Week5."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week5,json_file_week5)
+                        json_file_week5.close()
+
+                        json_object_week6["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2023-01-16 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week6 = open(str(pathWeeklyPattern) + "/Week6."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week6,json_file_week6)
+                        json_file_week6.close()
+
+                        json_object_week7["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    elif stopTime < datetime.strptime("2023-01-23 00:00:00", '%Y-%m-%d %H:%M:%S'):
+                        json_file_week7 = open(str(pathWeeklyPattern) + "/Week7."+str(systemId)+ "." + str(field)+".json", "w")
+                        json.dump(json_object_week7,json_file_week7)
+                        json_file_week7.close()
+
+                        json_object_week8["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+                    
         counter += 1
+    json_file_week8 = open(str(pathWeeklyPattern) + "/Week8."+str(systemId)+ "." + str(field)+".json", "w")
+    json.dump(json_object_week8,json_file_week8)
+    json_file_week8.close()
 
     mean = []
     time = []
@@ -81,27 +156,16 @@ def thresholdGeneration(systemId, field):
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["mean"] = mean_this_minute
                 json_object_mean_var["weekday"][str(weekday)]["hour"][str(hour)]["minute"][str(minute)]["variance"] = variance_this_minute
 
-    '''t = q / 'Thresholds'
+    t = q / 'Thresholds'
     if not t.exists():
         t.mkdir(parents=True)
     #Write the mean and variance values to a json file      
     json_file_mean_var = open(str(t) + "/"+str(systemId)+ "." + str(field)+".json", "w")
     json.dump(json_object_mean_var,json_file_mean_var)
-    json_file_mean_var.close()'''
+    json_file_mean_var.close()
 
-systems = ["trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
-           "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-            "ma2-gw", "narvik-gw4"]
+systems = ["hovedbygget-gw", "hoytek-gw2", "bergen-gw3",  "oslo-gw1"]
 field = "egress_queue_info__0__cur_buffer_occupancy"
 
-start = "2023-03-08 08:00:00"
-stop = "2023-03-08 20:00:00"
-attackDate="08.03.23"
-bucket = "april"
 for systemId in systems:
     thresholdGeneration(systemId, field)
-    #statisticalModelCalculations(start, stop, systemId, bucket, field, attackDate)
-'''systemId = "oslo-gw1"
-fields = ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","ingress_stats__if_1sec_pkts"]
-for field in fields:
-    thresholdGeneration(systemId, field)'''

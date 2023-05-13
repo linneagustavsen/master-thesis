@@ -19,6 +19,8 @@ from NetFlow.TopKFlows.topkflowCalculation import topkflows2
 '''
 def main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate):
     for systemId in systems:
+        print(systemId)
+        print(str(interval))
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
         #Entropy and other metrics calculations
         metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)
@@ -54,6 +56,8 @@ def main(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, at
 '''
 def main2(baseFile, systems, start, stop, frequency, interval, pathToRawFiles, attackDate):
     for systemId in systems:
+        print(systemId)
+        print(str(interval))
         silkFile = pathToRawFiles+systemId + "/"+ baseFile
         #Entropy and other metrics calculations
         metricCalculation(silkFile, start, stop, systemId, frequency, interval, attackDate)

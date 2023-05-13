@@ -144,7 +144,7 @@ def mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, freq
                 print("The file Telemetry/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl does not exist") 
             startTime += timedelta(minutes=15)
         
-systems = ["bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+systems = ["ifi2-gw5", 
             "oslo-gw1"]
 
 start = "2023-03-08 08:00:00"
@@ -163,7 +163,7 @@ fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_p
 bucket = "april"
 #main(start, stop, startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
 #randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, systems, bucket, fields, intervals, frequency, attackDate)
-mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
+#mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
 
 systemId = "oslo-gw1"
 fields = ["egress_queue_info__0__cur_buffer_occupancy"]

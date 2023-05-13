@@ -25,9 +25,9 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     #Open file to write alerts to
     calculations = open(str(q) + "/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     attackFlows = open(str(q) + "/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcDistributionDict ={}
+    '''srcDistributionDict ={}
     dstDistributionDict ={}
-    flowDistributionDict ={}
+    flowDistributionDict ={}'''
     
     #Write the column titles to the files
     calculations.write("sTime,eTime,srcEntropy,dstEntropy,flowEntropy")
@@ -74,21 +74,21 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
             #Calculate the generalized entropy of this distribution
             entropySip = generalizedEntropy(10,PiSIP)
             entropyOfSynPacketsPerSrc.append(entropySip)
-            srcDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiSIP
+            #srcDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiSIP
 
             #Find the probability distribution based on how many SYN packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropyDip = generalizedEntropy(10,PiDIP)
             entropyOfSynPacketsPerDst.append(entropyDip)
-            dstDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiDIP
+            #dstDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiDIP
 
             #Find the probability distribution based on how many SYN packets there is in each bi-directional flow in this time interval
             PiF, nf = uniDirFlowDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropyFlow = generalizedEntropy(10,PiF)
             entropyOfSynPacketsPerFlow.append(entropyFlow)
-            flowDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiF
+            #flowDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiF
 
             calculations.write("\n" +  (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") +  "," + str(entropyOfSynPacketsPerSrc[i]) 
                             + "," + str(entropyOfSynPacketsPerDst[i]) + "," + str(entropyOfSynPacketsPerFlow[i]))
@@ -107,7 +107,7 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
     calculations.close()
     attackFlows.close()
 
-    json_file = open(str(q) + "/SYN.srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
+    '''json_file = open(str(q) + "/SYN.srcIPDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
     pickle.dump(srcDistributionDict,json_file)
     json_file.close()
 
@@ -117,4 +117,4 @@ def synEntropyCalculation(silkFile, start, stop, systemId, frequency, interval, 
 
     json_file = open(str(q) + "/SYN.flowDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", "w")
     pickle.dump(flowDistributionDict,json_file)
-    json_file.close()
+    json_file.close()'''
