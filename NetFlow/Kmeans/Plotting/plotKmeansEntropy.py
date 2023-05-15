@@ -102,7 +102,7 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
             counter1 +=1
     labelPlot1 = ""
     labelPlot2 = ""
-    print(clusterLabels["AttackCluster"])
+
     if len(clusterLabels["AttackCluster"]) == 0:
         return
     if clusterLabels["AttackCluster"][0] == 0:

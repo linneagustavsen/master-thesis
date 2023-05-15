@@ -35,16 +35,20 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        f0 = open(str(q) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f0 = open(str(q) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        #f1 = open(str(q) + "/Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
-        f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
-        f0IP = open(str(ipPath) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        #f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+        '''f0IP = open(str(ipPath) + "/Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f1IP = open(str(ipPath) + "/Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
-        f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
-        f_scores = open(str(q) + "/Score.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
+        f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")'''
+        f_scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f_scores.write("TP,FP,FN,TN")
+        truePositives = 0
+        falsePositives = 0
+        falseNegatives = 0
+        trueNegatives = 0
         
         cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ ".stopTime"+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
@@ -77,32 +81,41 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
 
         for i in range(len(prediction)):
             line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(measurements[i])):
-                lineIPs += "," + str(measurements[i][j])
+                #lineIPs += "," + str(measurements[i][j])
                 #Skip the IP fields
                 if j == 0 or j == 1 or j == 16:
                     continue
                 line += "," + str(measurements[i][j])
-            lineIPs += "," +str(label[i])
+            #lineIPs += "," +str(label[i])
             line += "," +str(label[i])
             
-            if prediction[i] == 0:
+            if prediction[i] == attackCluster:
                 f0.write(line)
-                f0IP.write(lineIPs)
+                #f0IP.write(lineIPs)
+                if label[i] == 1:
+                    truePositives += 1
+                else:
+                    falsePositives += 1
 
-            elif prediction[i] == 1:
-                f1.write(line)
-                f1IP.write(lineIPs)
+            elif prediction[i] != attackCluster:
+                if label[i] == 1:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
+                #f1.write(line)
+                #f1IP.write(lineIPs)
 
                 
         f0.close()
-        f1.close()
+        '''f1.close()
         f0IP.close()
-        f1IP.close()
+        f1IP.close()'''
         cluster.close()
-        f_scores.write("\n"+str(confusion_matrix(label, prediction)) + ","+ str(accuracy_score(label, prediction)) + ","+ 
+        f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
+        '''f_scores.write("\n"+str(confusion_matrix(label, prediction)) + ","+ str(accuracy_score(label, prediction)) + ","+ 
                    str(f1_score(label,prediction)) + ","+ str(recall_score(label,prediction)) + ","+ 
-                   str(precision_score(label,prediction)))
+                   str(precision_score(label,prediction)))'''
         f_scores.close()
         startTime += clusterFrequency

@@ -106,7 +106,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
-    trueNegatives  =0
+    trueNegatives  = 0
 
     truePositives_r = 0
     falsePositives_r = 0

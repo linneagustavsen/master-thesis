@@ -27,9 +27,13 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     f1.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     cluster = open(str(q) + "/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
-    f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
-
+    f_scores = open(str(q) + "/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_scores.write("TP,FP,FN,TN")
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives = 0
+    
     dataPath = Path('NetFlow')
     dp = dataPath /'Kmeans'/ 'DataSets' 
 
@@ -55,24 +59,29 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
     cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
     
-    count0 = 0 
-    count1 = 0
     for i in range(len(prediction)):
         line = "\n"  + timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
         for measurement in measurements[i]:
             line += "," + str(measurement)
         line += "," +str(int(labels[i]))
         
-        if prediction[i] == 0:
+        if prediction[i] == attackCluster:
             f0.write(line)
-            count0 +=1
-        elif prediction[i] == 1:
+            if labels[i] == 1:
+                truePositives += 1
+            else:
+                falsePositives += 1
+        elif prediction[i] != attackCluster:
             f1.write(line)
-            count1 += 1
+            if labels[i] == 1:
+                falseNegatives += 1
+            else:
+                trueNegatives += 1
     
     f0.close()
     f1.close()
-    f_scores.write("\n"+str(confusion_matrix(labels, prediction)) + ","+ str(accuracy_score(labels, prediction)) + ","+ 
+    '''f_scores.write("\n"+str(confusion_matrix(labels, prediction)) + ","+ str(accuracy_score(labels, prediction)) + ","+ 
                    str(f1_score(labels,prediction)) + ","+ str(recall_score(labels,prediction)) + ","+ 
-                   str(precision_score(labels,prediction)))
+                   str(precision_score(labels,prediction)))'''
+    f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
     f_scores.close()
