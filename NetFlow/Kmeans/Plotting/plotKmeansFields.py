@@ -36,7 +36,8 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
         clusterLabels = pd.read_csv("Calculations0803/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ ".stopTime" + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
+        if len(clusterLabels["AttackCluster"]) ==0:
+            continue
         if clusterLabels["AttackCluster"][0] == 0:
             attackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime" + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
@@ -105,7 +106,8 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
                 maxValue = packetsNormal[i]
 
         startTime += clusterFrequency
-
+    if maxValue == 0:
+        return
     axs[0].plot(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
 
     axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#E76F51", label="Normal cluster")
@@ -116,10 +118,10 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     )
     axs[0].set_title("Packets in each cluster")
     axs[0].title.set_size(20)
-    axs[0].set_xlabel('Time')
-    axs[0].set_ylabel("Packets")
-    axs[0].ylabel.set_size(15)
-    axs[0].xlabel.set_size(15)
+    axs[0].set_xlabel('Time',fontsize=15)
+    axs[0].set_ylabel("Packets", fontsize=15)
+    #axs[0].ylabel.set_size(15)
+    #axs[0].xlabel.set_size(15)
     axs[0].set_ylim([0,maxValue])
     axs[0].tick_params(axis='both', which='major', labelsize=17)
     axs[0].legend()
@@ -129,10 +131,10 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs[1].set_xlabel('Time')
-    axs[1].set_ylabel("Packets")
-    axs[1].ylabel.set_size(15)
-    axs[1].xlabel.set_size(15)
+    axs[1].set_xlabel('Time', fontsize=15)
+    axs[1].set_ylabel("Packets", fontsize=15)
+    #axs[1].ylabel.set_size(15)
+    #axs[1].xlabel.set_size(15)
     axs[1].set_ylim([0,maxValue])
     axs[1].tick_params(axis='both', which='major', labelsize=17)
     axs[1].legend()
@@ -144,7 +146,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-systems = ["bergen-gw3"]
+#systems = ["bergen-gw3"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)

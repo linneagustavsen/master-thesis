@@ -29,31 +29,6 @@ def thresholdGeneration(systemId, field):
     json_file.close()
     json_file_mean_var.close()
 
-    json_file_week1 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week1 = json.load(json_file_week1)
-    json_file_week1.close()
-    json_file_week2 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week2 = json.load(json_file_week2)
-    json_file_week2.close()
-    json_file_week3 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week3 = json.load(json_file_week3)
-    json_file_week3.close()
-    json_file_week4 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week4 = json.load(json_file_week4)
-    json_file_week4.close()
-    json_file_week5 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week5 = json.load(json_file_week5)
-    json_file_week5.close()
-    json_file_week6 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week6 = json.load(json_file_week6)
-    json_file_week6.close()
-    json_file_week7 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week7 = json.load(json_file_week7)
-    json_file_week7.close()
-    json_file_week8 = open(str(s) + "/RawValuesSchema.json", "r")
-    json_object_week8 = json.load(json_file_week8)
-    json_file_week8.close()
-
     counter = 0
     start = ['2022-09-22 00:00:00', '2023-01-25 00:00:00']
     stop = ['2022-10-22 00:00:00', '2023-02-23 00:00:00']
@@ -77,55 +52,8 @@ def thresholdGeneration(systemId, field):
             for table in tables:
                 for row in table.records:
                     json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    if stopTime < datetime.strptime("2022-09-29 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_object_week1["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2022-10-06 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week1 = open(str(pathWeeklyPattern) + "/Week1."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week1,json_file_week1)
-                        json_file_week1.close()
-
-                        json_object_week2["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2022-10-13 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week2 = open(str(pathWeeklyPattern) + "/Week2."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week2,json_file_week2)
-                        json_file_week2.close()
-
-                        json_object_week3["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2022-10-20 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week3 = open(str(pathWeeklyPattern) + "/Week3."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week3,json_file_week3)
-                        json_file_week3.close()
-
-                        json_object_week4["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif startTime > datetime.strptime("2023-01-26 00:00:00", '%Y-%m-%d %H:%M:%S') and stopTime < datetime.strptime("2023-02-02 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week4 = open(str(pathWeeklyPattern) + "/Week4."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week4,json_file_week4)
-                        json_file_week4.close()
-
-                        json_object_week5["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2023-01-09 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week5 = open(str(pathWeeklyPattern) + "/Week5."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week5,json_file_week5)
-                        json_file_week5.close()
-
-                        json_object_week6["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2023-01-16 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week6 = open(str(pathWeeklyPattern) + "/Week6."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week6,json_file_week6)
-                        json_file_week6.close()
-
-                        json_object_week7["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    elif stopTime < datetime.strptime("2023-01-23 00:00:00", '%Y-%m-%d %H:%M:%S'):
-                        json_file_week7 = open(str(pathWeeklyPattern) + "/Week7."+str(systemId)+ "." + str(field)+".json", "w")
-                        json.dump(json_object_week7,json_file_week7)
-                        json_file_week7.close()
-
-                        json_object_week8["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-                    
+    
         counter += 1
-    json_file_week8 = open(str(pathWeeklyPattern) + "/Week8."+str(systemId)+ "." + str(field)+".json", "w")
-    json.dump(json_object_week8,json_file_week8)
-    json_file_week8.close()
 
     mean = []
     time = []

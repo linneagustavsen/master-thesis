@@ -90,18 +90,21 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
         if time not in sTime0.values:
             newPackets0.append(None)
         elif time in sTime0.values:
-            print("happened")
+            #print("happened")
             newPackets0.append(packets0[counter0])
             counter0 +=1
 
         if time not in sTime1.values:
             newPackets1.append(None)
         elif time in sTime1.values:
-            print("happened")
+            #print("happened")
             newPackets1.append(packets1[counter1])
             counter1 +=1
     labelPlot1 = ""
     labelPlot2 = ""
+    print(clusterLabels["AttackCluster"])
+    if len(clusterLabels["AttackCluster"]) == 0:
+        return
     if clusterLabels["AttackCluster"][0] == 0:
         labelPlot1 = "Attack cluster"
         labelPlot2 = "Normal cluster"
@@ -118,10 +121,10 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
     )
     axs.set_title("Packets in each cluster")
     axs.title.set_size(20)
-    axs.set_xlabel('Time')
-    axs.set_ylabel("Packets")
-    axs.ylabel.set_size(15)
-    axs.xlabel.set_size(15)
+    axs.set_xlabel('Time', fontsize=15)
+    axs.set_ylabel("Packets", fontsize=15)
+    #axs.ylabel.set_size(15)
+    #axs.xlabel.set_size(15)
     axs.tick_params(axis='both', which='major', labelsize=17)
     axs.legend()
     
@@ -134,11 +137,12 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-systems = ["bergen-gw3"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDate = "08.03.23"
 for systemId in systems:
+    print(systemId)
     for interval in intervals:
+        print(interval)
         plotKmeansFields(startKmeans, stopKmeans, interval, systemId, attackDate)
