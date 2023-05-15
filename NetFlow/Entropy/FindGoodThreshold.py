@@ -1,14 +1,16 @@
 
 
 from datetime import datetime, timedelta
-import pathlib
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
 
 def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
-    p = pathlib('ThresholdDecision')
+    p = Path('ThresholdDecision')
     q = p / 'Entropy' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
     data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
@@ -78,6 +80,8 @@ def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
                         falseNegatives += 1
                     else:
                         trueNegatives += 1
+        if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
+            continue
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
         fpr = falsePositives/(falsePositives + trueNegatives)
         fnr = falseNegatives/(falseNegatives + truePositives)
