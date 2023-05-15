@@ -1,5 +1,4 @@
 __pycache__/
-*.csv
 *.pkl
 Plots/Entropy/TopKFlowsTest/*
 Plots/Kmeans/NetFlow/*
@@ -8,4 +7,6 @@ Plots/Entropy/WeeklyPatternTest/*
 Plots/Threshold/*.png
 Plots/TopKFlows/*
 Calculations0803/*
+Detections/*
+Calculations/*
 *.npy
