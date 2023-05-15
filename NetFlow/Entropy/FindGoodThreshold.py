@@ -83,11 +83,26 @@ def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
         if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
             continue
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
-        fpr = falsePositives/(falsePositives + trueNegatives)
-        fnr = falseNegatives/(falseNegatives + truePositives)
-        ppv = truePositives/(truePositives+ falsePositives)
-        tpr = truePositives/(truePositives + falseNegatives)
-        f1 = 2*(ppv*tpr)/(ppv+tpr)
+        if not falsePositives == 0 and not trueNegatives == 0:
+            fpr = falsePositives/(falsePositives + trueNegatives)
+        else:
+            fpr = None
+        if not falseNegatives == 0  and not truePositives == 0:
+            fnr = falseNegatives/(falseNegatives + truePositives)
+        else:
+            fnr = None
+        if not truePositives == 0 and not falsePositives == 0:
+            ppv = truePositives/(truePositives+ falsePositives)
+        else:
+           ppv = None
+        if not falseNegatives == 0  and not truePositives == 0:
+            tpr = truePositives/(truePositives + falseNegatives)
+        else:
+            tpr = None
+        if not truePositives == 0 and not falsePositives== 0 and not falseNegatives == 0:
+            f1 = 2*(ppv*tpr)/(ppv+tpr)
+        else:
+            f1 = None
         f_scores.write("\n" + str(threshold) + "," + str(truePositives) + "," + str(falsePositives) + ","
                        + str(falseNegatives) + "," + str(trueNegatives) + "," + str(f1) +  "," + str(tpr) + ","+
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
