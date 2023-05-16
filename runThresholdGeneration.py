@@ -38,13 +38,13 @@ def thresholdGeneration(systemId, field):
         print("started on bucket", bucket, "for system", systemId, "field:", field)
         startTime = datetime.strptime(start[counter], '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime(stop[counter], '%Y-%m-%d %H:%M:%S')
-        intervalTime = (stopTime - startTime).total_seconds()/86400
+        intervalTime = (stopTime - startTime).days
 
         for i in range(math.ceil(intervalTime)):
-            if i % 10 == 0:
-                print("Iteration", i)
+            print("i", i)
 
             stopTime = startTime + timedelta(days = 1)
+            print(startTime, stopTime)
             #Makes datetime objects of the input times
             tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, bucket, field)
             startTime = stopTime
@@ -52,7 +52,7 @@ def thresholdGeneration(systemId, field):
             for table in tables:
                 for row in table.records:
                     json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
-    
+
         counter += 1
 
     mean = []
@@ -92,7 +92,7 @@ def thresholdGeneration(systemId, field):
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
-systems = ["hovedbygget-gw", "hoytek-gw2", "bergen-gw3",  "oslo-gw1"]
+systems = ["bergen-gw3",  "oslo-gw1"]
 field = "egress_queue_info__0__cur_buffer_occupancy"
 
 for systemId in systems:

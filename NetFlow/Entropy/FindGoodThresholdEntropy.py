@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
+def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate):
     p = Path('ThresholdDecision')
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
@@ -43,15 +43,6 @@ def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
             lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
             attackIntervals.append(lastInterval)
 
-
-    thresholds = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,
-                  1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,
-                  2,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,
-                  3,3.1,3.2,3.3,3.4,3.5,3.6,3.7,3.8,3.9,
-                  4,4.1,4.2,4.3,4.4,4.5,4.6,4.7,4.8,4.9,
-                  5,5.1,5.2,5.3,5.4,5.5,5.6,5.7,5.8,5.9,
-                  6,6.1,6.2,6.3,6.4,6.5,6.6,6.7,6.8,6.9,
-                  7]
     for threshold in range(0,1000):
         threshold = threshold/100
         #print(threshold)
@@ -83,6 +74,8 @@ def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
                         falseNegatives += 1
                     else:
                         trueNegatives += 1
+        if truePositives == 0:
+            continue
         if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
             continue
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
@@ -111,17 +104,16 @@ def findGoodThreshold(y_field, systemId, interval, windowSize, attackDate):
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
     f_scores.close()
         
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+systems = ["teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDate="08.03.23"
-y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
-            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
-intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
+y_fields = ["dstEntropy","srcEntropy", "flowEntropy", "packetSizeEntropy"]
+intervals = [timedelta(minutes = 10)]
 for systemId in systems:
     print(systemId)
     for interval in intervals:
         print(str(interval))
         for y_field in y_fields:
             print(y_field)
-            findGoodThreshold(y_field, systemId, interval, 10, attackDate)
+            findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
