@@ -40,10 +40,10 @@ def kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, inte
                 kmeansCombinedCalculation(silkFile, start, stop, timedelta(minutes=30), frequency, systemId, interval, attackDate)
                 print("Finished kmeans flow field  and entropy calculations")
 
-            if os.path.exists("NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"):
-                os.remove("NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+            if os.path.exists("NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+                os.remove("NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
             else:
-                print("The file NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl does not exist") 
+                print("The file NetFlow/Kmeans/DataSets/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
         startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -51,10 +51,10 @@ def kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, inte
     
         for i in range(math.ceil(intervalTime)):
             stopTime = startTime + timedelta(minutes=15)
-            if os.path.exists("NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"):
-                os.remove("NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl")
+            if os.path.exists("NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy"):
+                os.remove("NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy")
             else:
-                print("The file NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl does not exist") 
+                print("The file NetFlow/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy does not exist") 
             startTime += timedelta(minutes=15)
 
 #Attack 2

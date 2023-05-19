@@ -26,18 +26,18 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, freque
     p = Path('NetFlow')
     dp = p / 'Kmeans' / 'DataSets'
 
-    fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"
+    fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy"
     if Path(fieldsFile).exists():
         with open(str(fieldsFile), 'rb') as f:
-            df = pd.read_pickle(f)
+            df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", fieldsFile)
         df = df = getDataNetFlow(silkFile, startTime, stopTime)
 
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)
-        with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:
-            df.to_pickle(f)
+        with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, df)
     if len(df) == 0:
         return pd.DataFrame([])
     

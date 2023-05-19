@@ -4,7 +4,7 @@ import pandas as pd
 from HelperFunctions.GetData import *
 from HelperFunctions.StructureData import *
 from HelperFunctions.StructureData import *
-from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from HelperFunctions.ClusterLabelling import labelCluster
 from NetFlow.Kmeans.MakeDataSet import makeDataSetKmeansNetFlow
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
@@ -34,18 +34,18 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    entropyFile = str(dp) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    entropyFile = str(dp) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
         with open(str(entropyFile), 'rb') as f:
-            entropy_df = pd.read_pickle(f)
+            entropy_df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", entropyFile)
         entropy_df = getDataNetFlow(silkFile, startTime, stopTime)
 
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)
-        with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb') as f:
-            entropy_df.to_pickle(f)
+        with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, entropy_df)
     
     intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
  
@@ -53,10 +53,10 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
 
-        f0 = open(str(q) + "/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f1 = open(str(q) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f0 = open(str(q) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        #f1 = open(str(q) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-        f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+        #f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
         '''f0IP = open(str(ipPath) + "/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f1IP = open(str(ipPath) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
@@ -71,7 +71,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
         
         testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate)
-        if len(testingSet) < 2:
+        if len(testingSet) < 3:
             startTime += clusterFrequency
             continue
         sTime, eTime, measurements = structureData(testingSet)
@@ -105,7 +105,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
                 else:
                     falsePositives += 1
             else:
-                f1.write(line)
+                #f1.write(line)
                 #f1IP.write(lineIPs)
                 if label[i] == 1:
                     falseNegatives += 1
@@ -113,7 +113,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
                     trueNegatives += 1
         
         f0.close()
-        f1.close()
+        #f1.close()
         #f0IP.close()
         #f1IP.close()
         cluster.close()

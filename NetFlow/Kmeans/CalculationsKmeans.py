@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 from HelperFunctions.GetData import *
 from silk import *
 from HelperFunctions.StructureData import *
-from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from HelperFunctions.ClusterLabelling import labelCluster
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 '''
@@ -55,20 +55,20 @@ def kmeansCalculation(silkFile, start, stop, clusterFrequency, systemId, attackD
         
         dataPath = Path('NetFlow')
         dp = dataPath /'Kmeans'/ 'DataSets' 
-        fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"
+        fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy"
         if Path(fieldsFile).exists():
             with open(str(fieldsFile), 'rb') as f:
-                testingData = pd.read_pickle(f)
+                testingData = np.load(f, allow_pickle=True)
         else:
             print("Cant find", fieldsFile)
             testingData = getDataNetFlow(silkFile, startTime, stopTime)
 
             if not dp.exists():
                 dp.mkdir(parents=True, exist_ok=False)
-            with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:
-                testingData.to_pickle(f)
+            with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".npy", 'wb') as f:
+                np.save(f, testingData)
 
-        if len(testingData) <2:
+        if len(testingData) <3:
             startTime += clusterFrequency
             continue
         sTime, eTime, measurements, label = structureDataNumpyArrays(testingData)

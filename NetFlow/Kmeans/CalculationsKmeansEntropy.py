@@ -3,7 +3,7 @@ from sklearn.cluster import KMeans
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.StructureData import *
-from NetFlow.Kmeans.ClusterLabelling import labelCluster
+from HelperFunctions.ClusterLabelling import labelCluster
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 '''
@@ -21,10 +21,10 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
-    f0 = open(str(q) + "/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f1 = open(str(q) + "/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f0 = open(str(q) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    #f1 = open(str(q) + "/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f0.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-    f1.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    #f1.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     cluster = open(str(q) + "/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     f_scores = open(str(q) + "/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -37,20 +37,20 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
     dataPath = Path('NetFlow')
     dp = dataPath /'Kmeans'/ 'DataSets' 
 
-    entropyFile = str(dp) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    entropyFile = str(dp) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
         with open(str(entropyFile), 'rb') as f:
-            df = pd.read_pickle(f)
+            df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", entropyFile)
         df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
         
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)
-        with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl", 'wb') as f:
-            df.to_pickle(f)
+        with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, df)
 
-    if len(df) <2:
+    if len(df) <3:
         return
     timeIntervals, measurements, labels = structureDataEntropyNumpyArrays(df)
     #timeStamps = pd.to_datetime(timeStamps)
@@ -72,14 +72,14 @@ def kmeansEntropyCalculation(silkFile, start, stop, systemId, frequency, interva
             else:
                 falsePositives += 1
         elif prediction[i] != attackCluster:
-            f1.write(line)
+            #f1.write(line)
             if labels[i] == 1:
                 falseNegatives += 1
             else:
                 trueNegatives += 1
     
     f0.close()
-    f1.close()
+    #f1.close()
     '''f_scores.write("\n"+str(confusion_matrix(labels, prediction)) + ","+ str(accuracy_score(labels, prediction)) + ","+ 
                    str(f1_score(labels,prediction)) + ","+ str(recall_score(labels,prediction)) + ","+ 
                    str(precision_score(labels,prediction)))'''
