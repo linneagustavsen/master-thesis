@@ -55,7 +55,7 @@ def labelCluster(measurements, predictions, DBthreshold, c0threshold, c1threshol
 
     attackCluster = 1
     #If it is a burst attack and c1 is empty, c0 is the attack cluster
-    if db == 0 and cd1 == 0:
+    if db < DBthreshold and cd1 == 0:
         attackCluster = 0
     #If there is no burst and c0 is less compact than c1, c0 is the attack cluster
     elif db > DBthreshold and cd0 > (cd1 + c0threshold):
