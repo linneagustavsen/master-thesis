@@ -35,7 +35,11 @@ ipv6_addresses = [IPv6Addr('2a05:d016:cb:8600:bd0e:6306:bd6d:633e'), IPv6Addr('2
                     boolean, whether the flow is an attack flow or not
 '''
 def isAttackFlow(sip, dip, start, end):
-    if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses)) and isAttack(start, end):
+    if (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses): 
+        print("MATCH ON IPv6 ADDRESSES:")
+        print(sip)
+        print(dip)
+    if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses)) and isAttack(start, end):
         return True
     else:
         return False
