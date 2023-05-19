@@ -26,17 +26,18 @@ def findMinMaxEntropyTelemetry(systemId, interval, frequency):
     packetNumberArray = []
     bytesArray = []
 
-    maxPS = 0
     minPS = 1000000000000000000
 
-    maxPS_r = 0
     minPS_r = 1000000000000000000
 
-    maxPackets = 0
     minPackets = 1000000000000000000
 
-    maxBytes = 0
     minBytes = 1000000000000000000
+
+    changesPS = []
+    changesPS_r = []
+    changesPackets = []
+    changesBytes = []
 
     counter = 0
     j = 0
@@ -53,11 +54,8 @@ def findMinMaxEntropyTelemetry(systemId, interval, frequency):
         intervalTime = (stopTime - startTime).total_seconds()/frequency.total_seconds()
         #Loop for every minute in a week
         for i in range(math.ceil(intervalTime)):
-            if i % 10000 == 0:
-                print("packetSizeArray", packetSizeArray)
-                print("packetSizeRateArray", packetSizeRateArray)
-                print("packetNumberArray", packetNumberArray)
-                print("bytesArray", bytesArray)
+            if i % 100== 0:
+                print("Iteration:", i)
             stopTime = startTime + interval
             #Get data for a specified time interval
             df_bytes = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId)
@@ -84,43 +82,42 @@ def findMinMaxEntropyTelemetry(systemId, interval, frequency):
             
             if j >= 10:
                 changePS = abs(packetSizeArray[j] - np.nanmean(packetSizeArray[j-10: j-1]))
-                if changePS > maxPS:
-                    maxPS = changePS
-                elif changePS < minPS:
+                changesPS.append(changePS)
+                if changePS < minPS:
                     minPS = changePS 
 
                 changePS_r = abs(packetSizeRateArray[j] - np.nanmean(packetSizeRateArray[j-10: j-1]))
-                if changePS_r > maxPS_r:
-                    maxPS_r = changePS_r
-                elif changePS_r < minPS_r:
+                changesPS_r.append(changePS_r)
+                if changePS_r < minPS_r:
                     minPS_r = changePS_r 
 
                 changePackets = abs(packetNumberArray[j] - np.nanmean(packetNumberArray[j-10: j-1]))
-                if changePackets > maxPackets:
-                    maxPackets = changePackets
-                elif changePackets < minPackets:
+                changesPackets.append(changePackets)
+                if changePackets < minPackets:
                     minPackets = changePackets 
 
                 changeBytes = abs(bytesArray[j] - np.nanmean(bytesArray[j-10: j-1]))
-                if changeBytes > maxBytes:
-                    maxBytes = changeBytes
-                elif changeBytes < minBytes:
+                changesBytes.append(changeBytes)
+                if changeBytes < minBytes:
                     minBytes = changeBytes 
             #Push the start time by the specified frequency
             startTime = startTime + frequency
             j += 1
         counter += 1
 
-    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minPS, "maximum": maxPS},json_file)
+    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "w")
+    json.dump({"minimum": minPS, "maximum": 3*np.nanmean(changesPS)},json_file)
     json_file.close()
-    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minPS_r, "maximum": maxPS_r},json_file)
+    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "w")
+    json.dump({"minimum": minPS_r, "maximum": 3*np.nanmean(changesPS_r)},json_file)
     json_file.close()
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minPackets, "maximum": maxPackets},json_file)
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
+    json.dump({"minimum": minPackets, "maximum":  3*np.nanmean(changesPackets)},json_file)
     json_file.close()
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minBytes, "maximum": maxBytes},json_file)
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "w")
+    json.dump({"minimum": minBytes, "maximum":  3*np.nanmean(changesBytes)},json_file)
     json_file.close()
 
+findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=5), timedelta(minutes=1))
+findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=10), timedelta(minutes=1))
+findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=15), timedelta(minutes=1))

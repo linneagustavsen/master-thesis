@@ -31,8 +31,8 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, interval, wind
     records = []
 
     numberOfIcmpDstUnreachablePackets = []
+    changes = []
 
-    maxICMP = 0
     minICMP = 1000000000000000000
 
     #Instantiate variables
@@ -58,9 +58,8 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, interval, wind
             #If there is enough stored values to compare with we compare the difference of the metric with a threshold
             if i >= windowSize:
                 change = abs(numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1]))
-                if change > maxICMP:
-                    maxICMP = change
-                elif change < minICMP:
+                changes.append(change)
+                if change < minICMP:
                     minICMP = change 
            #Push the sliding window
             startTime = startTime + frequency
@@ -70,9 +69,11 @@ def icmpDstUnreachableDetection(silkFile, start, stop, frequency, interval, wind
  
         records.append(rec)
     infile.close()
-    json_file = open("NetFlow/Entropy/Calculations/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minICMP, "maximum": maxICMP},json_file)
+    json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "w")
+    json.dump({"minimum": minICMP, "maximum": 3*np.nanmean(changes)},json_file)
     json_file.close()
     json_file.close()
 
-icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/icmpDstUnreachable-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 10), 10)
+icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/icmpDstUnreachable-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 15), 10)
+icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/icmpDstUnreachable-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
+icmpDstUnreachableDetection("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/icmpDstUnreachable-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 10), 10)

@@ -31,7 +31,7 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
     packetSizeDistributionDict ={}
 
     #Write the column titles to the files
-    calculations.write("sTime,eTime,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes")
+    calculations.write("sTime,eTime,srcEntropy,srcEntropyRate,dstEntropy,dstEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes,real_label")
     attackFlows.write("sTime,eTime")
 
     #Makes datetime objects of the input times

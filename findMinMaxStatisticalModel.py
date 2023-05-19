@@ -26,10 +26,10 @@ def findMinMaxStatisticalModel(systemId, field, start, stop):
     json_object_mean_var = json.load(json_file_mean_var)
     json_file_mean_var.close()
 
-    maxNormal = 0
+    deviations = []
+    maxVarDeviations = []
     minNormal = 1000000000000000000
 
-    maxVarNormal = 0
     minVarNormal = 1000000000000000000
 
     maxVar = findMaxVar(json_object_mean_var)
@@ -45,22 +45,20 @@ def findMinMaxStatisticalModel(systemId, field, start, stop):
             mean_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["mean"]
             variance_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["variance"]
             
+            
             deviation = (row.values["_value"]- mean_row)/variance_row
             deviationVar = (row.values["_value"]- mean_row)/maxVar
-
-            if deviation > maxNormal:
-                maxNormal = deviation
-            elif deviation < minNormal:
+            deviations.append(deviation)
+            maxVarDeviations.append(deviationVar)
+            if deviation < minNormal:
                 minNormal = deviation 
             
-            if deviationVar > maxVarNormal:
-                maxVarNormal = deviationVar
-            elif deviationVar < minVarNormal:
+            if deviationVar < minVarNormal:
                 minVarNormal = deviationVar 
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel." + str(field)+".json", "w")
-    json.dump({"minimum": minNormal, "maximum": maxNormal},json_file)
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel." + str(field)+".json", "w")
+    json.dump({"minimum": minNormal, "maximum": 3*np.nanmean(deviations)},json_file)
     json_file.close()
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "w")
-    json.dump({"minimum": minVarNormal, "maximum": maxVarNormal},json_file)
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "w")
+    json.dump({"minimum": minVarNormal, "maximum": 3*np.nanmean(maxVarDeviations)},json_file)
     json_file.close()

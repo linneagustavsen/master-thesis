@@ -4,9 +4,11 @@ Plots/Entropy/TopKFlowsTest/*
 Plots/Kmeans/NetFlow/*
 Plots/Kmeans/Telemetry/*
 Plots/Entropy/WeeklyPatternTest/*
-Plots/Threshold/*.png
+Plots/Threshold/*
 Plots/TopKFlows/*
 Calculations0803/*
+Calculations1703/*
+Calculations2403/*
 Detections/*
 Calculations/*
 *.npy

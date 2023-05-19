@@ -28,10 +28,10 @@ def synEntropyCalculation(silkFile, start, stop, frequency, interval):
 
     synSYNPerFlow = []
 
-    maxSYN = 0
     minSYN = 1000000000000000000
 
     synSYNPerFlow = []
+    changes = []
     
     #Instantiate variables
     i = 0
@@ -47,17 +47,16 @@ def synEntropyCalculation(silkFile, start, stop, frequency, interval):
         #If there is enough stored values to compare with we compare the difference of the metric with a threshold
         if i >= 10:
             change = abs(synSYNPerFlow[i] - np.nanmean(synSYNPerFlow[i-10: i-1]))
-            if change > maxSYN:
-                maxSYN = change
-            elif change < minSYN:
+            changes.append(change)
+            if change < minSYN:
                 minSYN = change 
            
         i += 1
             
     infile.close()
 
-    json_file = open("NetFlow/Entropy/Calculations/MinMax.syn."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": minSYN, "maximum": maxSYN},json_file)
+    json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.syn.json", "w")
+    json.dump({"minimum": minSYN, "maximum": 3*np.nanmean(changes)},json_file)
     json_file.close()
 
-synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw/tcp-syn-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 10))
+synEntropyCalculation("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/tcp-syn-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5))
