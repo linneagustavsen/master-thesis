@@ -2,40 +2,70 @@ import matplotlib.pyplot as plt
 import json
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
+import numpy as np
 import pandas as pd
 
 '''
     Make a plot based on arrays of values and timestamps
 '''
 def plotSYN(systemId, attackDate):
-    data = pd.read_csv("Calculations0803/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    #data = pd.read_csv("Calculations0803/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("/Users/linneafgustavsen/Desktop/Masteroppgave/FromAttack23/Calculations/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(data["sTime"])
 
     y_values = data["synPacketsPerFlow"]
     labels = data["real_label"]
+
     if len(y_values) == 0:
         return
-    fig, axs = plt.subplots(1, 1, figsize=(20, 5))
+    if not 1 in labels:
+        return
+    fig, axs = plt.subplots(1, 1, figsize=(10, 5))
    
-    axs.plot(startTime ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
-    strings = [
+    '''strings = [
             ["Mar 08 14:29:55", "Mar 08 14:34:56"], ["Mar 08 14:49:56", "Mar 08 15:02:57"],
             ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
-    for string in strings:
+    strings = [["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
+           ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]'''
+    strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
+           ["Mar 24 14:46:30", "Mar 24 14:55:00"], ["Mar 24 14:59:50", "Mar 24 15:15:06"], 
+           ["Mar 24 15:26:51", "Mar 24 15:39:22"], ["Mar 24 15:40:21", "Mar 24 15:47:50"], 
+           ["Mar 24 16:07:29", "Mar 24 16:19:00"], ["Mar 24 16:22:29", "Mar 24 16:29:13"],
+           ["Mar 24 16:29:53", "Mar 24 16:49:50"], ["Mar 24 16:53:22", "Mar 24 17:09:39"],
+           ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
+    '''for string in strings:
         start = datetime.strptime(string[0], format).replace(year=2023)
         stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs.axvspan(start, stop, facecolor="#F9CAA4")
+        axs.axvspan(start, stop, facecolor="#F9CAA4")'''
+    
+    
+    start = datetime.strptime(strings[5][0], format).replace(year=2023)
+    stop = datetime.strptime(strings[5][1], format).replace(year=2023)
+    #axs.axvspan(start, stop, facecolor="#F9CAA4")
     
     #format = '%Y-%m-%dT%H:%M:%SZ'
     endTime = pd.to_datetime(data["eTime"])
     
     lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-
+    nonAttackValues = []
+    attackValues = []
+    timeAxis = []
+    counter = 0
     for i in range(len(labels)):
+        if endTime[i].replace(tzinfo=None) > stop:
+            print(endTime[i])
+            break
+        if startTime[i].replace(tzinfo=None) < start:
+            continue
+        timeAxis.append(startTime[i])
         if labels[i] == 1:
-            if startTime[i].replace(second=0).replace(tzinfo=None) in lastInterval and endTime[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+            counter +=1
+            attackValues.append(y_values[i])
+            nonAttackValues.append(None)
+
+            '''if startTime[i].replace(second=0).replace(tzinfo=None) in lastInterval and endTime[i].replace(second=0).replace(tzinfo=None) in lastInterval:
                 continue
             elif startTime[i].replace(second=0).replace(tzinfo=None) in lastInterval:
 
@@ -50,17 +80,27 @@ def plotSYN(systemId, attackDate):
                 nowInterval = pd.Interval(startTime[i].replace(second=0).replace(tzinfo=None), endTime[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
                 lastInterval = nowInterval
 
-            axs.axvspan(nowInterval.left, nowInterval.right, facecolor="#2A9D8F")
+            axs.axvspan(nowInterval.left, nowInterval.right, facecolor="#2A9D8F")'''
+
+        elif labels[i] == 0:
+            attackValues.append(None)
+            nonAttackValues.append(y_values[i])
+    
+    if counter == 0:
+        return
+    axs.scatter(timeAxis ,nonAttackValues, color="black", s=30, label="Normal flows")
+    axs.scatter(timeAxis, attackValues, color = "blue", s=10, label="Attack flows")
     axs.xaxis.set(
-        major_locator=mdates.HourLocator(),
-        major_formatter=mdates.DateFormatter("%H"),
+        major_locator=mdates.MinuteLocator(interval=1),
+        major_formatter=mdates.DateFormatter("%H:%M"),
     )
     axs.set_title("SYN packets per flow")
     axs.set_xlabel('Time')
     axs.set_ylabel("SYN packets per flow")
     axs.tick_params(axis='both', which='major', labelsize=12)
+    fig.legend()
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack0803/NetFlow/SYN/"+  str(systemId)+ ".SYN.png", dpi=300)
+    fig.savefig("Plots/Threshold/Attack2403/NetFlow/SYN/OnlySYNAttack.Scatter."+  str(systemId)+ ".SYN.png", dpi=300)
     plt.close()
 
 
@@ -68,6 +108,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 
-attackDate = "08.03.23"
+attackDate = "24.03.23"
 for systemId in systems:
+    print(systemId)
     plotSYN(systemId, attackDate)

@@ -118,10 +118,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 #Attack 2
 start = "2023-03-17 11:00:00"
 stop = "2023-03-17 14:00:00"
-startRFTraining = "2023-03-17 11:00:00"
-stopRFTraining = "2023-03-17 13:00:00"
-startRFTesting = "2023-03-24 14:00:00"
-stopRFTesting = "2023-03-24 18:00:00"
+
 startKmeans = "2023-03-17 11:00:00"
 stopKmeans= "2023-03-17 13:00:00"
 frequency = timedelta(minutes = 1)
@@ -131,7 +128,6 @@ attackDate="17.03.23"
 fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
 bucket = "april"
 main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
-randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, systems, bucket, fields, intervals, frequency, attackDate)
 mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency, clusterFrequency, attackDate)
 
 #Attack 3
@@ -148,3 +144,9 @@ fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_p
 bucket = "april"
 main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
 mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency, clusterFrequency, attackDate)
+
+startRFTraining = "2023-03-17 11:00:00"
+stopRFTraining = "2023-03-17 13:00:00"
+startRFTesting = "2023-03-24 14:00:00"
+stopRFTesting = "2023-03-24 18:00:00"
+randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, systems, bucket, fields, intervals, frequency, attackDate)
