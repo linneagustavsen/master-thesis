@@ -24,6 +24,7 @@ import os
 
 def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, intervals, systems, pathToRawFiles, attackDate):
     for systemId in systems:
+        print(systemId)
         trainingFile = pathToRawFiles+systemId + "/"+ trainingBase
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
 
@@ -79,7 +80,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 frequency = timedelta(minutes = 1)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 pathToRawFiles="/data/master-dump/fresh-netflow-data/master-dump/"
-attackDate="17.03.23" 
+attackDate="24.03.23" 
 
 trainingBase="2023-03-17_11-14-sorted.rw" 
 testingBase="2023-03-24_14-18-sorted.rw" 

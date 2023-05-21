@@ -4,7 +4,7 @@ Plots/Entropy/TopKFlowsTest/*
 Plots/Kmeans/NetFlow/*
 Plots/Kmeans/Telemetry/*
 Plots/Entropy/WeeklyPatternTest/*
-Plots/Threshold/*
+Plots/Threshold/Telemetry/DeviationScore/*
 Plots/TopKFlows/*
 Calculations0803/*
 Calculations1703/*

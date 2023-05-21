@@ -8,43 +8,22 @@ import pandas as pd
 
 def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate):
     p = Path('ThresholdDecision')
-    q = p / 'Entropy' / 'NetFlow'
+    q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
     f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
-    data = pd.read_csv("Calculations0803/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
     metricCalc = data[y_field]
     
-    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows.ICMPDstUnreachable"+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
-    eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
-   
-    attackIntervals = []
+    labels = data["real_label"]
     
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-    for i in range(len(sTimeAttacks)):
-        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            continue
-        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            attackIntervals.remove(lastInterval)
-            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
-            attackIntervals.append(lastInterval)
-        
-        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            attackIntervals.remove(lastInterval)
-            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
-            attackIntervals.append(lastInterval)
-        else:
-            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
-            attackIntervals.append(lastInterval)
-
-    for threshold in range(0,4000):
-        #threshold = threshold/100
+    for threshold in range(0,1000):
+        threshold = threshold/100
         #print(threshold)
         
         truePositives = 0
@@ -55,13 +34,8 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
             sTime[i] = sTime[i].replace(tzinfo=None)
             eTime[i] = eTime[i].replace(tzinfo=None)
 
-            attack = False
-            for timeInterval in attackIntervals:
-                if sTime[i] in timeInterval or eTime[i] in timeInterval:
-                    attack = True
+            attack = labels[i]
             if i >=windowSize:
-
-                
                 change = metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1])
                 
                 if abs(change) > threshold:
@@ -104,16 +78,14 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
     f_scores.close()
         
-systems = ["teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDate="08.03.23"
-y_fields = ["ICMPDstUnreachable"]
-intervals = [timedelta(minutes = 10)]
+y_field= "entropy_packet_size"
+intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 for systemId in systems:
     print(systemId)
     for interval in intervals:
         print(str(interval))
-        for y_field in y_fields:
-            print(y_field)
-            findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
+        findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)

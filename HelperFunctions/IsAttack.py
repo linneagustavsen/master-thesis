@@ -42,7 +42,7 @@ victim6 = trondheim_mp6
                     boolean, whether the flow is an attack flow or not
 '''
 def isAttackFlow(sip, dip, start, end):
-    if (sip in ipv6_addresses and dip == victim6) or (sip == victim6 and dip in ipv6_addresses): 
+    if (sip in ipv6_addresses and dip == victim6) or (sip == victim6 and dip in ipv6_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses) or (sip in ip_addresses and dip == victim6) or (sip == victim6 and dip in ip_addresses): 
         print("MATCH ON IPv6 ADDRESSES:")
         print(sip)
         print(dip)
