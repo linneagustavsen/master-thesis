@@ -8,12 +8,12 @@ import pandas as pd
 
 def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     p = Path('ThresholdDecision')
-    q = p / 'Threshold' / 'NetFlow'
+    q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
-    f = open(str(q) + "/MinMax/Max_min_thresholds_icmp_packets.txt", "a")
+    f = open(str(q) + "/MinMax/Max_min_thresholds_"+ y_field + ".txt", "a")
 
-    data = pd.read_csv(str(q) + "/icmpPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv(str(q) + "/"+ y_field +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     thresholds = pd.to_numeric(data["Threshold"],errors='coerce')
     f1_scores = pd.to_numeric(data["F1"],errors='coerce')
@@ -70,7 +70,7 @@ def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     if counter == 0:
         return
     #f.write("\nField: " + str(y_field) + " SystemId: " + str(systemId) + " Interval: " + str(int(interval.total_seconds())))
-    f.write("SystemId: " + str(systemId))
+    f.write("SystemId: " + str(systemId) + " Interval: " + str(int(interval.total_seconds())))
     f.write("\nMax F1-score was for threshold: " + str(thresholds[index_f1]) + " with a F1-score of " + str(f1_scores[index_f1]) + " a TPR of: " + str(
             tpr[index_f1]) + " a FPR of: " + str(fpr[index_f1]) + " an accuracy of: " + str(accuracy[index_f1]) + " a FNR of: " + str(fnr[index_f1]) + 
             " and a PPV of: " + str(ppv[index_f1]))
@@ -97,10 +97,13 @@ def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     f.write("\n\n")
     f.close()
         
-systems = ["teknobyen-gw1", "tromso-gw5",
-           "hoytek-gw2", "bergen-gw3", "trd-gw", "ifi2-gw5"]
+systems = ["stangnes-gw", "rodbergvn-gw2", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+            "oslo-gw1"]
 attackDate="08.03.23"
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-for interval in intervals:
-    for systemId in systems:
-        findGoodThresholdFromFile("SYN", systemId, interval, attackDate)
+y_fields= ["entropy_packet_size", "entropy_rate_packet_size"]
+for y_field in y_fields:
+    for interval in intervals:
+        for systemId in systems:
+            findGoodThresholdFromFile(y_field, systemId, interval, attackDate)

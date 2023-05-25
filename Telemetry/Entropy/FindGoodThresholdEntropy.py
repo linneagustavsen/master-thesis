@@ -11,8 +11,6 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
-    f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
     data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -21,38 +19,59 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
     metricCalc = data[y_field]
     
     labels = data["real_label"]
+    if 1 not in labels:
+        return
     
-    for threshold in range(0,1000):
-        threshold = threshold/100
-        #print(threshold)
+    f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
+    
+    changeDict = {}
+    maxChange = 0
+    minChange = 100000000000000000
+    changeList = []
+    for i in range(len(metricCalc)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+
+        attack = labels[i]
+        if i >=windowSize:
+            change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
+
+            if change > maxChange:
+                maxChange = change
+            if change < minChange:
+                minChange = change
+            changeDict[str(i)]  = {"attack": attack, "change": change}
+            changeList.append(int(change))
+        elif attack:
+            changeDict[str(i)]  = {"attack": attack, "change": None}
+            changeList.append(None)  
+    changeList = list(dict.fromkeys(changeList))
+    thresholds = list(sorted(changeList))
+
+    print(minChange)
+    print(maxChange)
+    for threshold in thresholds:
         
         truePositives = 0
         falsePositives = 0
         falseNegatives = 0
         trueNegatives  = 0
-        for i in range(len(metricCalc)):
-            sTime[i] = sTime[i].replace(tzinfo=None)
-            eTime[i] = eTime[i].replace(tzinfo=None)
 
-            attack = labels[i]
-            if i >=windowSize:
-                change = metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1])
-                
-                if abs(change) > threshold:
-                    if attack:
-                        truePositives += 1
-                    else:
-                        falsePositives += 1
+        for key in changeDict:
+            change = changeDict[key]["change"]
+            attack = changeDict[key]["attack"]
+            if change > threshold:
+                if attack:
+                    truePositives += 1
                 else:
-                    if attack:
-                        falseNegatives += 1
-                    else:
-                        trueNegatives += 1
+                    falsePositives += 1
             else:
                 if attack:
                     falseNegatives += 1
                 else:
                     trueNegatives += 1
+   
         if truePositives == 0:
             continue
         elif trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
@@ -87,10 +106,11 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDate="08.03.23"
-y_field= "entropy_packet_size"
+y_fields= ["numberOfPackets","numberOfBytes"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
-for systemId in systems:
-    print(systemId)
-    for interval in intervals:
-        print(str(interval))
-        findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
+for y_field in y_fields:
+    for systemId in systems:
+        print(systemId)
+        for interval in intervals:
+            print(str(interval))
+            findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
