@@ -8,10 +8,10 @@ import pandas as pd
 
 def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     p = Path('ThresholdDecision')
-    q = p / 'Entropy' / 'NetFlow'
+    q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
-    f = open(str(q) + "/MinMax/Max_min_thresholds_entropy.txt", "a")
+    f = open(str(q) + "/MinMax/Max_min_thresholds_ICMPDstUnreachable.txt", "a")
 
     data = pd.read_csv(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -96,15 +96,14 @@ def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     f.write("\n")
     f.close()
         
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5"]
 attackDate="08.03.23"
-y_fields = ["dstEntropy","srcEntropy", "flowEntropy", "packetSizeEntropy"]
+y_fields = ["ICMPDstUnreachable"]
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 for y_field in y_fields:
-    #print(str(interval))
+    print(y_field)
     for interval in intervals:
-        #print(y_field)
+        print(str(interval))
         for systemId in systems:
             findGoodThresholdFromFile(y_field, systemId, interval, attackDate)

@@ -12,3 +12,5 @@ Calculations2403/*
 Detections/*
 Calculations/*
 *.npy
+ThresholdDecision/Entropy/NetFlow/*.csv
+ThresholdDecision/Threshold/NetFlow/*.csv

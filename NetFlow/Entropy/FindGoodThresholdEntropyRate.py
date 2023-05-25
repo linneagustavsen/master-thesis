@@ -75,6 +75,11 @@ def findGoodThresholdEntropyRate(y_field, systemId, interval, windowSize, attack
                         falseNegatives += 1
                     else:
                         trueNegatives += 1
+            else:
+                if attack:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
         if truePositives == 0:
             continue
         if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:

@@ -6,7 +6,7 @@ from HelperFunctions.IsAttack import isAttack
 import paho.mqtt.client as mqtt
 
 from HelperFunctions.Normalization import normalization
-from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
+from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes, getDataPackets, getDataTables
 from Telemetry.Threshold.FindMaxVar import findMaxVar
 
 '''
@@ -46,24 +46,25 @@ def statisticalModelCalculations(start, stop, systemId, bucket, field, attackDat
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, bucket, field)
+    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),bucket, systemId,  [field])
+
     #Loop through all the tables and the rows and check their deviation from the threshold values
     #Alert detection system if the deviation is higher than a predetermined value
-    for table in tables:
-        for row in table.records:
-            mean_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["mean"]
-            variance_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["variance"]
-            
-            deviation = (row.values["_value"]- mean_row)/variance_row
-
-            deviationMaxVar = (row.values["_value"]- mean_row)/maxVar
-    
-            attack = int(isAttack(row.values["_time"].replace(tzinfo=None)-timedelta(seconds = 2), row.values["_time"].replace(tzinfo=None)))
+    for time, value in df.values:
+        mean_row = json_object_mean_var["weekday"][time.strftime('%w')]["hour"][str(time.hour)]["minute"][str(time.minute)]["mean"]
+        variance_row = json_object_mean_var["weekday"][time.strftime('%w')]["hour"][str(time.hour)]["minute"][str(time.minute)]["variance"]
         
-            line = "\n" + (row.values["_time"]- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(variance_row) + "," +str(attack)
-            f.write(line)
-            lineMax = "\n" + (row.values["_time"]- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + row.values["_time"].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviationMaxVar) + "," +str(row.values["_value"]) + ","+str(mean_row) + "," +str(maxVar) + "," +str(attack)
-            fMax.write(lineMax)
+        deviation = (value- mean_row)/variance_row
+
+        deviationMaxVar = (value- mean_row)/maxVar
+
+        attack = int(isAttack(time.replace(tzinfo=None)-timedelta(seconds = 2), time.replace(tzinfo=None)))
+    
+        line = "\n" + (time- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + time.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviation) + "," +str(value) + ","+str(mean_row) + "," +str(variance_row) + "," +str(attack)
+        f.write(line)
+        lineMax = "\n" + (time- timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + time.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(deviationMaxVar) + "," +str(value) + ","+str(mean_row) + "," +str(maxVar) + "," +str(attack)
+        fMax.write(lineMax)
+
 
         
     f.close()

@@ -24,21 +24,29 @@ def getData(start, stop, bucket, systemId, fields):
     query_api = client.query_api()
     columns = ["_time"]
 
-    #Build query for database
-    query = 'from(bucket: "' + bucket +'")\
-                |> range(start: ' + start + ', stop: ' + stop + ')\
-                |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-                |> filter(fn: (r) => '
-    for i in range(len(fields)):
-        query += 'r["_field"] == "' + fields[i] + '"'
-        columns.append(fields[i])
-        if len(fields) != 1 and i != len(fields)-1:
-            query += ' or '
+    query = 'data = (startTime, stopTime, systemId, field) =>\
+                from(bucket: "' + bucket +'")\
+                    |> range(start: startTime, stop: stopTime)\
+                    |> filter(fn: (r) => r["systemId"] == systemId)\
+                    |> filter(fn: (r) => r["_field"] == field )\
+                    |> group()\
+                    |> sort(columns: ["_time"])\
+                    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
+                    |> set(key: "_field", value: field)'
+    if len(fields) > 1:
+        query += 'union(\
+                tables: ['
+        for i in range(len(fields)):
+            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"'+fields[i]+'"),'
+            columns.append(fields[i])
         
-    query += ')\
-    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
-    |> group()        \
-    |> keep(columns: ' + str(columns).replace("'", '"') + ')'
+            
+        query += '],)'
+    else:
+        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"'+fields[0]+'")'
+        columns.append(fields[0])
+    query += '|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")\
+        |> keep(columns: ' + str(columns).replace("'", '"') + ')'
 
     #Make a data frame from the output of the query
     df = query_api.query_data_frame(query=query)
@@ -55,12 +63,21 @@ def getDataBytes(start, stop, bucket, systemId):
     query_api = client.query_api()
 
     #Build query for database
-    query = 'from(bucket: "' + bucket +'")\
-                |> range(start: ' + start + ', stop: ' + stop + ')\
-                |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-                |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_octets" or r["_field"] == "ingress_stats__if_1sec_octets")\
-                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
-                |> map(fn: (r) => ({_time: r._time, bytes: r.egress_stats__if_1sec_octets + r.ingress_stats__if_1sec_octets}))'\
+    query = 'data = (startTime, stopTime, systemId, field) =>\
+                from(bucket: "' + bucket +'")\
+                    |> range(start: startTime, stop: stopTime)\
+                    |> filter(fn: (r) => r["systemId"] == systemId)\
+                    |> filter(fn: (r) => r["_field"] == field )\
+                    |> group()\
+                    |> sort(columns: ["_time"])\
+                    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
+                    |> set(key: "_field", value: field)'
+    query += 'union(\
+                tables: [\
+                data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_octets"),\
+                data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_octets"),],)\
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+            |> map(fn: (r) => ({_time: r._time, bytes: r.egress_stats__if_1sec_octets + r.ingress_stats__if_1sec_octets}))'\
 
     #Make a data frame from the output of the query
     df = query_api.query_data_frame(query=query)
@@ -77,12 +94,21 @@ def getDataPackets(start, stop, bucket, systemId):
     query_api = client.query_api()
 
     #Build query for database
-    query = 'from(bucket: "' + bucket +'")\
-                |> range(start: ' + start + ', stop: ' + stop + ')\
-                |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
-                |> filter(fn: (r) => r["_field"] == "egress_stats__if_1sec_pkts" or r["_field"] == "ingress_stats__if_1sec_pkts")\
-                |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
-                |> map(fn: (r) => ({_time: r._time, packets: r.egress_stats__if_1sec_pkts + r.ingress_stats__if_1sec_pkts}))'\
+    query = 'data = (startTime, stopTime, systemId, field) =>\
+                from(bucket: "' + bucket +'")\
+                    |> range(start: startTime, stop: stopTime)\
+                    |> filter(fn: (r) => r["systemId"] == systemId)\
+                    |> filter(fn: (r) => r["_field"] == field )\
+                    |> group()\
+                    |> sort(columns: ["_time"])\
+                    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
+                    |> set(key: "_field", value: field)'
+    query += 'union(\
+                tables: [\
+                data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_pkts"),\
+                data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_pkts"),],)\
+            |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
+            |> map(fn: (r) => ({_time: r._time, packets: r.egress_stats__if_1sec_pkts + r.ingress_stats__if_1sec_pkts}))'\
 
 
     #Make a data frame from the output of the query

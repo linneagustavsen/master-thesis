@@ -75,7 +75,10 @@ def randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTest
             os.remove("Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
         else:
             print("The file Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
-
+        if os.path.exists("Telemetry/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+            os.remove("Telemetry/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+        else:
+            print("The file Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 def mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate):
     for systemId in systems:
         print("On router:", systemId)

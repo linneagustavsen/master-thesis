@@ -10,9 +10,8 @@ import pandas as pd
 def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     #data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     #data = pd.read_csv("Calculations1703/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    #data = pd.read_csv("Calculations2403/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    data = pd.read_csv("/Users/linneafgustavsen/Desktop/Masteroppgave/FromAttack23/Calculations/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    print(data)
+    data = pd.read_csv("Calculations2403/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+
     timeAxis = pd.to_datetime(data["sTime"])
     print(timeAxis[0])
     print(pd.to_datetime(data["eTime"])[0])
@@ -20,8 +19,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
 
     #attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     #attackFlows = pd.read_csv("Calculations1703/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    #attackFlows = pd.read_csv("Calculations2403/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    attackFlows = pd.read_csv("/Users/linneafgustavsen/Desktop/Masteroppgave/FromAttack23/Calculations/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations2403/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])
@@ -109,6 +107,8 @@ for systemId in systems:
         print(y_fields[i])
         for interval in intervals:
             print(interval)
-            if systemId == "tromso-gw5" and y_fields[i] == "dstEntropy" and interval == timedelta(minutes = 5):
-                continue
             makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
+            
+        break
+    break
+

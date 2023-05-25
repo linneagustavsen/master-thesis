@@ -2,7 +2,7 @@ from datetime import datetime,timedelta
 import json
 from pathlib import Path
 from HelperFunctions.GetData import *
-from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
+from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataTables
 from Telemetry.Threshold.FindMaxVar import findMaxVar
 
 '''
@@ -36,25 +36,25 @@ def findMinMaxStatisticalModel(systemId, field, start, stop):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
-    tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, "mars", field)
-    
+    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),"mars", systemId,  [field])
+
     #Loop through all the tables and the rows and check their deviation from the threshold values
     #Alert detection system if the deviation is higher than a predetermined value
-    for table in tables:
-        for row in table.records:
-            mean_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["mean"]
-            variance_row = json_object_mean_var["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)]["variance"]
-            
-            
-            deviation = (row.values["_value"]- mean_row)/variance_row
-            deviationVar = (row.values["_value"]- mean_row)/maxVar
-            deviations.append(deviation)
-            maxVarDeviations.append(deviationVar)
-            if deviation < minNormal:
-                minNormal = deviation 
-            
-            if deviationVar < minVarNormal:
-                minVarNormal = deviationVar 
+    for time, value in df.values:
+        mean_row = json_object_mean_var["weekday"][time.strftime('%w')]["hour"][str(time.hour)]["minute"][str(time.minute)]["mean"]
+        variance_row = json_object_mean_var["weekday"][time.strftime('%w')]["hour"][str(time.hour)]["minute"][str(time.minute)]["variance"]
+        
+        deviation = (value- mean_row)/variance_row
+
+        deviationVar = (value- mean_row)/maxVar
+
+        deviations.append(deviation)
+        maxVarDeviations.append(deviationVar)
+        if deviation < minNormal:
+            minNormal = deviation 
+        
+        if deviationVar < minVarNormal:
+            minVarNormal = deviationVar 
 
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel." + str(field)+".json", "w")
     json.dump({"minimum": minNormal, "maximum": 3*np.nanmean(deviations)},json_file)
@@ -62,3 +62,6 @@ def findMinMaxStatisticalModel(systemId, field, start, stop):
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "w")
     json.dump({"minimum": minVarNormal, "maximum": 3*np.nanmean(maxVarDeviations)},json_file)
     json_file.close()
+
+start = "2023-02-23 00:00:00"
+stop = "2023-03-07 00:00:00"

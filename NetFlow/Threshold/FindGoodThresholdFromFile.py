@@ -11,9 +11,9 @@ def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
-    f = open(str(q) + "/MinMax/Max_min_thresholds_SYN.txt", "a")
+    f = open(str(q) + "/MinMax/Max_min_thresholds_Packets.txt", "a")
 
-    data = pd.read_csv(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv(str(q) + "/numberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     thresholds = pd.to_numeric(data["Threshold"],errors='coerce')
     f1_scores = pd.to_numeric(data["F1"],errors='coerce')
@@ -97,11 +97,10 @@ def findGoodThresholdFromFile(y_field, systemId, interval, attackDate):
     f.write("\n\n")
     f.close()
         
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["teknobyen-gw1", "tromso-gw5",
+           "hoytek-gw2", "bergen-gw3", "trd-gw", "ifi2-gw5"]
 attackDate="08.03.23"
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-
-for systemId in systems:
-    findGoodThresholdFromFile("SYN", systemId, intervals[0], attackDate)
+for interval in intervals:
+    for systemId in systems:
+        findGoodThresholdFromFile("SYN", systemId, interval, attackDate)

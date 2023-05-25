@@ -6,6 +6,9 @@
             Pi:         list of floats, the probability distribution
             nf:         int, number of different bi-directional flows
 '''
+import numpy as np
+
+
 def flowDistribution(records):
     #Make dictionaries for how many packets each flow has and the flow itself to correlate the two
     numberOfPacketsPerFlow = {}
