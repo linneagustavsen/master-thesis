@@ -20,7 +20,7 @@ from HelperFunctions.IsAttack import isAttack
 '''
 def getData(start, stop, bucket, systemId, fields):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
-
+    print(start, stop)
     query_api = client.query_api()
     columns = ["_time"]
 
