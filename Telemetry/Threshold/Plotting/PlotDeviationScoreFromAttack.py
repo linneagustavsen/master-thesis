@@ -31,7 +31,7 @@ def makePlotDeviationScore(y_field, y_field_name, systemId, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/Telemetry/"+ y_field+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     
     y_values = data["Deviation_score"]

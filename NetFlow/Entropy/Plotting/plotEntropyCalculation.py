@@ -31,7 +31,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
     data = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     timeAxis = pd.to_datetime(data["sTime"])
@@ -45,7 +45,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         return
     if len(startTime) == 0:
         return             
-    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
+    fig, axs = plt.subplots(1, 1, figsize=(25, 6))
    
     axs.plot(timeAxis ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
@@ -113,7 +113,6 @@ for attackDate in attackDates:
             for interval in intervals:
                 print(interval)
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
-            break
         
     
 

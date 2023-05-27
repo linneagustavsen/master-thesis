@@ -36,7 +36,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     #Makes datetime objects of the input times
@@ -147,9 +147,9 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         print("There was no attack")
         return
     axs[attackSpanLast].axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
-    axs[0].plot(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
+    axs[0].plot(sTimeClusterAttack ,packetsClusterAttack, color="#E76F51", label="Attack cluster")
 
-    axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#E76F51", label="Normal cluster")
+    axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs[0].xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),

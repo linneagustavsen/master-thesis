@@ -17,3 +17,6 @@ python3 Telemetry/Entropy/Plotting/plotEntropyCalculation.py
 python3 Telemetry/Entropy/Plotting/plotEntropyCalculationJustAttack.py
 
 python3 Telemetry/Kmeans/Plotting/plotKmeansFields.py
+
+python3 Telemetry/Threshold/Plotting/PlotDeviationScoreFromAttack.py
+python3 Telemetry/Threshold/Plotting/PlotDeviationScoreFromAttackJustAttack.py

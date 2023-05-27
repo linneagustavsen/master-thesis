@@ -15,12 +15,16 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
             ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-08 14:15:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-08 16:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "17.03.23":
         fileString = "1703"
         strings = [["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
            ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-17 11:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-17 13:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "24.03.23":
         fileString = "2403"
         strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
@@ -31,7 +35,9 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     data = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -47,7 +53,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         return
     if len(startTime) == 0:
         return             
-    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
+    fig, axs = plt.subplots(1, 1, figsize=(25, 6))
    
     format = '%b %d %H:%M:%S'
     counterStrings = 0
@@ -57,13 +63,11 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
     
-    start = datetime.strptime(strings[0][0], format).replace(year=2023)
-    stop = datetime.strptime(strings[-1][1], format).replace(year=2023)
     values = []
     for i in range(len(sTime)):
-        if eTime[i].replace(tzinfo=None) > stop:
+        if eTime[i].replace(tzinfo=None) > stopAttack:
             break
-        if sTime[i].replace(tzinfo=None) < start:
+        if sTime[i].replace(tzinfo=None) < startAttack:
             continue
         timeAxis.append(sTime[i])
         values.append(y_values[i])
@@ -124,7 +128,6 @@ for attackDate in attackDates:
             for interval in intervals:
                 print(interval)
                 makePlot(y_fields[k], y_field_names[k], systemId, interval, attackDate)
-            break
         
     
 

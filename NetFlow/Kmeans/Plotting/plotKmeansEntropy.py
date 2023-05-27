@@ -8,7 +8,7 @@ import pandas as pd
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def plotKmeansFields(start, stop, interval, systemId, attackDate):
+def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     if attackDate == "08.03.23":
         fileString = "0803"
         strings = [
@@ -16,12 +16,16 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
             ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startTime = datetime.strptime("2023-03-08 14:15:00", '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime("2023-03-08 16:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "17.03.23":
         fileString = "1703"
         strings = [["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
            ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startTime = datetime.strptime("2023-03-17 11:00:00", '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime("2023-03-17 13:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "24.03.23":
         fileString = "2403"
         strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
@@ -32,7 +36,9 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     #Makes datetime objects of the input times
     fig, axs = plt.subplots(1, 1, figsize=(20, 10))
 
@@ -50,23 +56,24 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
     cluster1 = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     sTime0 = pd.to_datetime(cluster0["sTime"])
     sTime1 = pd.to_datetime(cluster1["sTime"])
-
+    
     packets0 = cluster0["number_of_packets"]
     labels0 = cluster0["real_label"]
     packets1 = cluster1["number_of_packets"]
     labels1 = cluster1["real_label"]
     
-    if 1 not in labels0 and 1 not in labels1:
+    if 1 not in labels0.values and 1 not in labels1.values:
         print("No attacks")
         return
-    
     #format = '%Y-%m-%dT%H:%M:%SZ'
     eTime0 = pd.to_datetime(cluster0["eTime"])
     eTime1 = pd.to_datetime(cluster1["eTime"])
+    
 
     lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-
     for i in range(len(labels0)):
+        sTime0[i] = sTime0[i].replace(tzinfo=None)
+        eTime0[i] = eTime0[i].replace(tzinfo=None)
         if labels0[i] == 1:
             if sTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval:
                 continue
@@ -86,6 +93,8 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
             axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
 
     for i in range(len(labels1)):
+        sTime1[i] = sTime1[i].replace(tzinfo=None)
+        eTime1[i] = eTime1[i].replace(tzinfo=None)
         if labels1[i] == 1:
             if sTime1[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTime1[i].replace(second=0).replace(tzinfo=None) in lastInterval:
                 continue
@@ -103,29 +112,36 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
                 lastInterval = nowInterval
 
             axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
+
     timeAxis = []
-    timeAxis.extend(sTime0.values)
-    timeAxis.extend(sTime1.values)
-    timeAxis.sort()
+
+    intervalTime = (stopTime - startTime).total_seconds()/60
+    for i in range(math.ceil(intervalTime)+1):
+        timeAxis.append(startTime+ timedelta(minutes=i))
     newPackets0 = []
     newPackets1 = []
     counter0 = 0
     counter1 = 0
  
     for time in timeAxis:
-        if time not in sTime0.values:
+        if time not in sTime0.values and time not in sTime1.values:
             newPackets0.append(None)
-        elif time in sTime0.values:
-            #print("happened")
-            newPackets0.append(packets0[counter0])
-            counter0 +=1
-
-        if time not in sTime1.values:
             newPackets1.append(None)
-        elif time in sTime1.values:
-            #print("happened")
-            newPackets1.append(packets1[counter1])
-            counter1 +=1
+        else:
+            if time not in sTime0.values:
+                newPackets0.append(None)
+            elif time in sTime0.values:
+                newPackets0.append(packets0[counter0])
+                counter0 +=1
+
+
+            if time not in sTime1.values:
+                newPackets1.append(None)
+            elif time in sTime1.values:
+                newPackets1.append(packets1[counter1])
+                counter1 +=1
+
+
     labelPlot1 = ""
     labelPlot2 = ""
 
@@ -134,12 +150,20 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
     if clusterLabels["AttackCluster"][0] == 0:
         labelPlot1 = "Attack cluster"
         labelPlot2 = "Normal cluster"
+        color1 = "#E76F51"
+        color2 = "#162931"
+        size1 = 70
+        size2 = 30
     elif clusterLabels["AttackCluster"][0] == 1:
         labelPlot2 = "Attack cluster"
         labelPlot1 = "Normal cluster"
-    axs.plot(timeAxis ,newPackets0, color="#162931", label=labelPlot1)
+        color1 = "#162931"
+        color2 = "#E76F51"
+        size1 = 30
+        size2 = 70
+    axs.scatter(timeAxis ,newPackets0, color=color1, label=labelPlot1, s=size1)
 
-    axs.plot(timeAxis ,newPackets1, color="#E76F51", label=labelPlot2)
+    axs.scatter(timeAxis ,newPackets1, color=color2, label=labelPlot2, s=size2)
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -172,4 +196,4 @@ for attackDate in attackDates:
         print(systemId)
         for interval in intervals:
             print(interval)
-            plotKmeansFields(startKmeans, stopKmeans, interval, systemId, attackDate)
+            plotKmeansEntropy(startKmeans, stopKmeans, interval, systemId, attackDate)

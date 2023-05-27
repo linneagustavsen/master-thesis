@@ -36,7 +36,7 @@ def makePlotDeviationScore(y_field, y_field_name, systemId, attackDate):
            ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
-        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFCB69','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         start = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stop = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/Telemetry/"+ y_field+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
@@ -92,6 +92,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s"]
 attackDates =  ["08.03.23","17.03.23","24.03.23"]
+attackDates =  ["24.03.23"]
 for attackDate in attackDates:
     print(attackDate)
     for i in range(len(y_fields)):
