@@ -7,13 +7,19 @@ import pandas as pd
 
 
 def findGoodThreshold(systemId, attackDate):
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     p = Path('ThresholdDecision')
-    q = p / 'Threshold' / 'NetFlow'
+    q = p / 'Threshold' / 'NetFlow'/'Attack' + fileString
     if not q.exists():
         q.mkdir(parents=True)
     f_scores = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
-    data = pd.read_csv("Calculations0803/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
@@ -43,24 +49,24 @@ def findGoodThreshold(systemId, attackDate):
         if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
             continue
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
-        if not falsePositives == 0 and not trueNegatives == 0:
+        if falsePositives != 0 or trueNegatives != 0:
             fpr = falsePositives/(falsePositives + trueNegatives)
         else:
             fpr = None
-        if not falseNegatives == 0  and not truePositives == 0:
+        if falseNegatives != 0  or truePositives != 0:
             fnr = falseNegatives/(falseNegatives + truePositives)
         else:
             fnr = None
-        if not truePositives == 0 and not falsePositives == 0:
-            ppv = truePositives/(truePositives+ falsePositives)
+        if truePositives != 0 or falsePositives != 0:
+            ppv = truePositives/(truePositives+falsePositives)
         else:
-           ppv = None
-        if not falseNegatives == 0  and not truePositives == 0:
-            tpr = truePositives/(truePositives + falseNegatives)
+            ppv = None
+        if falseNegatives != 0 or truePositives != 0:
+            tpr = truePositives/(truePositives+ falseNegatives)
         else:
             tpr = None
-        if not truePositives == 0 and not falsePositives== 0 and not falseNegatives == 0:
-            f1 = 2*(ppv*tpr)/(ppv+tpr)
+        if truePositives != 0 or falsePositives!= 0 or falseNegatives != 0:
+            f1 =2*truePositives/(2*truePositives+falsePositives+falseNegatives)
         else:
             f1 = None
         f_scores.write("\n" + str(threshold) + "," + str(truePositives) + "," + str(falsePositives) + ","
@@ -71,7 +77,7 @@ def findGoodThreshold(systemId, attackDate):
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-attackDate="08.03.23"
-for systemId in systems:
-    print(systemId)
-    findGoodThreshold(systemId, attackDate)
+attackDates = ["08.03.23","17.03.23"]
+for attackDate in attackDates:
+    for systemId in systems:
+        findGoodThreshold(systemId, attackDate)

@@ -94,9 +94,6 @@ y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/
 attackDates =  ["08.03.23","17.03.23","24.03.23"]
 attackDates =  ["24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for i in range(len(y_fields)):
-        print(y_fields[i])
         for systemId in systems:
-            print(systemId)
             makePlotDeviationScore(y_fields[i], y_field_names[i], systemId,  attackDate)

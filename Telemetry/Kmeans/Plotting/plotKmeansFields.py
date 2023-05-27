@@ -139,7 +139,5 @@ stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)

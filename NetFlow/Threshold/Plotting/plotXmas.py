@@ -117,7 +117,5 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         plotSYN(systemId, attackDate)

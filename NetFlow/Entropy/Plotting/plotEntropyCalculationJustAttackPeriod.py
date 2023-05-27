@@ -120,13 +120,9 @@ y_field_names = ["Entropy of destination IP addresses", "Entropy rate of destina
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         for k in range(len(y_fields)):
-            print(y_fields[k])
             for interval in intervals:
-                print(interval)
                 makePlot(y_fields[k], y_field_names[k], systemId, interval, attackDate)
         
     

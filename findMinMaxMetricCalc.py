@@ -35,7 +35,7 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
     #Instantiate empty arrays for the calculated values
     records = []
     
-    changes_sip = []
+    '''changes_sip = []
     changes_sip_r = []
     min_sip = 100000000000000
     min_sip_r = 100000000000000
@@ -58,16 +58,14 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
 
     changes_nf = []
     min_nf = 100000000000000
-    numberOfFlows = []
+    numberOfFlows = []'''
 
     changes_ICMP_ratio = []
     changes_ICMP_packets = []
-    min_ICMP_ratio = 100000000000000
-    min_ICMP_packets = 100000000000000
     icmpRatioArray = []
     icmpPacketsArray = []
 
-    changes_PS = []
+    '''changes_PS = []
     changes_PS_r = []
     min_PS = 100000000000000
     min_PS_r = 100000000000000
@@ -79,7 +77,7 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
     min_packets = 100000000000000
     min_bytes = 100000000000000
     packetNumberArray = []
-    bytesArray = []
+    bytesArray = []'''
     #Instantiate variables
     i = 0
     sizes = []
@@ -106,7 +104,7 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
                 sizes.pop(0)
                 records.append(rec)
                 continue
-            #Find the probability distribution based on how many packets there is in each source flow in this time interval
+            '''#Find the probability distribution based on how many packets there is in each source flow in this time interval
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropySip = generalizedEntropy(10,PiSIP)
@@ -133,14 +131,14 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
             flowRateArray.append(entropyFlow/nf)
 
             #Store the number of bi-directional flows in this time interval
-            numberOfFlows.append(nf)
+            numberOfFlows.append(nf)'''
 
             #Find the ratio of ICMP packets in this time interval
             icmpRatio, icmpPackets = icmpDistribution(records)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
 
-            #Find the probability distribution based on how big the packets are this time interval
+            '''#Find the probability distribution based on how big the packets are this time interval
             PiPS,nps = packetSizeDistributionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
@@ -185,19 +183,15 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
             change_nf = abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))
             if change_nf < min_nf:
                 min_nf = change_nf
-            changes_nf.append(change_nf)
+            changes_nf.append(change_nf)'''
             
             change_ICMP_ratio = abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))
-            if change_ICMP_ratio < min_ICMP_ratio:
-                min_ICMP_ratio = change_ICMP_ratio
             changes_ICMP_ratio.append(change_ICMP_ratio)
 
             change_ICMP_packets = abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))
-            if change_ICMP_packets < min_ICMP_packets:
-                min_ICMP_packets = change_ICMP_packets
             changes_ICMP_packets.append(change_ICMP_packets)
             
-            change_PS = abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))
+            '''change_PS = abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))
             if change_PS < min_PS:
                 min_PS = change_PS
             changes_PS.append(change_PS)
@@ -215,7 +209,7 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
             change_bytes = abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))
             if change_bytes < min_bytes:
                 min_bytes = change_bytes
-            changes_bytes.append(change_bytes)
+            changes_bytes.append(change_bytes)'''
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -225,7 +219,7 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
 
     infile.close()
 
-    json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "w")
+    '''json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": min_sip, "maximum": 3*np.nanmean(changes_sip)},json_file)
     json_file.close()
 
@@ -259,23 +253,23 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": min_PS_r, "maximum": 3*np.nanmean(changes_PS_r)},json_file)
-    json_file.close()
+    json_file.close()'''
 
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_ICMP_ratio, "maximum": 3*np.nanmean(changes_ICMP_ratio)},json_file)
+    json.dump({"minimum": min(changes_ICMP_ratio), "maximum": 3*np.nanmean(changes_ICMP_ratio)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_ICMP_packets, "maximum": 3*np.nanmean(changes_ICMP_packets)},json_file)
+    json.dump({"minimum": min(changes_ICMP_packets), "maximum": 3*np.nanmean(changes_ICMP_packets)},json_file)
     json_file.close()
 
-    json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
+    '''json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": min_packets, "maximum": 3*np.nanmean(changes_packets)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": min_bytes, "maximum": 3*np.nanmean(changes_bytes)},json_file)
-    json_file.close()
+    json_file.close()'''
 
 findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/tcp-syn-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
 findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/tcp-syn-all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 15), 10)

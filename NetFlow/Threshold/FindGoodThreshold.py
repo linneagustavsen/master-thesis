@@ -7,8 +7,14 @@ import pandas as pd
 
 
 def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate):
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     p = Path('ThresholdDecision')
-    q = p / 'Threshold' / 'NetFlow'
+    q = p / 'Entropy' / 'NetFlow' /'Attack' + fileString
     if not q.exists():
         q.mkdir(parents=True)
     
@@ -133,24 +139,24 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
             lastTrueNegatives = trueNegatives
 
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
-        if not falsePositives == 0 and not trueNegatives == 0:
+        if falsePositives != 0 or trueNegatives != 0:
             fpr = falsePositives/(falsePositives + trueNegatives)
         else:
             fpr = None
-        if not falseNegatives == 0  and not truePositives == 0:
+        if falseNegatives != 0  or truePositives != 0:
             fnr = falseNegatives/(falseNegatives + truePositives)
         else:
             fnr = None
-        if not truePositives == 0 and not falsePositives == 0:
-            ppv = truePositives/(truePositives+ falsePositives)
+        if truePositives != 0 or falsePositives != 0:
+            ppv = truePositives/(truePositives+falsePositives)
         else:
-           ppv = None
-        if not falseNegatives == 0  and not truePositives == 0:
-            tpr = truePositives/(truePositives + falseNegatives)
+            ppv = None
+        if falseNegatives != 0 or truePositives != 0:
+            tpr = truePositives/(truePositives+ falseNegatives)
         else:
             tpr = None
-        if not truePositives == 0 and not falsePositives== 0 and not falseNegatives == 0:
-            f1 = 2*(ppv*tpr)/(ppv+tpr)
+        if truePositives != 0 or falsePositives!= 0 or falseNegatives != 0:
+            f1 =2*truePositives/(2*truePositives+falsePositives+falseNegatives)
         else:
             f1 = None
         
@@ -186,13 +192,11 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-attackDate="08.03.23"
+attackDates = ["08.03.23","17.03.23"]
 y_fields = ["icmpRatio"]
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-for systemId in systems:
-    print(systemId)
-    for interval in intervals:
-        print(str(interval))
-        for y_field in y_fields:
-            print(y_field)
-            findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
+for attackDate in attackDates:
+    for systemId in systems:
+        for interval in intervals:
+            for y_field in y_fields:
+                findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)

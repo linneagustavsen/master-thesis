@@ -124,7 +124,5 @@ intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
-        print(systemId)
         for interval in intervals:
-            print(interval)
             plotKmeansFields(startKmeans, stopKmeans, interval, systemId, attackDate)
