@@ -40,42 +40,46 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator):
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
     with open(str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
         trainingSet = np.load(trainingFile, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as testingFile:
-        testingSet = np.load(testingFile, allow_pickle=True)
     if len(trainingSet) ==0:
-        return 
-    if len(testingSet) ==0:
-        return 
+        return
+    
     trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet) 
     trainingLabel=trainingLabel.astype('int')  
-
-    sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)
-    testingLabel=testingLabel.astype('int')    
-
+    
     classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTime = pd.to_datetime(sTime)
-    eTime = pd.to_datetime(eTime)
+    for k in range(1,5):
+        with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy", 'rb') as testingFile:
+            testingSet = np.load(testingFile, allow_pickle=True)
+        
+        if len(testingSet) ==0:
+            continue
 
-    predictions = classifier_RF.predict(testingMeasurements)
-    for i in range(len(predictions)):
-        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            #lineIPs += "," + str(testingMeasurements[i][j])
-            #Skip the IP fields
-            if j == 0 or j == 1 or j == 16:
-                continue
-            line += "," + str(testingMeasurements[i][j])
-        line += "," +str(testingLabel[i])
-        #lineIPs += "," +str(testingLabel[i])
-        if predictions[i] == 1:
-            f.write(line)
-            #f0IP.write(lineIPs)
-        '''if predictions[i] == 0:
-            f_not.write(line)
-            f1IP.write(lineIPs)'''
+        sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)
+        testingLabel=testingLabel.astype('int')    
+
+        sTime = pd.to_datetime(sTime)
+        eTime = pd.to_datetime(eTime)
+
+        predictions = classifier_RF.predict(testingMeasurements)
+        for i in range(len(predictions)):
+            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for j in range(len(testingMeasurements[i])):
+                #lineIPs += "," + str(testingMeasurements[i][j])
+                #Skip the IP fields
+                if j == 0 or j == 1 or j == 16:
+                    continue
+                line += "," + str(testingMeasurements[i][j])
+            line += "," +str(testingLabel[i])
+            #lineIPs += "," +str(testingLabel[i])
+            if predictions[i] == 1:
+                f.write(line)
+                #f0IP.write(lineIPs)
+            '''if predictions[i] == 0:
+                f_not.write(line)
+                f1IP.write(lineIPs)'''
 
     f.close()
     #f_not.close()
@@ -127,45 +131,51 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimato
         df1 = np.delete(df0, np.s_[2:4], 1)
         trainingSet = np.delete(df1, 16, 1)
 
-    fieldsFileTesting = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    fieldsFileNoIPTesting = str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    if Path(fieldsFileNoIPTesting).exists():
-        with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
-            testingSet = np.load(testingFile, allow_pickle=True)
-        if len(testingSet) ==0:
-            return 
-    elif Path(fieldsFileTesting).exists():
-        with open(str(fieldsFileTesting), 'rb') as testingFile:
-            df2 = np.load(testingFile, allow_pickle=True)
-        if len(df2) ==0:
-            return
-        df3 = np.delete(df2, np.s_[2:4],1)
-        testingSet = np.delete(df3, 16, 1)
-
     if len(trainingSet) ==0:
         return 
-    if len(testingSet) ==0:
-        return 
+    
     trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet)    
-    trainingLabel=trainingLabel.astype('int')  
-    sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
-    testingLabel=testingLabel.astype('int')  
+    trainingLabel=trainingLabel.astype('int')
+
     classifier_RF = RandomForestClassifier(n_estimators = estimator)
     classifier_RF.fit(trainingMeasurements,trainingLabel)
 
-    sTime = pd.to_datetime(sTime)
-    eTime = pd.to_datetime(eTime)
+    for k in range(1,5):
+        fieldsFileTesting = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy"
+        fieldsFileNoIPTesting = str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy"
+        if Path(fieldsFileNoIPTesting).exists():
+            with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
+                testingSet = np.load(testingFile, allow_pickle=True)
+            if len(testingSet) ==0:
+                return 
+        elif Path(fieldsFileTesting).exists():
+            with open(str(fieldsFileTesting), 'rb') as testingFile:
+                df2 = np.load(testingFile, allow_pickle=True)
+            if len(df2) ==0:
+                return
+            df3 = np.delete(df2, np.s_[2:4],1)
+            testingSet = np.delete(df3, 16, 1)
 
-    predictions = classifier_RF.predict(testingMeasurements)
-    for i in range(len(predictions)):
-        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            line += "," + str(testingMeasurements[i][j])
-        line += "," +str(testingLabel[i])
-        if predictions[i] == 1:
-            f.write(line)
-        '''if predictions[i] == 0:
-            f_not.write(line)'''
+        
+        if len(testingSet) ==0:
+            continue 
+        
+        sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
+        testingLabel=testingLabel.astype('int')  
+
+        sTime = pd.to_datetime(sTime)
+        eTime = pd.to_datetime(eTime)
+
+        predictions = classifier_RF.predict(testingMeasurements)
+        for i in range(len(predictions)):
+            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for j in range(len(testingMeasurements[i])):
+                line += "," + str(testingMeasurements[i][j])
+            line += "," +str(testingLabel[i])
+            if predictions[i] == 1:
+                f.write(line)
+            '''if predictions[i] == 0:
+                f_not.write(line)'''
 
     f.close()
     #f_not.close()

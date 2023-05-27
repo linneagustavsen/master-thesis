@@ -21,6 +21,10 @@ from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields, makeDataSetNoIPNetFlowFields
 import numpy as np
 import os
+from NetFlow.RandomForest.MakeTestingDataSet import makeTestingDataSetNetFlow
+
+from NetFlow.RandomForest.MakeTestingDataSetFields import makeTestingDataSetNetFlowFields
+from NetFlow.RandomForest.TrainFields import trainFields
 
 def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, frequency, intervals, systems, pathToRawFiles, attackDate):
     for systemId in systems:
@@ -29,7 +33,8 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
 
         makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, "Training", systemId, attackDate)
-        makeDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        makeTestingDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        trainFields(systemId, attackDate, estimator)
         calculationRandomForestNetFlowFields(systemId, attackDate, estimator)
         print("Finished Random Forest calculations on fields")
 
@@ -44,7 +49,7 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
             print("Finished Random Forest calculations on entropy")
 
             makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, frequency, interval, "Training", systemId, attackDate)
-            makeDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
+            makeTestingDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
             calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator)
             print("Finished Random Forest calculations on all fields")
 
@@ -66,10 +71,21 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
             else:
                 print("The file NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
-            if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
-                os.remove("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+            for i in range(1,9):
+                if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy"):
+                    os.remove("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy")
+                else:
+                    print("The file NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy does not exist") 
+        if os.path.exists("NetFlow/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+            os.remove("NetFlow/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+        else:
+            print("The file NetFlow/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+
+        for i in range(1,9):
+            if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy"):
+                os.remove("NetFlow/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy")
             else:
-                print("The file NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+                print("The file NetFlow/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy does not exist") 
 
 #Attack 1
 estimators = [50,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000]

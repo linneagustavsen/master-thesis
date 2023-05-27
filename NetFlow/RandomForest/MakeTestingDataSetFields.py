@@ -15,25 +15,28 @@ import numpy as np
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
+def makeTestingDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     p = Path('NetFlow')
     q = p /'RandomForest'/ 'DataSets' / str(path) 
+    
+    for i in range(1,9):
+        if startTime + timedelta(minutes=30) < stopTime:
+            stopping = startTime + timedelta(minutes=30)
+        else:
+            stopping = stopTime
 
-    fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    if not Path(fieldsFile).exists():
-        print("Cant find", fieldsFile)
-        data = getDataNetFlow(silkFile, startTime, stopTime)
+        fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(i)+".npy"
+        if not Path(fieldsFile).exists():
+            print("Cant find", fieldsFile)
+            data = getDataNetFlow(silkFile, startTime, stopping)
 
-        if not q.exists():
-            q.mkdir(parents=True, exist_ok=False)
-        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
-            np.save(f, data)
-
-        if len(data) <2:
-            return []
-    #return data
+            if not q.exists():
+                q.mkdir(parents=True, exist_ok=False)
+            with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(i)+".npy", 'wb') as f:
+                np.save(f, data)
+        startTime += timedelta(minutes=30)     
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -45,7 +48,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNoIPNetFlowFields(silkFile, start, stop, path, systemId, attackDate):  
+def makeTestingDataSetNoIPNetFlowFields(silkFile, start, stop, path, systemId, attackDate):  
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     p = Path('NetFlow')
@@ -55,13 +58,14 @@ def makeDataSetNoIPNetFlowFields(silkFile, start, stop, path, systemId, attackDa
     if not Path(fieldsFile).exists():
         print("Cant find", fieldsFile)
         data = getDataNetFlow(silkFile, startTime, stopTime)
-        
+
         if not q.exists():
             q.mkdir(parents=True, exist_ok=False)
-        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
-            np.save(f, data)
-
+        for i in range(1,10):
+            with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(i)+".npy", 'wb') as f:
+                np.save(f, data)
+            
         if len(data) <2:
-            return []
+            return
     
     #return data

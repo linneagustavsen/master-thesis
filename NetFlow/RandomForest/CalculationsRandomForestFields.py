@@ -1,4 +1,5 @@
 from pathlib import Path
+import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 import pandas as pd
@@ -38,45 +39,45 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
     
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
-        trainingSet = np.load(trainingFile, allow_pickle=True)
-    with open(str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as testingFile:
-        testingSet = np.load(testingFile, allow_pickle=True)
-
-    if len(trainingSet) ==0:
-        return 
-    if len(testingSet) ==0:
-        return 
     
-    trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet)    
-    trainingLabel=trainingLabel.astype('int')  
-    sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
-    testingLabel=testingLabel.astype('int')  
-    classifier_RF = RandomForestClassifier(n_estimators = estimator)
-    classifier_RF.fit(trainingMeasurements,trainingLabel)
+    modelPath = datasetsPath / 'RandomForest' / 'Models'
+    if not modelPath.exists():
+        modelPath.mkdir(parents=True)
+    filename = str(modelPath) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    classifier_RF = pickle.load(open(filename, 'rb'))
 
-    sTime = pd.to_datetime(sTime)
-    eTime = pd.to_datetime(eTime)
+    for k in range(1,9):
+        with open(str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k)+".npy", 'rb') as testingFile:
+            testingSet = np.load(testingFile, allow_pickle=True)
 
-    predictions = classifier_RF.predict(testingMeasurements)
-    for i in range(len(predictions)):
-        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            #lineIPs += "," + str(testingMeasurements[i][j])
-            #Skip the IP fields
-            if j == 0 or j == 1 or j == 16:
-                continue
-            line += "," + str(testingMeasurements[i][j])
-        line += "," +str(testingLabel[i])
-        #lineIPs += "," +str(testingLabel[i])
+        if len(testingSet) ==0:
+            return 
+        
+        sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
+        testingLabel=testingLabel.astype('int')  
 
-        if predictions[i] == 1:        
-            f.write(line)
-            #f0IP.write(lineIPs)
-        '''if predictions[i] == 0:
-            f_not.write(line)
-            f1IP.write(lineIPs)'''
+        sTime = pd.to_datetime(sTime)
+        eTime = pd.to_datetime(eTime)
+
+        predictions = classifier_RF.predict(testingMeasurements)
+        for i in range(len(predictions)):
+            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for j in range(len(testingMeasurements[i])):
+                #lineIPs += "," + str(testingMeasurements[i][j])
+                #Skip the IP fields
+                if j == 0 or j == 1 or j == 16:
+                    continue
+                line += "," + str(testingMeasurements[i][j])
+            line += "," +str(testingLabel[i])
+            #lineIPs += "," +str(testingLabel[i])
+
+            if predictions[i] == 1:        
+                f.write(line)
+                #f0IP.write(lineIPs)
+            '''if predictions[i] == 0:
+                f_not.write(line)
+                f1IP.write(lineIPs)'''
 
     f.close()
     '''f_not.close()
@@ -111,54 +112,44 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate, estimator):
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
 
-    fieldsFile = str(dsPath) + "/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    fieldsFileNoIP = str(dsPath) + "/Training/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    if Path(fieldsFileNoIP).exists():
-        with open(str(fieldsFileNoIP), 'rb') as trainingFile:
-            trainingSet = np.load(trainingFile, allow_pickle=True)
-    elif Path(fieldsFile).exists():
-        with open(str(fieldsFile), 'rb') as trainingFile:
-            df0 = np.load(trainingFile, allow_pickle=True)
-        if len(df0) ==0:
-            return 
-        df1 = np.delete(df0, np.s_[2:4],1)
-        trainingSet = np.delete(df1, -2,1)
+    modelPath = datasetsPath / 'RandomForest' / 'Models'
+    if not modelPath.exists():
+        modelPath.mkdir(parents=True)
+    filename = str(modelPath) + "/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    classifier_RF = pickle.load(open(filename, 'rb'))
 
-    fieldsFileTesting = str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    fieldsFileNoIPTesting = str(dsPath) + "/Testing/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
-    if Path(fieldsFileNoIPTesting).exists():
-        with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
-            testingSet = np.load(testingFile, allow_pickle=True)
-    elif Path(fieldsFileTesting).exists():
-        with open(str(fieldsFileTesting), 'rb') as testingFile:
-            df2 = np.load(testingFile, allow_pickle=True)
-        if len(df2) ==0:
-            return 
-        df3 = np.delete(df2, np.s_[2:4],1)
-        testingSet = np.delete(df3, -2,1)
-        
+    for k in range(1,9):
+        fieldsFileTesting = str(dsPath) + "/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k)+".npy"
+        fieldsFileNoIPTesting = str(dsPath) + "/Testing/FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k)+".npy"
+        if Path(fieldsFileNoIPTesting).exists():
+            with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
+                testingSet = np.load(testingFile, allow_pickle=True)
+        elif Path(fieldsFileTesting).exists():
+            with open(str(fieldsFileTesting), 'rb') as testingFile:
+                df2 = np.load(testingFile, allow_pickle=True)
+            if len(df2) ==0:
+                return 
+            df3 = np.delete(df2, np.s_[2:4],1)
+            testingSet = np.delete(df3, -2,1)
+            
 
-    trainingsTime, trainingeTime, trainingMeasurements, trainingLabel = structureDataNumpyArrays(trainingSet)    
-    trainingLabel=trainingLabel.astype('int')  
-    sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
-    testingLabel=testingLabel.astype('int')  
-    classifier_RF = RandomForestClassifier(n_estimators = estimator)
-    classifier_RF.fit(trainingMeasurements,trainingLabel)
+        sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    
+        testingLabel=testingLabel.astype('int')  
 
-    sTime = pd.to_datetime(sTime)
-    eTime = pd.to_datetime(eTime)
+        sTime = pd.to_datetime(sTime)
+        eTime = pd.to_datetime(eTime)
 
-    predictions = classifier_RF.predict(testingMeasurements)
-    for i in range(len(predictions)):
-        line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            line += "," + str(testingMeasurements[i][j])
-        line += "," +str(testingLabel[i])
-        
-        if predictions[i] == 1:
-            f.write(line)
-        '''if predictions[i] == 0:
-           f_not.write(line)'''
+        predictions = classifier_RF.predict(testingMeasurements)
+        for i in range(len(predictions)):
+            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            for j in range(len(testingMeasurements[i])):
+                line += "," + str(testingMeasurements[i][j])
+            line += "," +str(testingLabel[i])
+            
+            if predictions[i] == 1:
+                f.write(line)
+            '''if predictions[i] == 0:
+            f_not.write(line)'''
 
     f.close()
     #f_not.close()

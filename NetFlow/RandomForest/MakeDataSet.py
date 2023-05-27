@@ -41,7 +41,6 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
 
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
 
-    data = []
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
         with open(str(entropyFile), 'rb') as f:
@@ -59,6 +58,8 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
             np.save(f, np.array([]))
         return
     entropy_intervals, entropy_measurements, entropy_labels = structureDataEntropyNumpyArrays(entropy_df)
+
+    data = np.empty([len(measurements), 28])
 
     now = datetime.now()
 
@@ -105,14 +106,15 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
 
         newMeasurements = [ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, packetSizeArray, packetSizeRateArray, labels[counter]]
 
-        times = [sTime[counter], eTime[counter]]
-
-        times.extend(curMeasurements)
+        times = [sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"), eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ")]
+        
+        '''times.extend(curMeasurements)
         times.extend(newMeasurements)
-        data.append(times)
+        data.append(times)'''
+        data[counter] = np.concatenate((times, curMeasurements, newMeasurements), axis=None)
 
         counter +=1
-    data = np.array(data)
+    #data = np.array(data)
 
     with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
         np.save(f, data)
@@ -159,7 +161,7 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
     if len(df) <2:
         return []
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
-    data = []
+    data = np.empty([len(measurements), 25])
 
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
@@ -221,13 +223,15 @@ def makeDataSetNoIPNetFlow(silkFile, start, stop, frequency, interval, path, sys
         curMeasurements = measurements[counter]
         
         newMeasurements = [ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, packetSizeArray, packetSizeRateArray, labels[counter]]
-        times = [sTime[counter], eTime[counter]]
+        times = [0, 0]
+        '''times = [sTime[counter], eTime[counter]]
         times.extend(curMeasurements)
         times.extend(newMeasurements)
-        data.append(times)
+        data.append(times)'''
+        data[counter] = np.concatenate((times, curMeasurements, newMeasurements), axis=None)
 
         counter += 1
-    data = np.array(data)
+    #data = np.array(data)
  
     with open(str(q) + "/" +str(path) + "/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
         np.save(f, data)
