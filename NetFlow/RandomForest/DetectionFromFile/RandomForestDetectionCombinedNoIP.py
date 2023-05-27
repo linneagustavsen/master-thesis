@@ -18,7 +18,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detections are made on
 '''
-def detectionRandomForestNoIPNetFlow(systemId, interval, attackDate):
+def detectionRandomForestNoIPNetFlow(start, stop, systemId, interval, attackDate):
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -32,7 +32,7 @@ def detectionRandomForestNoIPNetFlow(systemId, interval, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Random forest combined no IP detection published to topic", MQTT_TOPIC)
+        print(systemId, "Random forest combined no IP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedNoIPDetectionNetFlow")
@@ -41,7 +41,9 @@ def detectionRandomForestNoIPNetFlow(systemId, interval, attackDate):
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
-    
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+
     alerts = pd.read_csv("Calculations0803/RandomForest/NetFlow/AlertsNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     sTime = pd.to_datetime(alerts["sTime"])
     eTime = pd.to_datetime(alerts["eTime"])
@@ -52,16 +54,22 @@ def detectionRandomForestNoIPNetFlow(systemId, interval, attackDate):
     real_label = alerts["real_label"]
 
     for i in range(len(sTime)):
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime:
+            break
+        if sTime[i] < startTime:
+            continue
+        simulateRealTime(datetime.now(), sTime[i], attackDate)
         alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "srcPort": srcPort[i],
-                    "dstPort": dstPort[i],
-                    "Protocol": protocol[i],
+                    "srcPort": int(srcPort[i]),
+                    "dstPort": int(dstPort[i]),
+                    "Protocol": int(protocol[i]),
                     "Deviation_score": None,
-                    "Real_label": real_label[i],
+                    "Real_label": int(real_label[i]),
                     "Attack_type": ""
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

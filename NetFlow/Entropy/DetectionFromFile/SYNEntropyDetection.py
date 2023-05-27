@@ -46,11 +46,11 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_src = open(str(q) + "/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_src = open(str(q) + "/MinMaxValues/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_src = json.load(json_file_src)
-    json_file_dst = open(str(q) + "/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dst = open(str(q) + "/MinMaxValues/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dst = json.load(json_file_dst)
-    json_file_flow = open(str(q) + "/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow = open(str(q) + "/MinMaxValues/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
 
     #Parameters for the MQTT connection
@@ -66,7 +66,7 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("SYN entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "SYN entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNEntropyDetectionNetFlow")
@@ -150,33 +150,36 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"]),
-                    "Protocol": "TCP",
+                    "Protocol": 6,
                     "Real_label": int(attack),
                     "Attack_type": "SYN Flood"
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_dst) > thresholdDst:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"]),
-                    "Protocol": "TCP",
+                    "Protocol": 6,
                     "Real_label": int(attack),
                     "Attack_type": "SYN Flood"
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_flow) > thresholdFlow:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"]),
-                    "Protocol": "TCP",
+                    "Protocol": 6,
                     "Real_label": int(attack),
                     "Attack_type": "SYN Flood"
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
         
             if abs(change_src) > thresholdSrc and attack:
                 truePositives_s += 1

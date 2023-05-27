@@ -66,9 +66,9 @@ def detectionPS(silkFile, start, stop, systemId, frequency, interval, windowSize
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_ps = open(str(q) + "/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ps = open(str(q) + "/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ps = json.load(json_file_ps)
-    json_file_ps_rate = open(str(q) + "/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ps_rate = open(str(q) + "/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ps_rate = json.load(json_file_ps_rate)
 
     #Parameters for the MQTT connection

@@ -39,7 +39,7 @@ def detectionPacketsNetFlow(start, stop, systemId, frequency, interval, windowSi
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_packets = open(str(q) + "/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_packets = open(str(q) + "/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
     
     #Parameters for the MQTT connection
@@ -55,7 +55,7 @@ def detectionPacketsNetFlow(start, stop, systemId, frequency, interval, windowSi
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Packets detection published to topic", MQTT_TOPIC)
+        print(systemId, "Packets detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketsDetectionNetFlow")
@@ -128,7 +128,7 @@ def detectionPacketsNetFlow(start, stop, systemId, frequency, interval, windowSi
                     "Attack_type": "Flooding"
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            
+
             if abs(change) > thresholdPackets and attack:
                 truePositives += 1
             elif abs(change) > thresholdPackets and not attack:

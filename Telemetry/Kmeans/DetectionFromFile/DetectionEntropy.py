@@ -21,7 +21,7 @@ from Telemetry.Kmeans.ClusterLabelling import labelCluster
             frequency:  timedelta object, frequency of metric calculation,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
     p = Path('Detections')
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
@@ -43,7 +43,7 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("K-means entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "K-means entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansEntropyDetectionTelemetry")
@@ -51,6 +51,10 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    
     
     truePositives = 0
     falsePositives = 0
@@ -88,7 +92,7 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
     db = attackCluster["Davies-bouldin-score"][0]
     attackType = ""
     #If it is a burst attack and non attack cluster is empty
-    if db == 0 and nonAttackClusterDiameter == 0:
+    if db < DBthreshold and nonAttackClusterDiameter == 0:
         attackType = "Same protocol"
     #If there is no burst and attack cluster is less compact than normal traffic
     elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
@@ -100,6 +104,10 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
     for i in range(len(sTime)):
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime:
+            break
+        if sTime[i] < startTime:
+            continue
         simulateRealTime(datetime.now(), eTime[i], attackDate)
         
         alert = {
@@ -112,7 +120,7 @@ def detectionKmeansEntropyTelemetry(systemId, interval, DBthreshold, c0threshold
                     "Attack_type": attackType
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-        
+
         if real_labels[i]:
             truePositives += 1
         elif not real_labels[i]:

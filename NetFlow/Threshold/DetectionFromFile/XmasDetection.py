@@ -41,7 +41,7 @@ def xmasCalculation(start, stop, systemId, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Xmas detection published to topic", MQTT_TOPIC)
+        print(systemId, "Xmas detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNDetectionNetFlow")
@@ -67,27 +67,41 @@ def xmasCalculation(start, stop, systemId, attackDate):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime:
             break
         if sTime[i] < startTime:
             continue
 
         attack = real_label[i]
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), sTime[i], attackDate)
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "Gateway": systemId,
                 "Deviation_score": None,
-                '''"srcIP": int(rec.sip),
-                "dstIP": int(rec.dip),'''
                 "srcPort": int(srcPort[i]),
                 "dstPort": int(dstPort[i]),
-                #"Protocol": protocol[i],
+                "Protocol": 6,
                 "Real_label": int(attack),
                 "Attack_type": "Xmas"
                 }
+        '''alert = {
+                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "Gateway": systemId,
+                "Deviation_score": None,
+                "srcIP": int(rec.sip),
+                "dstIP": int(rec.dip),
+                "srcPort": int(srcPort[i]),
+                "dstPort": int(dstPort[i]),
+                #"Protocol": int(protocol[i]),
+                "Real_label": int(attack),
+                "Attack_type": "Xmas"
+                }'''
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
         if attack:
             truePositives += 1
         elif not attack:

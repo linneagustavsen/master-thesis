@@ -36,7 +36,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
     #Write the column titles to the files
     scores.write("TP,FP,FN,TN")
     
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
@@ -51,8 +51,8 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
         print("Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client,userdata,result):
-        print("Packet detection published to topic", MQTT_TOPIC)
+    def on_publish(client, userdata, result):
+        print(systemId, "Packet detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketsDetectionTelemetry")
@@ -102,6 +102,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change) > thresholdPackets and attack:
                 truePositives += 1
             elif abs(change) > thresholdPackets and not attack:

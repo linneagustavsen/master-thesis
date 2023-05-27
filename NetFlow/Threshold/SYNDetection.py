@@ -52,7 +52,7 @@ def synDetection(silkFile, start, stop, systemId, windowSize, threshold, attackD
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_syn = open(str(q) + "/MinMax.syn.json", "r")
+    json_file_syn = open(str(q) + "/MinMaxValues/MinMax.syn.json", "r")
     maxmin_syn = json.load(json_file_syn)
 
     #Parameters for the MQTT connection

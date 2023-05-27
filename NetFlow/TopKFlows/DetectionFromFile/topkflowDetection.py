@@ -11,7 +11,7 @@ from HelperFunctions.Normalization import normalization
 from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
-def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
+def topkflows(start, stop, systemId, attackDate):
     p = Path('Detections')
     q = p / 'TopKFlows' / 'NetFlow'
     if not q.exists():
@@ -36,7 +36,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Top k flows detection published to topic", MQTT_TOPIC)
+        print(systemId, "Top k flows detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
@@ -50,7 +50,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
-    change = data["change"]
+    change = data["Change"]
     srcPort = data["srcPort"]
     dstPort = data["dstPort"]
     protocol = data["protocol"]
@@ -63,25 +63,38 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime:
             break
         if sTime[i] < startTime:
             continue
         attack = real_label[i]
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), sTime[i], attackDate)
         alert = {
             "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
             "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
             "Gateway": systemId,
+            "Deviation_score": change[i],
+            "srcPort": int(srcPort[i]),
+            "dstPort": int(dstPort[i]),
+            "Protocol": int(protocol[i]),
+            "Real_label": int(attack),
+            "Attack_type": "Flooding"
+        }
+        '''alert = {
+            "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "Gateway": systemId,
             "Deviation_score": change,
-            '''"srcIP": int(rec.sip),
-            "dstIP": int(rec.dip),'''
+            "srcIP": int(rec.sip),
+            "dstIP": int(rec.dip),
             "srcPort": srcPort[i],
             "dstPort": dstPort[i],
             "Protocol": protocol[i],
             "Real_label": int(attack),
             "Attack_type": "Flooding"
-        }
+        }'''
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
     
         if attack:

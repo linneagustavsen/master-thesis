@@ -75,11 +75,11 @@ def synEntropyDetection(silkFile, start, stop, systemId, frequency, interval, wi
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_src = open(str(q) + "/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_src = open(str(q) + "/MinMaxValues/MinMax.SYN_src."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_src = json.load(json_file_src)
-    json_file_dst = open(str(q) + "/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dst = open(str(q) + "/MinMaxValues/MinMax.SYN_dst."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dst = json.load(json_file_dst)
-    json_file_flow = open(str(q) + "/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow = open(str(q) + "/MinMaxValues/MinMax.SYN_flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
 
     #Parameters for the MQTT connection

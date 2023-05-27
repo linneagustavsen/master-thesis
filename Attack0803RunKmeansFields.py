@@ -6,13 +6,12 @@ from NetFlow.Kmeans.DetectionFromFile.DetectionKmeans import detectionKmeans
 arguments = sys.argv
 
 # Print the arguments
-print("Number of arguments:", len(arguments))
+#print("Number of arguments:", len(arguments))
 print("Argument values:", arguments)
 
-start = "2023-03-08 14:15:00"
-stop = "2023-03-08 16:00:00"
+start = arguments[1]
+stop = arguments[2]
 frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-attackDate="08.03.23"
+attackDate= arguments[3]
 
-detectionKmeans(start, stop, arguments[1], timedelta(minutes = 15), 0.5, 0, 0, attackDate)
+detectionKmeans(start, stop, arguments[4], timedelta(minutes = 15), 0.5, 0, 0, attackDate)

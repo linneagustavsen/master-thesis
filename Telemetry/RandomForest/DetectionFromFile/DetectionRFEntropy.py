@@ -18,7 +18,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def detectionRandomForestEntropyTelemetry(systemId, interval, attackDate):
+def detectionRandomForestEntropyTelemetry(start, stop, systemId, interval, attackDate):
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -31,8 +31,8 @@ def detectionRandomForestEntropyTelemetry(systemId, interval, attackDate):
         print("Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client,userdata,result):
-        print("Random Forest detection published to topic", MQTT_TOPIC)
+    def on_publish(client, userdata, result):
+        print(systemId, "Random Forest detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestDetectionTelemetry")
@@ -40,6 +40,9 @@ def detectionRandomForestEntropyTelemetry(systemId, interval, attackDate):
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
     alerts = pd.read_csv("Calculations0803/RandomForest/Telemetry/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
 
@@ -51,6 +54,10 @@ def detectionRandomForestEntropyTelemetry(systemId, interval, attackDate):
     for i in range(len(sTime)):
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime:
+            break
+        if sTime[i] < startTime:
+            continue
         simulateRealTime(datetime.now(), eTime[i], attackDate)
 
         alert = {

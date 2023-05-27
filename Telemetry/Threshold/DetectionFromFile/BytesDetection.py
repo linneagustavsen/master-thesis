@@ -36,7 +36,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
     #Write the column titles to the files
     scores.write("TP,FP,FN,TN")
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
@@ -51,8 +51,8 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
         print("Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client,userdata,result):
-        print("Bytes detection published to topic", MQTT_TOPIC)
+    def on_publish(client, userdata, result):
+        print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionTelemetry")
@@ -102,7 +102,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            
+
             if abs(change) > thresholdBytes and attack:
                 truePositives += 1
             elif abs(change) > thresholdBytes and not attack:

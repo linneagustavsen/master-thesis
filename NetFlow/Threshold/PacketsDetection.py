@@ -56,7 +56,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_packets = open(str(q) + "/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_packets = open(str(q) + "/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
     
     #Parameters for the MQTT connection

@@ -4,6 +4,7 @@ from pathlib import Path
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
+from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 from Telemetry.Threshold.FindMaxVar import *
 import paho.mqtt.client as mqtt
@@ -29,7 +30,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
     scores = open(str(r) + "/Scores.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar.json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "r")
     maxmin = json.load(json_file)
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -43,8 +44,8 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
         print("Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
-    def on_publish(client,userdata,result):
-        print("Max var detection published to topic", MQTT_TOPIC)
+    def on_publish(client, userdata, result):
+        print(systemId, "Max var detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("MaxVarDetectionTelemetry")
@@ -81,6 +82,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
         deviation = deviations[i]
         
         if deviation > threshold:
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -90,7 +92,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
                 "Attack_type": "Flooding"
             }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-        
+
         if deviation > threshold and attack:
             truePositives += 1
         elif deviation > threshold and not attack:

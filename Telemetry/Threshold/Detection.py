@@ -45,7 +45,7 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
     TNf = open(str(r) + "/TN." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel." + str(field)+".json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel." + str(field)+".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
@@ -61,7 +61,8 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Statistical threshold detection published to topic", MQTT_TOPIC)
+        s=0
+        #print("Statistical threshold detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ThresholdDetectionTelemetry")

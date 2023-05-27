@@ -43,9 +43,9 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_dip = open(str(q) + "/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dip = open(str(q) + "/MinMaxValues/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip = json.load(json_file_dip)
-    json_file_dip_rate = open(str(q) + "/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dip_rate = open(str(q) + "/MinMaxValues/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip_rate = json.load(json_file_dip_rate)
 
     #Parameters for the MQTT connection
@@ -61,7 +61,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Destination flow entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Destination flow entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("DestinationFlowEntropyDetectionNetFlow")
@@ -138,7 +138,6 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
                 attackType = "Flooding"
             else:
                 attackType = ""
-            print("still running 3")
             simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdDstEntropy:
                 alert = {

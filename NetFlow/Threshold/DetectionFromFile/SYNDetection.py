@@ -35,7 +35,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_syn = open(str(q) + "/MinMax.syn.json", "r")
+    json_file_syn = open(str(q) + "/MinMaxValues/MinMax.syn.json", "r")
     maxmin_syn = json.load(json_file_syn)
 
     #Parameters for the MQTT connection
@@ -51,7 +51,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("SYN detection published to topic", MQTT_TOPIC)
+        print(systemId, "SYN detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNDetectionNetFlow")
@@ -90,21 +90,32 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
             attack = real_label[i]
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), sTime[i], attackDate)
             if synPacketsPerFlow[i] >= threshold:
                 alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
-                        '''"srcIP": int(rec.sip),
-                        "dstIP": int(rec.dip),'''
                         "srcPort": int(srcPort[i]),
                         "dstPort": int(dstPort[i]),
-                        #"Protocol": protocol[i],
+                        "Protocol": 6,
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
+                '''alert = {
+                        "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "Gateway": systemId,
+                        "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
+                        "srcIP": int(rec.sip),
+                        "dstIP": int(rec.dip),
+                        "srcPort": int(srcPort[i]),
+                        "dstPort": int(dstPort[i]),
+                        "Protocol": protocol[i],
+                        "Real_label": int(attack),
+                        "Attack_type": "SYN Flood"
+                        }'''
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
             if synPacketsPerFlow[i] > threshold and attack:

@@ -43,9 +43,9 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_sip = open(str(q) + "/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_sip = open(str(q) + "/MinMaxValues/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip = json.load(json_file_sip)
-    json_file_sip_rate = open(str(q) + "/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_sip_rate = open(str(q) + "/MinMaxValues/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip_rate = json.load(json_file_sip_rate)
 
     #Parameters for the MQTT connection
@@ -61,7 +61,7 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Source flow entropy published to topic", MQTT_TOPIC)
+        print(systemId, "Source flow entropy published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SourceFlowEntropyDetectionNetFlow")
@@ -129,7 +129,7 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
         if i >=windowSize:
             change = ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1])
             change_r = ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1])
-            
+
             if change < 0 and change_r < 0:
                 attackType = "Low-Rate"
             elif change_r < 0:
@@ -148,6 +148,7 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
                     "Attack_type": attackType
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_r) > thresholdSrcEntropyRate:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -158,6 +159,7 @@ def detectionSrc(start, stop, systemId, frequency, interval, windowSize, thresho
                     "Attack_type": attackType
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             
             if abs(change) > thresholdSrcEntropy and attack:
                 truePositives += 1

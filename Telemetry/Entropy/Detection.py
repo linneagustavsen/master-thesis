@@ -61,9 +61,9 @@ def detectionEntropyTelemetry(start, stop, systemId, interval, frequency, window
     TNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
     TNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-    json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
-    json_file_rate = open("Telemetry/Entropy/Calculations/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_rate = json.load(json_file_rate)
    
     #Parameters for the MQTT connection

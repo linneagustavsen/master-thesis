@@ -46,7 +46,7 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
     TNf.write("sTime,eTime,Deviation_score,Value,Mean,Variance")
 
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.StatisticalModel_MaxVar.json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar.json", "r")
     maxmin = json.load(json_file)
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -61,7 +61,8 @@ def detectionMaxVar(systemId, if_name, field, start, stop, threshold, attackDate
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Max var detection published to topic", MQTT_TOPIC)
+        s=0
+        #print("Max var detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("MaxVarDetectionTelemetry")

@@ -56,7 +56,7 @@ def detectionBytesNetFlow(silkFile, start, stop, systemId, frequency, interval, 
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_bytes = open(str(q) + "/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_bytes = open(str(q) + "/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_bytes = json.load(json_file_bytes)
 
     #Parameters for the MQTT connection

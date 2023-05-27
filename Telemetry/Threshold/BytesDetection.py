@@ -53,7 +53,7 @@ def detectionBytesTelemetry(start, stop, systemId, interval, frequency, windowSi
     #Write the column titles to the files
     TNf_bytes.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
 
-    json_file = open("Telemetry/Threshold/Calculations/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection
@@ -69,7 +69,8 @@ def detectionBytesTelemetry(start, stop, systemId, interval, frequency, windowSi
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        print("Bytes detection published to topic", MQTT_TOPIC)
+        s=0
+        #print("Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionTelemetry")

@@ -66,9 +66,9 @@ def detectionDst(silkFile, start, stop, systemId, frequency, interval, windowSiz
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_dip = open(str(q) + "/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dip = open(str(q) + "/MinMaxValues/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip = json.load(json_file_dip)
-    json_file_dip_rate = open(str(q) + "/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_dip_rate = open(str(q) + "/MinMaxValues/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_dip_rate = json.load(json_file_dip_rate)
 
     #Parameters for the MQTT connection

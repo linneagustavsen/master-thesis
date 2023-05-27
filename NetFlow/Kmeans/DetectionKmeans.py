@@ -77,7 +77,7 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
         nonAttackClusterDiameter = cd0
     attackType = ""
     #If it is a burst attack and non attack cluster is empty
-    if db == 0 and nonAttackClusterDiameter == 0:
+    if db < DBthreshold and nonAttackClusterDiameter == 0:
         attackType = "Same protocol"
     #If there is no burst and attack cluster is less compact than normal traffic
     elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
@@ -87,7 +87,7 @@ def detectionKmeans(silkFile, start, stop, systemId, DBthreshold, c0threshold, c
         attackType = "Same protocol"
    
     for i in range(len(prediction)):
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), sTime[i], attackDate)
         if prediction[i] == attackCluster:
             alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

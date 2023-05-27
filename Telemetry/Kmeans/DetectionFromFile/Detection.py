@@ -41,7 +41,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Kmeans detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansDetectionTelemetry")
@@ -104,7 +104,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
         db = attackCluster["Davies-bouldin-score"][0]
         attackType = ""
         #If it is a burst attack and non attack cluster is empty
-        if db == 0 and nonAttackClusterDiameter == 0:
+        if db < DBthreshold and nonAttackClusterDiameter == 0:
             attackType = "Same protocol"
         #If there is no burst and attack cluster is less compact than normal traffic
         elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
@@ -125,10 +125,12 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
-        eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
-        eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
+
+        if eTimeCluster[i] > stopTime:
+            break
+        if sTimeCluster[i] < startTime:
+            continue
+        
         simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
         attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:

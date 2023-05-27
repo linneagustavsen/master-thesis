@@ -17,7 +17,7 @@ import json
             interval:   timedelta object, size of the sliding window which the calculation is made on
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
     p = Path('Detections')
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():
@@ -38,7 +38,7 @@ def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1thres
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Kmeans entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansEntropyDetectionNetFlow")
@@ -47,6 +47,9 @@ def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1thres
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
 
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
@@ -85,7 +88,7 @@ def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1thres
     db = attackCluster["Davies-bouldin-score"][0]
     attackType = ""
     #If it is a burst attack and non attack cluster is empty
-    if db == 0 and nonAttackClusterDiameter == 0:
+    if db < DBthreshold and nonAttackClusterDiameter == 0:
         attackType = "Same protocol"
     #If there is no burst and attack cluster is less compact than normal traffic
     elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
@@ -95,6 +98,12 @@ def detectionKmeansEntropy(systemId, interval, DBthreshold, c0threshold, c1thres
         attackType = "Same protocol"
         
     for i in range(len(sTime)):
+        sTime[i] = sTime[i].replace(tzinfo=None)
+        eTime[i] = eTime[i].replace(tzinfo=None)
+        if eTime[i] > stopTime:
+            break
+        if sTime[i] < startTime:
+            continue
         simulateRealTime(datetime.now(), eTime[i], attackDate)
         
         alert = {

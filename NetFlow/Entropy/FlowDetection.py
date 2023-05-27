@@ -79,11 +79,11 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_flow = open(str(q) + "/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow = open(str(q) + "/MinMaxValues/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
-    json_file_flow_rate = open(str(q) + "/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow_rate = open(str(q) + "/MinMaxValues/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow_rate = json.load(json_file_flow_rate)
-    json_file_nf = open(str(q) + "/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_nf = open(str(q) + "/MinMaxValues/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_nf = json.load(json_file_nf)
 
     #Parameters for the MQTT connection

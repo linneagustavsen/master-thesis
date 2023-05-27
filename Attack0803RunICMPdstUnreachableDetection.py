@@ -7,13 +7,12 @@ import sys
 arguments = sys.argv
 
 # Print the arguments
-print("Number of arguments:", len(arguments))
+#print("Number of arguments:", len(arguments))
 print("Argument values:", arguments)
 
-start = "2023-03-08 14:15:00"
-stop = "2023-03-08 16:00:00"
+start = arguments[1]
+stop = arguments[2]
 frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 10)
-attackDate="08.03.23"
+attackDate= arguments[3]
 
-icmpDstUnreachableDetection(start, stop, arguments[1], frequency, interval, 10, 0, attackDate)
+icmpDstUnreachableDetection(start, stop, arguments[4], frequency, timedelta(minutes=int(arguments[5])), 10, 0, attackDate)

@@ -44,9 +44,9 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_ps = open(str(q) + "/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ps = open(str(q) + "/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ps = json.load(json_file_ps)
-    json_file_ps_rate = open(str(q) + "/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ps_rate = open(str(q) + "/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ps_rate = json.load(json_file_ps_rate)
 
     #Parameters for the MQTT connection
@@ -62,7 +62,7 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Packet size entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Packet size entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketSizeEntropyDetectionNetFlow")
@@ -160,12 +160,13 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                
             if abs(change_r) > thresholdPSEntropyRate:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(change), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
+                    "Deviation_score": normalization(abs(change_r), maxmin_ps_rate["minimum"], maxmin_ps_rate["maximum"]),
                     "Packet_size_distribution": thisPacketSizeDistributionDict,
                     "Real_label": int(attack),
                     "Attack_type": attackType

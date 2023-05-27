@@ -60,7 +60,7 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file = open(str(q) + "/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open(str(q) + "/MinMaxValues/MinMax.icmp_dst_unreachable."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
     #Parameters for the MQTT connection

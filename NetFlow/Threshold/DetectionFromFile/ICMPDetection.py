@@ -42,9 +42,9 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_packets = open(str(q) + "/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_packets = open(str(q) + "/MinMaxValues/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
-    json_file_ratio = open(str(q) + "/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ratio = open(str(q) + "/MinMaxValues/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ratio = json.load(json_file_ratio)
 
     #Parameters for the MQTT connection
@@ -60,7 +60,7 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("ICMP detection published to topic", MQTT_TOPIC)
+        print(systemId, "ICMP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ICMPDetectionNetFlow")

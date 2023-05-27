@@ -50,11 +50,11 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_flow = open(str(q) + "/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow = open(str(q) + "/MinMaxValues/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow = json.load(json_file_flow)
-    json_file_flow_rate = open(str(q) + "/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_flow_rate = open(str(q) + "/MinMaxValues/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_flow_rate = json.load(json_file_flow_rate)
-    json_file_nf = open(str(q) + "/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_nf = open(str(q) + "/MinMaxValues/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_nf = json.load(json_file_nf)
 
     #Parameters for the MQTT connection
@@ -70,7 +70,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BidirectionalFlowEntropyDetectionNetFlow")
@@ -87,7 +87,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
 
     flowEntropy = data["flowEntropy"]
     flowEntropyRate = data["flowEntropyRate"]
-    numberOfFlows = flowEntropyRate = data["numberOfFlows"]
+    numberOfFlows = data["numberOfFlows"]
 
     attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
@@ -167,6 +167,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                     "Attack_type": attackType
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_r) > thresholdFlowEntropyRate:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -177,6 +178,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                     "Attack_type": attackType
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_nf) > thresholdNumberOfFlows:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

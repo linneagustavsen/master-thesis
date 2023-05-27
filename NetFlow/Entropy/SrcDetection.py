@@ -62,9 +62,9 @@ def detectionSrc(silkFile, start, stop, systemId, frequency, interval, windowSiz
     if not q.exists():
         q = Path('Entropy')
         q = q / 'Calculations'
-    json_file_sip = open(str(q) + "/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_sip = open(str(q) + "/MinMaxValues/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip = json.load(json_file_sip)
-    json_file_sip_rate = open(str(q) + "/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_sip_rate = open(str(q) + "/MinMaxValues/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_sip_rate = json.load(json_file_sip_rate)
 
     #Parameters for the MQTT connection

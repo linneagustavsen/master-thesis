@@ -39,15 +39,9 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
     scores.write("TP,FP,FN,TN")
     scores_r.write("TP,FP,FN,TN")
 
-    '''json_file = open("Telemetry/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
-    json_file_rate = open("Telemetry/Entropy/Calculations/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
-    maxmin_rate = json.load(json_file_rate)'''
-
-    ###TODO: REMEMBER TO CHANGE THIS BACK
-    json_file = open("NetFlow/Entropy/Calculations/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
-    maxmin = json.load(json_file)
-    json_file_rate = open("NetFlow/Entropy/Calculations/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_rate = json.load(json_file_rate)
 
     #Parameters for the MQTT connection
@@ -63,7 +57,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("EntropyDetectionTelemetry")
@@ -129,17 +123,19 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change_r) > thresholdEntropyRate:
                 alert = {
-                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
                     "Packet_size_distribution": packetSizeDistributionDict[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
                     "Real_label": int(attack),
                     "Attack_type": attackType
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))    
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
             if abs(change) > thresholdEntropy and attack:
                 truePositives += 1
             elif abs(change) > thresholdEntropy and not attack:

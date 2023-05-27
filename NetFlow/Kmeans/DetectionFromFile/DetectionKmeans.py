@@ -38,7 +38,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Kmeans detection is published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansDetectionNetFlow")
@@ -110,7 +110,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         db = attackCluster["Davies-bouldin-score"][0]
         attackType = ""
         #If it is a burst attack and non attack cluster is empty
-        if db == 0 and nonAttackClusterDiameter == 0:
+        if db < DBthreshold and nonAttackClusterDiameter == 0:
             attackType = "Same protocol"
         #If there is no burst and attack cluster is less compact than normal traffic
         elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
@@ -134,7 +134,11 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
+        if eTimeCluster[i] > stopTime:
+            break
+        if sTimeCluster[i] < startTime:
+            continue
+        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
         attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]
@@ -147,15 +151,26 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    '''"srcIP":measurements[i][0],
-                    "dstIP": measurements[i][1],'''
+                    "srcPort": int(srcPortsCluster[i]),
+                    "dstPort": int(dstPortsCluster[i]),
+                    "Protocol": int(protocolCluster[i]),
+                    "Deviation_score": None,
+                    "Real_label": int(real_labels[i]),
+                    "Attack_type": attackType
+                }
+        '''alert = {
+                    "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "srcIP":measurements[i][0],
+                    "dstIP": measurements[i][1],
                     "srcPort": srcPortsCluster[i],
                     "dstPort": dstPortsCluster[i],
                     "Protocol": protocolCluster[i],
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
                     "Attack_type": attackType
-                }
+                }'''
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
         if real_labels[i]:

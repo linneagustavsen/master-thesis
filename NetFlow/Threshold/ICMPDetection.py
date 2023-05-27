@@ -65,9 +65,9 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_packets = open(str(q) + "/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_packets = open(str(q) + "/MinMaxValues/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_packets = json.load(json_file_packets)
-    json_file_ratio = open(str(q) + "/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_ratio = open(str(q) + "/MinMaxValues/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ratio = json.load(json_file_ratio)
 
     #Parameters for the MQTT connection

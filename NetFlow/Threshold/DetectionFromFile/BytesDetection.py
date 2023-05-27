@@ -39,7 +39,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
     if not q.exists():
         q = Path('Threshold')
         q = q / 'Calculations'
-    json_file_bytes = open(str(q) + "/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_bytes = open(str(q) + "/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_bytes = json.load(json_file_bytes)
 
     #Parameters for the MQTT connection
@@ -55,7 +55,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print("Bytes detection published to topic", MQTT_TOPIC)
+        print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionNetFlow")
