@@ -181,8 +181,13 @@ print(test2)'''
 '''print(confusion_matrix([0,1,0,1],[1,1,1,0]))
 tn, fp, fn, tp = confusion_matrix([0,1,0,1],[1,1,1,0]).ravel()
 print(tn, fp, fn, tp)'''
-
+'''
 
 with open("Telemetry/Kmeans/DataSets/Fields.attack.08.03.23.stopTime.15.30.00.narvik-gw3.pkl", 'rb') as f:
     df = pd.read_pickle(f)
-print(df)
+print(df)'''
+
+from Correlation.NetworkGraph import NetworkGraph
+import networkx as nx
+graph = NetworkGraph().G
+print(nx.shortest_path(graph, "teknobyen-gw1", "narvik-gw3"))

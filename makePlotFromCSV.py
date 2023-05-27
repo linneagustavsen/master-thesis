@@ -30,7 +30,7 @@ def makePlotFromCSV(csvFile, x_field, y_field, y_fieldName, path):
     ax.set_ylabel(y_fieldName)
     ax.tick_params(axis='both', which='major', labelsize=12)
     fig.tight_layout()
-    fig.savefig(path+y_field+".png", dpi=300)
+    fig.savefig(path+y_field+".png", dpi=500)
 
 '''
 

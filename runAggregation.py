@@ -2,7 +2,8 @@
 #Parameters for the MQTT connection
 from Correlation.Aggregation import Aggregation
 from Correlation.NetworkGraph import NetworkGraph
-
+import sys
+arguments = sys.argv
 
 MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
@@ -16,5 +17,5 @@ MQTT_TOPIC_OUTPUT_Distribution = 'detections/aggregation/distribution'
 
 
 graph = NetworkGraph()
-aggregation = Aggregation(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT_TIME, MQTT_TOPIC_OUTPUT_IPS, MQTT_TOPIC_OUTPUT_ATTACK_TYPE,MQTT_TOPIC_OUTPUT_Distribution, graph)
+aggregation = Aggregation(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT_TIME, MQTT_TOPIC_OUTPUT_IPS, MQTT_TOPIC_OUTPUT_ATTACK_TYPE,MQTT_TOPIC_OUTPUT_Distribution, graph, arguments[1])
 aggregation.start()

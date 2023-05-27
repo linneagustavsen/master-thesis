@@ -43,6 +43,12 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
@@ -64,22 +70,22 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        attackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         if attackCluster.empty:
             continue
         if attackCluster["AttackCluster"][0] == 0:
-            cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         elif attackCluster["AttackCluster"][0] == 1:
-            cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 
-            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
@@ -145,7 +151,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    p = Path('Detections')
+    p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)

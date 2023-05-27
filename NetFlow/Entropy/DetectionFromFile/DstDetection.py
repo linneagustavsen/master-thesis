@@ -59,8 +59,13 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
-
-    data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
+    data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
@@ -69,7 +74,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
     dstEntropy = data["dstEntropy"]
     dstEntropyRate = data["dstEntropyRate"]
 
-    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    
@@ -174,7 +179,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
                 trueNegatives += 1
                 trueNegatives_r += 1
 
-    p = Path('Detections')
+    p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)

@@ -46,6 +46,12 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -55,22 +61,22 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     falseNegatives = 0
     trueNegatives  = 0
 
-    attackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     if attackCluster.empty:
         return
     if attackCluster["AttackCluster"][0] == 0:
-        cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-        nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     elif attackCluster["AttackCluster"][0] == 1:
-        cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 
-        nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
@@ -121,7 +127,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    p = Path('Detections')
+    p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)

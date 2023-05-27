@@ -82,7 +82,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     #fig.tight_layout()
     fig.legend(fontsize=20)
-    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/Telemetry/JustAttack."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/Telemetry/JustAttack."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close()
 
 

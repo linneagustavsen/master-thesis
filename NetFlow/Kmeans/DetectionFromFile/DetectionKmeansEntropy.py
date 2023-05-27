@@ -18,10 +18,7 @@ import json
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
-    p = Path('Detections')
-    q = p / 'Kmeans' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
+    
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -46,6 +43,12 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -54,22 +57,22 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
     falseNegatives = 0
     trueNegatives  = 0
 
-    attackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     if len(attackCluster) == 0:
         return
     if attackCluster["AttackCluster"][0] == 0:
-        cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-        nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     elif attackCluster["AttackCluster"][0] == 1:
-        cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 
-        nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
@@ -119,6 +122,11 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+
+    p = Path('Detections' + fileString)
+    q = p / 'Kmeans' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     scores = open(str(q) + "/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))

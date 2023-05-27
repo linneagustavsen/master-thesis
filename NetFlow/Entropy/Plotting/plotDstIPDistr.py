@@ -41,7 +41,7 @@ def makePlot(jsonFile, path, start):
         ax.set_ylabel("Number of packets")
         ax.set_xlim(0, len(ip_freqs))
         fig.tight_layout()
-        fig.savefig(path+startTime.strftime("%d_%m_%y_%H.%M.%S")+".png", dpi=300)
+        fig.savefig(path+startTime.strftime("%d_%m_%y_%H.%M.%S")+".png", dpi=500)
         plt.close()
         
         startTime += timedelta(minutes = 1)

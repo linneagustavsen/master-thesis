@@ -20,7 +20,7 @@ class Aggregation:
     """
         The class is initialized with data fields and database dictionaries.
     """
-    def __init__(self, broker, port, inputTopic, outputTopicTime, outputTopicIPs, outputTopicAttackTypes, outputDist, graph):
+    def __init__(self, broker, port, inputTopic, outputTopicTime, outputTopicIPs, outputTopicAttackTypes, outputDist, graph, attackDate):
         self.port = port
         self.broker = broker
         self.input = inputTopic
@@ -30,6 +30,13 @@ class Aggregation:
         self.outputDist = outputDist
         self.graph = graph
         self.alertCounter = 0
+
+        if attackDate == "08.03.23":
+            self.fileString = "0803"
+        elif attackDate == "17.03.23":
+            self.fileString = "1703"
+        elif attackDate == "24.03.23":
+            self.fileString = "2403"
 
         self.alertDB = {}
         for node in self.graph.G:
@@ -246,7 +253,7 @@ class Aggregation:
             
         except KeyboardInterrupt:
             print("Interrupted")
-            p = Path('Detections')
+            p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
             if not q.exists():
                 q.mkdir(parents=True)

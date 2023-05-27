@@ -127,7 +127,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs[1].tick_params(axis='both', which='major', labelsize=15)
     axs[1].legend(fontsize=20)
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".png", dpi=500)
     plt.close()
 
 

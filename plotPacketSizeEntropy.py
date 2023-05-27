@@ -72,7 +72,7 @@ def makePlot(y_fieldN, y_fieldT, y_fieldName, systemId, interval, attackDate):
     axs[1].set_ylabel(y_fieldName)
     axs[1].tick_params(axis='both', which='major', labelsize=12)
     fig.tight_layout()
-    fig.savefig("Plots/Entropy/Attack0803/NetFlow/PacketSize/"+  str(systemId)+ "." + str(y_fieldN)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Entropy/Attack0803/NetFlow/PacketSize/"+  str(systemId)+ "." + str(y_fieldN)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close()
 
 

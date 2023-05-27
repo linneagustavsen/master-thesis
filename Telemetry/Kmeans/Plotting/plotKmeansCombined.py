@@ -158,7 +158,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[1].set_ylim([0,maxValue])
     axs[1].legend(fontsize=20)
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close()
 
 

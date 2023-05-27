@@ -20,7 +20,7 @@ class Ranking:
     """
         The class is initialized with data fields and database dictionaries.
     """
-    def __init__(self, broker, port, inputTopic, outputTopic, graph):
+    def __init__(self, broker, port, inputTopic, outputTopic, graph, attackDate):
         self.port = port
         self.broker = broker
         self.input = inputTopic
@@ -28,9 +28,16 @@ class Ranking:
         self.graph = graph
         self.ranking = []
         self.alertCounter = 0
+
+        if attackDate == "08.03.23":
+            self.fileString = "0803"
+        elif attackDate == "17.03.23":
+            self.fileString = "1703"
+        elif attackDate == "24.03.23":
+            self.fileString = "2403"
         
     def writeRankingToFile(self):
-        p = Path('Detections')
+        p = Path('Detections' + self.fileString)
         q = p / 'Correlation' 
         if not q.exists():
             q.mkdir(parents=True)
@@ -177,7 +184,7 @@ class Ranking:
             
         except KeyboardInterrupt:
             print("Interrupted")
-            p = Path('Detections')
+            p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
             if not q.exists():
                 q.mkdir(parents=True)

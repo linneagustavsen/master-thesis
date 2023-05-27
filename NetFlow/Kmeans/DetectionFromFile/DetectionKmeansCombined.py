@@ -18,10 +18,6 @@ import json
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, DBthreshold, c0threshold, c1threshold, attackDate):
-    p = Path('Detections')
-    q = p / 'Kmeans' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -45,6 +41,13 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
+
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
 
     truePositives = 0
     falsePositives = 0
@@ -71,22 +74,22 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-        attackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         if len(attackCluster) == 0:
             continue
         if attackCluster["AttackCluster"][0] == 0:
-            cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         elif attackCluster["AttackCluster"][0] == 1:
-            cluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 
-            nonAttackCluster = pd.read_csv("Calculations0803/Kmeans/NetFlow/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
@@ -175,6 +178,10 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+    p = Path('Detections' + fileString)
+    q = p / 'Kmeans' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
     scores = open(str(q) + "/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))

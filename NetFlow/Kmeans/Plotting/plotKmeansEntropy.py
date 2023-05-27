@@ -180,7 +180,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     
     
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close()
 
 

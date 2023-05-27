@@ -1,11 +1,12 @@
 
 
+from datetime import timedelta
 import numpy as np
 import pandas as pd
 from ast import literal_eval
 
 
-def makeRandomForestTable(featureSet, interval, attackDate):
+def makeRandomForestTable(featureSet, dataset, interval, attackDate):
     systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5"]
     systemNames = []
@@ -18,11 +19,15 @@ def makeRandomForestTable(featureSet, interval, attackDate):
 
     for systemId in systems:
         print(systemId)
-        if featureSet == "Fields" or featureSet ==  "FieldsNoIP":
-            data = pd.read_csv("Calculations2403/RandomForest/NetFlow/Score."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-            print("Score."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        if featureSet == "Fields":
+            data = pd.read_csv("Calculations2403/RandomForest/"+dataset+"/Score."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+            #print("Score."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        elif featureSet ==  "FieldsNoIP":
+            data = pd.read_csv("Calculations2403/RandomForest/"+dataset+"/ScoreNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        elif featureSet == "CombinedNoIP":
+            data = pd.read_csv("Calculations2403/RandomForest/"+dataset+"/ScoreNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
         else:
-            data = pd.read_csv("Calculations2403/RandomForest/NetFlow/Score."+featureSet+ "."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+            data = pd.read_csv("Calculations2403/RandomForest/"+dataset+"/Score."+featureSet+ "."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
         if data.empty:
             f1_scores.append(None)
             precision_scores.append(None)
@@ -34,9 +39,9 @@ def makeRandomForestTable(featureSet, interval, attackDate):
 
         confusion_matrix = data["confusion_matrix"].values
         confusion_matrix = literal_eval(str(confusion_matrix).replace("['", "").replace("']", "").replace("' '", ",").replace(" ", ",").replace(",,,,,", ",").replace(",,,,", ",").replace(",,,", ",").replace(",,", ",").replace("[,", "["))
-
+        print(confusion_matrix)
         if len(data["confusion_matrix"].values) == 1:
-            print(confusion_matrix)
+            #print(confusion_matrix)
             accuracy = data["accuracy"][0]
             f1 = data["f1"][0]
             recall = data["recall"][0]
@@ -53,27 +58,28 @@ def makeRandomForestTable(featureSet, interval, attackDate):
         accuracy_scores.append(accuracy)
         if len(confusion_matrix) > 1:
             fpr_scores.append(int(confusion_matrix[0][1])/(int(confusion_matrix[0][1]) + int(confusion_matrix[0][0])))
-            print(fpr_scores[-1])
+            #print(fpr_scores[-1])
             fnr_scores.append(int(confusion_matrix[1][0])/(int(confusion_matrix[1][0]) + int(confusion_matrix[1][1])))
-            print(fnr_scores[-1])
+            #print(fnr_scores[-1])
         else:
             fpr_scores.append(None)
             fnr_scores.append(None)
         
 
-    print(f1_scores)
-    print(precision_scores)
-    print(tpr_scores)
-    print(accuracy_scores)
-    print(fpr_scores)
-    print(fnr_scores)
+    #print(f1_scores)
+    #print(precision_scores)
+    #print(tpr_scores)
+    #print(accuracy_scores)
+    #print(fpr_scores)
+    #print(fnr_scores)
 
-    print(len(f1_scores))
+    '''print(len(f1_scores))
     print(len(precision_scores))
     print(len(tpr_scores))
     print(len(accuracy_scores))
     print(len(fpr_scores))
-    print(len(fnr_scores))
+    print(len(fnr_scores))'''
+
     df = pd.DataFrame(dict(Routers=systems,
                         F1=f1_scores,
                         Precision=precision_scores,
@@ -81,7 +87,7 @@ def makeRandomForestTable(featureSet, interval, attackDate):
                         Accuracy=accuracy_scores,
                         FPR=fpr_scores,
                         FNR=fnr_scores))
+    df = df.sort_values(['F1', 'FPR'], ascending=False)
+    print(df.to_latex(index=False, float_format="{:.3f}".format,))
 
-    print(df.to_latex(index=False))
-
-makeRandomForestTable("Fields", 0, "24.03.23")
+makeRandomForestTable("Entropy", "Telemetry", timedelta(minutes=10), "24.03.23")

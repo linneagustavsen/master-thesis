@@ -48,7 +48,13 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
-    data = pd.read_csv("Calculations0803/Threshold/Telemetry/MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
+    data = pd.read_csv("Calculations"+fileString+"/Threshold/Telemetry/MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
@@ -96,7 +102,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
         elif deviation <= threshold and not attack:
             trueNegatives += 1
 
-    p = Path('Detections')
+    p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
         r.mkdir(parents=True)

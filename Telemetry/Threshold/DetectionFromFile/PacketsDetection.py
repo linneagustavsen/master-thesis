@@ -53,7 +53,13 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
 
-    data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
+    data = pd.read_csv("Calculations"+fileString+"/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
@@ -108,7 +114,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
                 falseNegatives +=1
             elif not attack:
                 trueNegatives += 1
-    p = Path('Detections')
+    p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
         r.mkdir(parents=True)

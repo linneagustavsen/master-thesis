@@ -85,7 +85,13 @@ def icmpDstUnreachableDetection(silkFile, start, stop, systemId, frequency, inte
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
     mqtt_client.loop_start()
-    
+
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
