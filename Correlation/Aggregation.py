@@ -137,6 +137,7 @@ class Aggregation:
                 print("Aggregation published to topic", self.outputTime)
         else:
             self.addAlertToGraph(gateway, interval, payload, 0)
+            print("No overlapping alerts for time interval", interval)
 
     def aggregateTimeDistribution(self, stime, etime, gateway, distribution, payload):
         stime = pd.Timestamp(stime)
@@ -196,6 +197,7 @@ class Aggregation:
                 print("Aggregation published to topic", self.outputDist)
         else:
             self.addAlertToGraph(gateway, interval, payload, 1)
+            print("No overlapping alerts for distribution for time interval", interval)
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
     """

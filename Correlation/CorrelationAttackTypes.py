@@ -113,8 +113,10 @@ class Correlation_Attack_types:
                     print("\n")
             else:
                 self.addAlert(attackType, interval, payload)
+                print("No overlapping alerts for time interval", interval)
         else:
             self.addAlert(attackType, interval, payload)
+            print("No attack type of type", attackType)
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
