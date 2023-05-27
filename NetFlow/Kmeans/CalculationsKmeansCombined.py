@@ -22,10 +22,10 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
     
-    '''ipP = Path('IPCalculations')
+    ipP = Path('IPCalculations')
     ipPath = ipP / 'Kmeans'
     if not ipPath.exists():
-        ipPath.mkdir(parents=True, exist_ok=False)'''
+        ipPath.mkdir(parents=True, exist_ok=False)
     
     dataPath = Path('NetFlow')
     dp = dataPath / 'Kmeans' / 'DataSets'
@@ -47,29 +47,16 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
         with open(str(dp) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
             np.save(f, entropy_df)
     
+    f0IP = open(str(ipPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+        
     intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
- 
+    
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
-
-        f0 = open(str(q) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        #f1 = open(str(q) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f0.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-        #f1.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-        '''f0IP = open(str(ipPath) + "/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f1IP = open(str(ipPath) + "/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
-        f1IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")'''
-        f_scores = open(str(q) + "/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f_scores.write("TP,FP,FN,TN")
-        truePositives = 0
-        falsePositives = 0
-        falseNegatives = 0
-        trueNegatives = 0
-        cluster = open(str(q) + "/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
         
+
         testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate)
         if len(testingSet) < 3:
             startTime += clusterFrequency
@@ -83,43 +70,33 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
 
         prediction = KMeans(n_clusters=2, random_state=0, n_init="auto").fit_predict(measurements)
         attackCluster, db, cd0, cd1, counter0, counter1 = labelCluster(measurements, prediction, 0.5, 0, 0)
-        cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
-
+        if attackCluster == 0:
+            nonAttackClusterDiameter = cd1
+            attackClusterDiameter = cd0
+        elif attackCluster == 1:
+            nonAttackClusterDiameter = cd0
+            attackClusterDiameter = cd1
+        attackType = ""
+        #If it is a burst attack and non attack cluster is empty
+        if db < 0.5 and nonAttackClusterDiameter == 0:
+            attackType = "Same"
+        #If there is no burst and attack cluster is less compact than normal traffic
+        elif db > 0.5 and attackClusterDiameter > (nonAttackClusterDiameter + 0):
+            attackType = "Different"
+        #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
+        elif db < 0.5 and nonAttackClusterDiameter > (attackClusterDiameter + 0):
+            attackType = "Same"
         for i in range(len(prediction)):
-            line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            #line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
+            lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             for j in range(len(measurements[i])):
-                #lineIPs += "," + str(measurements[i][j])
-                #Skip the IP fields
-                if j == 0 or j == 1 or j == 16:
-                    continue
-                line += "," + str(measurements[i][j])
-            #lineIPs += "," +str(label[i])
-            line += "," +str(label[i])
+                lineIPs += "," + str(measurements[i][j])
+            lineIPs +="," + attackType + "," +str(label[i])
+            #line += "," +str(label[i])
             
             if prediction[i] == attackCluster:
-                f0.write(line)
-                #f0IP.write(lineIPs)
-                if label[i] == 1:
-                    truePositives += 1
-                else:
-                    falsePositives += 1
-            else:
-                #f1.write(line)
-                #f1IP.write(lineIPs)
-                if label[i] == 1:
-                    falseNegatives += 1
-                else:
-                    trueNegatives += 1
-        
-        f0.close()
-        #f1.close()
-        #f0IP.close()
-        #f1IP.close()
-        cluster.close()
-        '''f_scores.write("\n"+str(confusion_matrix(label, prediction)) + ","+ str(accuracy_score(label, prediction)) + ","+ 
-                   str(f1_score(label,prediction)) + ","+ str(recall_score(label,prediction)) + ","+ 
-                   str(precision_score(label,prediction)))'''
-        f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
-        f_scores.close()
+                #f0.write(line)
+                f0IP.write(lineIPs)
+                
         startTime += clusterFrequency
+    f0IP.close()
