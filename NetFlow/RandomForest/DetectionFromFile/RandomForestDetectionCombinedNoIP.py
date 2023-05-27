@@ -36,10 +36,11 @@ def detectionRandomForestNoIPNetFlow(start, stop, systemId, interval, attackDate
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedNoIPDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')

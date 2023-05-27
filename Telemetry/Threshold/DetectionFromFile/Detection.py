@@ -22,14 +22,6 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
             attackDate: string, date of the attack to detect
 '''
 def detectionTelemetry(start, stop, systemId, field, threshold, attackDate):
-    p = Path('Detections')
-    r = p / 'Threshold' / 'Telemetry'
-    if not r.exists():
-        r.mkdir(parents=True)
-
-    scores = open(str(r) + "/Scores." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores.write("TP,FP,FN,TN")
-
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel." + str(field)+".json", "r")
     maxmin = json.load(json_file)
 
@@ -50,10 +42,11 @@ def detectionTelemetry(start, stop, systemId, field, threshold, attackDate):
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ThresholdDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Threshold/Telemetry/" + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -102,6 +95,14 @@ def detectionTelemetry(start, stop, systemId, field, threshold, attackDate):
             falseNegatives +=1
         elif deviation <= threshold and not attack:
             trueNegatives += 1
-        
+
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
+
+    scores = open(str(r) + "/Scores." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")
+ 
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

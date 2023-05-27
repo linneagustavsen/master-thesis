@@ -22,13 +22,6 @@ import paho.mqtt.client as mqtt
             
 '''
 def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
-    p = Path('Detections')
-    r = p / 'Threshold' / 'Telemetry'
-    if not r.exists():
-        r.mkdir(parents=True)
-
-    scores = open(str(r) + "/Scores.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores.write("TP,FP,FN,TN")
 
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "r")
     maxmin = json.load(json_file)
@@ -49,10 +42,11 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("MaxVarDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    ##mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Threshold/Telemetry/MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -101,6 +95,13 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
             falseNegatives +=1
         elif deviation <= threshold and not attack:
             trueNegatives += 1
-        
+
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
+
+    scores = open(str(r) + "/Scores.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN") 
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

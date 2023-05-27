@@ -26,22 +26,10 @@ from HelperFunctions.Normalization import normalization
             attackDate:             string, date of the attack the calculations are made on
 '''
 def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
-    p = Path('Detections')
-    q = p / 'Entropy' / 'Telemetry'
-    if not q.exists():
-        q.mkdir(parents=True)
-
-    #Open file to write alerts to
-    scores = open(str(q) + "/Scores.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores_r = open(str(q) + "/Scores.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    scores.write("TP,FP,FN,TN")
-    scores_r.write("TP,FP,FN,TN")
 
     json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
-    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "r")
+    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_rate = json.load(json_file_rate)
 
     #Parameters for the MQTT connection
@@ -61,10 +49,11 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("EntropyDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -162,6 +151,18 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                 trueNegatives += 1
                 trueNegatives_r += 1
 
+    p = Path('Detections')
+    q = p / 'Entropy' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    #Open file to write alerts to
+    scores = open(str(q) + "/Scores.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r = open(str(q) + "/Scores.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    scores.write("TP,FP,FN,TN")
+    scores_r.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
 

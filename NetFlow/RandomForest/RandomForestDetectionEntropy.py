@@ -52,10 +52,11 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestEntropyDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     p = Path('NetFlow')
     q = p / 'RandomForest'

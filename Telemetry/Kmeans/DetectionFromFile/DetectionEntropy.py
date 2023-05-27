@@ -22,13 +22,6 @@ from Telemetry.Kmeans.ClusterLabelling import labelCluster
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
-    p = Path('Detections')
-    q = p / 'Kmeans' / 'Telemetry'
-    if not q.exists():
-        q.mkdir(parents=True)
-
-    scores = open(str(q) + "/Scores.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores.write("TP,FP,FN,TN")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -47,10 +40,11 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansEntropyDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -62,6 +56,8 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     trueNegatives  = 0
 
     attackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    if attackCluster.empty:
+        return
     if attackCluster["AttackCluster"][0] == 0:
         cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
@@ -125,6 +121,12 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    
+    p = Path('Detections')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    scores = open(str(q) + "/Scores.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

@@ -12,16 +12,6 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
 def topkflows(start, stop, systemId, attackDate):
-    p = Path('Detections')
-    q = p / 'TopKFlows' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
-
-    #Open file to write alerts to
-    scores = open(str(q) + "/Scores.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    scores.write("TP,FP")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -40,10 +30,11 @@ def topkflows(start, stop, systemId, attackDate):
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -101,6 +92,15 @@ def topkflows(start, stop, systemId, attackDate):
             truePositives += 1
         elif not attack:
             falsePositives += 1
+    p = Path('Detections')
+    q = p / 'TopKFlows' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
 
+    #Open file to write alerts to
+    scores = open(str(q) + "/Scores.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    scores.write("TP,FP")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives))
     scores.close()

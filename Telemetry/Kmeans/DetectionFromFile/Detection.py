@@ -20,13 +20,6 @@ import paho.mqtt.client as mqtt
             attackDate: string, date of the attack the calculations are made on
 '''
 def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshold, c0threshold, c1threshold, attackDate):
-    p = Path('Detections')
-    q = p / 'Kmeans' / 'Telemetry'
-    if not q.exists():
-        q.mkdir(parents=True)
-
-    scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores.write("TP,FP,FN,TN")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -45,10 +38,11 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     
     truePositives = 0
@@ -73,7 +67,8 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
         attackCluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/ClusterLabelling.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
+        if attackCluster.empty:
+            continue
         if attackCluster["AttackCluster"][0] == 0:
             cluster = pd.read_csv("Calculations0803/Kmeans/Telemetry/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
@@ -154,6 +149,12 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-            
+    p = Path('Detections')
+    q = p / 'Kmeans' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")     
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

@@ -27,20 +27,6 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             attackDate:     string, date of the attack the calculations are made on
 '''
 def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, thresholdSrc, thresholdDst, thresholdFlow, attackDate):
-    p = Path('Detections')
-    q = p / 'Entropy' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
-    #Open files to write alerts to
-    scores_s = open(str(q) + "/Scores.SYNSourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores_d = open(str(q) + "/Scores.SYNDestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores_f = open(str(q) + "/Scores.SYNFlowIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
-    #Write the column titles to the files
-    scores_s.write("TP,FP,FN,TN")
-    scores_d.write("TP,FP,FN,TN")
-    scores_f.write("TP,FP,FN,TN")
-
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
     if not q.exists():
@@ -70,10 +56,11 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNEntropyDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -216,6 +203,21 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
                 trueNegatives_s += 1
                 trueNegatives_d += 1
                 trueNegatives_f += 1
+
+    p = Path('Detections')
+    q = p / 'Entropy' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
+    #Open files to write alerts to
+    scores_s = open(str(q) + "/Scores.SYNSourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_d = open(str(q) + "/Scores.SYNDestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_f = open(str(q) + "/Scores.SYNFlowIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    
+    #Write the column titles to the files
+    scores_s.write("TP,FP,FN,TN")
+    scores_d.write("TP,FP,FN,TN")
+    scores_f.write("TP,FP,FN,TN")
 
     scores_s.write("\n"+ str(truePositives_s)+ "," + str(falsePositives_s)+ "," + str(falseNegatives_s)+ "," + str(trueNegatives_s))
     scores_s.close()

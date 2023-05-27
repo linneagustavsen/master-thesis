@@ -204,6 +204,7 @@ class Aggregation:
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
         self.mqtt_client.subscribe(self.input)
+        print("subscribed to", self.input)
 
     def on_message(self, client, userdata, msg):
         print('Incoming message to topic {}'.format(msg.topic))
@@ -237,7 +238,7 @@ class Aggregation:
         self.mqtt_client = mqtt.Client()
         self.mqtt_client.on_message = self.on_message
         self.mqtt_client.on_connect = self.on_connect
-        
+
         self.mqtt_client.connect(self.broker, self.port)
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)

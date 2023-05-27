@@ -25,18 +25,6 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate):
-    p = Path('Detections')
-    q = p / 'Threshold' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
-    #Open file to write alerts to
-    scores_r = open(str(q) + "/Scores.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores = open(str(q) + "/Scores.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    
-    #Write the column titles to the files
-    scores_r.write("TP,FP,FN,TN")
-    scores.write("TP,FP,FN,TN")
-
     p = Path('NetFlow')
     q = p / 'Threshold' / 'Calculations'
     if not q.exists():
@@ -64,10 +52,11 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ICMPDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -179,7 +168,18 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
             elif not attack:
                trueNegatives += 1
                trueNegatives_r += 1
+    p = Path('Detections')
+    q = p / 'Threshold' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    #Open file to write alerts to
+    scores_r = open(str(q) + "/Scores.ICMPRatio."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.ICMPPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     
+    #Write the column titles to the files
+    scores_r.write("TP,FP,FN,TN")
+    scores.write("TP,FP,FN,TN")
+
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
 

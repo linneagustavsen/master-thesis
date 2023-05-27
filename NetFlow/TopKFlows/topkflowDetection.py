@@ -57,10 +57,11 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')

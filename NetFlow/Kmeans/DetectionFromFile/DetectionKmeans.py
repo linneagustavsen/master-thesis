@@ -22,8 +22,6 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
-    scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores.write("TP,FP,FN,TN")
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -42,10 +40,11 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     
     truePositives = 0
@@ -178,5 +177,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         elif not real_labels[i]:
             falsePositives += 1
     
+    scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

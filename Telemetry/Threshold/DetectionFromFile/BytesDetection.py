@@ -26,16 +26,7 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
 '''
 
 def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
-    p = Path('Detections')
-    r = p / 'Threshold' / 'Telemetry'
-    if not r.exists():
-        r.mkdir(parents=True)
-    #Open file to write alerts to
-    scores = open(str(r) + "/Scores.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    scores.write("TP,FP,FN,TN")
-
+    
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin = json.load(json_file)
 
@@ -56,10 +47,11 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionTelemetry")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -116,5 +108,15 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
                 falseNegatives +=1
             elif not attack:
                 trueNegatives += 1
+    p = Path('Detections')
+    r = p / 'Threshold' / 'Telemetry'
+    if not r.exists():
+        r.mkdir(parents=True)
+    #Open file to write alerts to
+    scores = open(str(r) + "/Scores.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    scores.write("TP,FP,FN,TN")
+
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

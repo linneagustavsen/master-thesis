@@ -27,18 +27,6 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             attackDate:                     string, date of the attack the calculations are made on
 '''
 def detectionPS(start, stop, systemId, frequency, interval, windowSize, thresholdPSEntropy, thresholdPSEntropyRate, attackDate):
-    p = Path('Detections')
-    q = p / 'Entropy' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
-    #Open files to write alerts to
-    scores = open(str(q) + "/Scores.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores_r = open(str(q) + "/Scores.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    scores.write("TP,FP,FN,TN")
-    scores_r.write("TP,FP,FN,TN")
-    
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
     if not q.exists():
@@ -66,10 +54,11 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketSizeEntropyDetectionNetFlow")
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     data = pd.read_csv("Calculations0803/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
@@ -197,6 +186,19 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
             elif not attack:
                 trueNegatives += 1
                 trueNegatives_r += 1
+
+    p = Path('Detections')
+    q = p / 'Entropy' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    
+    #Open files to write alerts to
+    scores = open(str(q) + "/Scores.PacketSizeEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r = open(str(q) + "/Scores.PacketSizeEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    scores.write("TP,FP,FN,TN")
+    scores_r.write("TP,FP,FN,TN")
 
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
