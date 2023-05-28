@@ -28,11 +28,12 @@ def detectionRandomForestCombinedTelemetry(start, stop, systemId, interval, atta
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Random Forest detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Random Forest detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestDetectionTelemetry")
@@ -65,7 +66,7 @@ def detectionRandomForestCombinedTelemetry(start, stop, systemId, interval, atta
             break
         if sTime[i] < startTime:
             continue
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        #simulateRealTime(datetime.now(), eTime[i], attackDate)
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

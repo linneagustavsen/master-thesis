@@ -52,8 +52,8 @@ def plotSYN(systemId, attackDate):
     format = '%b %d %H:%M:%S'
     
     
-    start = datetime.strptime(strings[synAttackIndex][0], format).replace(year=2023)
-    stop = datetime.strptime(strings[synAttackIndex][1], format).replace(year=2023)
+    '''start = datetime.strptime(strings[synAttackIndex][0], format).replace(year=2023)
+    stop = datetime.strptime(strings[synAttackIndex][1], format).replace(year=2023)'''
     #axs.axvspan(start, stop, facecolor="#F9CAA4")
     
     endTime = pd.to_datetime(data["eTime"])
@@ -64,11 +64,11 @@ def plotSYN(systemId, attackDate):
     timeAxis = []
     counter = 0
     for i in range(len(labels)):
-        if endTime[i].replace(tzinfo=None) > stop:
+        '''if endTime[i].replace(tzinfo=None) > stop:
             print(endTime[i])
             break
         if startTime[i].replace(tzinfo=None) < start:
-            continue
+            continue'''
         timeAxis.append(startTime[i])
         if labels[i] == 1:
             counter +=1
@@ -110,8 +110,8 @@ def plotSYN(systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/OnlySYNAttack.Scatter."+  str(systemId)+ ".SYN.png", dpi=500)
-    plt.close()
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.png", dpi=500)
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",

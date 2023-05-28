@@ -49,7 +49,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
@@ -103,7 +103,7 @@ def topkflows(silkFile, start, stop, frequency, k, attackDate, systemId):
                             exists = True
                     if not exists:
                         change = True
-                        simulateRealTime(datetime.now(), rec.stime, attackDate)
+                        #simulateRealTime(datetime.now(), rec.stime, attackDate)
                         alert = {
                             "sTime": (rec.stime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
                             "eTime": rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ"),

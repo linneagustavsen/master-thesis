@@ -41,11 +41,12 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Entropy detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("EntropyDetectionTelemetry")
@@ -105,7 +106,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
             else:
                 attackType = "Different protocols"
 
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             
             if abs(change) > thresholdEntropy:
                 alert = {

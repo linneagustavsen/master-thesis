@@ -89,7 +89,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
         axs.legend()
         fig.tight_layout()
         fig.savefig(path+y_field+day+".png", dpi=500)
-        plt.close()
+        plt.close(fig)
         x_values = []
         y_values = [[] for _ in range(7)]  # Initialize empty lists for 7 weeks
 

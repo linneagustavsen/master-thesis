@@ -179,7 +179,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs[1].legend(fontsize=20)
     fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",

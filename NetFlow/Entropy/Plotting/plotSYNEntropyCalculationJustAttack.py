@@ -107,7 +107,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     #fig.tight_layout()
     fig.legend(fontsize=20)
     fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/JustAttackPeriod/SYN."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",

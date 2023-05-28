@@ -46,7 +46,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         return
     timeAxis = pd.to_datetime(data["sTime"])
            
-    fig, axs = plt.subplots(1, 1, figsize=(20, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     axs.plot(timeAxis ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
@@ -86,12 +86,12 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
     )
     axs.set_title("ICMP destination unreachable packets", fontsize=20)
     axs.set_xlabel('Time', fontsize=15)
-    axs.set_ylabel("ICMP destination unreachable packets", fontsize=20)
+    axs.set_ylabel("Packets", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #fig.tight_layout()
     fig.savefig("Plots/Threshold/Attack"+ fileString+"/NetFlow/ICMPDstUnreachable/"+  str(systemId)+ "." + str("ICMPDstUnreachable")+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",

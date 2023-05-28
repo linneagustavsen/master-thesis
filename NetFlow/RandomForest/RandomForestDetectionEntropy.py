@@ -44,7 +44,7 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
@@ -81,7 +81,7 @@ def detectionRandomForestNetFlowEntropy(testingSet, systemId, frequency, interva
 
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
-        simulateRealTime(datetime.now(), timeStamps[i], attackDate)
+        #simulateRealTime(datetime.now(), timeStamps[i], attackDate)
         if predictions[i] == 1:
             alert = {
                     "sTime": (timeStamps[i]- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

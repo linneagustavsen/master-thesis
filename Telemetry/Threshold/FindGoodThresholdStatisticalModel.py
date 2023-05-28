@@ -7,16 +7,20 @@ import pandas as pd
 
 
 def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, attackDate):
+    p = Path('ThresholdDecision')
+    decisionPath = p / 'Threshold' / 'Telemetry'
     if attackDate == "08.03.23":
         fileString = "0803"
+        q = decisionPath /'Attack0803'
     elif attackDate == "17.03.23":
         fileString = "1703"
+        q = decisionPath /'Attack1703'
     elif attackDate == "24.03.23":
         fileString = "2403"
-    p = Path('ThresholdDecision')
-    q = p / 'Threshold' / 'Telemetry'/'Attack' + fileString
+        q = decisionPath /'Attack2403'
     if not q.exists():
         q.mkdir(parents=True)
+    
     data = pd.read_csv("Calculations"+fileString+"/Threshold/Telemetry/" + str(y_field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])

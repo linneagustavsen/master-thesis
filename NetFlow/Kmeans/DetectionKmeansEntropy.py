@@ -46,7 +46,7 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
@@ -88,7 +88,7 @@ def detectionKmeansEntropy(silkFile, start, stop, systemId, frequency, interval,
         attackType = "Same protocol"
     for i in range(len(prediction)):
         attack = labels[i]
-        simulateRealTime(datetime.now(), timeIntervals[i].right, attackDate)
+        #simulateRealTime(datetime.now(), timeIntervals[i].right, attackDate)
         if prediction[i] == attackCluster:
             alert = {
                         "sTime": timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ"),

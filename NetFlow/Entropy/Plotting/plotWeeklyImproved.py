@@ -61,7 +61,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path, interval):
     axs.legend()
     fig.tight_layout()
     fig.savefig(path+y_field+".png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 files = ["sip","sip_rate","dip", "dip_rate","flow", "f_rate","nf", "icmp_ratio", "icmp_packets", "packet_size", "packet_size_r", "packets", "bytes"]

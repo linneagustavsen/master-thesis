@@ -40,11 +40,12 @@ def icmpDstUnreachableDetection(start, stop, systemId, frequency, interval, wind
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "ICMP destination unreachable detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "ICMP destination unreachable detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ICMPDstUnreachableNetFlow")
@@ -115,7 +116,7 @@ def icmpDstUnreachableDetection(start, stop, systemId, frequency, interval, wind
         if i >= windowSize:
             change = numberOfIcmpDstUnreachablePackets[i] - np.nanmean(numberOfIcmpDstUnreachablePackets[i-windowSize: i-1])
 
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > threshold:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -63,7 +63,7 @@ def makePlot(y_field, y_fieldName):
     axs.legend()
     fig.tight_layout()
     fig.savefig("Plots/Threshold/Telemetry/WeeklyPattern/"+ y_field+".png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 y_fields = ["egress_octets"]

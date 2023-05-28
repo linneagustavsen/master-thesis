@@ -7,16 +7,20 @@ import pandas as pd
 
 
 def findGoodThreshold(systemId, attackDate):
+    p = Path('ThresholdDecision')
+    decisionPath = p / 'Threshold' / 'NetFlow'
     if attackDate == "08.03.23":
         fileString = "0803"
+        q = decisionPath /'Attack0803'
     elif attackDate == "17.03.23":
         fileString = "1703"
+        q = decisionPath /'Attack1703'
     elif attackDate == "24.03.23":
         fileString = "2403"
-    p = Path('ThresholdDecision')
-    q = p / 'Threshold' / 'NetFlow'/'Attack' + fileString
+        q = decisionPath /'Attack2403'
     if not q.exists():
         q.mkdir(parents=True)
+    
     f_scores = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
     data = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")

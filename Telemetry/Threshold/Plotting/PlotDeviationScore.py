@@ -35,5 +35,5 @@ def plotDeviationScore(systemId, field):
                 fig.legend()
                 fig.tight_layout()
                 fig.savefig("Plots/Threshold/DeviationScore"+ row.values["_time"].strftime("%d-%m-%Y--%H:%M:%S") + "--"+ str(systemId) + str(field)+".png")
-                plt.close()
+                plt.close(fig)
 plotDeviationScore("bergen-gw3", "egress_stats__if_1sec_octets")

@@ -7,14 +7,17 @@ import pandas as pd
 
 
 def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate):
+    p = Path('ThresholdDecision')
+    decisionPath = p / 'Entropy' / 'NetFlow'
     if attackDate == "08.03.23":
         fileString = "0803"
+        q = decisionPath /'Attack0803'
     elif attackDate == "17.03.23":
         fileString = "1703"
+        q = decisionPath /'Attack1703'
     elif attackDate == "24.03.23":
         fileString = "2403"
-    p = Path('ThresholdDecision')
-    q = p / 'Entropy' / 'NetFlow' /'Attack' + fileString
+        q = decisionPath /'Attack2403'
     if not q.exists():
         q.mkdir(parents=True)
     
@@ -77,15 +80,12 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
             changeList.append(None)
     
     if not isThereAttack:
-        print("No attacks!!\n")
         return
     changeList = list(dict.fromkeys(changeList))
     thresholds = list(sorted(changeList))
     f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
-    print(thresholds)
-    print(minChange)
-    print(maxChange)
+
     lastTruePositives = 0
     lastFalsePositives = 0
     lastFalseNegatives = 0

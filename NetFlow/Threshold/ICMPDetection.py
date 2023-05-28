@@ -79,7 +79,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
@@ -136,7 +136,7 @@ def detectionICMP(silkFile, start, stop, systemId, frequency, interval, windowSi
                 change_ratio = icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1])
                 change_packets = icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])
                 
-                simulateRealTime(datetime.now(), rec.stime, attackDate)
+                #simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change_ratio) > thresholdICMPRatio:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

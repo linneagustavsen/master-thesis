@@ -51,7 +51,8 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         counterStrings += 1
 
     clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-
+    if len(clusterLabels["AttackCluster"]) == 0:
+        return
     cluster0 = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     cluster1 = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     sTime0 = pd.to_datetime(cluster0["sTime"])
@@ -141,29 +142,26 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
                 newPackets1.append(packets1[counter1])
                 counter1 +=1
 
-
-    labelPlot1 = ""
-    labelPlot2 = ""
-
-    if len(clusterLabels["AttackCluster"]) == 0:
-        return
-    if clusterLabels["AttackCluster"][0] == 0:
-        labelPlot1 = "Attack cluster"
-        labelPlot2 = "Normal cluster"
-        color1 = "#E76F51"
-        color2 = "#162931"
-        size1 = 70
-        size2 = 30
-    elif clusterLabels["AttackCluster"][0] == 1:
-        labelPlot2 = "Attack cluster"
-        labelPlot1 = "Normal cluster"
-        color1 = "#162931"
-        color2 = "#E76F51"
-        size1 = 30
-        size2 = 70
-    axs.scatter(timeAxis ,newPackets0, color=color1, label=labelPlot1, s=size1)
-
-    axs.scatter(timeAxis ,newPackets1, color=color2, label=labelPlot2, s=size2)
+    if fileString == "0803":
+        if clusterLabels["AttackCluster"][0] == 0:
+            labelPlot1 = "Attack cluster"
+            labelPlot2 = "Normal cluster"
+            color1 = "#E76F51"
+            color2 = "#162931"
+            size1 = 70
+            size2 = 30
+        elif clusterLabels["AttackCluster"][0] == 1:
+            labelPlot2 = "Attack cluster"
+            labelPlot1 = "Normal cluster"
+            color1 = "#162931"
+            color2 = "#E76F51"
+            size1 = 30
+            size2 = 70
+        axs.scatter(timeAxis ,newPackets0, color=color1, label=labelPlot1, s=size1)
+        axs.scatter(timeAxis ,newPackets1, color=color2, label=labelPlot2, s=size2)
+    else:
+        axs.scatter(timeAxis ,newPackets0, color="#E76F51", label="Attack cluster", s=70)
+        axs.scatter(timeAxis ,newPackets1, color="#162931", label="Normal cluster", s=30)
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -181,16 +179,15 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     
     fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+systems = [
             "oslo-gw1"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:

@@ -65,26 +65,11 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
 
         clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
-        attackCluster = 1
-        db = clusterLabels["Davies-bouldin-score"][0]
-        cd0 = clusterLabels["ClusterDiameter0"][0]
-        cd1 = clusterLabels["ClusterDiameter1"][0]
-        #If it is a burst attack and c1 is empty, c0 is the attack cluster
-        if db < 0.5 and cd1 == 0:
-            attackCluster = 0
-        #If there is no burst and c0 is less compact than c1, c0 is the attack cluster
-        elif db > 0.5 and cd0 > (cd1 + 0):
-            attackCluster = 0
-        #If there is burst traffic and normal traffic and c1 is less compact than c0, c1 is the attack cluster
-        elif db < 0.5 and cd1 > (cd0 + 0):
-            attackCluster = 0
-        print(clusterLabels["AttackCluster"][0], attackCluster)
-
-        if attackCluster == 0:
+        if clusterLabels["AttackCluster"][0] == 0:
             attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             nonAttackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
-        elif attackCluster == 1:
+        elif clusterLabels["AttackCluster"][0] == 1:
             attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             nonAttackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         '''
@@ -102,15 +87,11 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         #print(clusterLabels["AttackCluster"])
         sTimeAttack = pd.to_datetime(attackCluster["sTime"])
         sTimeNormal = pd.to_datetime(nonAttackCluster["sTime"])
-        packetsAttack = attackCluster["entropy_packet_size"]
+        packetsAttack = attackCluster["egress_stats__if_1sec_pkt"]
         labelsAttack = attackCluster["real_label"]
         
+        packetsNormal = nonAttackCluster["egress_stats__if_1sec_pkt"]
         labelsNormal = nonAttackCluster["real_label"]
-        #format = '%Y-%m-%dT%H:%M:%SZ'
-        eTimeAttack = pd.to_datetime(attackCluster["eTime"])
-        eTimeNormal = pd.to_datetime(nonAttackCluster["eTime"])
-
-        lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
 
         for i in range(len(labelsAttack)):
             sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
@@ -158,8 +139,8 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[1].set_ylim([0,maxValue])
     axs[1].legend(fontsize=20)
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
