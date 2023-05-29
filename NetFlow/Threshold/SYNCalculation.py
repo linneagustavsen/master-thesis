@@ -17,7 +17,6 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     if not q.exists():
         q.mkdir(parents=True)
     #Open file to write alerts to
-    #Open file to write alerts to
     calculations = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
     calculations.write("sTime,eTime,synPacketsPerFlow,srcPort,dstPort,real_label")

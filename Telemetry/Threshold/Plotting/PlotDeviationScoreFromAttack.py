@@ -54,7 +54,7 @@ def makePlotDeviationScore(y_field, y_field_name, systemId, attackDate):
         counterStrings += 1
     
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=30),
+        major_locator=mdates.HourLocator(),
         major_formatter=mdates.DateFormatter("%H:%M"),
         
     )
@@ -73,7 +73,8 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s"]
-attackDates =  ["08.03.23","17.03.23"]
+
+attackDates =  ["08.03.23"]
 for attackDate in attackDates:
     for i in range(len(y_fields)):
         for systemId in systems:

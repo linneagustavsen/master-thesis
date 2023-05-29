@@ -34,27 +34,20 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
     
     changes_sip = []
     changes_sip_r = []
-    min_sip = 100000000000000
-    min_sip_r = 100000000000000
     ipSrcArray = []
     ipSrcRateArray = []
 
     changes_dip = []
     changes_dip_r = []
-    min_dip = 100000000000000
-    min_dip_r = 100000000000000
     ipDstArray = []
     ipDstRateArray = []
 
     changes_f = []
     changes_f_r = []
-    min_f = 100000000000000
-    min_f_r = 100000000000000
     flowArray = []
     flowRateArray = []
 
     changes_nf = []
-    min_nf = 100000000000000
     numberOfFlows = []
 
     changes_ICMP_ratio = []
@@ -64,15 +57,11 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
 
     changes_PS = []
     changes_PS_r = []
-    min_PS = 100000000000000
-    min_PS_r = 100000000000000
     packetSizeArray = []
     packetSizeRateArray = []
 
     changes_packets = []
     changes_bytes = []
-    min_packets = 100000000000000
-    min_bytes = 100000000000000
     packetNumberArray = []
     bytesArray = []
     #Instantiate variables
@@ -153,13 +142,9 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
                 bytesArray.append(numberOfBytes(records))
 
                 change_sip = abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]))
-                if change_sip < min_sip:
-                    min_sip = change_sip
                 changes_sip.append(change_sip)
                 
                 change_sip_r = abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))
-                if change_sip_r < min_sip_r:
-                    min_sip_r = change_sip_r
                 changes_sip_r.append(change_sip_r)
                 
                 change_dip = abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))
@@ -168,23 +153,15 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
                 changes_dip.append(change_dip)
 
                 change_dip_r = abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))
-                if change_dip_r < min_dip_r:
-                    min_dip_r = change_dip_r
                 changes_dip_r.append(change_dip_r)
 
                 change_f = abs(flowArray[i] - np.nanmean(flowArray[i-windowSize: i-1]))
-                if change_f < min_f:
-                    min_f = change_f
                 changes_f.append(change_f)
                 
                 change_f_r = abs(flowRateArray[i] - np.nanmean(flowRateArray[i-windowSize: i-1]))
-                if change_f_r < min_f_r:
-                    min_f_r = change_f_r
                 changes_f_r.append(change_f_r) 
                 
                 change_nf = abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))
-                if change_nf < min_nf:
-                    min_nf = change_nf
                 changes_nf.append(change_nf)
                 
                 change_ICMP_ratio = abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))
@@ -192,29 +169,17 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
 
                 change_ICMP_packets = abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))
                 changes_ICMP_packets.append(change_ICMP_packets)
-                if change_ICMP_ratio != 0:
-                    print(change_ICMP_ratio)
-                if change_ICMP_packets !=  0:
-                    print(change_ICMP_packets)
 
                 change_PS = abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))
-                if change_PS < min_PS:
-                    min_PS = change_PS
                 changes_PS.append(change_PS)
                 
                 change_PS_r = abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
-                if change_PS_r < min_PS_r:
-                    min_PS_r = change_PS_r
                 changes_PS_r.append(change_PS_r)
                 
                 change_packets = abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))
-                if change_packets < min_packets:
-                    min_packets = change_packets
                 changes_packets.append(change_packets)
                 
                 change_bytes = abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))
-                if change_bytes < min_bytes:
-                    min_bytes = change_bytes
                 changes_bytes.append(change_bytes)
                 #Push the sliding window
                 startTime = startTime + frequency
@@ -226,56 +191,57 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
         infile.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.sip."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_sip, "maximum": 3*np.nanmean(changes_sip)},json_file)
+    json.dump({"minimum": np.nanmin(changes_sip), "maximum": 3*np.nanmean(changes_sip)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.sip_rate."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_sip_r, "maximum": 3*np.nanmean(changes_sip_r)},json_file)
+    json.dump({"minimum": np.nanmin(changes_sip_r), "maximum": 3*np.nanmean(changes_sip_r)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.dip."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_dip, "maximum": 3*np.nanmean(changes_dip)},json_file)
+    json.dump({"minimum": np.nanmin(changes_dip), "maximum": 3*np.nanmean(changes_dip)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.dip_rate."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_dip_r, "maximum": 3*np.nanmean(changes_dip_r)},json_file)
+    json.dump({"minimum": np.nanmin(changes_dip_r), "maximum": 3*np.nanmean(changes_dip_r)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.flow."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_f, "maximum": 3*np.nanmean(changes_f)},json_file)
+    json.dump({"minimum": np.nanmin(changes_f), "maximum": 3*np.nanmean(changes_f)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.f_rate."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_f_r, "maximum": 3*np.nanmean(changes_f_r)},json_file)
+    json.dump({"minimum": np.nanmin(changes_f_r), "maximum": 3*np.nanmean(changes_f_r)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.nf."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_nf, "maximum": 3*np.nanmean(changes_nf)},json_file)
+    json.dump({"minimum": np.nanmin(changes_nf), "maximum": 3*np.nanmean(changes_nf)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_PS, "maximum": 3*np.nanmean(changes_PS)},json_file)
+    json.dump({"minimum": np.nanmin(changes_PS), "maximum": 3*np.nanmean(changes_PS)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Entropy/Calculations/MinMaxValues/MinMax.packet_size_r."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_PS_r, "maximum": 3*np.nanmean(changes_PS_r)},json_file)
+    json.dump({"minimum": np.nanmin(changes_PS_r), "maximum": 3*np.nanmean(changes_PS_r)},json_file)
     json_file.close()
-    print(np.nanmean(changes_ICMP_ratio))
+
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.icmp_ratio."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min(changes_ICMP_ratio), "maximum": 3*np.nanmean(changes_ICMP_ratio)},json_file)
+    json.dump({"minimum": np.nanmin(changes_ICMP_ratio), "maximum": 3*np.nanmean(changes_ICMP_ratio)},json_file)
     json_file.close()
-    print(np.nanmean(changes_ICMP_packets))
+
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.icmp_packets."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min(changes_ICMP_packets), "maximum": 3*np.nanmean(changes_ICMP_packets)},json_file)
+    json.dump({"minimum": np.nanmin(changes_ICMP_packets), "maximum": 3*np.nanmean(changes_ICMP_packets)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_packets, "maximum": 3*np.nanmean(changes_packets)},json_file)
+    json.dump({"minimum": np.nanmin(changes_packets), "maximum": 3*np.nanmean(changes_packets)},json_file)
     json_file.close()
 
     json_file = open("NetFlow/Threshold/Calculations/MinMaxValues/MinMax.bytes."+ str(int(interval.total_seconds())) +".json", "w")
-    json.dump({"minimum": min_bytes, "maximum": 3*np.nanmean(changes_bytes)},json_file)
+    json.dump({"minimum": np.nanmin(changes_bytes), "maximum": 3*np.nanmean(changes_bytes)},json_file)
     json_file.close()
 
 findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
 findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 15), 10)
+findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 10), 10)
