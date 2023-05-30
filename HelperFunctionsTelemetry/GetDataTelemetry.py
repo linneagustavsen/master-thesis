@@ -197,6 +197,7 @@ def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
         #Calculate the generalized entropy rate of this distribution
         packetSizeRateArray.append(entropyPacketSize/nps)
         labels.append(int(isAttack(timeInterval.left, timeInterval.right)))
+        
         #Push the start time by the specified frequency
         startTime = startTime + frequency
         counter +=1

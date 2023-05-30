@@ -40,7 +40,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
             entropy_df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", entropyFile)
-        entropy_df = getDataNetFlow(silkFile, startTime, stopTime)
+        entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
 
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)
@@ -70,7 +70,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
         cluster = open(str(q) + "/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
         
-        testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate)
+        testingSet = makeDataSetKmeansNetFlow(silkFile, startTime, stopTime, systemId, entropy_df, frequency, interval, attackDate)
         if len(testingSet) < 3:
             startTime += clusterFrequency
             continue

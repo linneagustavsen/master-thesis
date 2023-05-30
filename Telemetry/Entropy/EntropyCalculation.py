@@ -76,6 +76,7 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
         #If there is not enough stored values to compare with we skip the detection
         calculations.write("\n" + sTime.strftime("%Y-%m-%dT%H:%M:%SZ")+ ","+ stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(packetSizeArray[j]) + "," + str(packetSizeRateArray[j])
                                + "," + str(packetNumberArray[j]) + "," + str(bytesArray[j]) +  "," + str(int(isAttack(sTime, stopTime))))
+
         #Push the start time by the specified frequency
         startTime = startTime + frequency
         j += 1

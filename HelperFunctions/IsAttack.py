@@ -64,7 +64,7 @@ def isAttackFlow(sip, dip, start, end):
 def isAttack(start, end):
     exists = False
     for i in range(int((end-start).total_seconds())+1):
-        time = start + timedelta(seconds = i)
+        time = start.replace(tzinfo=None) + timedelta(seconds = i)
         if time.replace(microsecond=0) in attackTimestamps:
             exists = True
     return exists

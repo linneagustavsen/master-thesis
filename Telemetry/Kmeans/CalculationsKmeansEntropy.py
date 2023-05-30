@@ -67,6 +67,7 @@ def calculationsKmeansEntropyTelemetry(start, stop, systemId, bucket, interval, 
     cluster.write("\n"+ str(attackCluster) + "," + str(db) + "," + str(cd0) + "," + str(cd1)+ "," + str(counter0)+ "," + str(counter1))
     for i in range(len(prediction)):
         line = "\n"  + timeIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +timeIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
+
         for measurement in measurements[i]:
             line += "," + str(measurement)
         line += "," +str(labels[i])
