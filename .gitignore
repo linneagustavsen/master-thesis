@@ -7,7 +7,11 @@ Calculations2403/*
 Detections*/*
 Calculations/*
 *.npy
-ThresholdDecision*/Entropy/NetFlow/*.csv
-ThresholdDecision*/Threshold/NetFlow/*.csv
-ThresholdDecision*/Entropy/Telemetry/*.csv
-ThresholdDecision*/Threshold/Telemetry/*.csv
+ThresholdDecision/Entropy/NetFlow/Attack*/*.csv
+ThresholdDecision/Threshold/NetFlow/Attack*/*.csv
+ThresholdDecision/Entropy/Telemetry/Attack*/*.csv
+ThresholdDecision/Threshold/Telemetry/Attack*/*.csv
+ThresholdDecisionold/Entropy/NetFlow/*.csv
+ThresholdDecisionold/Threshold/NetFlow/*.csv
+ThresholdDecisionold/Entropy/Telemetry/*.csv
+ThresholdDecisionold/Threshold/Telemetry/*.csv

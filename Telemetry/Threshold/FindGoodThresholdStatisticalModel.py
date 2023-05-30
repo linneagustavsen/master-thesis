@@ -47,7 +47,10 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
         attack = labels[i]
         if i >=windowSize:
             change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
-
+            if change == np.nan:
+                changeDict[str(i)]  = {"attack": attack, "change": None}
+                changeList.append(None) 
+                continue
             if change > maxChange:
                 maxChange = change
             if change < minChange:

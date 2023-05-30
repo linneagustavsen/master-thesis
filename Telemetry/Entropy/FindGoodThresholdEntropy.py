@@ -21,7 +21,7 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
     if not q.exists():
         q.mkdir(parents=True)
     
-    data = pd.read_csv("Calculations"+fileString+"/Threshold/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("Calculations"+fileString+"/Threshold/Entropy/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
