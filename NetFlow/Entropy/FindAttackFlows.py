@@ -37,7 +37,6 @@ def findAttackFlows(silkFile, start, stop, systemId, frequency, interval, attack
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
-
     #Loop through all the flow records in the input file
     for rec in infile:
         if rec.etime > stopTime + frequency:

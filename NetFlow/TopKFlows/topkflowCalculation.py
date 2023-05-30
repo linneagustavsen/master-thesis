@@ -67,7 +67,8 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
     if not q.exists():
         q.mkdir(parents=True)
     f = open(str(q) + "/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("sTime,eTime,Change,Position,Packets,Percentage,srcPort,dstPort,protocol,real_label")
+    #f.write("sTime,eTime,Change,Position,Packets,Percentage,srcPort,dstPort,protocol,real_label")
+    f.write("sTime,eTime,Change,real_label")
     #Makes a datetime object of the input start time
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -106,9 +107,11 @@ def topkflows2(silkFile, start, stop, frequency, k, attackDate, systemId):
                         if str(key) == lastDistribution[j][0]:
                             exists = True
                     if not exists: # and (value/sumOfPackets) >= 0.01:
-                        f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + 
+                        '''f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + 
                                 str(normalization(20-i, 0, 20)) + ","+  str(i+1)+ "," + str(value) + "," + str((value/sumOfPackets))+  "," +
-                                str(rec.sport) + "," + str(rec.dport) + "," + str(rec.protocol) + "," + str(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))
+                                str(rec.sport) + "," + str(rec.dport) + "," + str(rec.protocol) + "," + str(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))'''
+                        f.write("\n" + (rec.stime-frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + 
+                                str(normalization(20-i, 0, 20)) + ","+  str(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))
                         change = True
 
                     if change:

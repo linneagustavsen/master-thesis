@@ -26,7 +26,8 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
         ipPath.mkdir(parents=True, exist_ok=False)
 
     f = open(str(q) + "/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    #f.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    f.write("sTime,eTime,packets,real_label")
     '''f_not = open(str(q) + "/NotAlerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_not.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
     f0IP = open(str(ipPath) + "/Alerts.Combined.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -63,12 +64,13 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
         for i in range(len(predictions)):
             line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             #lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
+            '''for j in range(len(testingMeasurements[i])):
                 #lineIPs += "," + str(testingMeasurements[i][j])
                 #Skip the IP fields
                 if j == 0 or j == 1 or j == 16:
                     continue
-                line += "," + str(testingMeasurements[i][j])
+                line += "," + str(testingMeasurements[i][j])'''
+            line += "," + str(testingMeasurements[i][5])
             line += "," +str(testingLabel[i])
             #lineIPs += "," +str(testingLabel[i])
 
@@ -103,7 +105,8 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate, estimator):
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
     f = open(str(q) + "/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    #f.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")
+    f.write("sTime,eTime,packets,real_label")
     '''f_not = open(str(q) + "/NotAlertsNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_not.write("sTime,eTime,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,real_label")'''
     f_scores = open(str(q) + "/ScoreNoIP.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -142,8 +145,9 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate, estimator):
         predictions = classifier_RF.predict(testingMeasurements)
         for i in range(len(predictions)):
             line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                line += "," + str(testingMeasurements[i][j])
+            '''for j in range(len(testingMeasurements[i])):
+                line += "," + str(testingMeasurements[i][j])'''
+            line += "," + str(testingMeasurements[i][3])
             line += "," +str(testingLabel[i])
             
             if predictions[i] == 1:
