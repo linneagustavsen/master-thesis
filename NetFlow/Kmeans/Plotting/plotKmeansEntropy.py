@@ -40,7 +40,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     #Makes datetime objects of the input times
-    fig, axs = plt.subplots(1, 1, figsize=(20, 10))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
     format = '%b %d %H:%M:%S'
     counterStrings = 0
@@ -167,8 +167,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in each cluster")
-    axs.title.set_size(20)
+    axs.set_title("Packets in each cluster", fontsize=20)
     axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.ylabel.set_size(15)

@@ -78,7 +78,7 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
     entropyOfSynPacketsPerDst = data["dstEntropy"]
     entropyOfSynPacketsPerFlow = data["flowEntropy"]
     
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
     attackIntervals = []

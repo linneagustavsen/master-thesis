@@ -81,7 +81,7 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
         jsonFilePS = open("Calculations"+fileString+"/Entropy/NetFlow/packetSizeDistributions.300secInterval.attack.08.03.bergen-gw3.json", "r")
         packetSizeDistributionDict = json.load(jsonFilePS)
     
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
     attackIntervals = []

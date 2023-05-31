@@ -69,7 +69,7 @@ def icmpDstUnreachableDetection(start, stop, systemId, frequency, interval, wind
 
     numberOfIcmpDstUnreachablePackets = data["ICMPDstUnreachable"]
 
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    

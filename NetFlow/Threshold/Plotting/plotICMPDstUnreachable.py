@@ -34,7 +34,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])
 

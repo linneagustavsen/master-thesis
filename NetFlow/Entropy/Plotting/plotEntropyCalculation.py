@@ -37,7 +37,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     timeAxis = pd.to_datetime(data["sTime"])
     y_values = data[y_field]
 
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])

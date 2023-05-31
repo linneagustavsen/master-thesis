@@ -148,8 +148,6 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
                 changes_sip_r.append(change_sip_r)
                 
                 change_dip = abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))
-                if change_dip < min_dip:
-                    min_dip = change_dip
                 changes_dip.append(change_dip)
 
                 change_dip_r = abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))
@@ -242,6 +240,6 @@ def findMinMaxMetricCalc(silkFile, start, stop, frequency, interval, windowSize)
     json.dump({"minimum": np.nanmin(changes_bytes), "maximum": 3*np.nanmean(changes_bytes)},json_file)
     json_file.close()
 
-findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
-findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 15), 10)
+'''findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 5), 10)
+findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 15), 10)'''
 findMinMaxMetricCalc("/home/linneafg/silk-data/RawDataFromFilter/oslo-gw1/all7weeks-sorted.rw", "2010-12-27 00:00:00", "2011-02-14 00:00:00", timedelta(minutes = 1), timedelta(minutes = 10), 10)

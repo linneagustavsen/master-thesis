@@ -32,7 +32,7 @@ def makePlot(y_fieldN, y_fieldT, y_fieldName, systemId, interval, attackDate):
         axs[1].axvspan(start, stop, facecolor="#F9CAA4")
     
     #format = '%Y-%m-%dT%H:%M:%SZ'
-    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations0803/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])
     lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")

@@ -6,7 +6,7 @@ import statistics
 
 import numpy as np
 
-from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
+from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataTables
 from Telemetry.Threshold.FFTDenoiser import fft_denoiser
 from Telemetry.Threshold.StatisticalModelCalculations import statisticalModelCalculations
 
@@ -41,17 +41,19 @@ def thresholdGeneration(systemId, field):
         intervalTime = (stopTime - startTime).days
 
         for i in range(math.ceil(intervalTime)):
-            print("i", i)
 
             stopTime = startTime + timedelta(days = 1)
-            print(startTime, stopTime)
+            if i % 10 == 0:
+                print("i", i)
+                print(startTime, stopTime)
             #Makes datetime objects of the input times
-            tables = getDataTables(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, bucket, field)
+            df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),bucket, systemId,  [field])
             startTime = stopTime
-            #Loop through all the tables and the rows and store them in a json structure based on weekday, hour, and minute
-            for table in tables:
-                for row in table.records:
-                    json_object_raw["weekday"][row.values["_time"].strftime('%w')]["hour"][str(row.values["_time"].hour)]["minute"][str(row.values["_time"].minute)].append(row.values["_value"])
+
+            #Loop through all the tables and the rows and check their deviation from the threshold values
+            #Alert detection system if the deviation is higher than a predetermined value
+            for time, value in df.values:
+                json_object_raw["weekday"][time.strftime('%w')]["hour"][str(time.hour)]["minute"][str(time.minute)].append(value)
 
         counter += 1
 
@@ -92,8 +94,9 @@ def thresholdGeneration(systemId, field):
     json.dump(json_object_mean_var,json_file_mean_var)
     json_file_mean_var.close()
 
-systems = ["bergen-gw3",  "oslo-gw1"]
-field = "egress_queue_info__0__cur_buffer_occupancy"
+systems = ["narvik-gw4", "hoytek-gw2"]
+fields = ["egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
 
 for systemId in systems:
-    thresholdGeneration(systemId, field)
+    for field in fields:
+        thresholdGeneration(systemId, field)
