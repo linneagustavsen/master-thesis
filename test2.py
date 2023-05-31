@@ -190,7 +190,5 @@ print(df)'''
 from Correlation.NetworkGraph import NetworkGraph
 import networkx as nx
 graph = NetworkGraph().G
-print(nx.shortest_path(graph, "teknobyen-gw1", "narvik-gw3"))
+print(nx.shortest_path(graph, "teknobyen-gw1", "trd-gw"))
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1",
-            "teknobyen-gw2",  "trd-gw", 
