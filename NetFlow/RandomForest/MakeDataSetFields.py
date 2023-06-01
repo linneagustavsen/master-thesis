@@ -24,6 +24,7 @@ def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
     fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if not Path(fieldsFile).exists():
         print("Cant find", fieldsFile)
+        #If the systemId == ifi2-gw you have to make an empty numpy array of shape 14 319 852 rows and 20 columns and set sTime and eTime to 0 and save sTime in a separate numpy array
         data = getDataNetFlow(silkFile, startTime, stopTime)
 
         if not q.exists():

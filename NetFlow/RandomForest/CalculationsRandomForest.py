@@ -3,6 +3,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 import pandas as pd
 import numpy as np
+import pickle
 
 from HelperFunctions.StructureData import structureDataNumpyArrays
 
@@ -39,7 +40,8 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator):
 
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
-    with open(str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
+    
+    '''with open(str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'rb') as trainingFile:
         trainingSet = np.load(trainingFile, allow_pickle=True)
     if len(trainingSet) ==0:
         return
@@ -48,9 +50,15 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator):
     trainingLabel=trainingLabel.astype('int')  
     
     classifier_RF = RandomForestClassifier(n_estimators = estimator)
-    classifier_RF.fit(trainingMeasurements,trainingLabel)
+    classifier_RF.fit(trainingMeasurements,trainingLabel)'''
 
-    for k in range(1,5):
+    modelPath = datasetsPath / 'RandomForest' / 'Models'
+    if not modelPath.exists():
+        modelPath.mkdir(parents=True)
+    filename = str(modelPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    classifier_RF = pickle.load(open(filename, 'rb'))
+
+    for k in range(1,9):
         with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy", 'rb') as testingFile:
             testingSet = np.load(testingFile, allow_pickle=True)
         
@@ -119,7 +127,7 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimato
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
 
-    fieldsFile = str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    '''fieldsFile = str(dsPath) + "/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     fieldsFileNoIP = str(dsPath) + "/Training/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(fieldsFileNoIP).exists():
         with open(str(fieldsFileNoIP), 'rb') as trainingFile:
@@ -141,9 +149,15 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimato
     trainingLabel=trainingLabel.astype('int')
 
     classifier_RF = RandomForestClassifier(n_estimators = estimator)
-    classifier_RF.fit(trainingMeasurements,trainingLabel)
+    classifier_RF.fit(trainingMeasurements,trainingLabel)'''
 
-    for k in range(1,5):
+    modelPath = datasetsPath / 'RandomForest' / 'Models'
+    if not modelPath.exists():
+        modelPath.mkdir(parents=True)
+    filename = str(modelPath) + "/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    classifier_RF = pickle.load(open(filename, 'rb'))
+
+    for k in range(1,9):
         fieldsFileTesting = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy"
         fieldsFileNoIPTesting = str(dsPath) + "/Testing/CombinedNoIP."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy"
         if Path(fieldsFileNoIPTesting).exists():

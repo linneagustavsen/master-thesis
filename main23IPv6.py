@@ -12,6 +12,7 @@ from NetFlow.RandomForest.MakeDataSetEntropy import makeDataSetNetFlowEntropy
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields
 from NetFlow.RandomForest.MakeTestingDataSet import makeTestingDataSetNetFlow
 from NetFlow.RandomForest.MakeTestingDataSetFields import makeTestingDataSetNetFlowFields
+from NetFlow.RandomForest.TrainCombined import trainCombined, trainCombinedNoIP
 from NetFlow.RandomForest.TrainFields import trainFields
 from NetFlow.Threshold.FindAttackFlowsICMPDstUnreachable import findAttackFlowsICMPdstUnreachable
 from NetFlow.Threshold.ICMPDstUnreachableCalculation import icmpDstUnreachableCalculation
@@ -62,8 +63,11 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
 
         makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, "Training", systemId, attackDate)
-        makeTestingDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        print("Made training data set fields")
         trainFields(systemId, attackDate, estimator)
+        print("trained fields")
+        makeTestingDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        print("Made testing data set fields")
         calculationRandomForestNetFlowFields(systemId, attackDate, estimator)
         print("Finished Random Forest calculations on fields")
 
@@ -73,32 +77,42 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
         for interval in intervals:
             print(interval)
             makeDataSetNetFlowEntropy(trainingFile, startRFTraining, stopRFTraining, frequency, interval, "Training", systemId, attackDate)
+            print("Made training data set entropy")
             makeDataSetNetFlowEntropy(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
+            print("Made testing data set entropy")
             calculationRandomForestNetFlowEntropy(systemId, interval, attackDate, estimator)
             print("Finished Random Forest calculations on entropy")
 
             makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, frequency, interval, "Training", systemId, attackDate)
-            makeTestingDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
-            calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator)
-            print("Finished Random Forest calculations on all fields")
-
-            calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimator)
-            print("Finished Random Forest calculations without IPs")
-
+            print("Made training data set combined")
+            
             if os.path.exists("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
                 os.remove("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
             else:
                 print("The file NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
-
+            
+            trainCombined(systemId, interval, attackDate, estimator)
+            print("trained combined")
+            trainCombinedNoIP(systemId, interval, attackDate, estimator)
+            print("trained combined no IPs")
+            
+            if os.path.exists("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+                os.remove("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+            else:
+                print("The file NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+            
+            makeTestingDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
+            print("Made testing data set combined")
             if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
                 os.remove("NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
             else:
                 print("The file NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
-            if os.path.exists("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
-                os.remove("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
-            else:
-                print("The file NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+            calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator)
+            print("Finished Random Forest calculations on all fields")
+
+            calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimator)
+            print("Finished Random Forest calculations without IPs")
 
             for i in range(1,9):
                 if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy"):
