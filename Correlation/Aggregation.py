@@ -230,27 +230,27 @@ class Aggregation:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsAggregation.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateway = payload.get('Gateway')
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
+            packetSizeDistribution = payload.get('Packet_size_distribution')
+            print(packetSizeDistribution)
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateway = payload.get('Gateway')
-        srcIP = payload.get('srcIP')
-        dstIP = payload.get('dstIP')
-        packetSizeDistribution = payload.get('Packet_size_distribution')
-        print(packetSizeDistribution)
-
-        self.aggregateTime(stime, etime, gateway, payload)
-        
-        if payload.get('Attack_type') != '':
-            self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
-            print("Aggregation published to topic", self.outputAttackTypes)
-        if srcIP != None or dstIP != None:
-            self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
-            print("Aggregation published to topic", self.outputIPs)
-        if packetSizeDistribution != None:
-            self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
+            self.aggregateTime(stime, etime, gateway, payload)
+            
+            if payload.get('Attack_type') != '':
+                self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
+                print("Aggregation published to topic", self.outputAttackTypes)
+            if srcIP != None or dstIP != None:
+                self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
+                print("Aggregation published to topic", self.outputIPs)
+            if packetSizeDistribution != None:
+                self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

@@ -137,30 +137,30 @@ class Correlation_Distribution:
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
-       
+
         if payload.get('sTime') == "WRITE":
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
             if not q.exists():
                 q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationDistribution.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
 
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateway = payload.get('Gateway')
+            deviation_scores = payload.get('Deviation_scores')
+            real_labels = payload.get('Real_labels')
+            attack_types = payload.get('Attack_types')
+            alertDB = payload.get('alertDB')
+            alertDB = self.decodeAlertDB(alertDB)
+            distributions = payload.get('Packet_size_distributions')
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateway = payload.get('Gateway')
-        deviation_scores = payload.get('Deviation_scores')
-        real_labels = payload.get('Real_labels')
-        attack_types = payload.get('Attack_types')
-        alertDB = payload.get('alertDB')
-        alertDB = self.decodeAlertDB(alertDB)
-        distributions = payload.get('Packet_size_distributions')
+            
 
-        
-
-        self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
+            self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

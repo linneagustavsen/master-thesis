@@ -187,19 +187,19 @@ class Correlation_Time:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateway = payload.get('Gateway')
+            deviation_scores = payload.get('Deviation_scores')
+            real_labels = payload.get('Real_labels')
+            attack_types = payload.get('Attack_types')
+            alertDB = payload.get('alertDB')
+            alertDB = self.decodeAlertDB(alertDB)
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateway = payload.get('Gateway')
-        deviation_scores = payload.get('Deviation_scores')
-        real_labels = payload.get('Real_labels')
-        attack_types = payload.get('Attack_types')
-        alertDB = payload.get('alertDB')
-        alertDB = self.decodeAlertDB(alertDB)
-
-        self.correlateTime(stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB)
+            self.correlateTime(stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

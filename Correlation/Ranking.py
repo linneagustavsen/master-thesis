@@ -159,7 +159,6 @@ class Ranking:
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            print(payload)
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
@@ -170,17 +169,17 @@ class Ranking:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateways = payload.get('Gateways')
+            deviation_scores = payload.get('Deviation_scores')
+            real_labels = payload.get('Real_labels')
+            attack_types = payload.get('Attack_types')
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateways = payload.get('Gateways')
-        deviation_scores = payload.get('Deviation_scores')
-        real_labels = payload.get('Real_labels')
-        attack_types = payload.get('Attack_types')
-
-        self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
+            self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

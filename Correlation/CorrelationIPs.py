@@ -146,16 +146,16 @@ class Correlation_IPs:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationIPs.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        srcIP = payload.get('srcIP')
-        dstIP = payload.get('dstIP')
-
-        self.correlateIPs(stime, etime, srcIP, payload)
-        self.correlateIPs(stime, etime, dstIP, payload)
+            self.correlateIPs(stime, etime, srcIP, payload)
+            self.correlateIPs(stime, etime, dstIP, payload)
 
     def start(self):
         self.mqtt_client = mqtt.Client()

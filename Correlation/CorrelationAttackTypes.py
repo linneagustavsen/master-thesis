@@ -153,15 +153,15 @@ class Correlation_Attack_types:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationAttackType.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
             alertsFile.close()
+        else:
 
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            attackType = payload.get('Attack_type')
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        attackType = payload.get('Attack_type')
-
-        self.correlateAttackTypes(stime, etime, attackType, payload)
+            self.correlateAttackTypes(stime, etime, attackType, payload)
 
 
     def start(self):

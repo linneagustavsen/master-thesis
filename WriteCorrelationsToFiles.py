@@ -1,16 +1,7 @@
-from datetime import datetime,timedelta
-import os
-from pathlib import Path
-import numpy as np
-from HelperFunctions.IsAttack import isAttack
-from HelperFunctions.SimulateRealTime import simulateRealTime
-from HelperFunctionsTelemetry.GetDataTelemetry import *
-from HelperFunctions.GeneralizedEntropy import *
-from HelperFunctions.Distributions import *
+
 import json
 import paho.mqtt.client as mqtt
-from time import sleep
-from random import randrange
+
 
 
 def writeDetectionsToFile():
@@ -52,3 +43,4 @@ def writeDetectionsToFile():
     mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
     mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
     mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
+writeDetectionsToFile()
