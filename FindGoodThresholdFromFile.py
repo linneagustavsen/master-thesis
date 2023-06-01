@@ -70,27 +70,27 @@ def findGoodThresholdFromFile(y_field, dataSet, dataType, systemId, interval, at
     for i in range(len(thresholds)):
         if tp[i] == 0:
             continue
-        if f1_scores[i] > max_f1 and f1_scores[i] != np.nan:
+        if f1_scores[i] >= max_f1 and f1_scores[i] != np.nan:
             max_f1 = f1_scores[i]
             index_f1 = i
 
-        if tpr[i] > max_tpr and tpr[i] != np.nan:
+        if tpr[i] >= max_tpr and tpr[i] != np.nan:
             max_tpr = tpr[i]
             index_tpr = i
 
-        if fpr[i] > min_fpr and fpr[i] != np.nan:
+        if fpr[i] <= min_fpr and fpr[i] != np.nan:
             min_fpr = fpr[i]
             index_fpr = i
         
-        if accuracy[i] > max_accuracy and accuracy[i] != np.nan:
+        if accuracy[i] >= max_accuracy and accuracy[i] != np.nan:
             max_accuracy = accuracy[i]
             index_accuracy = i
 
-        if fnr[i] > min_fnr and fnr[i] != np.nan:
+        if fnr[i] <= min_fnr and fnr[i] != np.nan:
             min_fnr = fnr[i]
             index_fnr = i
 
-        if ppv[i] > max_ppv and ppv[i] != np.nan:
+        if ppv[i] >= max_ppv and ppv[i] != np.nan:
             max_ppv = ppv[i]
             index_ppv = i
         counter += 1
@@ -135,29 +135,29 @@ attackDates = ["08.03.23"]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
-'''print("NetFlow entropy")
+print("NetFlow entropy")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            for interval in intervals:
+                print(interval)
                 findGoodThresholdFromFile(y_field, "NetFlow", "Entropy", systemId, interval, attackDate)
 
-y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
+'''y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
 print("Telemetry entropy")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            for interval in intervals:
+                print(interval)
                 findGoodThresholdFromFile(y_field, "Telemetry", "Entropy", systemId, interval, attackDate)
 
 
@@ -167,12 +167,12 @@ print("NetFlow ICMP dst unreachable")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            for interval in intervals:
+                print(interval)
                 findGoodThresholdFromFile(y_field, "NetFlow", "Threshold", systemId, interval, attackDate)
 
 y_fields = ["SYN"]
@@ -184,7 +184,7 @@ for attackDate in attackDates:
         print(y_field)
         for systemId in systems:
             print(systemId)
-            findGoodThresholdFromFile(y_field, "NetFlow", "Threshold", systemId, 0, attackDate)'''
+            findGoodThresholdFromFile(y_field, "NetFlow", "Threshold", systemId, 0, attackDate)
 
 
 y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
@@ -198,7 +198,7 @@ for attackDate in attackDates:
             if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "egress_queue_info__0__cur_buffer_occupancy":
                 continue
             findGoodThresholdFromFile(y_field, "Telemetry", "Threshold", systemId, 0, attackDate)
-'''
+
 y_fields = ["TopKFlows"]
 print("NetFlow TopKFlows")
 for attackDate in attackDates:

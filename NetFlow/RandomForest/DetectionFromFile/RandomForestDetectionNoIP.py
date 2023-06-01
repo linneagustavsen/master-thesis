@@ -34,7 +34,8 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Random Forest fields no IP detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Random Forest fields no IP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestNoIPDetectionNetFlow")
@@ -57,9 +58,9 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, attackDate):
     sTime = pd.to_datetime(alerts["sTime"])
     eTime = pd.to_datetime(alerts["eTime"])
 
-    srcPort = alerts["srcPort"]
+    '''srcPort = alerts["srcPort"]
     dstPort = alerts["dstPort"]
-    protocol = alerts["protocol"]
+    protocol = alerts["protocol"]'''
     real_label = alerts["real_label"]
 
     for i in range(len(sTime)):
@@ -75,11 +76,19 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, attackDate):
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "Gateway": systemId,
+                "Deviation_score": None,
+                "Real_label": int(real_label[i]),
+                "Attack_type": ""
+                }
+        '''alert = {
+                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "Gateway": systemId,
                 "srcPort": int(srcPort[i]),
                 "dstPort": int(dstPort[i]),
                 "Protocol": int(protocol[i]),
                 "Deviation_score": None,
                 "Real_label": int(real_label[i]),
                 "Attack_type": ""
-                }
+                }'''
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

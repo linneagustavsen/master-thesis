@@ -37,7 +37,8 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansDetectionTelemetry")
@@ -125,6 +126,8 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
         startTime += clusterFrequency
 
     counter = 0
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
@@ -157,7 +160,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from GetThreshold import getThreshold
 
 from NetFlow.Threshold.DetectionFromFile.ICMPDetection import detectionICMP
 import sys
@@ -14,5 +15,9 @@ start = arguments[1]
 stop = arguments[2]
 frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
+systemId = arguments[4]
+interval = timedelta(minutes=int(arguments[5]))
+thresholdICMPRatio = getThreshold("icmpRatio", systemId, interval, "Entropy", "NetFlow", attackDate)
+thresholdNumberOfICMPPackets = getThreshold("icmpPackets", systemId, interval, "Entropy", "NetFlow", attackDate)
 
-detectionICMP(start, stop, arguments[4], frequency, timedelta(minutes=int(arguments[5])), 10, 0,0, attackDate)
+detectionICMP(start, stop, systemId, frequency, interval, 10, thresholdICMPRatio, thresholdNumberOfICMPPackets, attackDate)

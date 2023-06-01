@@ -220,7 +220,6 @@ class Aggregation:
         self.alertCounter += 1
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            print(payload)
         except Exception as err:
             print('Message sent from topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
@@ -231,6 +230,7 @@ class Aggregation:
         srcIP = payload.get('srcIP')
         dstIP = payload.get('dstIP')
         packetSizeDistribution = payload.get('Packet_size_distribution')
+        print(packetSizeDistribution)
 
         self.aggregateTime(stime, etime, gateway, payload)
         

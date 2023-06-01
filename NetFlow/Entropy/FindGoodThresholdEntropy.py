@@ -173,7 +173,7 @@ attackDates = ["08.03.23"]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
-intervals = [timedelta(minutes = 5)]
+intervals = [timedelta(minutes = 10)]
 
 for attackDate in attackDates:
     print(attackDate)

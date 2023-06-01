@@ -1,88 +1,144 @@
 
 Field: icmpRatio SystemId: tromso-gw5 Interval: 300
 Max F1-score was for threshold: 66.8009237275 with a F1-score of 0.56 a TPR of: 0.3888888888888889 a FPR of: 0.0 an accuracy of: 0.9843971631205674 a FNR of: 0.6111111111111112 and a PPV of: 1.0
-Max TPR was for threshold: 4.60057e-05 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
-Min FPR was for threshold: 4.60057e-05 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max TPR was for threshold: 0.0031044845 with a F1-score of 0.0586319218241042 a TPR of: 1.0 a FPR of: 0.8413391557496361 an accuracy of: 0.1801418439716312 a FNR of: 0.0 and a PPV of: 0.0302013422818791
+Min FPR was for threshold: 129.1671919973 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.975886524822695 a FNR of: 0.9444444444444444 and a PPV of: 1.0
 Max accuracy was for threshold: 66.8009237275 with a F1-score of 0.56 a TPR of: 0.3888888888888889 a FPR of: 0.0 an accuracy of: 0.9843971631205674 a FNR of: 0.6111111111111112 and a PPV of: 1.0
-Min FNR was for threshold: 4.60057e-05 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
-Max PPV was for threshold: 66.8009237275 with a F1-score of 0.56 a TPR of: 0.3888888888888889 a FPR of: 0.0 an accuracy of: 0.9843971631205674 a FNR of: 0.6111111111111112 and a PPV of: 1.0
+Min FNR was for threshold: 0.0031044845 with a F1-score of 0.0586319218241042 a TPR of: 1.0 a FPR of: 0.8413391557496361 an accuracy of: 0.1801418439716312 a FNR of: 0.0 and a PPV of: 0.0302013422818791
+Max PPV was for threshold: 129.1671919973 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.975886524822695 a FNR of: 0.9444444444444444 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: teknobyen-gw1 Interval: 300
 Max F1-score was for threshold: 17.4829932955 with a F1-score of 0.5806451612903226 a TPR of: 0.4736842105263157 a FPR of: 0.0043731778425655 an accuracy of: 0.9815602836879432 a FNR of: 0.5263157894736842 and a PPV of: 0.75
-Max TPR was for threshold: 2.74918e-05 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
-Min FPR was for threshold: 2.74918e-05 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
-Max accuracy was for threshold: 17.4829932955 with a F1-score of 0.5806451612903226 a TPR of: 0.4736842105263157 a FPR of: 0.0043731778425655 an accuracy of: 0.9815602836879432 a FNR of: 0.5263157894736842 and a PPV of: 0.75
-Min FNR was for threshold: 2.74918e-05 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
-Max PPV was for threshold: 66.7744856624 with a F1-score of 0.2727272727272727 a TPR of: 0.1578947368421052 a FPR of: 0.0 an accuracy of: 0.9773049645390072 a FNR of: 0.8421052631578947 and a PPV of: 1.0
+Max TPR was for threshold: 0.0021306911 with a F1-score of 0.0594679186228482 a TPR of: 1.0 a FPR of: 0.8760932944606414 an accuracy of: 0.1475177304964539 a FNR of: 0.0 and a PPV of: 0.0306451612903225
+Min FPR was for threshold: 285.8348804251 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9744680851063828 a FNR of: 0.9473684210526316 and a PPV of: 1.0
+Max accuracy was for threshold: 47.7044823822 with a F1-score of 0.5517241379310345 a TPR of: 0.4210526315789473 a FPR of: 0.0029154518950437 an accuracy of: 0.9815602836879432 a FNR of: 0.5789473684210527 and a PPV of: 0.8
+Min FNR was for threshold: 0.0021306911 with a F1-score of 0.0594679186228482 a TPR of: 1.0 a FPR of: 0.8760932944606414 an accuracy of: 0.1475177304964539 a FNR of: 0.0 and a PPV of: 0.0306451612903225
+Max PPV was for threshold: 285.8348804251 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9744680851063828 a FNR of: 0.9473684210526316 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: hoytek-gw2 Interval: 300
 Max F1-score was for threshold: 0.0359901058 with a F1-score of 0.4285714285714285 a TPR of: 0.375 a FPR of: 0.0087082728592162 an accuracy of: 0.9773049645390072 a FNR of: 0.625 and a PPV of: 0.5
-Max TPR was for threshold: 1.729e-07 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Min FPR was for threshold: 1.729e-07 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max TPR was for threshold: 4.27973e-05 with a F1-score of 0.0494590417310664 a TPR of: 1.0 a FPR of: 0.8925979680696662 an accuracy of: 0.1276595744680851 a FNR of: 0.0 and a PPV of: 0.0253565768621236
+Min FPR was for threshold: 0.0838636185 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
 Max accuracy was for threshold: 0.0708234652 with a F1-score of 0.3157894736842105 a TPR of: 0.1875 a FPR of: 0.0 an accuracy of: 0.9815602836879432 a FNR of: 0.8125 and a PPV of: 1.0
-Min FNR was for threshold: 1.729e-07 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Max PPV was for threshold: 0.0708234652 with a F1-score of 0.3157894736842105 a TPR of: 0.1875 a FPR of: 0.0 an accuracy of: 0.9815602836879432 a FNR of: 0.8125 and a PPV of: 1.0
+Min FNR was for threshold: 4.27973e-05 with a F1-score of 0.0494590417310664 a TPR of: 1.0 a FPR of: 0.8925979680696662 an accuracy of: 0.1276595744680851 a FNR of: 0.0 and a PPV of: 0.0253565768621236
+Max PPV was for threshold: 0.0838636185 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: bergen-gw3 Interval: 300
 Max F1-score was for threshold: 0.0494369604 with a F1-score of 0.5714285714285714 a TPR of: 0.5 a FPR of: 0.0058055152394775 an accuracy of: 0.9829787234042552 a FNR of: 0.5 and a PPV of: 0.6666666666666666
-Max TPR was for threshold: 5.64e-08 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Min FPR was for threshold: 5.64e-08 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Max accuracy was for threshold: 0.0643037966 with a F1-score of 0.5217391304347826 a TPR of: 0.375 a FPR of: 0.0014513788098693 an accuracy of: 0.9843971631205674 a FNR of: 0.625 and a PPV of: 0.8571428571428571
-Min FNR was for threshold: 5.64e-08 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Max PPV was for threshold: 0.0835167508 with a F1-score of 0.4761904761904761 a TPR of: 0.3125 a FPR of: 0.0 an accuracy of: 0.9843971631205674 a FNR of: 0.6875 and a PPV of: 1.0
+Max TPR was for threshold: 9.4311e-06 with a F1-score of 0.0457142857142857 a TPR of: 1.0 a FPR of: 0.969521044992743 an accuracy of: 0.0524822695035461 a FNR of: 0.0 and a PPV of: 0.023391812865497
+Min FPR was for threshold: 0.1092388494 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
+Max accuracy was for threshold: 0.0835167508 with a F1-score of 0.4761904761904761 a TPR of: 0.3125 a FPR of: 0.0 an accuracy of: 0.9843971631205674 a FNR of: 0.6875 and a PPV of: 1.0
+Min FNR was for threshold: 9.4311e-06 with a F1-score of 0.0457142857142857 a TPR of: 1.0 a FPR of: 0.969521044992743 an accuracy of: 0.0524822695035461 a FNR of: 0.0 and a PPV of: 0.023391812865497
+Max PPV was for threshold: 0.1092388494 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: trd-gw Interval: 300
 Max F1-score was for threshold: 0.0541439473 with a F1-score of 0.6086956521739131 a TPR of: 0.4375 a FPR of: 0.0 an accuracy of: 0.9872340425531916 a FNR of: 0.5625 and a PPV of: 1.0
-Max TPR was for threshold: 1.2716e-06 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Min FPR was for threshold: 1.2716e-06 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max TPR was for threshold: 1.63608e-05 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 0.9927431059506532 an accuracy of: 0.0297872340425531 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Min FPR was for threshold: 0.098548712 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
 Max accuracy was for threshold: 0.0541439473 with a F1-score of 0.6086956521739131 a TPR of: 0.4375 a FPR of: 0.0 an accuracy of: 0.9872340425531916 a FNR of: 0.5625 and a PPV of: 1.0
-Min FNR was for threshold: 1.2716e-06 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
-Max PPV was for threshold: 0.0541439473 with a F1-score of 0.6086956521739131 a TPR of: 0.4375 a FPR of: 0.0 an accuracy of: 0.9872340425531916 a FNR of: 0.5625 and a PPV of: 1.0
+Min FNR was for threshold: 1.63608e-05 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 0.9927431059506532 an accuracy of: 0.0297872340425531 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max PPV was for threshold: 0.098548712 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9787234042553192 a FNR of: 0.9375 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: ifi2-gw5 Interval: 300
 Max F1-score was for threshold: 0.0240729507 with a F1-score of 0.5517241379310345 a TPR of: 0.4444444444444444 a FPR of: 0.0043668122270742 an accuracy of: 0.9815602836879432 a FNR of: 0.5555555555555556 and a PPV of: 0.7272727272727273
-Max TPR was for threshold: 3.787e-07 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
-Min FPR was for threshold: 3.787e-07 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max TPR was for threshold: 2.39769e-05 with a F1-score of 0.0517985611510791 a TPR of: 1.0 a FPR of: 0.9592430858806404 an accuracy of: 0.0652482269503546 a FNR of: 0.0 and a PPV of: 0.0265878877400295
+Min FPR was for threshold: 0.0547709897 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.975886524822695 a FNR of: 0.9444444444444444 and a PPV of: 1.0
 Max accuracy was for threshold: 0.0297400727 with a F1-score of 0.5384615384615384 a TPR of: 0.3888888888888889 a FPR of: 0.0014556040756914 an accuracy of: 0.9829787234042552 a FNR of: 0.6111111111111112 and a PPV of: 0.875
-Min FNR was for threshold: 3.787e-07 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
-Max PPV was for threshold: 0.033146991 with a F1-score of 0.4347826086956521 a TPR of: 0.2777777777777778 a FPR of: 0.0 an accuracy of: 0.9815602836879432 a FNR of: 0.7222222222222222 and a PPV of: 1.0
+Min FNR was for threshold: 2.39769e-05 with a F1-score of 0.0517985611510791 a TPR of: 1.0 a FPR of: 0.9592430858806404 an accuracy of: 0.0652482269503546 a FNR of: 0.0 and a PPV of: 0.0265878877400295
+Max PPV was for threshold: 0.0547709897 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.975886524822695 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+
+Field: icmpRatio SystemId: tromso-gw5 Interval: 600
+Max F1-score was for threshold: 16.5677770095 with a F1-score of 0.4571428571428571 a TPR of: 0.4444444444444444 a FPR of: 0.0131964809384164 an accuracy of: 0.9728571428571428 a FNR of: 0.5555555555555556 and a PPV of: 0.4705882352941176
+Max TPR was for threshold: 0.0017197426 with a F1-score of 0.0587275693311582 a TPR of: 1.0 a FPR of: 0.8460410557184751 an accuracy of: 0.1757142857142857 a FNR of: 0.0 and a PPV of: 0.0302521008403361
+Min FPR was for threshold: 83.9823579778 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+Max accuracy was for threshold: 77.9791162914 with a F1-score of 0.2 a TPR of: 0.1111111111111111 a FPR of: 0.0 an accuracy of: 0.9771428571428572 a FNR of: 0.8888888888888888 and a PPV of: 1.0
+Min FNR was for threshold: 0.0017197426 with a F1-score of 0.0587275693311582 a TPR of: 1.0 a FPR of: 0.8460410557184751 an accuracy of: 0.1757142857142857 a FNR of: 0.0 and a PPV of: 0.0302521008403361
+Max PPV was for threshold: 83.9823579778 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.9444444444444444 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: teknobyen-gw1 Interval: 600
 Max F1-score was for threshold: 17.0091111629 with a F1-score of 0.5333333333333333 a TPR of: 0.4210526315789473 a FPR of: 0.0044052863436123 an accuracy of: 0.98 a FNR of: 0.5789473684210527 and a PPV of: 0.7272727272727273
-Max TPR was for threshold: 5.3671e-06 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
-Min FPR was for threshold: 5.3671e-06 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
+Max TPR was for threshold: 0.0002199491 with a F1-score of 0.0553935860058309 a TPR of: 1.0 a FPR of: 0.9515418502202644 an accuracy of: 0.0742857142857142 a FNR of: 0.0 and a PPV of: 0.0284857571214392
+Min FPR was for threshold: 140.6693855397 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9742857142857144 a FNR of: 0.9473684210526316 and a PPV of: 1.0
 Max accuracy was for threshold: 17.0091111629 with a F1-score of 0.5333333333333333 a TPR of: 0.4210526315789473 a FPR of: 0.0044052863436123 an accuracy of: 0.98 a FNR of: 0.5789473684210527 and a PPV of: 0.7272727272727273
-Min FNR was for threshold: 5.3671e-06 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
-Max PPV was for threshold: 134.9565792108 with a F1-score of 0.1904761904761904 a TPR of: 0.1052631578947368 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.8947368421052632 and a PPV of: 1.0
+Min FNR was for threshold: 0.0002199491 with a F1-score of 0.0553935860058309 a TPR of: 1.0 a FPR of: 0.9515418502202644 an accuracy of: 0.0742857142857142 a FNR of: 0.0 and a PPV of: 0.0284857571214392
+Max PPV was for threshold: 140.6693855397 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9742857142857144 a FNR of: 0.9473684210526316 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: hoytek-gw2 Interval: 600
 Max F1-score was for threshold: 0.0101929178 with a F1-score of 0.3684210526315789 a TPR of: 0.4375 a FPR of: 0.0219298245614035 an accuracy of: 0.9657142857142856 a FNR of: 0.5625 and a PPV of: 0.3181818181818182
-Max TPR was for threshold: 7.898e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Min FPR was for threshold: 7.898e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max TPR was for threshold: 1.68395e-05 with a F1-score of 0.0483383685800604 a TPR of: 1.0 a FPR of: 0.9210526315789472 an accuracy of: 0.1 a FNR of: 0.0 and a PPV of: 0.0247678018575851
+Min FPR was for threshold: 0.0478758518 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014619883040935 an accuracy of: 0.9771428571428572 a FNR of: 0.9375 and a PPV of: 0.5
 Max accuracy was for threshold: 0.0478758518 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014619883040935 an accuracy of: 0.9771428571428572 a FNR of: 0.9375 and a PPV of: 0.5
-Min FNR was for threshold: 7.898e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Min FNR was for threshold: 1.68395e-05 with a F1-score of 0.0483383685800604 a TPR of: 1.0 a FPR of: 0.9210526315789472 an accuracy of: 0.1 a FNR of: 0.0 and a PPV of: 0.0247678018575851
 Max PPV was for threshold: 0.0478758518 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014619883040935 an accuracy of: 0.9771428571428572 a FNR of: 0.9375 and a PPV of: 0.5
 
 Field: icmpRatio SystemId: bergen-gw3 Interval: 600
 Max F1-score was for threshold: 0.0267647657 with a F1-score of 0.5185185185185185 a TPR of: 0.4375 a FPR of: 0.0058479532163742 an accuracy of: 0.9814285714285714 a FNR of: 0.5625 and a PPV of: 0.6363636363636364
-Max TPR was for threshold: 2.258e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Min FPR was for threshold: 2.258e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Max accuracy was for threshold: 0.0267647657 with a F1-score of 0.5185185185185185 a TPR of: 0.4375 a FPR of: 0.0058479532163742 an accuracy of: 0.9814285714285714 a FNR of: 0.5625 and a PPV of: 0.6363636363636364
-Min FNR was for threshold: 2.258e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Max PPV was for threshold: 0.0504655291 with a F1-score of 0.2222222222222222 a TPR of: 0.125 a FPR of: 0.0 an accuracy of: 0.98 a FNR of: 0.875 and a PPV of: 1.0
+Max TPR was for threshold: 3.75186e-05 with a F1-score of 0.0500782472613458 a TPR of: 1.0 a FPR of: 0.8874269005847953 an accuracy of: 0.1328571428571428 a FNR of: 0.0 and a PPV of: 0.0256821829855537
+Min FPR was for threshold: 0.0551328269 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9785714285714284 a FNR of: 0.9375 and a PPV of: 1.0
+Max accuracy was for threshold: 0.0409643778 with a F1-score of 0.4347826086956521 a TPR of: 0.3125 a FPR of: 0.0029239766081871 an accuracy of: 0.9814285714285714 a FNR of: 0.6875 and a PPV of: 0.7142857142857143
+Min FNR was for threshold: 3.75186e-05 with a F1-score of 0.0500782472613458 a TPR of: 1.0 a FPR of: 0.8874269005847953 an accuracy of: 0.1328571428571428 a FNR of: 0.0 and a PPV of: 0.0256821829855537
+Max PPV was for threshold: 0.0551328269 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9785714285714284 a FNR of: 0.9375 and a PPV of: 1.0
 
 Field: icmpRatio SystemId: trd-gw Interval: 600
 Max F1-score was for threshold: 0.0182308178 with a F1-score of 0.5161290322580645 a TPR of: 0.5 a FPR of: 0.0102339181286549 an accuracy of: 0.9785714285714284 a FNR of: 0.5 and a PPV of: 0.5333333333333333
-Max TPR was for threshold: 2.03e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Min FPR was for threshold: 2.03e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
-Max accuracy was for threshold: 0.0182308178 with a F1-score of 0.5161290322580645 a TPR of: 0.5 a FPR of: 0.0102339181286549 an accuracy of: 0.9785714285714284 a FNR of: 0.5 and a PPV of: 0.5333333333333333
-Min FNR was for threshold: 2.03e-07 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max TPR was for threshold: 7.4734e-06 with a F1-score of 0.0452616690240452 a TPR of: 1.0 a FPR of: 0.986842105263158 an accuracy of: 0.0357142857142857 a FNR of: 0.0 and a PPV of: 0.0231548480463096
+Min FPR was for threshold: 0.0466873042 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014619883040935 an accuracy of: 0.9771428571428572 a FNR of: 0.9375 and a PPV of: 0.5
+Max accuracy was for threshold: 0.0427910463 with a F1-score of 0.2857142857142857 a TPR of: 0.1875 a FPR of: 0.0029239766081871 an accuracy of: 0.9785714285714284 a FNR of: 0.8125 and a PPV of: 0.6
+Min FNR was for threshold: 7.4734e-06 with a F1-score of 0.0452616690240452 a TPR of: 1.0 a FPR of: 0.986842105263158 an accuracy of: 0.0357142857142857 a FNR of: 0.0 and a PPV of: 0.0231548480463096
 Max PPV was for threshold: 0.0427910463 with a F1-score of 0.2857142857142857 a TPR of: 0.1875 a FPR of: 0.0029239766081871 an accuracy of: 0.9785714285714284 a FNR of: 0.8125 and a PPV of: 0.6
 
 Field: icmpRatio SystemId: ifi2-gw5 Interval: 600
 Max F1-score was for threshold: 0.0093354678 with a F1-score of 0.4848484848484848 a TPR of: 0.4444444444444444 a FPR of: 0.0102639296187683 an accuracy of: 0.9757142857142858 a FNR of: 0.5555555555555556 and a PPV of: 0.5333333333333333
-Max TPR was for threshold: 4.359e-07 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
-Min FPR was for threshold: 4.359e-07 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
-Max accuracy was for threshold: 0.0093354678 with a F1-score of 0.4848484848484848 a TPR of: 0.4444444444444444 a FPR of: 0.0102639296187683 an accuracy of: 0.9757142857142858 a FNR of: 0.5555555555555556 and a PPV of: 0.5333333333333333
-Min FNR was for threshold: 4.359e-07 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
+Max TPR was for threshold: 1.642e-06 with a F1-score of 0.0502092050209205 a TPR of: 1.0 a FPR of: 0.998533724340176 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0257510729613733
+Min FPR was for threshold: 0.026533801 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+Max accuracy was for threshold: 0.026533801 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+Min FNR was for threshold: 1.642e-06 with a F1-score of 0.0502092050209205 a TPR of: 1.0 a FPR of: 0.998533724340176 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0257510729613733
 Max PPV was for threshold: 0.026533801 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9757142857142858 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+
+Field: icmpRatio SystemId: tromso-gw5 Interval: 900
+Max F1-score was for threshold: 12.464161611 with a F1-score of 0.4705882352941176 a TPR of: 0.4444444444444444 a FPR of: 0.0118168389955686 an accuracy of: 0.9741007194244604 a FNR of: 0.5555555555555556 and a PPV of: 0.5
+Max TPR was for threshold: 0.0002873666 with a F1-score of 0.0527859237536656 a TPR of: 1.0 a FPR of: 0.9542097488921714 an accuracy of: 0.0705035971223021 a FNR of: 0.0 and a PPV of: 0.0271084337349397
+Min FPR was for threshold: 68.8469542131 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9755395683453236 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+Max accuracy was for threshold: 65.6683618979 with a F1-score of 0.2 a TPR of: 0.1111111111111111 a FPR of: 0.0 an accuracy of: 0.9769784172661872 a FNR of: 0.8888888888888888 and a PPV of: 1.0
+Min FNR was for threshold: 0.0002873666 with a F1-score of 0.0527859237536656 a TPR of: 1.0 a FPR of: 0.9542097488921714 an accuracy of: 0.0705035971223021 a FNR of: 0.0 and a PPV of: 0.0271084337349397
+Max PPV was for threshold: 68.8469542131 with a F1-score of 0.1052631578947368 a TPR of: 0.0555555555555555 a FPR of: 0.0 an accuracy of: 0.9755395683453236 a FNR of: 0.9444444444444444 and a PPV of: 1.0
+
+Field: icmpRatio SystemId: teknobyen-gw1 Interval: 900
+Max F1-score was for threshold: 7.848874547 with a F1-score of 0.4705882352941176 a TPR of: 0.4210526315789473 a FPR of: 0.0103550295857988 an accuracy of: 0.9741007194244604 a FNR of: 0.5789473684210527 and a PPV of: 0.5333333333333333
+Max TPR was for threshold: 0.0001173065 with a F1-score of 0.0560471976401179 a TPR of: 1.0 a FPR of: 0.9467455621301776 an accuracy of: 0.079136690647482 a FNR of: 0.0 and a PPV of: 0.0288315629742033
+Min FPR was for threshold: 94.1249476094 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9741007194244604 a FNR of: 0.9473684210526316 and a PPV of: 1.0
+Max accuracy was for threshold: 93.3064242139 with a F1-score of 0.1904761904761904 a TPR of: 0.1052631578947368 a FPR of: 0.0 an accuracy of: 0.9755395683453236 a FNR of: 0.8947368421052632 and a PPV of: 1.0
+Min FNR was for threshold: 0.0001173065 with a F1-score of 0.0560471976401179 a TPR of: 1.0 a FPR of: 0.9467455621301776 an accuracy of: 0.079136690647482 a FNR of: 0.0 and a PPV of: 0.0288315629742033
+Max PPV was for threshold: 94.1249476094 with a F1-score of 0.1 a TPR of: 0.0526315789473684 a FPR of: 0.0 an accuracy of: 0.9741007194244604 a FNR of: 0.9473684210526316 and a PPV of: 1.0
+
+Field: icmpRatio SystemId: hoytek-gw2 Interval: 900
+Max F1-score was for threshold: 0.0115139355 with a F1-score of 0.3333333333333333 a TPR of: 0.375 a FPR of: 0.0206185567010309 an accuracy of: 0.9654676258992806 a FNR of: 0.625 and a PPV of: 0.3
+Max TPR was for threshold: 1.0428e-06 with a F1-score of 0.0451977401129943 a TPR of: 1.0 a FPR of: 0.9955817378497792 an accuracy of: 0.0273381294964028 a FNR of: 0.0 and a PPV of: 0.0231213872832369
+Min FPR was for threshold: 0.0306874542 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014727540500736 an accuracy of: 0.9769784172661872 a FNR of: 0.9375 and a PPV of: 0.5
+Max accuracy was for threshold: 0.0306874542 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014727540500736 an accuracy of: 0.9769784172661872 a FNR of: 0.9375 and a PPV of: 0.5
+Min FNR was for threshold: 1.0428e-06 with a F1-score of 0.0451977401129943 a TPR of: 1.0 a FPR of: 0.9955817378497792 an accuracy of: 0.0273381294964028 a FNR of: 0.0 and a PPV of: 0.0231213872832369
+Max PPV was for threshold: 0.0306874542 with a F1-score of 0.1111111111111111 a TPR of: 0.0625 a FPR of: 0.0014727540500736 an accuracy of: 0.9769784172661872 a FNR of: 0.9375 and a PPV of: 0.5
+
+Field: icmpRatio SystemId: bergen-gw3 Interval: 900
+Max F1-score was for threshold: 0.0201475029 with a F1-score of 0.5833333333333334 a TPR of: 0.4375 a FPR of: 0.0014727540500736 an accuracy of: 0.9856115107913668 a FNR of: 0.5625 and a PPV of: 0.875
+Max TPR was for threshold: 4.8842e-06 with a F1-score of 0.0462427745664739 a TPR of: 1.0 a FPR of: 0.9720176730486008 an accuracy of: 0.0503597122302158 a FNR of: 0.0 and a PPV of: 0.0236686390532544
+Min FPR was for threshold: 0.027395903 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9784172661870504 a FNR of: 0.9375 and a PPV of: 1.0
+Max accuracy was for threshold: 0.0212921708 with a F1-score of 0.5454545454545454 a TPR of: 0.375 a FPR of: 0.0 an accuracy of: 0.9856115107913668 a FNR of: 0.625 and a PPV of: 1.0
+Min FNR was for threshold: 4.8842e-06 with a F1-score of 0.0462427745664739 a TPR of: 1.0 a FPR of: 0.9720176730486008 an accuracy of: 0.0503597122302158 a FNR of: 0.0 and a PPV of: 0.0236686390532544
+Max PPV was for threshold: 0.027395903 with a F1-score of 0.1176470588235294 a TPR of: 0.0625 a FPR of: 0.0 an accuracy of: 0.9784172661870504 a FNR of: 0.9375 and a PPV of: 1.0
+
+Field: icmpRatio SystemId: trd-gw Interval: 900
+Max F1-score was for threshold: 0.0116126172 with a F1-score of 0.5161290322580645 a TPR of: 0.5 a FPR of: 0.0103092783505154 an accuracy of: 0.9784172661870504 a FNR of: 0.5 and a PPV of: 0.5333333333333333
+Max TPR was for threshold: 6.4886e-06 with a F1-score of 0.0455192034139402 a TPR of: 1.0 a FPR of: 0.9882179675994108 an accuracy of: 0.0345323741007194 a FNR of: 0.0 and a PPV of: 0.0232896652110625
+Min FPR was for threshold: 0.0305635415 with a F1-score of 0.1052631578947368 a TPR of: 0.0625 a FPR of: 0.0029455081001472 an accuracy of: 0.9755395683453236 a FNR of: 0.9375 and a PPV of: 0.3333333333333333
+Max accuracy was for threshold: 0.0116126172 with a F1-score of 0.5161290322580645 a TPR of: 0.5 a FPR of: 0.0103092783505154 an accuracy of: 0.9784172661870504 a FNR of: 0.5 and a PPV of: 0.5333333333333333
+Min FNR was for threshold: 6.4886e-06 with a F1-score of 0.0455192034139402 a TPR of: 1.0 a FPR of: 0.9882179675994108 an accuracy of: 0.0345323741007194 a FNR of: 0.0 and a PPV of: 0.0232896652110625
+Max PPV was for threshold: 0.0116126172 with a F1-score of 0.5161290322580645 a TPR of: 0.5 a FPR of: 0.0103092783505154 an accuracy of: 0.9784172661870504 a FNR of: 0.5 and a PPV of: 0.5333333333333333
+
+Field: icmpRatio SystemId: ifi2-gw5 Interval: 900
+Max F1-score was for threshold: 0.0073954607 with a F1-score of 0.4848484848484848 a TPR of: 0.4444444444444444 a FPR of: 0.0103397341211226 an accuracy of: 0.9755395683453236 a FNR of: 0.5555555555555556 and a PPV of: 0.5333333333333333
+Max TPR was for threshold: 3.53623e-05 with a F1-score of 0.0597014925373134 a TPR of: 1.0 a FPR of: 0.8375184638109305 an accuracy of: 0.1841726618705036 a FNR of: 0.0 and a PPV of: 0.0307692307692307
+Min FPR was for threshold: 0.0161784855 with a F1-score of 0.0952380952380952 a TPR of: 0.0555555555555555 a FPR of: 0.0029542097488921 an accuracy of: 0.9726618705035972 a FNR of: 0.9444444444444444 and a PPV of: 0.3333333333333333
+Max accuracy was for threshold: 0.0087319202 with a F1-score of 0.4516129032258064 a TPR of: 0.3888888888888889 a FPR of: 0.0088626292466765 an accuracy of: 0.9755395683453236 a FNR of: 0.6111111111111112 and a PPV of: 0.5384615384615384
+Min FNR was for threshold: 3.53623e-05 with a F1-score of 0.0597014925373134 a TPR of: 1.0 a FPR of: 0.8375184638109305 an accuracy of: 0.1841726618705036 a FNR of: 0.0 and a PPV of: 0.0307692307692307
+Max PPV was for threshold: 0.0087319202 with a F1-score of 0.4516129032258064 a TPR of: 0.3888888888888889 a FPR of: 0.0088626292466765 an accuracy of: 0.9755395683453236 a FNR of: 0.6111111111111112 and a PPV of: 0.5384615384615384

@@ -9,7 +9,7 @@ from sklearn.metrics import auc
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def makeROCcurve(y_field, dataSet, dataType, systemId, interval, attackDate):
+def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
     p = Path('ThresholdDecision') 
     plotPath = Path('Plots')
 
@@ -47,27 +47,57 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, interval, attackDate):
         
     elif dataSet == "Telemetry":
         plotting = plotting / 'Telemetry' / 'ROC'
-    
-    if interval != 0:
-        dataFile = str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
-    else:
+
+    if intervals == 0:
         dataFile = str(q) + "/" + str(y_field) +".attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
-    if not Path(dataFile).exists():
+        if not Path(dataFile).exists():
+            return
+        data = pd.read_csv(dataFile)
+        tpr = pd.to_numeric(data["TPR"],errors='coerce')
+        fpr = pd.to_numeric(data["FPR"],errors='coerce')
+
+        truePositiveRate = []
+        falsePositiveRate = []
+        for i in range(len(tpr) -1, -1, -1):
+            truePositiveRate.append(tpr[i])
+            falsePositiveRate.append(fpr[i])
+        auc_value = auc(falsePositiveRate, truePositiveRate)
+        fig, axs = plt.subplots(1, 1, figsize=(7, 7))
+    
+        axs.plot(falsePositiveRate ,truePositiveRate, color="#162931", label="AUC=%.3f"%auc_value)
+        axs.set_title("Roc curve", fontsize=20)
+        axs.set_xlabel("False Positive Rate", fontsize=20)
+        axs.set_ylabel("True Positive Rate", fontsize=20)
+        axs.tick_params(axis='both', which='major', labelsize=15)
+        fig.tight_layout()
+        fig.legend(fontsize=15, loc="right")
+
+        if not plotting.exists():
+            plotting.mkdir()
+        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+        plt.close(fig)
         return
-
-    data = pd.read_csv(dataFile)
-    tpr = pd.to_numeric(data["TPR"],errors='coerce')
-    fpr = pd.to_numeric(data["FPR"],errors='coerce')
-
-    truePositiveRate = []
-    falsePositiveRate = []
-    for i in range(len(tpr) -1, -1, -1):
-        truePositiveRate.append(tpr[i])
-        falsePositiveRate.append(fpr[i])
-    auc_value = auc(falsePositiveRate, truePositiveRate)
     fig, axs = plt.subplots(1, 1, figsize=(7, 7))
-   
-    axs.plot(falsePositiveRate ,truePositiveRate, color="#162931", label="AUC=%.3f"%auc_value)
+    colors = ["#7F6A93",'#B96B37','#60634E']
+    colorCounter = 0
+    for interval in intervals:
+        dataFile = str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+
+        if not Path(dataFile).exists():
+            return
+        data = pd.read_csv(dataFile)
+        tpr = pd.to_numeric(data["TPR"],errors='coerce')
+        fpr = pd.to_numeric(data["FPR"],errors='coerce')
+
+        truePositiveRate = []
+        falsePositiveRate = []
+        for i in range(len(tpr) -1, -1, -1):
+            truePositiveRate.append(tpr[i])
+            falsePositiveRate.append(fpr[i])
+        auc_value = auc(falsePositiveRate, truePositiveRate)
+    
+        axs.plot(falsePositiveRate ,truePositiveRate, color=colors[colorCounter], label="Interval: "+ str(int(interval.total_seconds()/60)) +" min\nAUC=%.3f"%auc_value)
+        colorCounter += 1
     axs.set_title("Roc curve", fontsize=20)
     axs.set_xlabel("False Positive Rate", fontsize=20)
     axs.set_ylabel("True Positive Rate", fontsize=20)
@@ -77,10 +107,8 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, interval, attackDate):
 
     if not plotting.exists():
         plotting.mkdir()
-    if interval != 0:
-        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    else:
-        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+    fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+    
     plt.close(fig)
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -96,27 +124,23 @@ print("NetFlow entropy")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
-                makeROCcurve(y_field, "NetFlow", "Entropy", systemId, interval, attackDate)
-                
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            makeROCcurve(y_field, "NetFlow", "Entropy", systemId, intervals, attackDate)
+            
 
 y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
 print("Telemetry entropy")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
-                makeROCcurve(y_field, "Telemetry", "Entropy", systemId, interval, attackDate)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            makeROCcurve(y_field, "Telemetry", "Entropy", systemId, intervals, attackDate)
 
 
 y_fields = ["ICMPDstUnreachable"]
@@ -125,13 +149,11 @@ print("NetFlow ICMP dst unreachable")
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for interval in intervals:
-        print(interval)
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
-                makeROCcurve(y_field, "NetFlow", "Threshold", systemId, interval, attackDate)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            makeROCcurve(y_field, "NetFlow", "Threshold", systemId, intervals, attackDate)
 
 y_fields = ["SYN"]
 print("NetFlow SYN")

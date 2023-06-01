@@ -26,7 +26,7 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
-    metricCalc = data["Deviation_score"]
+    deviationScore = data["Deviation_score"]
     
     labels = data["real_label"]
     if 1 not in labels:
@@ -38,21 +38,19 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
     
     changeDict = {}
     changeList = []
-    for i in range(len(metricCalc)):
+    for i in range(len(deviationScore)):
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
 
         attack = labels[i]
-        if i >=windowSize:
-            change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
-            if change == np.nan or change == None or pd.isna(change):
-                if attack:
-                    changeDict[str(i)]  = {"attack": attack, "change": None}
-                continue
-            changeDict[str(i)]  = {"attack": attack, "change": change}
-            changeList.append(int(change*1000000))
-        elif attack:
-            changeDict[str(i)]  = {"attack": attack, "change": None}
+        change = deviationScore[i]
+        if change == np.nan or change == None or pd.isna(change):
+            if attack:
+                changeDict[str(i)]  = {"attack": attack, "change": None}
+            continue
+        changeDict[str(i)]  = {"attack": attack, "change": change}
+        changeList.append(int(change*1000000))
+
 
     changeList = list(dict.fromkeys(changeList))
     thresholds = list(sorted(changeList))
@@ -120,7 +118,6 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 attackDates = ["08.03.23"]
 y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
-y_fields= [ "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 for attackDate in attackDates:
     print("\n")

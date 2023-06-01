@@ -91,12 +91,13 @@ class Correlation_Distribution:
                 for time in alertDB[otherGateway]:
                     if interval.overlaps(time):
                         for distribution in distributions:
-                            if informationDistance(10, distribution, alertDB[otherGateway][time]["Packet_size_distribution"]) < 2:
-                                timeExists = True
-                                gateways.append(otherGateway)
-                                alerts = alertDB[otherGateway][time]
+                            alerts = alertDB[otherGateway][time]
 
-                                for alert in alerts:
+                            for alert in alerts:
+                                print(alert["Packet_size_distribution"])
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 2:
+                                    timeExists = True
+                                    gateways.append(otherGateway)
                                     deviation_scores.append(alert["Deviation_score"])
                                     real_labels.append(alert["Real_label"])
                                     attack_types.append(alert["Attack_type"])

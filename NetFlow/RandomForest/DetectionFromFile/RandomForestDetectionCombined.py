@@ -34,7 +34,8 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Random forest combined detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Random forest combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedDetectionNetFlow")
@@ -58,9 +59,9 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
     sTime = pd.to_datetime(alerts["sTime"])
     eTime = pd.to_datetime(alerts["eTime"])
 
-    srcPort = alerts["srcPort"]
+    '''srcPort = alerts["srcPort"]
     dstPort = alerts["dstPort"]
-    protocol = alerts["protocol"]
+    protocol = alerts["protocol"]'''
     real_label = alerts["real_label"]
 
     for i in range(len(sTime)):
@@ -75,9 +76,6 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "Gateway": systemId,
-                "srcPort": int(srcPort[i]),
-                "dstPort": int(dstPort[i]),
-                "Protocol": int(protocol[i]),
                 "Deviation_score": None,
                 "Real_label": int(real_label[i]),
                 "Attack_type": ""

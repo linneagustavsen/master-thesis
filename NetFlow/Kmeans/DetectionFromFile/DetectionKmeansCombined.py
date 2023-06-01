@@ -35,7 +35,8 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansCombinedDetectionNetFlow")
@@ -106,13 +107,20 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+
+            scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Combined.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            
+            tn = scores["TN"][0]
+            fn = scores["FN"][0]
+            trueNegatives += tn
+            falseNegatives += fn
         
         sTime = pd.to_datetime(cluster["sTime"])
         eTime = pd.to_datetime(cluster["eTime"])
 
-        srcPort = cluster["srcPort"]
+        '''srcPort = cluster["srcPort"]
         dstPort = cluster["dstPort"]
-        protocol = cluster["protocol"]
+        protocol = cluster["protocol"]'''
 
         labels = cluster["real_label"]
 
@@ -132,14 +140,15 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
     
         sTimeCluster.extend(sTime)
         eTimeCluster.extend(eTime)
-        srcPortsCluster.extend(srcPort)
+        '''srcPortsCluster.extend(srcPort)
         dstPortsCluster.extend(dstPort)
-        protocolCluster.extend(protocol)
+        protocolCluster.extend(protocol)'''
         real_labels.extend(labels)
 
         startTime += clusterFrequency
 
-
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     counter = 0
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
@@ -160,9 +169,6 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "srcPort": int(srcPortsCluster[i]),
-                    "dstPort": int(dstPortsCluster[i]),
-                    "Protocol": int(protocolCluster[i]),
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
                     "Attack_type": attackType
@@ -186,7 +192,7 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

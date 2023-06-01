@@ -35,7 +35,8 @@ def detectionRandomForestTelemetry(start, stop, systemId, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Random Forest detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Random Forest detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestDetectionTelemetry")

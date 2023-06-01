@@ -41,7 +41,8 @@ def detectionTelemetry(start, stop, systemId, field, threshold, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Statistical threshold detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Statistical threshold detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ThresholdDetectionTelemetry")
@@ -105,7 +106,7 @@ def detectionTelemetry(start, stop, systemId, field, threshold, attackDate):
         elif deviation <= threshold and not attack:
             trueNegatives += 1
 
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():

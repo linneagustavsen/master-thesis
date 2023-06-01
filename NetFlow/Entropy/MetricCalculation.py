@@ -128,13 +128,13 @@ def metricCalculation(silkFile, start, stop, systemId, frequency, interval, atta
             icmpPacketsArray.append(icmpPackets)
 
             #Find the probability distribution based on how big the packets are this time interval
-            PiPS,nps = packetSizeDistributionNetFlow(records)
+            PiPS,nps,packetSizeDistributionDictArray = packetSizeDistributionDetectionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
             packetSizeArray.append(entropyPacketSize)
             #Calculate the generalized entropy rate of this distribution
             packetSizeRateArray.append(entropyPacketSize/nps)
-            packetSizeDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiPS
+            packetSizeDistributionDict[rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ")] = packetSizeDistributionDictArray
 
             #Store the number of packets and bytes this time interval
             packetNumberArray.append(numberOfPackets(records))

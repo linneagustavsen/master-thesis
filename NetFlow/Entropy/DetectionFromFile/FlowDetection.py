@@ -56,7 +56,8 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BidirectionalFlowEntropyDetectionNetFlow")
@@ -219,7 +220,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                 trueNegatives_r += 1
                 falseNegatives_nf += 1
     
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():

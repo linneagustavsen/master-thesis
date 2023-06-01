@@ -8,13 +8,13 @@ def simulateRealTime(timeNow, stime, attackDate):
     attackMonth = int(attackDate[1])
     attackDay = int(attackDate[0])
     
-    movedTime = stime + timedelta(hours=1, minutes=45)
+    '''movedTime = stime + timedelta(hours=1, minutes=45)
     if movedTime > timeNow.replace(year=attackYear, month=attackMonth, day=attackDay):
         duration = math.ceil((movedTime - timeNow.replace(year=attackYear, month=attackMonth, day=attackDay)).total_seconds())
     else:
-        duration = 0
-    '''if stime > timeNow.replace(year=attackYear, month=attackMonth, day=attackDay):
+        duration = 0'''
+    if stime > timeNow.replace(year=attackYear, month=attackMonth, day=attackDay):
         duration = math.ceil((stime - timeNow.replace(year=attackYear, month=attackMonth, day=attackDay)).total_seconds())
     else:
-        duration = 0'''
+        duration = 0
     sleep(duration)
