@@ -5,6 +5,8 @@ from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -68,7 +70,8 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
@@ -121,7 +124,7 @@ def detectionPacketsNetFlow(silkFile, start, stop, systemId, frequency, interval
             if i >=windowSize:
                 change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
                 
-                #simulateRealTime(datetime.now(), rec.stime, attackDate)
+                simulateRealTime(datetime.now(), rec.stime, attackDate)
                 if abs(change) > thresholdPackets:
                     alert = {
                         "sTime": (rec.stime - frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),

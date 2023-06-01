@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from threading import Thread
 import json
 
@@ -182,7 +184,7 @@ class Ranking:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 

@@ -4,6 +4,8 @@ from pathlib import Path
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.Normalization import normalization
 from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
@@ -57,12 +59,12 @@ def detectionTelemetry(systemId, if_name, field, start, stop, threshold, attackD
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client,userdata,result):
-        s=0
-        #print("Statistical threshold detection published to topic", MQTT_TOPIC)
+        print("Statistical threshold detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("ThresholdDetectionTelemetry")

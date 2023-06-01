@@ -5,6 +5,8 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 '''
@@ -29,12 +31,12 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansEntropyDetectionNetFlow")
@@ -112,7 +114,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
             break
         if sTime[i] < startTime:
             continue
-        #simulateRealTime(datetime.now(), eTime[i], attackDate)
+        simulateRealTime(datetime.now(), eTime[i], attackDate)
         
         alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -129,6 +131,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         elif not real_labels[i]:
             falsePositives += 1
 
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

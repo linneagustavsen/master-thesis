@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 
 
-def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate):
+def findGoodThreshold(systemId, interval, windowSize, attackDate):
     p = Path('ThresholdDecision')
-    decisionPath = p / 'Entropy' / 'NetFlow'
+    decisionPath = p / 'Threshold' / 'NetFlow'
     if attackDate == "08.03.23":
         fileString = "0803"
         q = decisionPath /'Attack0803'
@@ -21,15 +21,15 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
     if not q.exists():
         q.mkdir(parents=True)
     
-    #data = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    #data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
-    metricCalc = data[y_field]
+    metricCalc = data["ICMPDstUnreachable"]
     
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    
@@ -69,21 +69,24 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
         
         if i >=windowSize:
             change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
+            if change == np.nan or change == None:
+                if attack:
+                    changeDict[str(i)]  = {"attack": attack, "change": None}
+                continue
             if change > maxChange:
                 maxChange = change
             if change < minChange:
                 minChange = change
             changeDict[str(i)]  = {"attack": attack, "change": change}
-            changeList.append(int(change*10000000000))
+            changeList.append(int(change*100))
         elif attack:
             changeDict[str(i)]  = {"attack": attack, "change": None}
-            changeList.append(None)
     
     if not isThereAttack:
         return
     changeList = list(dict.fromkeys(changeList))
     thresholds = list(sorted(changeList))
-    f_scores = open(str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_scores = open(str(q) + "/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
 
     lastTruePositives = 0
@@ -105,7 +108,7 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
     threshold_fnr = 0
     threshold_ppv = 0
     for threshold in thresholds:
-        threshold = threshold/10000000000
+        threshold = threshold/100
 
         truePositives = 0
         falsePositives = 0
@@ -114,6 +117,12 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
         for key in changeDict:
             change = changeDict[key]["change"]
             attack = changeDict[key]["attack"]
+            if change == None:
+                if attack:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
+                continue
             if change > threshold:
                 if attack:
                     truePositives += 1
@@ -192,11 +201,15 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-attackDates = ["08.03.23","17.03.23"]
-y_fields = ["icmpRatio"]
+attackDates = ["08.03.23","17.03.23", "24.03.23"]
+attackDates = ["08.03.23"]
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
+print("ICMP Destination unreachable")
 for attackDate in attackDates:
+    print("\n")
+    print(attackDate)
     for systemId in systems:
+        print(systemId)
         for interval in intervals:
-            for y_field in y_fields:
-                findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)
+            print(interval)
+            findGoodThreshold(systemId, interval, 10, attackDate)

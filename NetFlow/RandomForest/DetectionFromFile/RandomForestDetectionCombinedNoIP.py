@@ -5,6 +5,8 @@ from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -28,12 +30,12 @@ def detectionRandomForestNoIPNetFlow(start, stop, systemId, interval, attackDate
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Random forest combined no IP detection published to topic", MQTT_TOPIC)
+        print(systemId, "Random forest combined no IP detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedNoIPDetectionNetFlow")
@@ -68,7 +70,7 @@ def detectionRandomForestNoIPNetFlow(start, stop, systemId, interval, attackDate
             break
         if sTime[i] < startTime:
             continue
-        #simulateRealTime(datetime.now(), sTime[i], attackDate)
+        simulateRealTime(datetime.now(), sTime[i], attackDate)
         if real_label[i] == np.nan:
             print(i, sTime[i], eTime[i], real_label[i])
         alert = {

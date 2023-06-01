@@ -7,6 +7,8 @@ from HelperFunctions.Normalization import normalization
 from HelperFunctionsTelemetry.GetDataTelemetry import getDataTables
 from .FindMaxVar import *
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly

@@ -6,6 +6,8 @@ from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -42,12 +44,12 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
+        print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionNetFlow")
@@ -117,7 +119,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
         if i >=windowSize:
             change = bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])
             
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdBytes:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -142,6 +144,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

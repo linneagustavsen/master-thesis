@@ -1,0 +1,24 @@
+
+Field: ICMPDstUnreachable SystemId: teknobyen-gw1 Interval: 300
+Max F1-score was for threshold: 4.77 with a F1-score of 0.0526315789473684 a TPR of: 0.5 a FPR of: 0.0498575498575498 an accuracy of: 0.9488636363636364 a FNR of: 0.5 and a PPV of: 0.0277777777777777
+Max TPR was for threshold: 0.0 with a F1-score of 0.0063795853269537 a TPR of: 1.0 a FPR of: 0.8874643874643875 an accuracy of: 0.1150568181818181 a FNR of: 0.0 and a PPV of: 0.0032
+Min FPR was for threshold: 0.0 with a F1-score of 0.0063795853269537 a TPR of: 1.0 a FPR of: 0.8874643874643875 an accuracy of: 0.1150568181818181 a FNR of: 0.0 and a PPV of: 0.0032
+Max accuracy was for threshold: 4.77 with a F1-score of 0.0526315789473684 a TPR of: 0.5 a FPR of: 0.0498575498575498 an accuracy of: 0.9488636363636364 a FNR of: 0.5 and a PPV of: 0.0277777777777777
+Min FNR was for threshold: 0.0 with a F1-score of 0.0063795853269537 a TPR of: 1.0 a FPR of: 0.8874643874643875 an accuracy of: 0.1150568181818181 a FNR of: 0.0 and a PPV of: 0.0032
+Max PPV was for threshold: 4.77 with a F1-score of 0.0526315789473684 a TPR of: 0.5 a FPR of: 0.0498575498575498 an accuracy of: 0.9488636363636364 a FNR of: 0.5 and a PPV of: 0.0277777777777777
+
+Field: ICMPDstUnreachable SystemId: teknobyen-gw1 Interval: 600
+Max F1-score was for threshold: 4.66 with a F1-score of 0.0186915887850467 a TPR of: 0.5 a FPR of: 0.1492109038737446 an accuracy of: 0.8497854077253219 a FNR of: 0.5 and a PPV of: 0.0095238095238095
+Max TPR was for threshold: 0.0 with a F1-score of 0.0061728395061728 a TPR of: 1.0 a FPR of: 0.9239598278335724 an accuracy of: 0.0786838340486409 a FNR of: 0.0 and a PPV of: 0.0030959752321981
+Min FPR was for threshold: 0.0 with a F1-score of 0.0061728395061728 a TPR of: 1.0 a FPR of: 0.9239598278335724 an accuracy of: 0.0786838340486409 a FNR of: 0.0 and a PPV of: 0.0030959752321981
+Max accuracy was for threshold: 4.66 with a F1-score of 0.0186915887850467 a TPR of: 0.5 a FPR of: 0.1492109038737446 an accuracy of: 0.8497854077253219 a FNR of: 0.5 and a PPV of: 0.0095238095238095
+Min FNR was for threshold: 0.0 with a F1-score of 0.0061728395061728 a TPR of: 1.0 a FPR of: 0.9239598278335724 an accuracy of: 0.0786838340486409 a FNR of: 0.0 and a PPV of: 0.0030959752321981
+Max PPV was for threshold: 4.66 with a F1-score of 0.0186915887850467 a TPR of: 0.5 a FPR of: 0.1492109038737446 an accuracy of: 0.8497854077253219 a FNR of: 0.5 and a PPV of: 0.0095238095238095
+
+Field: ICMPDstUnreachable SystemId: teknobyen-gw1 Interval: 900
+Max F1-score was for threshold: 0.77 with a F1-score of 0.0072595281306715 a TPR of: 1.0 a FPR of: 0.7904624277456648 an accuracy of: 0.2118155619596541 a FNR of: 0.0 and a PPV of: 0.0036429872495446
+Max TPR was for threshold: 0.0 with a F1-score of 0.0061068702290076 a TPR of: 1.0 a FPR of: 0.9407514450867052 an accuracy of: 0.0619596541786743 a FNR of: 0.0 and a PPV of: 0.003062787136294
+Min FPR was for threshold: 0.0 with a F1-score of 0.0061068702290076 a TPR of: 1.0 a FPR of: 0.9407514450867052 an accuracy of: 0.0619596541786743 a FNR of: 0.0 and a PPV of: 0.003062787136294
+Max accuracy was for threshold: 2.33 with a F1-score of 0.0061919504643962 a TPR of: 0.5 a FPR of: 0.4624277456647399 an accuracy of: 0.537463976945245 a FNR of: 0.5 and a PPV of: 0.0031152647975077
+Min FNR was for threshold: 0.0 with a F1-score of 0.0061068702290076 a TPR of: 1.0 a FPR of: 0.9407514450867052 an accuracy of: 0.0619596541786743 a FNR of: 0.0 and a PPV of: 0.003062787136294
+Max PPV was for threshold: 0.77 with a F1-score of 0.0072595281306715 a TPR of: 1.0 a FPR of: 0.7904624277456648 an accuracy of: 0.2118155619596541 a FNR of: 0.0 and a PPV of: 0.0036429872495446

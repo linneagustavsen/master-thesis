@@ -6,6 +6,8 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 '''
@@ -28,12 +30,12 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansDetectionNetFlow")
@@ -79,18 +81,18 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             continue
         if fileString == "0803":
             if attackCluster["AttackCluster"][0] == 0:
-                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
                 attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
                 nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
             elif attackCluster["AttackCluster"][0] == 1:
-                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
                 attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
                 nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
 
-                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
             for label in labelsForNonAttackCluster:
@@ -143,7 +145,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             break
         if sTimeCluster[i] < startTime:
             continue
-        #simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
+        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
         attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]
@@ -182,6 +184,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

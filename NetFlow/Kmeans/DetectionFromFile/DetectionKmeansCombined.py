@@ -7,6 +7,8 @@ from HelperFunctions.StructureData import *
 from HelperFunctions.StructureData import *
 from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 '''
@@ -28,12 +30,12 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansCombinedDetectionNetFlow")
@@ -146,7 +148,7 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             break
         if sTimeCluster[i] < startTime:
             continue
-        #simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
+        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
         attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]
@@ -184,6 +186,7 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

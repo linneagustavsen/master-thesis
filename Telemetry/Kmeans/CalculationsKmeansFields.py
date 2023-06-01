@@ -9,6 +9,8 @@ from HelperFunctions.IsAttack import *
 from Telemetry.Kmeans.ClusterLabelling import labelCluster
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 '''
     Do K-means clustering on field data write both clusters to file

@@ -2,6 +2,8 @@ from pathlib import Path
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import networkx as nx
 from threading import Thread
 import json
@@ -157,7 +159,7 @@ class Correlation_Distribution:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 

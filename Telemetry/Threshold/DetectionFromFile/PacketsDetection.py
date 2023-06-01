@@ -7,6 +7,8 @@ from HelperFunctions.Distributions import *
 from HelperFunctions.IsAttack import isAttack
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.Normalization import normalization
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -39,12 +41,12 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print(systemId, "Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Packet detection published to topic", MQTT_TOPIC)
+        print(systemId, "Packet detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("PacketsDetectionTelemetry")
@@ -90,7 +92,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
         if i >= windowSize:
             change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
             
-            #simulateRealTime(datetime.now(), eTime[i], attackDate)
+            simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdPackets:
                 alert = {
                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -115,6 +117,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
                 falseNegatives +=1
             elif not attack:
                 trueNegatives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():

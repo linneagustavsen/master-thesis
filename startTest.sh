@@ -1,8 +1,8 @@
 #!/bin/bash
-interval=15
-start="2023-03-24 14:00:00"
-stop="2023-03-24 18:00:00"
-attackDate="24.03.23"
+interval=10
+start="2023-03-08 14:15:00"
+stop="2023-03-08 16:00:00"
+attackDate="08.03.23"
 for systemId in  "teknobyen-gw1" "narvik-gw3" "hovedbygget-gw" "hoytek-gw2" "teknobyen-gw2" "ma2-gw" "bergen-gw3" "narvik-kv-gw" "trd-gw" "ifi2-gw5" "oslo-gw1"
 do
     python3 Attack0803RunBytesDetection.py "$start" "$stop" $attackDate $systemId $interval 

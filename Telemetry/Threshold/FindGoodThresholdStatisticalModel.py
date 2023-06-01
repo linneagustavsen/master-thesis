@@ -37,8 +37,6 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
     
     changeDict = {}
-    maxChange = 0
-    minChange = 100000000000000000
     changeList = []
     for i in range(len(metricCalc)):
         sTime[i] = sTime[i].replace(tzinfo=None)
@@ -47,19 +45,15 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
         attack = labels[i]
         if i >=windowSize:
             change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
-            if change == np.nan:
-                changeDict[str(i)]  = {"attack": attack, "change": None}
-                changeList.append(None) 
+            if change == np.nan or change == None or pd.isna(change):
+                if attack:
+                    changeDict[str(i)]  = {"attack": attack, "change": None}
                 continue
-            if change > maxChange:
-                maxChange = change
-            if change < minChange:
-                minChange = change
             changeDict[str(i)]  = {"attack": attack, "change": change}
             changeList.append(int(change*1000000))
         elif attack:
             changeDict[str(i)]  = {"attack": attack, "change": None}
-            changeList.append(None)  
+
     changeList = list(dict.fromkeys(changeList))
     thresholds = list(sorted(changeList))
 
@@ -73,6 +67,12 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
         for key in changeDict:
             change = changeDict[key]["change"]
             attack = changeDict[key]["attack"]
+            if change == None:
+                if attack:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
+                continue
             if change > threshold:
                 if attack:
                     truePositives += 1
@@ -117,10 +117,18 @@ def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, a
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-attackDates = ["08.03.23","17.03.23"]
+attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["08.03.23"]
 y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
+y_fields= [ "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 for attackDate in attackDates:
+    print("\n")
+    print(attackDate)
     for y_field in y_fields:
+        print(y_field)
         for systemId in systems:
+            print(systemId)
+            if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "egress_queue_info__0__cur_buffer_occupancy":
+                continue
             findGoodThresholdStatisticalModel(y_field, systemId, 0, 10, attackDate)

@@ -39,5 +39,6 @@ do
     python3 Attack0803RunSYNEntropyDetection.py "$start" "$stop" $attackDate $systemId $interval &
     python3 Attack0803RunTopKFlows.py "$start" "$stop" $attackDate $systemId &
     python3 Attack0803RunXmasDetection.py "$start" "$stop" $attackDate $systemId &
+    sleep $((30))
 done
 

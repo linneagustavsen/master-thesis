@@ -4,6 +4,8 @@ from pathlib import Path
 from HelperFunctions.GetData import *
 from HelperFunctions.IsAttack import isAttack
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.Normalization import normalization
 from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes, getDataPackets, getDataTables

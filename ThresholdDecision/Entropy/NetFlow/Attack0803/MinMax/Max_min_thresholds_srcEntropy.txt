@@ -1,0 +1,88 @@
+
+Field: srcEntropy SystemId: tromso-gw5 Interval: 300
+Max F1-score was for threshold: 0.9049430898 with a F1-score of 0.2150537634408602 a TPR of: 0.5555555555555556 a FPR of: 0.0946142649199417 an accuracy of: 0.8964539007092198 a FNR of: 0.4444444444444444 and a PPV of: 0.1333333333333333
+Max TPR was for threshold: 0.0003287539 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Min FPR was for threshold: 0.0003287539 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max accuracy was for threshold: 1.3773512037 with a F1-score of 0.1538461538461538 a TPR of: 0.1111111111111111 a FPR of: 0.0087336244541484 an accuracy of: 0.9687943262411348 a FNR of: 0.8888888888888888 and a PPV of: 0.25
+Min FNR was for threshold: 0.0003287539 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max PPV was for threshold: 1.3773512037 with a F1-score of 0.1538461538461538 a TPR of: 0.1111111111111111 a FPR of: 0.0087336244541484 an accuracy of: 0.9687943262411348 a FNR of: 0.8888888888888888 and a PPV of: 0.25
+
+Field: srcEntropy SystemId: teknobyen-gw1 Interval: 300
+Max F1-score was for threshold: 1.7326098731 with a F1-score of 0.2 a TPR of: 0.1578947368421052 a FPR of: 0.0116618075801749 an accuracy of: 0.9659574468085106 a FNR of: 0.8421052631578947 and a PPV of: 0.2727272727272727
+Max TPR was for threshold: 0.0004163957 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
+Min FPR was for threshold: 0.0004163957 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
+Max accuracy was for threshold: 1.9633290448 with a F1-score of 0.1818181818181818 a TPR of: 0.1052631578947368 a FPR of: 0.0014577259475218 an accuracy of: 0.9744680851063828 a FNR of: 0.8947368421052632 and a PPV of: 0.6666666666666666
+Min FNR was for threshold: 0.0004163957 with a F1-score of 0.0524861878453038 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.026950354609929 a FNR of: 0.0 and a PPV of: 0.026950354609929
+Max PPV was for threshold: 1.9633290448 with a F1-score of 0.1818181818181818 a TPR of: 0.1052631578947368 a FPR of: 0.0014577259475218 an accuracy of: 0.9744680851063828 a FNR of: 0.8947368421052632 and a PPV of: 0.6666666666666666
+
+Field: srcEntropy SystemId: hoytek-gw2 Interval: 300
+Max F1-score was for threshold: 0.2295662497 with a F1-score of 0.0812182741116751 a TPR of: 0.5 a FPR of: 0.251088534107402 an accuracy of: 0.7432624113475177 a FNR of: 0.5 and a PPV of: 0.0441988950276243
+Max TPR was for threshold: 0.0008623824 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Min FPR was for threshold: 0.0008623824 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max accuracy was for threshold: 0.3797226682 with a F1-score of 0.0206185567010309 a TPR of: 0.0625 a FPR of: 0.11611030478955 an accuracy of: 0.8652482269503546 a FNR of: 0.9375 and a PPV of: 0.0123456790123456
+Min FNR was for threshold: 0.0008623824 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max PPV was for threshold: 0.2295662497 with a F1-score of 0.0812182741116751 a TPR of: 0.5 a FPR of: 0.251088534107402 an accuracy of: 0.7432624113475177 a FNR of: 0.5 and a PPV of: 0.0441988950276243
+
+Field: srcEntropy SystemId: bergen-gw3 Interval: 300
+Max F1-score was for threshold: 0.9693448386 with a F1-score of 0.1568627450980392 a TPR of: 0.5 a FPR of: 0.1132075471698113 an accuracy of: 0.8780141843971632 a FNR of: 0.5 and a PPV of: 0.0930232558139534
+Max TPR was for threshold: 0.0012050179 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Min FPR was for threshold: 0.0012050179 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max accuracy was for threshold: 2.1067768824 with a F1-score of 0.0869565217391304 a TPR of: 0.0625 a FPR of: 0.0087082728592162 an accuracy of: 0.9702127659574468 a FNR of: 0.9375 and a PPV of: 0.1428571428571428
+Min FNR was for threshold: 0.0012050179 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max PPV was for threshold: 2.1067768824 with a F1-score of 0.0869565217391304 a TPR of: 0.0625 a FPR of: 0.0087082728592162 an accuracy of: 0.9702127659574468 a FNR of: 0.9375 and a PPV of: 0.1428571428571428
+
+Field: srcEntropy SystemId: trd-gw Interval: 300
+Max F1-score was for threshold: 0.2577112853 with a F1-score of 0.0504201680672268 a TPR of: 0.75 a FPR of: 0.6502177068214804 an accuracy of: 0.3588652482269504 a FNR of: 0.25 and a PPV of: 0.0260869565217391
+Max TPR was for threshold: 0.0015315273 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Min FPR was for threshold: 0.0015315273 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max accuracy was for threshold: 0.8476257124 with a F1-score of 0.0077821011673151 a TPR of: 0.0625 a FPR of: 0.3483309143686502 an accuracy of: 0.6382978723404256 a FNR of: 0.9375 and a PPV of: 0.0041493775933609
+Min FNR was for threshold: 0.0015315273 with a F1-score of 0.044382801664355 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0226950354609929 a FNR of: 0.0 and a PPV of: 0.0226950354609929
+Max PPV was for threshold: 0.2577112853 with a F1-score of 0.0504201680672268 a TPR of: 0.75 a FPR of: 0.6502177068214804 an accuracy of: 0.3588652482269504 a FNR of: 0.25 and a PPV of: 0.0260869565217391
+
+Field: srcEntropy SystemId: ifi2-gw5 Interval: 300
+Max F1-score was for threshold: 1.8437775735 with a F1-score of 0.0689655172413793 a TPR of: 0.1111111111111111 a FPR of: 0.0553129548762736 an accuracy of: 0.9234042553191488 a FNR of: 0.8888888888888888 and a PPV of: 0.05
+Max TPR was for threshold: 0.0001595709 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Min FPR was for threshold: 0.0001595709 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max accuracy was for threshold: 1.9394907477 with a F1-score of 0.0384615384615384 a TPR of: 0.0555555555555555 a FPR of: 0.0480349344978165 an accuracy of: 0.9290780141843972 a FNR of: 0.9444444444444444 and a PPV of: 0.0294117647058823
+Min FNR was for threshold: 0.0001595709 with a F1-score of 0.0497925311203319 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.025531914893617 a FNR of: 0.0 and a PPV of: 0.025531914893617
+Max PPV was for threshold: 1.8437775735 with a F1-score of 0.0689655172413793 a TPR of: 0.1111111111111111 a FPR of: 0.0553129548762736 an accuracy of: 0.9234042553191488 a FNR of: 0.8888888888888888 and a PPV of: 0.05
+
+Field: srcEntropy SystemId: teknobyen-gw1 Interval: 600
+Max F1-score was for threshold: 1.3031590396 with a F1-score of 0.1136363636363636 a TPR of: 0.2631578947368421 a FPR of: 0.0939794419970631 an accuracy of: 0.8885714285714286 a FNR of: 0.7368421052631579 and a PPV of: 0.072463768115942
+Max TPR was for threshold: 4.26998e-05 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
+Min FPR was for threshold: 4.26998e-05 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
+Max accuracy was for threshold: 1.5396416799 with a F1-score of 0.0434782608695652 a TPR of: 0.0526315789473684 a FPR of: 0.0381791483113069 an accuracy of: 0.9371428571428572 a FNR of: 0.9473684210526316 and a PPV of: 0.037037037037037
+Min FNR was for threshold: 4.26998e-05 with a F1-score of 0.0528511821974965 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0271428571428571 a FNR of: 0.0 and a PPV of: 0.0271428571428571
+Max PPV was for threshold: 1.514895471 with a F1-score of 0.1052631578947368 a TPR of: 0.1578947368421052 a FPR of: 0.0513950073421439 an accuracy of: 0.9271428571428572 a FNR of: 0.8421052631578947 and a PPV of: 0.0789473684210526
+
+Field: srcEntropy SystemId: hoytek-gw2 Interval: 600
+Max F1-score was for threshold: 0.097756529 with a F1-score of 0.0699708454810495 a TPR of: 0.75 a FPR of: 0.4605263157894737 an accuracy of: 0.5442857142857143 a FNR of: 0.25 and a PPV of: 0.036697247706422
+Max TPR was for threshold: 0.0001437848 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Min FPR was for threshold: 0.0001437848 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max accuracy was for threshold: 0.2413811221 with a F1-score of 0.0307692307692307 a TPR of: 0.125 a FPR of: 0.1637426900584795 an accuracy of: 0.82 a FNR of: 0.875 and a PPV of: 0.0175438596491228
+Min FNR was for threshold: 0.0001437848 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max PPV was for threshold: 0.097756529 with a F1-score of 0.0699708454810495 a TPR of: 0.75 a FPR of: 0.4605263157894737 an accuracy of: 0.5442857142857143 a FNR of: 0.25 and a PPV of: 0.036697247706422
+
+Field: srcEntropy SystemId: bergen-gw3 Interval: 600
+Max F1-score was for threshold: 1.0888792548 with a F1-score of 0.1639344262295081 a TPR of: 0.3125 a FPR of: 0.0584795321637426 an accuracy of: 0.9271428571428572 a FNR of: 0.6875 and a PPV of: 0.1111111111111111
+Max TPR was for threshold: 0.0008249121 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Min FPR was for threshold: 0.0008249121 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max accuracy was for threshold: 1.571088357 with a F1-score of 0.0588235294117647 a TPR of: 0.0625 a FPR of: 0.0248538011695906 an accuracy of: 0.9542857142857144 a FNR of: 0.9375 and a PPV of: 0.0555555555555555
+Min FNR was for threshold: 0.0008249121 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max PPV was for threshold: 1.0888792548 with a F1-score of 0.1639344262295081 a TPR of: 0.3125 a FPR of: 0.0584795321637426 an accuracy of: 0.9271428571428572 a FNR of: 0.6875 and a PPV of: 0.1111111111111111
+
+Field: srcEntropy SystemId: trd-gw Interval: 600
+Max F1-score was for threshold: 0.2901586348 with a F1-score of 0.0588235294117647 a TPR of: 0.625 a FPR of: 0.4590643274853801 an accuracy of: 0.5428571428571428 a FNR of: 0.375 and a PPV of: 0.0308641975308641
+Max TPR was for threshold: 0.0011661142 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Min FPR was for threshold: 0.0011661142 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max accuracy was for threshold: 0.6659312887 with a F1-score of 0.0098522167487684 a TPR of: 0.0625 a FPR of: 0.2719298245614035 an accuracy of: 0.7128571428571429 a FNR of: 0.9375 and a PPV of: 0.0053475935828877
+Min FNR was for threshold: 0.0011661142 with a F1-score of 0.0446927374301676 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0228571428571428 a FNR of: 0.0 and a PPV of: 0.0228571428571428
+Max PPV was for threshold: 0.2901586348 with a F1-score of 0.0588235294117647 a TPR of: 0.625 a FPR of: 0.4590643274853801 an accuracy of: 0.5428571428571428 a FNR of: 0.375 and a PPV of: 0.0308641975308641
+
+Field: srcEntropy SystemId: ifi2-gw5 Interval: 600
+Max F1-score was for threshold: 0.0124501164 with a F1-score of 0.0520984081041968 a TPR of: 1.0 a FPR of: 0.9604105571847508 an accuracy of: 0.0642857142857142 a FNR of: 0.0 and a PPV of: 0.0267459138187221
+Max TPR was for threshold: 0.0003483867 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
+Min FPR was for threshold: 0.0003483867 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
+Max accuracy was for threshold: 0.7298074943 with a F1-score of 0.0141843971631205 a TPR of: 0.0555555555555555 a FPR of: 0.1788856304985337 an accuracy of: 0.8014285714285714 a FNR of: 0.9444444444444444 and a PPV of: 0.008130081300813
+Min FNR was for threshold: 0.0003483867 with a F1-score of 0.0501392757660167 a TPR of: 1.0 a FPR of: 1.0 an accuracy of: 0.0257142857142857 a FNR of: 0.0 and a PPV of: 0.0257142857142857
+Max PPV was for threshold: 0.0124501164 with a F1-score of 0.0520984081041968 a TPR of: 1.0 a FPR of: 0.9604105571847508 an accuracy of: 0.0642857142857142 a FNR of: 0.0 and a PPV of: 0.0267459138187221

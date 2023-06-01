@@ -9,6 +9,7 @@ Calculations/*
 *.npy
 ThresholdDecision/Entropy/NetFlow/Attack*/*.csv
 ThresholdDecision/Threshold/NetFlow/Attack*/*.csv
+ThresholdDecision/TopKFlows/NetFlow/Attack*/*.csv
 ThresholdDecision/Entropy/Telemetry/Attack*/*.csv
 ThresholdDecision/Threshold/Telemetry/Attack*/*.csv
 ThresholdDecisionold/Entropy/NetFlow/*.csv

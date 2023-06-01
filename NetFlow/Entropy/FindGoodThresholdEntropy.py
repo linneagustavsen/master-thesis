@@ -68,6 +68,10 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
         
         if i >=windowSize:
             change = abs(metricCalc[i] - np.nanmean(metricCalc[i-windowSize: i-1]))
+            if change == np.nan or change == None:
+                if attack:
+                    changeDict[str(i)]  = {"attack": attack, "change": None}
+                continue
             if change > maxChange:
                 maxChange = change
             if change < minChange:
@@ -76,10 +80,9 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
             changeList.append(int(change*10000000000))
         elif attack:
             changeDict[str(i)]  = {"attack": attack, "change": None}
-            changeList.append(None)
     
     if not isThereAttack:
-        print("No attacks!!\n")
+        print("No attacks!!")
         return
     changeList = list(dict.fromkeys(changeList))
     thresholds = list(sorted(changeList))
@@ -114,6 +117,12 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
         for key in changeDict:
             change = changeDict[key]["change"]
             attack = changeDict[key]["attack"]
+            if change == None:
+                if attack:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
+                continue
             if change > threshold:
                 if attack:
                     truePositives += 1
@@ -156,15 +165,22 @@ def findGoodThresholdEntropy(y_field, systemId, interval, windowSize, attackDate
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
     f_scores.close()
         
-systems = ["teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-attackDates = ["08.03.23","17.03.23"]
+attackDates = ["17.03.23","24.03.23"]
+attackDates = ["08.03.23"]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
-intervals = [timedelta(minutes = 10)]
+intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
+intervals = [timedelta(minutes = 5)]
+
 for attackDate in attackDates:
+    print(attackDate)
     for systemId in systems:
+        print(systemId)
         for interval in intervals:
+            print(interval)
             for y_field in y_fields:
+                print(y_field)
                 findGoodThresholdEntropy(y_field, systemId, interval, 10, attackDate)

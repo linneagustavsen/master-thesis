@@ -1,6 +1,8 @@
 from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from threading import Thread
 import json
 from datetime import timedelta
@@ -157,7 +159,7 @@ class Correlation_IPs:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
