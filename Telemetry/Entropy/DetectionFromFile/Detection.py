@@ -161,7 +161,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                 trueNegatives += 1
                 trueNegatives_r += 1
 
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():

@@ -178,6 +178,7 @@ for attackDate in attackDates:
             if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "egress_queue_info__0__cur_buffer_occupancy":
                 continue
             makeROCcurve(y_field, "Telemetry", "Threshold", systemId, 0, attackDate)
+            
 y_fields = ["TopKFlows"]
 print("NetFlow TopKFlows")
 for attackDate in attackDates:

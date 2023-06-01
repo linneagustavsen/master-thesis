@@ -158,7 +158,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():

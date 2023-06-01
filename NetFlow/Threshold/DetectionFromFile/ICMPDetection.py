@@ -178,7 +178,7 @@ def detectionICMP(start, stop, systemId, frequency, interval, windowSize, thresh
             elif not attack:
                trueNegatives += 1
                trueNegatives_r += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

@@ -129,7 +129,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

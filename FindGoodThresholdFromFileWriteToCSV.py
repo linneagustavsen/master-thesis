@@ -81,7 +81,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDates = ["08.03.23", "17.03.23","24.03.23"]
-attackDates = ["08.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
@@ -128,15 +128,6 @@ for attackDate in attackDates:
         print(y_field)
         findGoodThresholdFromFile(y_field, "NetFlow", "Threshold", systems, 0, attackDate)
 
-
-y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        findGoodThresholdFromFile(y_field, "Telemetry", "Threshold", systems, 0, attackDate)
-
 y_fields = ["TopKFlows"]
 print("NetFlow TopKFlows")
 for attackDate in attackDates:
@@ -145,3 +136,12 @@ for attackDate in attackDates:
     for y_field in y_fields:
         print(y_field)
         findGoodThresholdFromFile(y_field, "NetFlow", "TopKFlows", systems, 0, attackDate)
+
+attackDates = ["08.03.23", "17.03.23","24.03.23"]
+y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
+for attackDate in attackDates:
+    print("\n")
+    print(attackDate)
+    for y_field in y_fields:
+        print(y_field)
+        findGoodThresholdFromFile(y_field, "Telemetry", "Threshold", systems, 0, attackDate)

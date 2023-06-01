@@ -139,7 +139,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         elif not real_labels[i]:
             falsePositives += 1
 
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

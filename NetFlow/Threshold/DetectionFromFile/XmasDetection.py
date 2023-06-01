@@ -104,7 +104,7 @@ def xmasCalculation(start, stop, systemId, attackDate):
             truePositives += 1
         elif not attack:
             falsePositives += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

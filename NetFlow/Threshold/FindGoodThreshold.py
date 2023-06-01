@@ -202,7 +202,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDates = ["08.03.23","17.03.23", "24.03.23"]
-attackDates = ["08.03.23"]
+attackDates = ["17.03.23", "24.03.23"]
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 print("ICMP Destination unreachable")
 for attackDate in attackDates:

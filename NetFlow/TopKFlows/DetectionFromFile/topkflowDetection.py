@@ -101,7 +101,7 @@ def topkflows(start, stop, systemId, threshold, attackDate):
             truePositives += 1
         elif not attack:
             falsePositives += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'TopKFlows' / 'NetFlow'
     if not q.exists():

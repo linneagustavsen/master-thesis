@@ -197,7 +197,7 @@ def detectionPS(start, stop, systemId, frequency, interval, windowSize, threshol
                 trueNegatives += 1
                 trueNegatives_r += 1
 
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def findGoodThresholdStatisticalModel(y_field, systemId, interval, windowSize, attackDate):
+def findGoodThresholdStatisticalModel(y_field, systemId, attackDate):
     p = Path('ThresholdDecision')
     decisionPath = p / 'Threshold' / 'Telemetry'
     if attackDate == "08.03.23":
@@ -116,16 +116,22 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDates = ["08.03.23","17.03.23","24.03.23"]
-attackDates = ["08.03.23"]
 y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "egress_queue_info__0__cur_buffer_occupancy":
-                continue
-            findGoodThresholdStatisticalModel(y_field, systemId, 0, 10, attackDate)
+    if attackDate == "08.03.23":
+        for y_field in ["MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]:
+            print(y_field)
+            for systemId in systems:
+                print(systemId)
+                if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "MaxVar.egress_queue_info__0__cur_buffer_occupancy":
+                    continue
+                findGoodThresholdStatisticalModel(y_field, systemId, attackDate)
+    else:
+        for y_field in y_fields:
+            print(y_field)
+            for systemId in systems:
+                print(systemId)
+                findGoodThresholdStatisticalModel(y_field, systemId, attackDate)

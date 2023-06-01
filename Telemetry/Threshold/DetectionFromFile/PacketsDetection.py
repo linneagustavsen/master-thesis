@@ -118,7 +118,7 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
                 falseNegatives +=1
             elif not attack:
                 trueNegatives += 1
-    #sleep(randrange(400))
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
