@@ -116,7 +116,6 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 attackDates = ["08.03.23", "17.03.23","24.03.23"]
-attackDates = ["08.03.23"]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
@@ -175,8 +174,6 @@ for attackDate in attackDates:
         print(y_field)
         for systemId in systems:
             print(systemId)
-            if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "egress_queue_info__0__cur_buffer_occupancy":
-                continue
             makeROCcurve(y_field, "Telemetry", "Threshold", systemId, 0, attackDate)
             
 y_fields = ["TopKFlows"]

@@ -37,12 +37,14 @@ def getPacketSizeDistribution(start, stop, systemId, interval, frequency, attack
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
+        dfBytes = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId)
         dfPackets = getDataPackets(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId)
 
         #If there is no data for this interval we skip the calculations
-        if dfPackets.empty:
+        if dfBytes.empty or dfPackets.empty:
             startTime = startTime + frequency
             continue
+        dfBytes = dfBytes["bytes"].to_numpy()
         dfPackets = dfPackets["packets"].to_numpy()
 
         numberOfPacketsOfSizei = {}
@@ -54,14 +56,13 @@ def getPacketSizeDistribution(start, stop, systemId, interval, frequency, attack
                 size = 0
             else:
                 #If there are packets the average size of a packet is calculated for this measurement, cast to an integer, and stored
-                size = int(bytes[i]/dfPackets[i])
+                size = int(dfBytes[i]/dfPackets[i])
             #If the size of the packet has been encountered before the number of packets by the number of packets
             if size in numberOfPacketsOfSizei:
                 numberOfPacketsOfSizei[size] += dfPackets[i]
             else:
                 numberOfPacketsOfSizei[size] = dfPackets[i]
         packetSizeDistributionDict[stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")] = numberOfPacketsOfSizei
-        
        
         #Push the start time by the specified frequency
         startTime = startTime + frequency

@@ -181,6 +181,15 @@ class Correlation_Time:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
 
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
+
         stime = payload.get('sTime')
         etime = payload.get('eTime')
         gateway = payload.get('Gateway')
@@ -205,11 +214,5 @@ class Correlation_Time:
             
         except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()

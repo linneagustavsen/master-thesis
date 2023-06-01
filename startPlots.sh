@@ -1,6 +1,5 @@
 #!/bin/bash
 python3 mainTelemetry23.py
-python3 PlotROCcurve.py
 
 python3 Telemetry/Entropy/Plotting/plotEntropyCalculation.py
 python3 Telemetry/Entropy/Plotting/plotEntropyCalculationJustAttack.py
@@ -15,3 +14,5 @@ python3 Telemetry/Threshold/FindGoodThresholdStatisticalModel.py
 
 python3 FindGoodThresholdFromFile.py
 python3 FindGoodThresholdFromFileWriteToCSV.py
+
+python3 PlotROCcurve.py

@@ -137,6 +137,16 @@ class Correlation_Distribution:
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
+       
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
+            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
+            alertsFile.close()
+
 
         stime = payload.get('sTime')
         etime = payload.get('eTime')
@@ -147,6 +157,9 @@ class Correlation_Distribution:
         alertDB = payload.get('alertDB')
         alertDB = self.decodeAlertDB(alertDB)
         distributions = payload.get('Packet_size_distributions')
+
+        
+
         self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
 
     def start(self):
@@ -162,11 +175,5 @@ class Correlation_Distribution:
             
         except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()
