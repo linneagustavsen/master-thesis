@@ -57,13 +57,13 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
         dfPackets = dfPackets["packets"].to_numpy()
 
         #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nps = packetSizeDistribution(dfBytes, dfPackets)
+        PiPS,nps,packetSizeDistributionDictArray = packetSizeDistributionDetection(dfBytes, dfPackets)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
         #Calculate the generalized entropy rate of this distribution
         packetSizeRateArray.append(entropyPacketSize/nps)
-        packetSizeDistributionDict[stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")] = PiPS
+        packetSizeDistributionDict[stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")] = packetSizeDistributionDictArray
         
         #Store the number of packets and bytes this time interval
         packetNumberArray.append(sum(dfPackets))
@@ -76,6 +76,7 @@ def calculationEntropyTelemetry(start, stop, systemId, interval, frequency, atta
         #If there is not enough stored values to compare with we skip the detection
         calculations.write("\n" + sTime.strftime("%Y-%m-%dT%H:%M:%SZ")+ ","+ stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(packetSizeArray[j]) + "," + str(packetSizeRateArray[j])
                                + "," + str(packetNumberArray[j]) + "," + str(bytesArray[j]) +  "," + str(int(isAttack(sTime, stopTime))))
+
         #Push the start time by the specified frequency
         startTime = startTime + frequency
         j += 1

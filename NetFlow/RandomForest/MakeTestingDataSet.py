@@ -41,7 +41,7 @@ def makeTestingDataSetNetFlow(silkFile, start, stop, frequency, interval, path, 
         return
     entropy_intervals, entropy_measurements, entropy_labels = structureDataEntropyNumpyArrays(entropy_df)
 
-
+    starting = startTime
     for fileNumber in range(1,9):
         fieldsFile = str(q) + "/" + str(path) +"/Fields.attack."+str(attackDate)+ "."+str(systemId) + "."+ str(fileNumber) + ".npy"
         if Path(fieldsFile).exists():
@@ -51,7 +51,7 @@ def makeTestingDataSetNetFlow(silkFile, start, stop, frequency, interval, path, 
             print("Cant find", fieldsFile)
             if not q.exists():
                 q.mkdir(parents=True, exist_ok=False)
-            df = getDataNetFlow(silkFile, startTime, stopTime)
+            df = getDataNetFlow(silkFile, starting, starting + timedelta(minutes=30))
             with open(str(fieldsFile), 'wb') as f:
                 np.save(f, df)
 
@@ -127,6 +127,7 @@ def makeTestingDataSetNetFlow(silkFile, start, stop, frequency, interval, path, 
 
         with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId) + "."+ str(fileNumber) + ".npy", 'wb') as f:
             np.save(f, data)
+        starting += timedelta(minutes=30)
     #return data
 
 '''

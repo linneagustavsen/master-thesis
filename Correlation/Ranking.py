@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from threading import Thread
 import json
 
@@ -28,6 +30,14 @@ class Ranking:
         self.graph = graph
         self.ranking = []
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
+        self.highRankingFalsePositives = 0
+        self.highRankingTruePositives = 0
+        self.highRankingTotal = 0
+        self.numberOfRankings = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -37,6 +47,7 @@ class Ranking:
             self.fileString = "2403"
         
     def writeRankingToFile(self):
+        self.numberOfRankings += 1
         p = Path('Detections' + self.fileString)
         q = p / 'Correlation' 
         if not q.exists():
@@ -54,6 +65,17 @@ class Ranking:
             line += str(alert['Deviation_score']) + ","
             line += str(alert['Attack_types']) + ","
             line += str(alert['Real_labels'])
+        
+            
+            if alert['Real_labels']['0'] > alert['Real_labels']['1']:
+                self.falsePositivesOut += 1
+            elif alert['Real_labels']['0'] < alert['Real_labels']['1']:
+                self.truePositivesOut += 1
+            if position <= 10:
+                self.highRankingFalsePositives += alert['Real_labels']['0']
+                self.highRankingTruePositives += alert['Real_labels']['1']
+                self.highRankingTotal += alert['Real_labels']['0'] + alert['Real_labels']['1']
+
             position +=1
         line += "\n"
         line += "\n"
@@ -157,19 +179,33 @@ class Ranking:
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            print(payload)
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
+        
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
+            precision = self.highRankingTruePositives/self.highRankingFalsePositives 
+            alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
+            alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateways = payload.get('Gateways')
+            deviation_scores = payload.get('Deviation_scores')
+            real_labels = payload.get('Real_labels')
+            attack_types = payload.get('Attack_types')
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateways = payload.get('Gateways')
-        deviation_scores = payload.get('Deviation_scores')
-        real_labels = payload.get('Real_labels')
-        attack_types = payload.get('Attack_types')
+            self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
 
-        self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
+            if real_labels['0'] > real_labels['1']:
+                self.falsePositivesIn += 1
+            elif real_labels['0'] < real_labels['1']:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -182,13 +218,7 @@ class Ranking:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()

@@ -99,7 +99,7 @@ def makePlot(jsonFile, path, start):
         ax.set_xlim(0, len(ip_freqs))
         fig.tight_layout()
         fig.savefig(path+startTime.strftime("%d_%m_%y_%H.%M.%S")+".png", dpi=500)
-        plt.close()
+        plt.close(fig)
         
         startTime += timedelta(minutes = 1)
 

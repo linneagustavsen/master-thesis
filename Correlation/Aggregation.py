@@ -2,6 +2,8 @@ from datetime import timedelta
 from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from threading import Thread
 import json
 
@@ -30,6 +32,10 @@ class Aggregation:
         self.outputDist = outputDist
         self.graph = graph
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -53,6 +59,10 @@ class Aggregation:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if counter['0'] > counter['1']:
+            self.falsePositivesOut += 1
+        elif counter['0'] < counter['1']:
+            self.truePositivesOut += 1
         return counter    
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
@@ -130,8 +140,8 @@ class Aggregation:
             print("\nOverlappingAlerts")
             print(overlappingAlerts)
             print("\n")
-            if overlappingAlerts > 3:
-                
+            if overlappingAlerts > 10:
+                self.countElements(real_labels)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'Gateway': gateway,
@@ -218,28 +228,41 @@ class Aggregation:
         self.alertCounter += 1
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            print(payload)
         except Exception as err:
             print('Message sent from topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
-
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateway = payload.get('Gateway')
-        srcIP = payload.get('srcIP')
-        dstIP = payload.get('dstIP')
-        packetSizeDistribution = payload.get('Packet_size_distribution')
-
-        self.aggregateTime(stime, etime, gateway, payload)
         
-        if payload.get('Attack_type') != '':
-            self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
-            print("Aggregation published to topic", self.outputAttackTypes)
-        if srcIP != None or dstIP != None:
-            self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
-            print("Aggregation published to topic", self.outputIPs)
-        if packetSizeDistribution != None:
-            self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsAggregation.csv", "a")
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
+            alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateway = payload.get('Gateway')
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
+            packetSizeDistribution = payload.get('Packet_size_distribution')
+            print(packetSizeDistribution)
+
+            self.aggregateTime(stime, etime, gateway, payload)
+            
+            if payload.get('Attack_type') != '':
+                self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
+                print("Aggregation published to topic", self.outputAttackTypes)
+            if srcIP != None or dstIP != None:
+                self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
+                print("Aggregation published to topic", self.outputIPs)
+            if packetSizeDistribution != None:
+                self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
+            if int(payload.get('Real_label')) == 0:
+                self.falsePositivesIn += 1
+            elif int(payload.get('Real_label')) == 1:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -251,13 +274,7 @@ class Aggregation:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsAggregation.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()

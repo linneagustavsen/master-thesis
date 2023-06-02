@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 import numpy as np
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -49,11 +51,13 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Bi-directional flow entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BidirectionalFlowEntropyDetectionNetFlow")
@@ -79,7 +83,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
     flowEntropyRate = data["flowEntropyRate"]
     numberOfFlows = data["numberOfFlows"]
 
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
     attackIntervals = []
@@ -216,6 +220,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                 trueNegatives_r += 1
                 falseNegatives_nf += 1
     
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():

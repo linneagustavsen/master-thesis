@@ -209,7 +209,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[1].legend(fontsize=20)
     fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -221,11 +221,8 @@ clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         for interval in intervals:
-            print(interval)
             if interval == timedelta(minutes=15):
                 plotKmeansFields(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
             else:

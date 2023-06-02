@@ -1,0 +1,24 @@
+
+Field: ICMPDstUnreachable SystemId: hoytek-gw2 Interval: 300
+Max F1-score was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+Max TPR was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+Min FPR was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+Max accuracy was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+Min FNR was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+Max PPV was for threshold: 23.22 with a F1-score of 0.0714285714285714 a TPR of: 1.0 a FPR of: 0.1585365853658536 an accuracy of: 0.8424242424242424 a FNR of: 0.0 and a PPV of: 0.037037037037037
+
+Field: ICMPDstUnreachable SystemId: hoytek-gw2 Interval: 600
+Max F1-score was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+Max TPR was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+Min FPR was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+Max accuracy was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+Min FNR was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+Max PPV was for threshold: 20.0 with a F1-score of 0.0377358490566037 a TPR of: 1.0 a FPR of: 0.320754716981132 an accuracy of: 0.68125 a FNR of: 0.0 and a PPV of: 0.0192307692307692
+
+Field: ICMPDstUnreachable SystemId: hoytek-gw2 Interval: 900
+Max F1-score was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333
+Max TPR was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333
+Min FPR was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333
+Max accuracy was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333
+Min FNR was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333
+Max PPV was for threshold: 26.77 with a F1-score of 0.1538461538461538 a TPR of: 1.0 a FPR of: 0.0714285714285714 an accuracy of: 0.9290322580645162 a FNR of: 0.0 and a PPV of: 0.0833333333333333

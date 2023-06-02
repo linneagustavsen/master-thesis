@@ -2,6 +2,8 @@ from pathlib import Path
 import pandas as pd
 from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import networkx as nx
 from threading import Thread
 import json
@@ -29,6 +31,10 @@ class Correlation_Distribution:
         self.output = outputTopic
         self.graph = graph
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -44,6 +50,11 @@ class Correlation_Distribution:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if '0' or '1' in counter:
+            if counter['0'] > counter['1']:
+                self.falsePositivesOut += 1
+            elif counter['0'] < counter['1']:
+                self.truePositivesOut += 1
         return counter
     
     def addElementToCounterDict(self, element, counterDict):
@@ -89,12 +100,13 @@ class Correlation_Distribution:
                 for time in alertDB[otherGateway]:
                     if interval.overlaps(time):
                         for distribution in distributions:
-                            if informationDistance(10, distribution, alertDB[otherGateway][time]["Packet_size_distribution"]) < 2:
-                                timeExists = True
-                                gateways.append(otherGateway)
-                                alerts = alertDB[otherGateway][time]
+                            alerts = alertDB[otherGateway][time]
 
-                                for alert in alerts:
+                            for alert in alerts:
+                                print(alert["Packet_size_distribution"])
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 2:
+                                    timeExists = True
+                                    gateways.append(otherGateway)
                                     deviation_scores.append(alert["Deviation_score"])
                                     real_labels.append(alert["Real_label"])
                                     attack_types.append(alert["Attack_type"])
@@ -135,16 +147,40 @@ class Correlation_Distribution:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        gateway = payload.get('Gateway')
-        deviation_scores = payload.get('Deviation_scores')
-        real_labels = payload.get('Real_labels')
-        attack_types = payload.get('Attack_types')
-        alertDB = payload.get('alertDB')
-        alertDB = self.decodeAlertDB(alertDB)
-        distributions = payload.get('Packet_size_distributions')
-        self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationDistribution.csv", "a")
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
+            alertsFile.close()
+
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            gateway = payload.get('Gateway')
+            deviation_scores = payload.get('Deviation_scores')
+            real_labels = payload.get('Real_labels')
+            attack_types = payload.get('Attack_types')
+            alertDB = payload.get('alertDB')
+            alertDB = self.decodeAlertDB(alertDB)
+            distributions = payload.get('Packet_size_distributions')
+
+            
+
+            self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
+            falseLabels = 0
+            trueLabels = 0
+            for label in real_labels:
+                if label == '1':
+                    trueLabels += 1
+                elif label == '0':
+                    falseLabels += 1
+            if falseLabels > trueLabels:
+                self.falsePositivesIn += 1
+            elif falseLabels < trueLabels:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -157,13 +193,7 @@ class Correlation_Distribution:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()

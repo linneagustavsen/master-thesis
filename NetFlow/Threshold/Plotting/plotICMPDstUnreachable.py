@@ -34,7 +34,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])
 
@@ -46,7 +46,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         return
     timeAxis = pd.to_datetime(data["sTime"])
            
-    fig, axs = plt.subplots(1, 1, figsize=(20, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     axs.plot(timeAxis ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
@@ -86,12 +86,12 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
     )
     axs.set_title("ICMP destination unreachable packets", fontsize=20)
     axs.set_xlabel('Time', fontsize=15)
-    axs.set_ylabel("ICMP destination unreachable packets", fontsize=20)
+    axs.set_ylabel("Packets", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #fig.tight_layout()
     fig.savefig("Plots/Threshold/Attack"+ fileString+"/NetFlow/ICMPDstUnreachable/"+  str(systemId)+ "." + str("ICMPDstUnreachable")+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -102,7 +102,5 @@ intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
     for interval in intervals:
-        print(interval)
         for systemId in systems:
-            print(systemId)
             makePlotICMPDstUnreachable(systemId, interval, attackDate)

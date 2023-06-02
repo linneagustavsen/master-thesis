@@ -40,7 +40,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
             entropy_df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", entropyFile)
-        entropy_df = getDataNetFlow(silkFile, startTime, stopTime)
+        entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
 
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)
@@ -56,8 +56,7 @@ def kmeansCombinedCalculation(silkFile, start, stop, clusterFrequency, frequency
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
         
-
-        testingSet = makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate)
+        testingSet = makeDataSetKmeansNetFlow(silkFile, startTime, stopTime, systemId, entropy_df, frequency, interval, attackDate)
         if len(testingSet) < 3:
             startTime += clusterFrequency
             continue

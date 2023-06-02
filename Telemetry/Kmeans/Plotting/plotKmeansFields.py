@@ -39,7 +39,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
-    fig, axs = plt.subplots(2, 1, figsize=(20, 10))
+    fig, axs = plt.subplots(2, 1, figsize=(20, 12))
 
     format = '%b %d %H:%M:%S'
     
@@ -96,16 +96,15 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         startTime += clusterFrequency
     if maxValue == 0:
         return
-    axs[0].plot(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
+    axs[0].scatter(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
 
-    axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#E76F51", label="Normal cluster")
+    axs[1].scatter(sTimeClusterNormal ,packetsClusterNormal, color="#E76F51", label="Normal cluster")
 
     axs[0].xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs[0].set_title("Packets in each cluster")
-    axs[0].title.set_size(20)
+    axs[0].set_title("Packets in each cluster", fontsize=20)
     axs[0].set_xlabel('Time',fontsize=20)
     axs[0].set_ylabel("Packets", fontsize=20)
     #axs[0].ylabel.set_size(15)
@@ -126,9 +125,9 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs[1].set_ylim([0,maxValue])
     axs[1].tick_params(axis='both', which='major', labelsize=15)
     axs[1].legend(fontsize=20)
-    fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".png", dpi=500)
-    plt.close()
+    #fig.tight_layout()
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Scatter.Packets."+  str(systemId)+ ".png", dpi=500)
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -139,7 +138,5 @@ stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)

@@ -5,6 +5,8 @@ from silk import *
 from datetime import datetime
 from HelperFunctions.IsAttack import *
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.SimulateRealTime import simulateRealTime
 
@@ -27,11 +29,13 @@ def xmasCalculation(start, stop, systemId, attackDate):
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Xmas detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Xmas detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNDetectionNetFlow")
@@ -52,9 +56,9 @@ def xmasCalculation(start, stop, systemId, attackDate):
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
-    srcPort = data["srcPort"]
+    '''srcPort = data["srcPort"]
     dstPort = data["dstPort"]
-    #protocol = data["protocol"]
+    protocol = data["protocol"]'''
     real_label = data["real_label"]
 
     truePositives = 0
@@ -78,9 +82,6 @@ def xmasCalculation(start, stop, systemId, attackDate):
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "Gateway": systemId,
                 "Deviation_score": None,
-                "srcPort": int(srcPort[i]),
-                "dstPort": int(dstPort[i]),
-                "Protocol": 6,
                 "Real_label": int(attack),
                 "Attack_type": "Xmas"
                 }
@@ -98,11 +99,12 @@ def xmasCalculation(start, stop, systemId, attackDate):
                 "Attack_type": "Xmas"
                 }'''
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-
+        print(attack)
         if attack:
             truePositives += 1
         elif not attack:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

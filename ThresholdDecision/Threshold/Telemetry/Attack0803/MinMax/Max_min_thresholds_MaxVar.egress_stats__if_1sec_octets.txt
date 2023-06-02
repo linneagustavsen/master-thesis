@@ -1,0 +1,112 @@
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: stangnes-gw
+Max F1-score was for threshold: 0.053089 with a F1-score of 0.1062742333450828 a TPR of: 0.995049504950495 a FPR of: 0.9996056393571922 an accuracy of: 0.0564703693366824 a FNR of: 0.0049504950495049 and a PPV of: 0.0561347979892012
+Max TPR was for threshold: 0.053089 with a F1-score of 0.1062742333450828 a TPR of: 0.995049504950495 a FPR of: 0.9996056393571922 an accuracy of: 0.0564703693366824 a FNR of: 0.0049504950495049 and a PPV of: 0.0561347979892012
+Min FPR was for threshold: 0.717927 with a F1-score of 0.0015885623510722 a TPR of: 0.0008250825082508 a FPR of: 0.0022675736961451 an accuracy of: 0.9415294445994976 a FNR of: 0.9991749174917492 and a PPV of: 0.0212765957446808
+Max accuracy was for threshold: 0.713159 with a F1-score of 0.0031746031746031 a TPR of: 0.0016501650165016 a FPR of: 0.0022675736961451 an accuracy of: 0.9415759605544702 a FNR of: 0.9983498349834984 and a PPV of: 0.0416666666666666
+Min FNR was for threshold: 0.053089 with a F1-score of 0.1062742333450828 a TPR of: 0.995049504950495 a FPR of: 0.9996056393571922 an accuracy of: 0.0564703693366824 a FNR of: 0.0049504950495049 and a PPV of: 0.0561347979892012
+Max PPV was for threshold: 0.636981 with a F1-score of 0.0293255131964809 a TPR of: 0.0165016501650165 a FPR of: 0.0065069506063294 an accuracy of: 0.9384128756163364 a FNR of: 0.9834983498349836 and a PPV of: 0.131578947368421
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: rodbergvn-gw2
+Max F1-score was for threshold: 0.080406 with a F1-score of 0.1062282364349627 a TPR of: 1.0 a FPR of: 0.9996056199161942 an accuracy of: 0.0564448580735225 a FNR of: 0.0 and a PPV of: 0.0560934736058095
+Max TPR was for threshold: 0.080406 with a F1-score of 0.1062282364349627 a TPR of: 1.0 a FPR of: 0.9996056199161942 an accuracy of: 0.0564448580735225 a FNR of: 0.0 and a PPV of: 0.0560934736058095
+Min FPR was for threshold: 0.80704 with a F1-score of 0.0016090104585679 a TPR of: 0.0008298755186721 a FPR of: 0.0018240078876016 an accuracy of: 0.9422522103303862 a FNR of: 0.9991701244813278 and a PPV of: 0.0263157894736842
+Max accuracy was for threshold: 0.80704 with a F1-score of 0.0016090104585679 a TPR of: 0.0008298755186721 a FPR of: 0.0018240078876016 an accuracy of: 0.9422522103303862 a FNR of: 0.9991701244813278 and a PPV of: 0.0263157894736842
+Min FNR was for threshold: 0.080406 with a F1-score of 0.1062282364349627 a TPR of: 1.0 a FPR of: 0.9996056199161942 an accuracy of: 0.0564448580735225 a FNR of: 0.0 and a PPV of: 0.0560934736058095
+Max PPV was for threshold: 0.702702 with a F1-score of 0.0309278350515463 a TPR of: 0.0174273858921161 a FPR of: 0.0065072713827951 an accuracy of: 0.9387622149837134 a FNR of: 0.9825726141078838 and a PPV of: 0.1372549019607843
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: tromso-fh-gw
+Max F1-score was for threshold: 1.13911 with a F1-score of 0.1069667354075136 a TPR of: 0.993338884263114 a FPR of: 0.9853523357086302 an accuracy of: 0.0695501891727778 a FNR of: 0.0066611157368859 and a PPV of: 0.0565268893627102
+Max TPR was for threshold: 1.067266 with a F1-score of 0.1066607460035524 a TPR of: 1.0 a FPR of: 0.9955463182897862 an accuracy of: 0.0603017422579289 a FNR of: 0.0 and a PPV of: 0.0563347248932876
+Min FPR was for threshold: 2.917099 with a F1-score of 0.0016142050040355 a TPR of: 0.0008326394671107 a FPR of: 0.0018309580364212 an accuracy of: 0.9422205614461208 a FNR of: 0.9991673605328892 and a PPV of: 0.0263157894736842
+Max accuracy was for threshold: 2.917099 with a F1-score of 0.0016142050040355 a TPR of: 0.0008326394671107 a FPR of: 0.0018309580364212 an accuracy of: 0.9422205614461208 a FNR of: 0.9991673605328892 and a PPV of: 0.0263157894736842
+Min FNR was for threshold: 1.067266 with a F1-score of 0.1066607460035524 a TPR of: 1.0 a FPR of: 0.9955463182897862 an accuracy of: 0.0603017422579289 a FNR of: 0.0 and a PPV of: 0.0563347248932876
+Max PPV was for threshold: 2.816998 with a F1-score of 0.0063846767757382 a TPR of: 0.0033305578684429 a FPR of: 0.002375296912114 an accuracy of: 0.9418468868232986 a FNR of: 0.9966694421315572 and a PPV of: 0.0769230769230769
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: tromso-gw5
+Max F1-score was for threshold: 0.191667 with a F1-score of 0.1062972961012523 a TPR of: 1.0 a FPR of: 0.9997524752475248 an accuracy of: 0.0563525068922012 a FNR of: 0.0 and a PPV of: 0.0561319872873434
+Max TPR was for threshold: 0.191667 with a F1-score of 0.1062972961012523 a TPR of: 1.0 a FPR of: 0.9997524752475248 an accuracy of: 0.0563525068922012 a FNR of: 0.0 and a PPV of: 0.0561319872873434
+Min FPR was for threshold: 2.569107 with a F1-score of 0.0016380016380016 a TPR of: 0.0008326394671107 a FPR of: 0.0009405940594059 an accuracy of: 0.943040044857717 a FNR of: 0.9991673605328892 and a PPV of: 0.05
+Max accuracy was for threshold: 2.569107 with a F1-score of 0.0016380016380016 a TPR of: 0.0008326394671107 a FPR of: 0.0009405940594059 an accuracy of: 0.943040044857717 a FNR of: 0.9991673605328892 and a PPV of: 0.05
+Min FNR was for threshold: 0.191667 with a F1-score of 0.1062972961012523 a TPR of: 1.0 a FPR of: 0.9997524752475248 an accuracy of: 0.0563525068922012 a FNR of: 0.0 and a PPV of: 0.0561319872873434
+Max PPV was for threshold: 2.521872 with a F1-score of 0.0048820179007323 a TPR of: 0.0024979184013322 a FPR of: 0.0012376237623762 an accuracy of: 0.9428531377038456 a FNR of: 0.9975020815986678 and a PPV of: 0.1071428571428571
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: teknobyen-gw1
+Max F1-score was for threshold: 2.196903 with a F1-score of 0.1684365471559247 a TPR of: 0.6759493670886076 a FPR of: 0.3772308000802085 an accuracy of: 0.6257511948137984 a FNR of: 0.3240506329113924 and a PPV of: 0.0962046601008887
+Max TPR was for threshold: 0.01301 with a F1-score of 0.1064403125842091 a TPR of: 1.0 a FPR of: 0.9973932223781832 an accuracy of: 0.0585340462783324 a FNR of: 0.0 and a PPV of: 0.0562117546605948
+Min FPR was for threshold: 15.675241 with a F1-score of 0.0016863406408094 a TPR of: 0.00084388185654 a FPR of: 0.0 an accuracy of: 0.9439738797141912 a FNR of: 0.99915611814346 and a PPV of: 1.0
+Max accuracy was for threshold: 13.607097 with a F1-score of 0.099279423538831 a TPR of: 0.0523206751054852 a FPR of: 0.0001002606777621 an accuracy of: 0.9467657218568116 a FNR of: 0.9476793248945148 and a PPV of: 0.96875
+Min FNR was for threshold: 0.01301 with a F1-score of 0.1064403125842091 a TPR of: 1.0 a FPR of: 0.9973932223781832 an accuracy of: 0.0585340462783324 a FNR of: 0.0 and a PPV of: 0.0562117546605948
+Max PPV was for threshold: 15.675241 with a F1-score of 0.0016863406408094 a TPR of: 0.00084388185654 a FPR of: 0.0 an accuracy of: 0.9439738797141912 a FNR of: 0.99915611814346 and a PPV of: 1.0
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: narvik-gw3
+Max F1-score was for threshold: 0.220494 with a F1-score of 0.1080629438796825 a TPR of: 0.9659751037344398 a FPR of: 0.9453702790651808 an accuracy of: 0.1057383534229999 a FNR of: 0.0340248962655601 and a PPV of: 0.0572327662503687
+Max TPR was for threshold: 0.169657 with a F1-score of 0.1067079920301084 a TPR of: 1.0 a FPR of: 0.9947243861552116 an accuracy of: 0.0610601759203239 a FNR of: 0.0 and a PPV of: 0.0563610851262862
+Min FPR was for threshold: 1.098626 with a F1-score of 0.0008153281695882 a TPR of: 0.0008298755186721 a FPR of: 0.0614830884528153 an accuracy of: 0.8859310280634802 a FNR of: 0.9991701244813278 and a PPV of: 0.000801282051282
+Max accuracy was for threshold: 1.098626 with a F1-score of 0.0008153281695882 a TPR of: 0.0008298755186721 a FPR of: 0.0614830884528153 an accuracy of: 0.8859310280634802 a FNR of: 0.9991701244813278 and a PPV of: 0.000801282051282
+Min FNR was for threshold: 0.169657 with a F1-score of 0.1067079920301084 a TPR of: 1.0 a FPR of: 0.9947243861552116 an accuracy of: 0.0610601759203239 a FNR of: 0.0 and a PPV of: 0.0563610851262862
+Max PPV was for threshold: 0.220494 with a F1-score of 0.1080629438796825 a TPR of: 0.9659751037344398 a FPR of: 0.9453702790651808 an accuracy of: 0.1057383534229999 a FNR of: 0.0340248962655601 and a PPV of: 0.0572327662503687
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: hovedbygget-gw
+Max F1-score was for threshold: 0.72389 with a F1-score of 0.1063951191678005 a TPR of: 1.0 a FPR of: 0.9985775946635276 an accuracy of: 0.0574537037037037 a FNR of: 0.0 and a PPV of: 0.0561865467525844
+Max TPR was for threshold: 0.72389 with a F1-score of 0.1063951191678005 a TPR of: 1.0 a FPR of: 0.9985775946635276 an accuracy of: 0.0574537037037037 a FNR of: 0.0 and a PPV of: 0.0561865467525844
+Min FPR was for threshold: 6.143278 with a F1-score of 0.0014684287812041 a TPR of: 0.0008250825082508 a FPR of: 0.0073082205218756 an accuracy of: 0.937037037037037 a FNR of: 0.9991749174917492 and a PPV of: 0.0066666666666666
+Max accuracy was for threshold: 6.143278 with a F1-score of 0.0014684287812041 a TPR of: 0.0008250825082508 a FPR of: 0.0073082205218756 an accuracy of: 0.937037037037037 a FNR of: 0.9991749174917492 and a PPV of: 0.0066666666666666
+Min FNR was for threshold: 0.72389 with a F1-score of 0.1063951191678005 a TPR of: 1.0 a FPR of: 0.9985775946635276 an accuracy of: 0.0574537037037037 a FNR of: 0.0 and a PPV of: 0.0561865467525844
+Max PPV was for threshold: 4.698207 with a F1-score of 0.0890290921836663 a TPR of: 0.1047854785478547 a FPR of: 0.0742593682558367 an accuracy of: 0.8796759259259259 a FNR of: 0.8952145214521452 and a PPV of: 0.0773918342474101
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: teknobyen-gw2
+Max F1-score was for threshold: 2.634255 with a F1-score of 0.1064084913620819 a TPR of: 1.0 a FPR of: 0.9977685212734304 an accuracy of: 0.0581819883916869 a FNR of: 0.0 and a PPV of: 0.0561940053473427
+Max TPR was for threshold: 2.634255 with a F1-score of 0.1064084913620819 a TPR of: 1.0 a FPR of: 0.9977685212734304 an accuracy of: 0.0581819883916869 a FNR of: 0.0 and a PPV of: 0.0561940053473427
+Min FPR was for threshold: 8.83011 with a F1-score of 0.0016326530612244 a TPR of: 0.0008347245409015 a FPR of: 0.0012892988197956 an accuracy of: 0.9427541658865382 a FNR of: 0.9991652754590984 and a PPV of: 0.037037037037037
+Max accuracy was for threshold: 8.83011 with a F1-score of 0.0016326530612244 a TPR of: 0.0008347245409015 a FPR of: 0.0012892988197956 an accuracy of: 0.9427541658865382 a FNR of: 0.9991652754590984 and a PPV of: 0.037037037037037
+Min FNR was for threshold: 2.634255 with a F1-score of 0.1064084913620819 a TPR of: 1.0 a FPR of: 0.9977685212734304 an accuracy of: 0.0581819883916869 a FNR of: 0.0 and a PPV of: 0.0561940053473427
+Max PPV was for threshold: 7.268019 with a F1-score of 0.032071840923669 a TPR of: 0.0208681135225375 a FPR of: 0.016661707825052 an accuracy of: 0.9293671597079198 a FNR of: 0.9791318864774624 and a PPV of: 0.0692520775623268
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: ma2-gw
+Max F1-score was for threshold: 0.3055 with a F1-score of 0.1063446761800219 a TPR of: 0.9991749174917492 a FPR of: 0.998234255444379 an accuracy of: 0.0577314814814814 a FNR of: 0.0008250825082508 and a PPV of: 0.0561610165561378
+Max TPR was for threshold: 0.204627 with a F1-score of 0.1062831586793528 a TPR of: 1.0 a FPR of: 0.9997547577006082 an accuracy of: 0.0563425925925925 a FNR of: 0.0 and a PPV of: 0.0561241028015744
+Min FPR was for threshold: 2.777954 with a F1-score of 0.001412429378531 a TPR of: 0.0008250825082508 a FPR of: 0.009956837355307 an accuracy of: 0.934537037037037 a FNR of: 0.9991749174917492 and a PPV of: 0.0049019607843137
+Max accuracy was for threshold: 2.777954 with a F1-score of 0.001412429378531 a TPR of: 0.0008250825082508 a FPR of: 0.009956837355307 an accuracy of: 0.934537037037037 a FNR of: 0.9991749174917492 and a PPV of: 0.0049019607843137
+Min FNR was for threshold: 0.204627 with a F1-score of 0.1062831586793528 a TPR of: 1.0 a FPR of: 0.9997547577006082 an accuracy of: 0.0563425925925925 a FNR of: 0.0 and a PPV of: 0.0561241028015744
+Max PPV was for threshold: 0.3055 with a F1-score of 0.1063446761800219 a TPR of: 0.9991749174917492 a FPR of: 0.998234255444379 an accuracy of: 0.0577314814814814 a FNR of: 0.0008250825082508 and a PPV of: 0.0561610165561378
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: bergen-gw3
+Max F1-score was for threshold: 8.246129 with a F1-score of 0.1308400718778077 a TPR of: 0.9612211221122112 a FPR of: 0.757126735685197 an accuracy of: 0.2831936275644885 a FNR of: 0.0387788778877887 and a PPV of: 0.0701976379850566
+Max TPR was for threshold: 0.691752 with a F1-score of 0.1066901408450704 a TPR of: 1.0 a FPR of: 0.9958294489966144 an accuracy of: 0.060065762052517 a FNR of: 0.0 and a PPV of: 0.0563511251627301
+Min FPR was for threshold: 16.634758 with a F1-score of 0.0014204545454545 a TPR of: 0.0008250825082508 a FPR of: 0.0095677346548255 an accuracy of: 0.9348863057472327 a FNR of: 0.9991749174917492 and a PPV of: 0.0051020408163265
+Max accuracy was for threshold: 16.634758 with a F1-score of 0.0014204545454545 a TPR of: 0.0008250825082508 a FPR of: 0.0095677346548255 an accuracy of: 0.9348863057472327 a FNR of: 0.9991749174917492 and a PPV of: 0.0051020408163265
+Min FNR was for threshold: 0.691752 with a F1-score of 0.1066901408450704 a TPR of: 1.0 a FPR of: 0.9958294489966144 an accuracy of: 0.060065762052517 a FNR of: 0.0 and a PPV of: 0.0563511251627301
+Max PPV was for threshold: 8.246129 with a F1-score of 0.1308400718778077 a TPR of: 0.9612211221122112 a FPR of: 0.757126735685197 an accuracy of: 0.2831936275644885 a FNR of: 0.0387788778877887 and a PPV of: 0.0701976379850566
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: narvik-kv-gw
+Max F1-score was for threshold: 0.42396 with a F1-score of 0.1063131760950523 a TPR of: 1.0 a FPR of: 0.9990583337463448 an accuracy of: 0.0569797904191616 a FNR of: 0.0 and a PPV of: 0.0561408437514632
+Max TPR was for threshold: 0.42396 with a F1-score of 0.1063131760950523 a TPR of: 1.0 a FPR of: 0.9990583337463448 an accuracy of: 0.0569797904191616 a FNR of: 0.0 and a PPV of: 0.0561408437514632
+Min FPR was for threshold: 3.640346 with a F1-score of 0.0015873015873015 a TPR of: 0.0008340283569641 a FPR of: 0.0029736829062794 an accuracy of: 0.9411489520958084 a FNR of: 0.999165971643036 and a PPV of: 0.0163934426229508
+Max accuracy was for threshold: 3.640346 with a F1-score of 0.0015873015873015 a TPR of: 0.0008340283569641 a FPR of: 0.0029736829062794 an accuracy of: 0.9411489520958084 a FNR of: 0.999165971643036 and a PPV of: 0.0163934426229508
+Min FNR was for threshold: 0.42396 with a F1-score of 0.1063131760950523 a TPR of: 1.0 a FPR of: 0.9990583337463448 an accuracy of: 0.0569797904191616 a FNR of: 0.0 and a PPV of: 0.0561408437514632
+Max PPV was for threshold: 0.42396 with a F1-score of 0.1063131760950523 a TPR of: 1.0 a FPR of: 0.9990583337463448 an accuracy of: 0.0569797904191616 a FNR of: 0.0 and a PPV of: 0.0561408437514632
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: trd-gw
+Max F1-score was for threshold: 2.943313 with a F1-score of 0.1109921318497136 a TPR of: 0.9834983498349836 a FPR of: 0.9355993721797136 an accuracy of: 0.1159722222222222 a FNR of: 0.0165016501650165 and a PPV of: 0.0588148221246361
+Max TPR was for threshold: 2.024097 with a F1-score of 0.1064465132619005 a TPR of: 1.0 a FPR of: 0.9980380616048656 an accuracy of: 0.0579629629629629 a FNR of: 0.0 and a PPV of: 0.0562152133580705
+Min FPR was for threshold: 10.291655 with a F1-score of 0.0016273393002441 a TPR of: 0.0008250825082508 a FPR of: 0.0007847753580537 an accuracy of: 0.9431944444444444 a FNR of: 0.9991749174917492 and a PPV of: 0.0588235294117647
+Max accuracy was for threshold: 10.291655 with a F1-score of 0.0016273393002441 a TPR of: 0.0008250825082508 a FPR of: 0.0007847753580537 an accuracy of: 0.9431944444444444 a FNR of: 0.9991749174917492 and a PPV of: 0.0588235294117647
+Min FNR was for threshold: 2.024097 with a F1-score of 0.1064465132619005 a TPR of: 1.0 a FPR of: 0.9980380616048656 an accuracy of: 0.0579629629629629 a FNR of: 0.0 and a PPV of: 0.0562152133580705
+Max PPV was for threshold: 8.984028 with a F1-score of 0.0525547445255474 a TPR of: 0.0297029702970297 a FPR of: 0.0059839121051598 an accuracy of: 0.9399074074074074 a FNR of: 0.9702970297029704 and a PPV of: 0.2278481012658227
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: ifi2-gw5
+Max F1-score was for threshold: 0.661726 with a F1-score of 0.1093417757406794 a TPR of: 0.967391304347826 a FPR of: 0.9328043639970246 an accuracy of: 0.1175974907541781 a FNR of: 0.0326086956521739 and a PPV of: 0.0579456102569239
+Max TPR was for threshold: -0.068126 with a F1-score of 0.106259162187375 a TPR of: 1.0 a FPR of: 0.9977188197371684 an accuracy of: 0.0581433453490005 a FNR of: 0.0 and a PPV of: 0.056110720150129
+Min FPR was for threshold: 6.26092 with a F1-score of 0.0010660980810234 a TPR of: 0.0008361204013377 a FPR of: 0.0336722043144061 an accuracy of: 0.9122700248115724 a FNR of: 0.9991638795986622 and a PPV of: 0.0014705882352941
+Max accuracy was for threshold: 6.26092 with a F1-score of 0.0010660980810234 a TPR of: 0.0008361204013377 a FPR of: 0.0336722043144061 an accuracy of: 0.9122700248115724 a FNR of: 0.9991638795986622 and a PPV of: 0.0014705882352941
+Min FNR was for threshold: -0.068126 with a F1-score of 0.106259162187375 a TPR of: 1.0 a FPR of: 0.9977188197371684 an accuracy of: 0.0581433453490005 a FNR of: 0.0 and a PPV of: 0.056110720150129
+Max PPV was for threshold: 3.136703 with a F1-score of 0.0941274468971262 a TPR of: 0.1889632107023411 a FPR of: 0.1676171584428465 an accuracy of: 0.7963578484153364 a FNR of: 0.8110367892976589 and a PPV of: 0.0626733222407099
+
+Field: MaxVar.egress_stats__if_1sec_octets SystemId: oslo-gw1
+Max F1-score was for threshold: 9.275201 with a F1-score of 0.1230103710276745 a TPR of: 0.915016501650165 a FPR of: 0.7705513046890328 an accuracy of: 0.2679166666666667 a FNR of: 0.0849834983498349 and a PPV of: 0.0659373327784053
+Max TPR was for threshold: 5.79144 with a F1-score of 0.1064698906311767 a TPR of: 1.0 a FPR of: 0.9977928193054738 an accuracy of: 0.0581944444444444 a FNR of: 0.0 and a PPV of: 0.0562282533054975
+Min FPR was for threshold: 18.75295 with a F1-score of 0.0012578616352201 a TPR of: 0.0008250825082508 a FPR of: 0.0184912693741416 an accuracy of: 0.9264814814814816 a FNR of: 0.9991749174917492 and a PPV of: 0.0026455026455026
+Max accuracy was for threshold: 18.75295 with a F1-score of 0.0012578616352201 a TPR of: 0.0008250825082508 a FPR of: 0.0184912693741416 an accuracy of: 0.9264814814814816 a FNR of: 0.9991749174917492 and a PPV of: 0.0026455026455026
+Min FNR was for threshold: 5.79144 with a F1-score of 0.1064698906311767 a TPR of: 1.0 a FPR of: 0.9977928193054738 an accuracy of: 0.0581944444444444 a FNR of: 0.0 and a PPV of: 0.0562282533054975
+Max PPV was for threshold: 9.520988 with a F1-score of 0.1227336122733612 a TPR of: 0.8712871287128713 a FPR of: 0.7327839905826957 an accuracy of: 0.3011111111111111 a FNR of: 0.1287128712871287 and a PPV of: 0.0660165041260315

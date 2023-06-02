@@ -1,0 +1,5 @@
+SystemId,threshold,maxTPR
+tromso-gw5,0.04,1.0
+teknobyen-gw1,0.04,1.0
+hoytek-gw2,0.04,1.0
+bergen-gw3,0.04,1.0

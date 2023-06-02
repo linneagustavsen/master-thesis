@@ -1,5 +1,6 @@
 from datetime import timedelta
 import sys
+from GetThreshold import getThreshold
 from NetFlow.Entropy.DetectionFromFile.SrcDetection import detectionSrc
 
 # Access the command-line arguments
@@ -13,5 +14,9 @@ start = arguments[1]
 stop = arguments[2]
 frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
+systemId = arguments[4]
+interval = timedelta(minutes=int(arguments[5]))
+thresholdSrcEntropy = getThreshold("srcEntropy", systemId, interval, "Entropy", "NetFlow", attackDate)
+thresholdSrcEntropyRate = getThreshold("srcEntropyRate", systemId, interval, "Entropy", "NetFlow", attackDate)
 
-detectionSrc(start, stop, arguments[4], frequency, timedelta(minutes=int(arguments[5])), 10, 0, 0, attackDate)
+detectionSrc(start, stop, systemId, frequency, interval, 10, thresholdSrcEntropy, thresholdSrcEntropyRate, attackDate)

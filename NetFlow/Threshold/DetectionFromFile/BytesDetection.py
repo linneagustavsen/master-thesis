@@ -6,6 +6,8 @@ from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -42,11 +44,13 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Bytes detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("BytesDetectionNetFlow")
@@ -70,7 +74,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
 
     bytesArray = data["numberOfBytes"]
 
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    
@@ -141,6 +145,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

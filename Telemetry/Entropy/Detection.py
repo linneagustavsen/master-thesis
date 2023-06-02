@@ -7,6 +7,8 @@ from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.Normalization import normalization
 
@@ -75,7 +77,8 @@ def detectionEntropyTelemetry(start, stop, systemId, interval, frequency, window
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):

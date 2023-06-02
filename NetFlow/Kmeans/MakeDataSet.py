@@ -20,8 +20,8 @@ import pandas as pd
 '''
 def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, frequency, interval, attackDate):
     columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nextHopIP", "entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    '''startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')'''
     
     p = Path('NetFlow')
     dp = p / 'Kmeans' / 'DataSets'
@@ -32,7 +32,7 @@ def makeDataSetKmeansNetFlow(silkFile, start, stop, systemId, entropy_df, freque
             df = np.load(f, allow_pickle=True)
     else:
         print("Cant find", fieldsFile)
-        df = df = getDataNetFlow(silkFile, startTime, stopTime)
+        df = getDataNetFlow(silkFile, start, stop)
 
         if not dp.exists():
             dp.mkdir(parents=True, exist_ok=False)

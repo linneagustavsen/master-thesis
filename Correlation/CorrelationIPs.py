@@ -1,6 +1,8 @@
 from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from threading import Thread
 import json
 from datetime import timedelta
@@ -24,6 +26,10 @@ class Correlation_IPs:
         self.output = outputTopic
         self.alertsIP ={}
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -39,6 +45,11 @@ class Correlation_IPs:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if '0' or '1' in counter:
+            if counter['0'] > counter['1']:
+                self.falsePositivesOut += 1
+            elif counter['0'] < counter['1']:
+                self.truePositivesOut += 1
         return counter
 
     def addAlertsIP(self, ip, interval, alert):
@@ -101,7 +112,7 @@ class Correlation_IPs:
                 for existingTime in existingTimes:
                     self.addAlertsIP(ip, existingTime, payload)
    
-                if overlappingAlerts > 3:
+                if overlappingAlerts > 20:
                     
                     message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -138,13 +149,27 @@ class Correlation_IPs:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
 
-        stime = payload.get('sTime')
-        etime = payload.get('eTime')
-        srcIP = payload.get('srcIP')
-        dstIP = payload.get('dstIP')
+        if payload.get('sTime') == "WRITE":
+            p = Path('Detections' + self.fileString)
+            q = p / 'Correlation' 
+            if not q.exists():
+                q.mkdir(parents=True)
+            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationIPs.csv", "a")
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
+            alertsFile.close()
+        else:
+            stime = payload.get('sTime')
+            etime = payload.get('eTime')
+            srcIP = payload.get('srcIP')
+            dstIP = payload.get('dstIP')
 
-        self.correlateIPs(stime, etime, srcIP, payload)
-        self.correlateIPs(stime, etime, dstIP, payload)
+            self.correlateIPs(stime, etime, srcIP, payload)
+            self.correlateIPs(stime, etime, dstIP, payload)
+
+            if int(payload.get('Real_label')) == 0:
+                self.falsePositivesIn += 1
+            elif int(payload.get('Real_label')) == 1:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -157,13 +182,7 @@ class Correlation_IPs:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
             
-        except KeyboardInterrupt:
+        except:
             print("Interrupted")
-            p = Path('Detections' + self.fileString)
-            q = p / 'Correlation' 
-            if not q.exists():
-                q.mkdir(parents=True)
-            alertsFile = open(str(q) + "/NumberOfAlertsCorrelationIPs.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + self.alertCounter)
-            alertsFile.close()
+            
             self.mqtt_client.disconnect()

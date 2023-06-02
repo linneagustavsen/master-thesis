@@ -1,4 +1,5 @@
 from datetime import timedelta
+from GetThreshold import getThreshold
 
 from NetFlow.Entropy.DetectionFromFile.DstDetection import detectionDst
 import sys
@@ -14,5 +15,8 @@ start = arguments[1]
 stop = arguments[2]
 frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
-
-detectionDst(start, stop, arguments[4], frequency, timedelta(minutes=int(arguments[5])), 10, 0, 0, attackDate)
+systemId = arguments[4]
+interval = timedelta(minutes=int(arguments[5]))
+thresholdDstEntropy = getThreshold("dstEntropy", systemId, interval, "Entropy", "NetFlow", attackDate)
+thresholdDstEntropyRate = getThreshold("dstEntropyRate", systemId, interval, "Entropy", "NetFlow", attackDate)
+detectionDst(start, stop, systemId, frequency, interval, 10, thresholdDstEntropy, thresholdDstEntropyRate, attackDate)

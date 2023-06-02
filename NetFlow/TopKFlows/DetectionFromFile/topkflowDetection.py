@@ -6,12 +6,14 @@ from HelperFunctions.GeneralizedEntropy import *
 from datetime import datetime,timedelta
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
 from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
-def topkflows(start, stop, systemId, attackDate):
+def topkflows(start, stop, systemId, threshold, attackDate):
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -22,11 +24,13 @@ def topkflows(start, stop, systemId, attackDate):
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Top k flows detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Top k flows detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("TopKFlowsDetectionNetFlow")
@@ -48,9 +52,9 @@ def topkflows(start, stop, systemId, attackDate):
     eTime = pd.to_datetime(data["eTime"])
 
     change = data["Change"]
-    srcPort = data["srcPort"]
+    '''srcPort = data["srcPort"]
     dstPort = data["dstPort"]
-    protocol = data["protocol"]
+    protocol = data["protocol"]'''
     real_label = data["real_label"]
 
     truePositives = 0
@@ -68,36 +72,36 @@ def topkflows(start, stop, systemId, attackDate):
             continue
         attack = real_label[i]
         simulateRealTime(datetime.now(), sTime[i], attackDate)
-        alert = {
-            "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "Gateway": systemId,
-            "Deviation_score": change[i],
-            "srcPort": int(srcPort[i]),
-            "dstPort": int(dstPort[i]),
-            "Protocol": int(protocol[i]),
-            "Real_label": int(attack),
-            "Attack_type": "Flooding"
-        }
-        '''alert = {
-            "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "Gateway": systemId,
-            "Deviation_score": change,
-            "srcIP": int(rec.sip),
-            "dstIP": int(rec.dip),
-            "srcPort": srcPort[i],
-            "dstPort": dstPort[i],
-            "Protocol": protocol[i],
-            "Real_label": int(attack),
-            "Attack_type": "Flooding"
-        }'''
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-    
+
+        if change[i] > threshold:
+            alert = {
+                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "Gateway": systemId,
+                "Deviation_score": change[i],
+                "Real_label": int(attack),
+                "Attack_type": "Flooding"
+            }
+            '''alert = {
+                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "Gateway": systemId,
+                "Deviation_score": change,
+                "srcIP": int(rec.sip),
+                "dstIP": int(rec.dip),
+                "srcPort": srcPort[i],
+                "dstPort": dstPort[i],
+                "Protocol": protocol[i],
+                "Real_label": int(attack),
+                "Attack_type": "Flooding"
+            }'''
+            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
         if attack:
             truePositives += 1
         elif not attack:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'TopKFlows' / 'NetFlow'
     if not q.exists():

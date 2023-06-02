@@ -69,6 +69,7 @@ def calculationsKmeansCombinedTelemetry(start, stop, systemId, bucket, interval,
         labels = []
         for j in range(len(prediction)):
             attack = isAttack(timeStamps[j] -timedelta(seconds = 2), timeStamps[j])
+
             labels.append(attack)
             line = "\n"  + (timeStamps[j] -timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") +"," + timeStamps[j].strftime("%Y-%m-%dT%H:%M:%SZ")
             for measurement in measurements[i]:

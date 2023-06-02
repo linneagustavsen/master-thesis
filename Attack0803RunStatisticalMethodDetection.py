@@ -1,4 +1,5 @@
 from datetime import timedelta
+from GetThreshold import getThreshold
 
 from Telemetry.Threshold.DetectionFromFile.Detection import detectionTelemetry
 import sys
@@ -14,5 +15,8 @@ start = arguments[1]
 stop = arguments[2]
 frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
-
-detectionTelemetry(start, stop, arguments[4], arguments[5], 0, attackDate)
+systemId = arguments[4]
+y_field = arguments[5]
+threshold = getThreshold(y_field, systemId, 0, "Threshold", "Telemetry", attackDate)
+print(systemId, threshold)
+#detectionTelemetry(start, stop, systemId, y_field, threshold, attackDate)

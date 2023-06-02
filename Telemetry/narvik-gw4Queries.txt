@@ -1,0 +1,84 @@
+Egress octets:
+
+data = (startTime, stopTime, field, link_name) =>
+    from(bucket: "april")
+    |> range(start: startTime, stop: stopTime)
+    |> filter(fn: (r) => r["link_name"] == link_name)
+    |> filter(fn: (r) => r["_field"] == field)
+    |> group()
+    |> sort(columns: ["_time"])
+    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)
+    |> set(key: "_field", value: field)
+    
+union(tables: [                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_octets", link_name:"tromso-narvik3"),                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_octets", link_name:"narvik-gw3.narvik-gw4"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_octets", link_name:"kommunevn-narvik"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_octets", link_name:"bodo-narvik")]
+    )            
+    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")            
+    |> keep(columns: ["_time", "ingress_stats__if_1sec_octets"])
+
+Egress packets:
+
+data = (startTime, stopTime, field, link_name) =>
+    from(bucket: "april")
+    |> range(start: startTime, stop: stopTime)
+    |> filter(fn: (r) => r["link_name"] == link_name)
+    |> filter(fn: (r) => r["_field"] == field)
+    |> group()
+    |> sort(columns: ["_time"])
+    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)
+    |> set(key: "_field", value: field)
+    
+union(tables: [                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_pkts", link_name:"tromso-narvik3"),                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_pkts", link_name:"narvik-gw3.narvik-gw4"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_pkts", link_name:"kommunevn-narvik"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "ingress_stats__if_1sec_pkts", link_name:"bodo-narvik")]
+    )            
+    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")            
+    |> keep(columns: ["_time", "ingress_stats__if_1sec_pkts"])
+
+
+Ingress octets:
+
+data = (startTime, stopTime, field, link_name) =>
+    from(bucket: "april")
+    |> range(start: startTime, stop: stopTime)
+    |> filter(fn: (r) => r["link_name"] == link_name)
+    |> filter(fn: (r) => r["_field"] == field)
+    |> group()
+    |> sort(columns: ["_time"])
+    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)
+    |> set(key: "_field", value: field)
+    
+union(tables: [                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_octets", link_name:"tromso-narvik3"),                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_octets", link_name:"narvik-gw3.narvik-gw4"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_octets", link_name:"kommunevn-narvik"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_octets", link_name:"bodo-narvik")]
+    )            
+    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")            
+    |> keep(columns: ["_time", "egress_stats__if_1sec_octets"])
+
+Ingress packets:
+
+data = (startTime, stopTime, field, link_name) =>
+    from(bucket: "april")
+    |> range(start: startTime, stop: stopTime)
+    |> filter(fn: (r) => r["link_name"] == link_name)
+    |> filter(fn: (r) => r["_field"] == field)
+    |> group()
+    |> sort(columns: ["_time"])
+    |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)
+    |> set(key: "_field", value: field)
+    
+union(tables: [                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_pkts", link_name:"tromso-narvik3"),                
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_pkts", link_name:"narvik-gw3.narvik-gw4"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_pkts", link_name:"kommunevn-narvik"),
+		data(startTime: v.timeRangeStart, stopTime: v.timeRangeStop, field: "egress_stats__if_1sec_pkts", link_name:"bodo-narvik")]
+    )            
+    |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")            
+    |> keep(columns: ["_time", "egress_stats__if_1sec_pkts"])

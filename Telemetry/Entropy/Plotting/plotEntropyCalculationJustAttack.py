@@ -51,7 +51,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         return
     if not 1 in labels:
         return
-    fig, axs = plt.subplots(1, 1, figsize=(20, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     format = '%b %d %H:%M:%S'
     counterStrings = 0
@@ -83,11 +83,10 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     #fig.tight_layout()
     fig.legend(fontsize=20)
     fig.savefig("Plots/Entropy/Attack"+ fileString+ "/Telemetry/JustAttack."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+systems = ["teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 
 y_fields = ["entropy_packet_size", "entropy_rate_packet_size", "numberOfPackets", "numberOfBytes"]
@@ -95,13 +94,14 @@ y_field_names = ["Entropy of packet size", "Entropy rate of packet size",
                  "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
+    if attackDate == "24.03.23":
+        systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+            "oslo-gw1"]
     for systemId in systems:
-        print(systemId)
         for i in range(len(y_fields)):
-            print(y_fields[i])
             for interval in intervals:
-                print(interval)
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
 

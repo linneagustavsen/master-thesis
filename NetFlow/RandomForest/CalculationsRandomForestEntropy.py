@@ -21,7 +21,8 @@ def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate, estima
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
     f = open(str(q) + "/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    #f.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
+    f.write("sTime,eTime,number_of_packets,real_label")
     #f_not = open(str(q) + "/NotAlerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #f_not.write("sTime,eTime,entropy_ip_source,entropy_rate_ip_source,entropy_ip_destination,entropy_rate_ip_destination,entropy_flow,entropy_rate_flow,number_of_flows,icmp_ratio,number_of_icmp_packets,packet_size_entropy,packet_size_entropy_rate,number_of_packets,number_of_bytes,real_label")
     f_scores = open(str(q) + "/Score.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
@@ -50,8 +51,9 @@ def calculationRandomForestNetFlowEntropy(systemId, interval, attackDate, estima
     predictions = classifier_RF.predict(testingMeasurements)
     for i in range(len(predictions)):
         line = "\n"  + testingIntervals[i].left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," +testingIntervals[i].right.strftime("%Y-%m-%dT%H:%M:%SZ")
-        for j in range(len(testingMeasurements[i])):
-            line += "," + str(testingMeasurements[i][j])
+        '''for j in range(len(testingMeasurements[i])):
+            line += "," + str(testingMeasurements[i][j])'''
+        line += "," + str(testingMeasurements[i][-2])
         line += "," +str(testingLabel[i])
 
         if predictions[i] == 1:

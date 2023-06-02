@@ -40,6 +40,11 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
         return
 
     sTime, eTime, measurements, labels = structureDataNumpyArrays(df)
+    
+    '''timeFile = str(q) + "/" + str(path) +"/Fields.sTimes.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if Path(timeFile).exists():
+        with open(str(timeFile), 'rb') as f:
+            sTime = np.load(f, allow_pickle=True)'''
 
     entropyFile =  str(q) + "/" + str(path) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
     if Path(entropyFile).exists():
@@ -106,8 +111,8 @@ def makeDataSetNetFlow(silkFile, start, stop, frequency, interval, path, systemI
 
         newMeasurements = [ipSrcArray, ipSrcRateArray, ipDstArray, ipDstRateArray, flowArray, flowRateArray, packetSizeArray, packetSizeRateArray, labels[counter]]
 
-        times = [sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"), eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ")]
-        
+        #times = [sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"), eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ")]
+        times = [0, 0]
         '''times.extend(curMeasurements)
         times.extend(newMeasurements)
         data.append(times)'''

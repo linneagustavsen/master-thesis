@@ -8,6 +8,8 @@ from HelperFunctions.IsAttack import *
 from datetime import datetime
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from Telemetry.Kmeans.ClusterLabelling import labelCluster
 
@@ -32,11 +34,13 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "K-means entropy detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "K-means entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansEntropyDetectionTelemetry")
@@ -127,6 +131,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():

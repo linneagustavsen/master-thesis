@@ -9,6 +9,8 @@ from HelperFunctions.IsAttack import *
 from Telemetry.Kmeans.ClusterLabelling import labelCluster
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 '''
     Do K-means clustering on field data write both clusters to file
@@ -30,11 +32,13 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansDetectionTelemetry")
@@ -122,6 +126,8 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
         startTime += clusterFrequency
 
     counter = 0
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
@@ -154,6 +160,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():

@@ -26,7 +26,7 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
         ipPath.mkdir(parents=True, exist_ok=False)
 
     f0IP = open(str(ipPath) + "/Alerts.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f0IP.write("sTime,eTime,srcIP,dstIP,srcPort,dstPort,protocol,packets,bytes,fin,syn,rst,psh,ack,urg,ece,cwr,duration,nextHopIP,real_label")
+    f0IP.write("sTime,eTime,srcIP,dstIP,nextHopIP,real_label")
     
     datasetsPath = Path('NetFlow')
     dsPath = datasetsPath / 'RandomForest' / 'DataSets'
@@ -54,8 +54,11 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
         for i in range(len(predictions)):
             #line = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
             lineIPs = "\n"  + sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ") + "," + eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for j in range(len(testingMeasurements[i])):
-                lineIPs += "," + str(testingMeasurements[i][j])
+            '''for j in range(len(testingMeasurements[i])):
+                lineIPs += "," + str(testingMeasurements[i][j])'''
+            lineIPs += "," + str(testingMeasurements[i][0])
+            lineIPs += "," + str(testingMeasurements[i][1])
+            lineIPs += "," + str(testingMeasurements[i][-1])
             #line += "," +str(testingLabel[i])
             lineIPs += "," +str(testingLabel[i])
 

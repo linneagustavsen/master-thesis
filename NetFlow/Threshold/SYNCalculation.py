@@ -27,7 +27,7 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     #Open file to write alerts to
     calculations = open(str(ipPath) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("sTime,eTime,srcIP,dstIP,synPacketsPerFlow,,deviation_score,real_label")
+    calculations.write("sTime,eTime,srcIP,dstIP,synPacketsPerFlow,deviation_score,real_label")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     

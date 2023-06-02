@@ -46,7 +46,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
 
     y_values = data[y_field]
 
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])
@@ -107,7 +107,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     #fig.tight_layout()
     fig.legend(fontsize=20)
     fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/JustAttackPeriod/SYN."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -121,10 +121,7 @@ intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
-        print(systemId)
         for i in range(len(y_fields)):
-            print(y_fields[i])
             for interval in intervals:
-                print(interval)
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
 

@@ -41,7 +41,6 @@ def makeDataSetTelemetryFields(start, stop, bucket, fields, systemId, path, atta
             times = [timeStamps[i]]
             times.extend(measurements[i]) 
             times.append(int(isAttack(timeStamps[i] - timedelta(seconds = 2), timeStamps[i])))
-
             data.append(times)
         data = np.array(data)
 

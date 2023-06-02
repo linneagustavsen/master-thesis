@@ -6,6 +6,8 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 '''
@@ -18,10 +20,6 @@ import json
             attackDate: string, date of the attack the detections are made on
 '''
 def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0threshold, c1threshold, attackDate):
-    p = Path('Detections' + fileString)
-    q = p / 'Kmeans' / 'NetFlow'
-    if not q.exists():
-        q.mkdir(parents=True)
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -32,11 +30,13 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansDetectionNetFlow")
@@ -80,34 +80,43 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/ClusterLabelling.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         if len(attackCluster) == 0:
             continue
-        if attackCluster["AttackCluster"][0] == 0:
-            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        if fileString == "0803":
+            if attackCluster["AttackCluster"][0] == 0:
+                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+                nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+
+                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            
+            elif attackCluster["AttackCluster"][0] == 1:
+                cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+                attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+                nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+
+                nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            labelsForNonAttackCluster = nonAttackCluster["real_label"]
+
+            for label in labelsForNonAttackCluster:
+                if label == 0:
+                    trueNegatives += 1
+                elif label == 1:
+                    falseNegatives += 1        
+        else:
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
-
-            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
-        elif attackCluster["AttackCluster"][0] == 1:
-            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-            attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
-            nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-
-            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
-        labelsForNonAttackCluster = nonAttackCluster["real_label"]
-
-        for label in labelsForNonAttackCluster:
-            if label == 0:
-                trueNegatives += 1
-            elif label == 1:
-                falseNegatives += 1
-        
+            scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Fields.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            
+            tn = scores["TN"][0]
+            fn = scores["FN"][0]
+            trueNegatives += tn
+            falseNegatives += fn
         sTime = pd.to_datetime(cluster["sTime"])
         eTime = pd.to_datetime(cluster["eTime"])
 
-        srcPort = cluster["srcPort"]
+        '''srcPort = cluster["srcPort"]
         dstPort = cluster["dstPort"]
-        protocol = cluster["protocol"]
+        protocol = cluster["protocol"]'''
 
         labels = cluster["real_label"]
 
@@ -127,14 +136,16 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     
         sTimeCluster.extend(sTime)
         eTimeCluster.extend(eTime)
-        srcPortsCluster.extend(srcPort)
+        '''srcPortsCluster.extend(srcPort)
         dstPortsCluster.extend(dstPort)
-        protocolCluster.extend(protocol)
+        protocolCluster.extend(protocol)'''
         real_labels.extend(labels)
 
         startTime += clusterFrequency
 
     counter = 0
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
@@ -155,9 +166,6 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "srcPort": int(srcPortsCluster[i]),
-                    "dstPort": int(dstPortsCluster[i]),
-                    "Protocol": int(protocolCluster[i]),
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
                     "Attack_type": attackType
@@ -181,7 +189,12 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             truePositives += 1
         elif not real_labels[i]:
             falsePositives += 1
-    
+    sleep(randrange(400))
+    p = Path('Detections' + fileString)
+    q = p / 'Kmeans' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+
     scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))

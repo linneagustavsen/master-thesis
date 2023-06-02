@@ -4,6 +4,8 @@ from silk import *
 from datetime import datetime, timedelta
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 from HelperFunctions.IsAttack import isAttackFlow
 from HelperFunctions.Normalization import normalization
@@ -37,11 +39,13 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "SYN detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "SYN detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("SYNDetectionNetFlow")
@@ -63,9 +67,9 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
     eTime = pd.to_datetime(data["eTime"])
 
     synPacketsPerFlow = data["synPacketsPerFlow"]
-    srcPort = data["srcPort"]
+    '''srcPort = data["srcPort"]
     dstPort = data["dstPort"]
-    #protocol = data["protocol"]
+    protocol = data["protocol"]'''
     real_label = data["real_label"]
 
     truePositives = 0
@@ -83,20 +87,17 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
             break
         if sTime[i] < startTime:
             continue
-
+        
+        attack = real_label[i]
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
-            attack = real_label[i]
             simulateRealTime(datetime.now(), sTime[i], attackDate)
-            if synPacketsPerFlow[i] >= threshold:
+            if synPacketsPerFlow[i] > threshold:
                 alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                         "Gateway": systemId,
                         "Deviation_score": normalization(abs(change), maxmin_syn["minimum"], maxmin_syn["maximum"]),
-                        "srcPort": int(srcPort[i]),
-                        "dstPort": int(dstPort[i]),
-                        "Protocol": 6,
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }
@@ -128,6 +129,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():

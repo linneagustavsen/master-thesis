@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import numpy as np
 import json
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -95,7 +97,8 @@ def detectionFlow(silkFile, start, stop, systemId, frequency, interval, windowSi
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):

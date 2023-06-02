@@ -5,6 +5,8 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
 from HelperFunctions.StructureData import *
 from HelperFunctions.ClusterLabelling import labelCluster
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 '''
@@ -29,11 +31,13 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansEntropyDetectionNetFlow")
@@ -60,27 +64,39 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
     attackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     if len(attackCluster) == 0:
         return
-    if attackCluster["AttackCluster"][0] == 0:
-        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    if fileString == "0803":
+        if attackCluster["AttackCluster"][0] == 0:
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+            attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        
+        elif attackCluster["AttackCluster"][0] == 1:
+            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+            attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+
+            nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        
+        labelsForNonAttackCluster = nonAttackCluster["real_label"]
+
+        for label in labelsForNonAttackCluster:
+            if label == 0:
+                trueNegatives += 1
+            elif label == 1:
+                falseNegatives += 1
+    else:
+        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-    
-    elif attackCluster["AttackCluster"][0] == 1:
-        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-        attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
-        nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-
-        nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-    
-    labelsForNonAttackCluster = nonAttackCluster["real_label"]
-
-    for label in labelsForNonAttackCluster:
-        if label == 0:
-            trueNegatives += 1
-        elif label == 1:
-            falseNegatives += 1
+        scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Entropy.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+            
+        tn = scores["TN"][0]
+        fn = scores["FN"][0]
+        trueNegatives += tn
+        falseNegatives += fn
     
     sTime = pd.to_datetime(cluster["sTime"])
     eTime = pd.to_datetime(cluster["eTime"])
@@ -123,6 +139,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         elif not real_labels[i]:
             falsePositives += 1
 
+    sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():

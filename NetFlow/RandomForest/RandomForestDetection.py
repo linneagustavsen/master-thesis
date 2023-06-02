@@ -4,6 +4,8 @@ import pickle
 import pandas as pd
 import numpy as np
 import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
 import json
 
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -43,7 +45,8 @@ def detectionRandomForestNetFlowFields(testingSet, systemId, attackDate):
 
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        print("Connected with result code "+str(rc))
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):

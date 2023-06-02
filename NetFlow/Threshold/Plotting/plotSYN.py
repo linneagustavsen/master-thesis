@@ -17,6 +17,8 @@ def plotSYN(systemId, attackDate):
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
         synAttackIndex = 0
+        startAttack = datetime.strptime("2023-03-08 14:15:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-08 16:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "17.03.23":
         fileString = "1703"
         strings = [["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
@@ -24,6 +26,8 @@ def plotSYN(systemId, attackDate):
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
         synAttackIndex = 0
+        startAttack = datetime.strptime("2023-03-17 11:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-17 13:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "24.03.23":
         fileString = "2403"
         strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
@@ -36,6 +40,8 @@ def plotSYN(systemId, attackDate):
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         synAttackIndex = 5
+        startAttack = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(data["sTime"])
@@ -47,14 +53,17 @@ def plotSYN(systemId, attackDate):
         return
     if not 1 in labels:
         return
-    fig, axs = plt.subplots(1, 1, figsize=(10, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     format = '%b %d %H:%M:%S'
     
     
-    start = datetime.strptime(strings[synAttackIndex][0], format).replace(year=2023)
-    stop = datetime.strptime(strings[synAttackIndex][1], format).replace(year=2023)
-    #axs.axvspan(start, stop, facecolor="#F9CAA4")
+    counterStrings = 0
+    for string in strings:
+        start = datetime.strptime(string[0], format).replace(year=2023)
+        stop = datetime.strptime(string[1], format).replace(year=2023)
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        counterStrings += 1
     
     endTime = pd.to_datetime(data["eTime"])
     
@@ -64,10 +73,10 @@ def plotSYN(systemId, attackDate):
     timeAxis = []
     counter = 0
     for i in range(len(labels)):
-        if endTime[i].replace(tzinfo=None) > stop:
+        if endTime[i].replace(tzinfo=None) > stopAttack:
             print(endTime[i])
             break
-        if startTime[i].replace(tzinfo=None) < start:
+        if startTime[i].replace(tzinfo=None) < startAttack:
             continue
         timeAxis.append(startTime[i])
         if labels[i] == 1:
@@ -90,7 +99,7 @@ def plotSYN(systemId, attackDate):
                 nowInterval = pd.Interval(startTime[i].replace(second=0).replace(tzinfo=None), endTime[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
                 lastInterval = nowInterval
 
-            axs.axvspan(nowInterval.left, nowInterval.right, facecolor="#2A9D8F")'''
+            axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])'''
 
         elif labels[i] == 0:
             attackValues.append(None)
@@ -98,8 +107,9 @@ def plotSYN(systemId, attackDate):
     
     if counter == 0:
         return
-    axs.scatter(timeAxis ,nonAttackValues, color="black", s=30, label="Normal flows")
-    axs.scatter(timeAxis, attackValues, color = "blue", s=10, label="Attack flows")
+    axs.scatter(timeAxis ,nonAttackValues, color="black", s=10, label="Normal flows")
+    axs.scatter(timeAxis, attackValues, color = "blue", s=30, label="Attack flows")
+
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M"),
@@ -108,10 +118,10 @@ def plotSYN(systemId, attackDate):
     axs.set_xlabel('Time',fontsize=20)
     axs.set_ylabel("SYN packets per flow", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    fig.legend(fontsize=15)
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/OnlySYNAttack.Scatter."+  str(systemId)+ ".SYN.png", dpi=500)
-    plt.close()
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.png", dpi=500)
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -119,6 +129,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         print(systemId)

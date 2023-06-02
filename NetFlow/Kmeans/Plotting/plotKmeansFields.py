@@ -179,7 +179,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs[1].legend(fontsize=20)
     fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".png", dpi=500)
-    plt.close()
+    plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
@@ -190,7 +190,5 @@ stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 for attackDate in attackDates:
-    print(attackDate)
     for systemId in systems:
-        print(systemId)
         plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)

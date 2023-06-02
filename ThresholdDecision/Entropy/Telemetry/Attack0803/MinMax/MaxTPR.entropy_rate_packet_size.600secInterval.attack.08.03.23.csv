@@ -1,0 +1,15 @@
+SystemId,threshold,maxTPR
+stangnes-gw,0.00053,1.0
+rodbergvn-gw2,3e-05,1.0
+tromso-fh-gw,9e-06,1.0
+tromso-gw5,1.7e-05,1.0
+teknobyen-gw1,0.000133,1.0
+narvik-gw3,6e-05,1.0
+hovedbygget-gw,0.000117,1.0
+teknobyen-gw2,0.000107,1.0
+ma2-gw,0.000262,1.0
+bergen-gw3,8.9e-05,1.0
+narvik-kv-gw,0.000185,1.0
+trd-gw,0.000107,1.0
+ifi2-gw5,1e-05,1.0
+oslo-gw1,0.000145,1.0
