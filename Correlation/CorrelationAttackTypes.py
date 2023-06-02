@@ -26,6 +26,10 @@ class Correlation_Attack_types:
         self.output = outputTopic
         self.alertsAttack ={}
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -41,6 +45,10 @@ class Correlation_Attack_types:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if counter['0'] > counter['1']:
+            self.falsePositivesOut += 1
+        elif counter['0'] < counter['1']:
+            self.truePositivesOut += 1
         return counter
 
 
@@ -106,7 +114,7 @@ class Correlation_Attack_types:
                 print("\nOverlappingAlerts")
                 print(overlappingAlerts)
                 print("\n")
-                if overlappingAlerts > 3:
+                if overlappingAlerts > 10:
 
                     message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -153,7 +161,7 @@ class Correlation_Attack_types:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationAttackType.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
 
@@ -162,7 +170,10 @@ class Correlation_Attack_types:
             attackType = payload.get('Attack_type')
 
             self.correlateAttackTypes(stime, etime, attackType, payload)
-
+            if int(payload.get('Real_label')) == 0:
+                self.falsePositivesIn += 1
+            elif int(payload.get('Real_label')) == 1:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()

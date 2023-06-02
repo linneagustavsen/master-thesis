@@ -26,6 +26,10 @@ class Correlation_IPs:
         self.output = outputTopic
         self.alertsIP ={}
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -41,6 +45,11 @@ class Correlation_IPs:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if '0' or '1' in counter:
+            if counter['0'] > counter['1']:
+                self.falsePositivesOut += 1
+            elif counter['0'] < counter['1']:
+                self.truePositivesOut += 1
         return counter
 
     def addAlertsIP(self, ip, interval, alert):
@@ -103,7 +112,7 @@ class Correlation_IPs:
                 for existingTime in existingTimes:
                     self.addAlertsIP(ip, existingTime, payload)
    
-                if overlappingAlerts > 3:
+                if overlappingAlerts > 20:
                     
                     message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                                 'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -146,7 +155,7 @@ class Correlation_IPs:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationIPs.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
             stime = payload.get('sTime')
@@ -156,6 +165,11 @@ class Correlation_IPs:
 
             self.correlateIPs(stime, etime, srcIP, payload)
             self.correlateIPs(stime, etime, dstIP, payload)
+
+            if int(payload.get('Real_label')) == 0:
+                self.falsePositivesIn += 1
+            elif int(payload.get('Real_label')) == 1:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()

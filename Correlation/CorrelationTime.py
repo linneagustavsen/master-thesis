@@ -30,6 +30,10 @@ class Correlation_Time:
         self.graph = graph
         self.alertsCorrelated = {}
         self.alertCounter = 0
+        self.truePositivesIn = 0
+        self.falsePositivesIn = 0
+        self.truePositivesOut = 0
+        self.falsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -45,6 +49,11 @@ class Correlation_Time:
                 counter[element] += 1
             else:
                 counter[element] = 1
+        if '0' or '1' in counter:
+            if counter['0'] > counter['1']:
+                self.falsePositivesOut += 1
+            elif counter['0'] < counter['1']:
+                self.truePositivesOut += 1
         return counter
     
     def addElementToCounterDict(self, element, counterDict):
@@ -187,7 +196,7 @@ class Correlation_Time:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationTime.csv", "a")
-            alertsFile.write("NumberOfAlerts\n" + str(self.alertCounter))
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
             stime = payload.get('sTime')
@@ -200,6 +209,17 @@ class Correlation_Time:
             alertDB = self.decodeAlertDB(alertDB)
 
             self.correlateTime(stime, etime, gateway, deviation_scores, real_labels, attack_types, alertDB)
+            falseLabels = 0
+            trueLabels = 0
+            for label in real_labels:
+                if label == '1':
+                    trueLabels += 1
+                elif label == '0':
+                    falseLabels += 1
+            if falseLabels > trueLabels:
+                self.falsePositivesIn += 1
+            elif falseLabels < trueLabels:
+                self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
