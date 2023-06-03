@@ -45,11 +45,16 @@ class Correlation_IPs:
                 counter[element] += 1
             else:
                 counter[element] = 1
-        if '0' or '1' in counter:
-            if counter['0'] > counter['1']:
+        if 0 or 1 in counter:
+            if 1 not in counter:
                 self.falsePositivesOut += 1
-            elif counter['0'] < counter['1']:
+            elif 0 not in counter:
                 self.truePositivesOut += 1
+            else:
+                if counter[0] > counter[1]:
+                    self.falsePositivesOut += 1
+                elif counter[0] < counter[1]:
+                    self.truePositivesOut += 1
         return counter
 
     def addAlertsIP(self, ip, interval, alert):
@@ -140,11 +145,10 @@ class Correlation_IPs:
         print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
-        self.alertCounter += 1
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
-            #print(payload)
+            print(payload)
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
@@ -158,6 +162,7 @@ class Correlation_IPs:
             alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
+            self.alertCounter += 1
             stime = payload.get('sTime')
             etime = payload.get('eTime')
             srcIP = payload.get('srcIP')

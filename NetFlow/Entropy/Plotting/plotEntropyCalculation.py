@@ -106,7 +106,7 @@ y_field_names = ["Entropy of destination IP addresses", "Entropy rate of destina
                  "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
     print("\n")
     print(attackDate)

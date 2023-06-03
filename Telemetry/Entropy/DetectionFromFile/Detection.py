@@ -122,7 +122,6 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-
             if abs(change_r) > thresholdEntropyRate:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

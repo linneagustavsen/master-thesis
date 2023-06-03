@@ -45,10 +45,16 @@ class Correlation_Attack_types:
                 counter[element] += 1
             else:
                 counter[element] = 1
-        if counter['0'] > counter['1']:
+  
+        if 1 not in counter:
             self.falsePositivesOut += 1
-        elif counter['0'] < counter['1']:
+        elif 0 not in counter:
             self.truePositivesOut += 1
+        else:
+            if counter[0] > counter[1]:
+                self.falsePositivesOut += 1
+            elif counter[0] < counter[1]:
+                self.truePositivesOut += 1
         return counter
 
 
@@ -68,8 +74,6 @@ class Correlation_Attack_types:
         return self.alertsAttack[attackType][interval]
     
     def removeTimestampFromAttackType(self, attackType, interval):
-        print("\n removeTimestampFromAttackType")
-        print(self.alertsAttack)
         del self.alertsAttack[attackType][interval]
 
     def correlateAttackTypes(self, stime, etime, attackType, payload):
@@ -113,7 +117,6 @@ class Correlation_Attack_types:
 
                 print("\nOverlappingAlerts")
                 print(overlappingAlerts)
-                print("\n")
                 if overlappingAlerts > 10:
 
                     message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -127,7 +130,6 @@ class Correlation_Attack_types:
                     self.mqtt_client.publish(self.output, json.dumps(message))
                     print("\nPublished message to topic", self.output)
                     print(message)
-                    print("\n")
             else:
                 self.addAlert(attackType, interval, payload)
                 print("No overlapping alerts for time interval", interval)
@@ -146,8 +148,7 @@ class Correlation_Attack_types:
         print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
-        self.alertCounter += 1
-        print('Incoming message to topic {}'.format(msg.topic))
+        #print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
             #print(payload)
@@ -164,7 +165,7 @@ class Correlation_Attack_types:
             alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
-
+            self.alertCounter += 1
             stime = payload.get('sTime')
             etime = payload.get('eTime')
             attackType = payload.get('Attack_type')
