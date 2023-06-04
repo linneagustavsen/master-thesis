@@ -155,7 +155,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": attack,
-                    "Attack_type": None
+                    "Attack_type": ""
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 

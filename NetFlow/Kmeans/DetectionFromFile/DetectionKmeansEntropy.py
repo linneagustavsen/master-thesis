@@ -102,7 +102,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
 
     real_labels = cluster["real_label"]
 
-    db = attackCluster["Davies-bouldin-score"][0]
+    '''db = attackCluster["Davies-bouldin-score"][0]
     attackType = ""
     #If it is a burst attack and non attack cluster is empty
     if db < DBthreshold and nonAttackClusterDiameter == 0:
@@ -112,7 +112,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         attackType = "Different protocols"
     #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
     elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
-        attackType = "Same protocol"
+        attackType = "Same protocol"'''
         
     for i in range(len(sTime)):
         sTime[i] = sTime[i].replace(tzinfo=None)
@@ -129,7 +129,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
-                    "Attack_type": attackType
+                    "Attack_type": ""
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
         

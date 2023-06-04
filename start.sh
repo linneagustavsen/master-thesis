@@ -1,5 +1,5 @@
 #!/bin/bash
-interval=10
+interval=5
 start="2023-03-17 11:00:00"
 stop="2023-03-17 13:00:00"
 attackDate="17.03.23"

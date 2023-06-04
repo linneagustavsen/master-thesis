@@ -35,10 +35,10 @@ def writeDetectionsToFile():
     alert = {
         "sTime": "WRITE"
         }
-    #mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
+    mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
     #mqtt_client.publish(MQTT_TOPIC_aggregation,json.dumps(alert))
     #mqtt_client.publish(MQTT_TOPIC_attackType,json.dumps(alert))
     #mqtt_client.publish(MQTT_TOPIC_distribution,json.dumps(alert))
     #mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
-    mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
+    #mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
 writeDetectionsToFile()

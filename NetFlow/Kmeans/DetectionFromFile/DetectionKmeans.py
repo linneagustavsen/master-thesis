@@ -169,7 +169,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
-                    "Attack_type": None
+                    "Attack_type": ""
                 }
         '''alert = {
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

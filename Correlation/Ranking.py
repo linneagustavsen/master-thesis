@@ -171,7 +171,8 @@ class Ranking:
                         "Attack_types": attack_types
                         }
             self.ranking.append(newAlert)
-        
+        thread2 = Timer(60, self.writeRankingToFile)
+        thread2.start()
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
     """
@@ -196,7 +197,12 @@ class Ranking:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
-            precision = self.highRankingTruePositives/self.highRankingFalsePositives 
+            if self.highRankingTruePositives == 0:
+                precision = 0
+            elif self.highRankingFalsePositives == 0:
+                precision = 1
+            else:
+                precision = self.highRankingTruePositives/self.highRankingFalsePositives 
             alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision")
             alertsFile.write("\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
             alertsFile.close()
@@ -210,9 +216,9 @@ class Ranking:
             attack_types = payload.get('Attack_types')
 
             self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
-            if 1 not in real_labels:
+            if '1' not in real_labels:
                 self.falsePositivesIn += 1
-            elif 0 not in real_labels:
+            elif '0' not in real_labels:
                 self.truePositivesIn += 1
             else:
                 if real_labels['0'] > real_labels['1']:
@@ -230,7 +236,7 @@ class Ranking:
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
-            thread2 = Timer(15, self.writeRankingToFile)
+            thread2 = Timer(60, self.writeRankingToFile)
             thread2.start()
             
         except:

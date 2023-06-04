@@ -3,7 +3,7 @@ import pandas as pd
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
-from threading import Thread
+from threading import Thread, Timer
 import json
 from datetime import timedelta
 
@@ -33,10 +33,16 @@ class Correlation_Attack_types:
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
+            self.startTime = pd.Timestamp("2023-03-08T14:15:00Z")
+            self.stopTime = pd.Timestamp("2023-03-08T16:00:00Z")
         elif attackDate == "17.03.23":
             self.fileString = "1703"
+            self.startTime = pd.Timestamp("2023-03-17T11:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-17T13:00:00Z")
         elif attackDate == "24.03.23":
             self.fileString = "2403"
+            self.startTime = pd.Timestamp("2023-03-24T14:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-24T18:00:00Z")
 
     def countElements(self, listOfElements):
         counter = {}
@@ -63,9 +69,9 @@ class Correlation_Attack_types:
             if interval in self.getTimes(attackType):
                 self.alertsAttack[attackType][interval].append(alert)
             else:
-                self.alertsAttack[attackType] = {interval:[alert]}
+                self.alertsAttack[attackType][interval] = [alert]
         else:
-                self.alertsAttack[attackType] = {interval:[alert]}
+            self.alertsAttack[attackType] = {interval:[alert]}
 
     def getTimes(self, attackType):
         return self.alertsAttack[attackType]
@@ -76,56 +82,53 @@ class Correlation_Attack_types:
     def removeTimestampFromAttackType(self, attackType, interval):
         del self.alertsAttack[attackType][interval]
 
-    def correlateAttackTypes(self, stime, etime, attackType, payload):
-        stime = pd.Timestamp(stime)
-        etime = pd.Timestamp(etime)
-        fuzzyStartTime = stime - timedelta(minutes = 15)
-        interval = pd.Interval(fuzzyStartTime, etime, closed='both')
-        
+    def correlateAttackTypes(self):
+        stime = self.startTime
+        etime = self.startTime + timedelta(seconds=60)
+        interval = pd.Interval(stime, etime, closed='both')
 
-        self.addAlert(attackType, interval, payload)
+        for attackType in self.alertsAttack:
+            overlappingAlerts = 0
+            gateways = []
+            deviation_scores = []
+            real_labels = []
+            removeTimes = []
 
-        overlappingAlerts = 0
-        gateways = [payload.get('Gateway')]
-        deviation_scores = []
-        real_labels = []
-        removeTimes = []
+            for time in self.getTimes(attackType):
+                if time.left < stime - timedelta(minutes = 15):
+                    removeTimes.append(time)
+                    continue
 
-        for time in self.getTimes(attackType):
-            if time.left < stime - timedelta(minutes = 15):
-                removeTimes.append(time)
-                continue
+                if interval.overlaps(time):
+                    alerts = self.getAlerts(attackType, time)
+                    overlappingAlerts += len(alerts)
 
-            if interval.overlaps(time):
-                alerts = self.getAlerts(attackType, time)
-                overlappingAlerts += len(alerts)
+                    for alert in alerts:
+                        gateways.append(alert['Gateway'])
+                        if not alert["Deviation_score"] == None:
+                            deviation_scores.append(alert["Deviation_score"])
+                        real_labels.append(alert["Real_label"])
 
-                for alert in alerts:
-                    gateways.append(alert['Gateway'])
-                    if not alert["Deviation_score"] == None:
-                        deviation_scores.append(alert["Deviation_score"])
-                    real_labels.append(alert["Real_label"])
+            for time in removeTimes:
+                self.removeTimestampFromAttackType(attackType, time)
 
-        for time in removeTimes:
-            self.removeTimestampFromAttackType(attackType, time)
+            print("\nOverlappingAlerts on attack type", attackType)
+            print(overlappingAlerts)
+            if overlappingAlerts > 10:
 
-        print("\nOverlappingAlerts on attack type", attackType)
-        print(overlappingAlerts)
-        if overlappingAlerts > 10:
-
-            message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'Gateways': list(set(gateways)),
-                        'Deviation_scores': deviation_scores,
-                        'Real_labels': self.countElements(real_labels),
-                        'Attack_types': {attackType: overlappingAlerts}
-                        }
-            
-            self.mqtt_client.publish(self.output, json.dumps(message))
-            print("\nPublished message to topic", self.output)
-        else:
-            print("No overlapping alerts for time interval", interval)
-
+                message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            'Gateways': list(set(gateways)),
+                            'Deviation_scores': deviation_scores,
+                            'Real_labels': self.countElements(real_labels),
+                            'Attack_types': {attackType: overlappingAlerts}
+                            }
+                
+                self.mqtt_client.publish(self.output, json.dumps(message))
+                print("\nPublished message to topic", self.output)
+        self.startTime += timedelta(seconds=60)
+        thread2 = Timer(60, self.correlateAttackTypes)
+        thread2.start()
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
     """
@@ -144,7 +147,8 @@ class Correlation_Attack_types:
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
-
+        if self.alertCounter == 0:
+            self.startTime = pd.Timestamp(payload.get('sTime'))
         if payload.get('sTime') == "WRITE":
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
@@ -159,11 +163,15 @@ class Correlation_Attack_types:
             etime = payload.get('eTime')
             attackType = payload.get('Attack_type')
 
-            self.correlateAttackTypes(stime, etime, attackType, payload)
+            #self.correlateAttackTypes(stime, etime, attackType, payload)
             if int(payload.get('Real_label')) == 0:
                 self.falsePositivesIn += 1
             elif int(payload.get('Real_label')) == 1:
                 self.truePositivesIn += 1
+            stime = pd.Timestamp(stime)
+            etime = pd.Timestamp(etime)
+            interval = pd.Interval(stime, etime, closed='both')
+            self.addAlert(attackType, interval, payload)
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -175,6 +183,8 @@ class Correlation_Attack_types:
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
+            thread2 = Timer(60, self.correlateAttackTypes)
+            thread2.start()
             
         except:
             print("Interrupted")

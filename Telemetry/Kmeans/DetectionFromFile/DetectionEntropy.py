@@ -121,7 +121,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
-                    "Attack_type": None
+                    "Attack_type": ""
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 

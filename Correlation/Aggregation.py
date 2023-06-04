@@ -1,10 +1,10 @@
-from datetime import timedelta
+from datetime import timedelta,datetime
 from pathlib import Path
 import pandas as pd
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
-from threading import Thread
+from threading import Thread, Timer
 import json
 
 #Parameters for the MQTT connection
@@ -39,10 +39,16 @@ class Aggregation:
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
+            self.startTime = pd.Timestamp("2023-03-08T14:15:00Z")
+            self.stopTime = pd.Timestamp("2023-03-08T16:00:00Z")
         elif attackDate == "17.03.23":
             self.fileString = "1703"
+            self.startTime = pd.Timestamp("2023-03-17T11:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-17T13:00:00Z")
         elif attackDate == "24.03.23":
             self.fileString = "2403"
+            self.startTime = pd.Timestamp("2023-03-24T14:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-24T18:00:00Z")
 
         self.alertDB = {}
         for node in self.graph.G:
@@ -105,57 +111,56 @@ class Aggregation:
                 newAlertDB[gateway][str(str(start)+ "," + str(end))] = alertDB[gateway][time]
         return newAlertDB
     
-    def aggregateTime(self, stime, etime, gateway, payload):
-        stime = pd.Timestamp(stime)
-        etime = pd.Timestamp(etime)
-        fuzzyStartTime = stime - timedelta(seconds = 2)
-        interval = pd.Interval(fuzzyStartTime, etime, closed='both')
-        overlappingAlerts = 0
-        deviation_scores = []
-        real_labels = []
-        attack_types = []
-        removeTimes = []
-
-        self.addAlertToGraph(gateway, interval, payload, 0)
-
-        for time in self.getTimes(gateway, self.alertDB):
-            #Remove old alerts from the data structure
-            if time.left < stime - timedelta(minutes = 10):
-                removeTimes.append(time)
-                continue
-            
-            #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
-            if interval.overlaps(time):
-                alerts = self.getAlerts(gateway, time, self.alertDB)
-                overlappingAlerts += len(alerts)
-
-                for alert in alerts:
-                    if not alert["Deviation_score"] == None:
-                        deviation_scores.append(alert["Deviation_score"])
-                    real_labels.append(alert["Real_label"])
-                    if not alert["Attack_type"] == None:
-                        attack_types.append(alert["Attack_type"])
-                
+    def aggregateTime(self):
+        stime = self.startTime
+        etime = self.startTime + timedelta(seconds=60)
+        interval = pd.Interval(stime, etime, closed='both')
         
-        for time in removeTimes:
-            self.removeTimestampFromGraph(gateway, time, 0)
+        
+        for gateway in self.graph.G:
+            overlappingAlerts = 0
+            deviation_scores = []
+            real_labels = []
+            attack_types = []
+            removeTimes = []
+            for time in self.getTimes(gateway, self.alertDB):
+                #Remove old alerts from the data structure
+                if time.left < stime - timedelta(minutes = 10):
+                    removeTimes.append(time)
+                    continue
+                
+                #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
+                if interval.overlaps(time):
+                    alerts = self.getAlerts(gateway, time, self.alertDB)
+                    overlappingAlerts += len(alerts)
 
-        print("\nOverlappingAlerts for gateway", gateway)
-        print(overlappingAlerts)
-        if overlappingAlerts > 500:
-            self.countElements(real_labels)
-            message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    'Gateway': gateway,
-                    'Deviation_scores': deviation_scores,
-                    'Real_labels': real_labels,
-                    'Attack_types': attack_types,
-                    'alertDB': self.encodeAlertsDB(self.alertDB)}
+                    for alert in alerts:
+                        if not alert["Deviation_score"] == None:
+                            deviation_scores.append(alert["Deviation_score"])
+                        real_labels.append(alert["Real_label"])
+                        if not alert["Attack_type"] == None:
+                            attack_types.append(alert["Attack_type"])
+            
+            for time in removeTimes:
+                self.removeTimestampFromGraph(gateway, time, 0)
+            if not overlappingAlerts == 0:
+                print("\nOverlappingAlerts for gateway", gateway)
+                print(overlappingAlerts)
+            if overlappingAlerts > 500:
+                self.countElements(real_labels)
+                message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        'Gateway': gateway,
+                        'Deviation_scores': deviation_scores,
+                        'Real_labels': real_labels,
+                        'Attack_types': attack_types,
+                        'alertDB': self.encodeAlertsDB(self.alertDB)}
 
-            self.mqtt_client.publish(self.outputTime, json.dumps(message))
-            print("Aggregation published to topic", self.outputTime)
-        else:
-            print("No overlapping alerts for time interval", interval)
+                self.mqtt_client.publish(self.outputTime, json.dumps(message))
+                print("Aggregation published to topic", self.outputTime)
+        self.startTime += timedelta(seconds=60)
+        thread2 = Timer(60, self.aggregateTime)
+        thread2.start()
 
     def aggregateTimeDistribution(self, stime, etime, gateway, distribution, payload):
         stime = pd.Timestamp(stime)
@@ -215,7 +220,6 @@ class Aggregation:
     def on_connect(self, client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
         self.mqtt_client.subscribe(self.input)
-        print("subscribed to", self.input)
 
     def on_message(self, client, userdata, msg):
         #print('Incoming message to topic {}'.format(msg.topic))
@@ -224,7 +228,8 @@ class Aggregation:
         except Exception as err:
             print('Message sent from topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
-        
+        if self.alertCounter == 0:
+            self.startTime = pd.Timestamp(payload.get('sTime'))
         if payload.get('sTime') == "WRITE":
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
@@ -241,11 +246,9 @@ class Aggregation:
             srcIP = payload.get('srcIP')
             dstIP = payload.get('dstIP')
             packetSizeDistribution = payload.get('Packet_size_distribution')
-            '''print("INCOMMING DISTRIBUTION from gateway", gateway)
-            print(packetSizeDistribution)'''
 
-            self.aggregateTime(stime, etime, gateway, payload)
-            
+            #self.aggregateTime(stime, etime, gateway, payload)
+
             if payload.get('Attack_type') != '':
                 self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
                 print("Aggregation published to topic", self.outputAttackTypes)
@@ -258,6 +261,11 @@ class Aggregation:
                 self.falsePositivesIn += 1
             elif int(payload.get('Real_label')) == 1:
                 self.truePositivesIn += 1
+            
+            stime = pd.Timestamp(stime)
+            etime = pd.Timestamp(etime)
+            interval = pd.Interval(stime, etime, closed='both')
+            self.addAlertToGraph(gateway, interval, payload, 0)
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -268,6 +276,8 @@ class Aggregation:
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
+            thread2 = Timer(60, self.aggregateTime)
+            thread2.start()
             
         except:
             print("Interrupted")
