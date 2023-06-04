@@ -34,8 +34,7 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Random forest combined detection published to topic", MQTT_TOPIC)
+        print(systemId, "Random forest combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("RandomForestCombinedDetectionNetFlow")

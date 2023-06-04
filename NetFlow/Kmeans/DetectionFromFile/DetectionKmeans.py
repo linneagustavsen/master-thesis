@@ -35,8 +35,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans detection is published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansDetectionNetFlow")
@@ -72,7 +71,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
     real_labels = []
 
-    attackTypes = []
+    #attackTypes = []
 
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
@@ -120,7 +119,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
 
         labels = cluster["real_label"]
 
-        db = attackCluster["Davies-bouldin-score"][0]
+        '''db = attackCluster["Davies-bouldin-score"][0]
         attackType = ""
         #If it is a burst attack and non attack cluster is empty
         if db < DBthreshold and nonAttackClusterDiameter == 0:
@@ -132,7 +131,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
             attackType = "Same protocol"
         
-        attackTypes.append(attackType)
+        attackTypes.append(attackType)'''
     
         sTimeCluster.extend(sTime)
         eTimeCluster.extend(eTime)
@@ -153,22 +152,24 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             break
         if sTimeCluster[i] < startTime:
             continue
-        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
-        attackType = ""
+        
+
+        '''attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]
         if sTimeCluster[i] > startTime + clusterFrequency:
             counter += 1
             attackType = attackTypes[counter]
-            startTime += clusterFrequency
-        
+            startTime += clusterFrequency'''
+        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
+
         alert = {
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": int(real_labels[i]),
-                    "Attack_type": attackType
+                    "Attack_type": None
                 }
         '''alert = {
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -39,8 +39,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "K-means entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "K-means entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansEntropyDetectionTelemetry")
@@ -70,15 +69,15 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
         return
     if attackCluster["AttackCluster"][0] == 0:
         cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-        attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-        nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+        '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+        nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
 
         nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     elif attackCluster["AttackCluster"][0] == 1:
         cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-        attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
-        nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+        '''attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+        nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]'''
 
         nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
@@ -95,7 +94,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
     real_labels = cluster["real_label"]
 
-    db = attackCluster["Davies-bouldin-score"][0]
+    '''db = attackCluster["Davies-bouldin-score"][0]
     attackType = ""
     #If it is a burst attack and non attack cluster is empty
     if db < DBthreshold and nonAttackClusterDiameter == 0:
@@ -105,7 +104,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
         attackType = "Different protocols"
     #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
     elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
-        attackType = "Same protocol"
+        attackType = "Same protocol"'''
         
     for i in range(len(sTime)):
         sTime[i] = sTime[i].replace(tzinfo=None)
@@ -121,9 +120,8 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
-                    #"Value": measurements[i],
                     "Real_label": int(real_labels[i]),
-                    "Attack_type": attackType
+                    "Attack_type": None
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 

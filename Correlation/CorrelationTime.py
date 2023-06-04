@@ -99,9 +99,6 @@ class Correlation_Time:
                     #send the alert to the alert ranking
 
         timeExists = False
-        existsCorrelated = False
-        existingTimes = []
-        removeTimes = []
         gateways = [gateway]
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
@@ -120,41 +117,12 @@ class Correlation_Time:
                         alerts = alertDB[otherGateway][time]
 
                         for alert in alerts:
-                            deviation_scores.append(alert["Deviation_score"])
+                            if not alert["Deviation_score"] == None:
+                                deviation_scores.append(alert["Deviation_score"])
                             real_labels.append(alert["Real_label"])
-                            attack_types.append(alert["Attack_type"])
-
-        '''for time in self.alertsCorrelated:
-            if time.left < stime - timedelta(minutes=15):
-                removeTimes.append(time)
-                continue
-
-            if interval.overlaps(time):
-                existsCorrelated = True
-                existingTimes.append(time)
-                alerts = self.alertsCorrelated[time]
-
-                for alert in alerts:
-                    gateways.extend(alert['Gateways'])
-                    deviation_scores.extend(alert["Deviation_scores"])
-                    real_labels.extend(alert["Real_labels"])
-                    attack_types.extend(alert["Attack_types"])'''
-
-        '''for time in removeTimes:
-            #self.removeTimestampFromCorrelation(time)
-            if time in existingTimes:
-                    existingTimes.remove(time)'''
-
-        alert = {
-                    "sTime": stime,
-                    "eTime": etime,
-                    "Gateways": gateways,
-                    "Deviation_scores": deviation_scores,
-                    "Real_labels": real_labels,
-                    "Attack_types": attack_types
-                    }
-
-        if timeExists or existsCorrelated:
+                            if not alert["Attack_type"] == None:
+                                attack_types.append(alert["Attack_type"])
+        if timeExists:
 
             message = {
                     "sTime": stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -166,14 +134,8 @@ class Correlation_Time:
                     }
             
             print("\nPublished message to topic", self.output)
-            print(message)
             self.mqtt_client.publish(self.output, json.dumps(message))
 
-        '''if existsCorrelated:
-            for existingTime in existingTimes:
-                self.addAlertToExistingTimestamp(existingTime, alert)
-        else:
-            self.alertsCorrelated[interval] = [alert]'''
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.

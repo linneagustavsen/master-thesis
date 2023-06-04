@@ -110,71 +110,66 @@ class Aggregation:
         etime = pd.Timestamp(etime)
         fuzzyStartTime = stime - timedelta(seconds = 2)
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
-        exists = False
-        existingTimes = []
-        overlappingAlerts = 1
+        overlappingAlerts = 0
         deviation_scores = []
         real_labels = []
         attack_types = []
         removeTimes = []
 
+        self.addAlertToGraph(gateway, interval, payload, 0)
+
         for time in self.getTimes(gateway, self.alertDB):
             #Remove old alerts from the data structure
-            if time.left < stime - timedelta(minutes = 15):
+            if time.left < stime - timedelta(minutes = 10):
                 removeTimes.append(time)
                 continue
             
             #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
             if interval.overlaps(time):
-                exists = True
-                existingTimes.append(time)
                 alerts = self.getAlerts(gateway, time, self.alertDB)
                 overlappingAlerts += len(alerts)
 
                 for alert in alerts:
-                    deviation_scores.append(alert["Deviation_score"])
+                    if not alert["Deviation_score"] == None:
+                        deviation_scores.append(alert["Deviation_score"])
                     real_labels.append(alert["Real_label"])
-                    attack_types.append(alert["Attack_type"])
+                    if not alert["Attack_type"] == None:
+                        attack_types.append(alert["Attack_type"])
+                
         
         for time in removeTimes:
             self.removeTimestampFromGraph(gateway, time, 0)
 
-        if exists:
-            for existingTime in existingTimes:
-                self.addAlertToGraph(gateway, existingTime, payload, 0)
+        print("\nOverlappingAlerts for gateway", gateway)
+        print(overlappingAlerts)
+        if overlappingAlerts > 500:
+            self.countElements(real_labels)
+            message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    'Gateway': gateway,
+                    'Deviation_scores': deviation_scores,
+                    'Real_labels': real_labels,
+                    'Attack_types': attack_types,
+                    'alertDB': self.encodeAlertsDB(self.alertDB)}
 
-            print("\nOverlappingAlerts")
-            print(overlappingAlerts)
-            if overlappingAlerts > 10:
-                self.countElements(real_labels)
-                message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'Gateway': gateway,
-                        'Deviation_scores': deviation_scores,
-                        'Real_labels': real_labels,
-                        'Attack_types': attack_types,
-                        'alertDB': self.encodeAlertsDB(self.alertDB)}
-    
-                self.mqtt_client.publish(self.outputTime, json.dumps(message))
-                print("Aggregation published to topic", self.outputTime)
+            self.mqtt_client.publish(self.outputTime, json.dumps(message))
+            print("Aggregation published to topic", self.outputTime)
         else:
-            self.addAlertToGraph(gateway, interval, payload, 0)
             print("No overlapping alerts for time interval", interval)
 
     def aggregateTimeDistribution(self, stime, etime, gateway, distribution, payload):
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
-        fuzzyStartTime = stime - timedelta(seconds = 2)
+        fuzzyStartTime = stime - timedelta(minutes = 1)
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
-        exists = False
-        existingTimes = []
-        overlappingAlerts = 1
+        overlappingAlerts = 0
         deviation_scores = []
         real_labels = []
         attack_types = []
-        distributions = [distribution]
+        distributions = []
         removeTimes = []
 
+        self.addAlertToGraph(gateway, interval, payload, 1)
         for time in self.getTimes(gateway, self.alertDBDistribution):
             #Remove old alerts from the data structure
             if time.left < stime - timedelta(minutes = 15):
@@ -183,41 +178,36 @@ class Aggregation:
             
             #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
             if interval.overlaps(time):
-                exists = True
-                existingTimes.append(time)
                 alerts = self.getAlerts(gateway, time, self.alertDBDistribution)
                 overlappingAlerts += len(alerts)
 
                 for alert in alerts:
-                    deviation_scores.append(alert["Deviation_score"])
+                    if not alert["Deviation_score"] == None:
+                        deviation_scores.append(alert["Deviation_score"])
                     real_labels.append(alert["Real_label"])
-                    attack_types.append(alert["Attack_type"])
+                    if not alert["Attack_type"] == None:
+                        attack_types.append(alert["Attack_type"])
                     distributions.append(alert["Packet_size_distribution"])
 
         for time in removeTimes:
             self.removeTimestampFromGraph(gateway, time, 1)
 
-        if exists:
-            for existingTime in existingTimes:
-                self.addAlertToGraph(gateway, existingTime, payload, 1)
+        print("\nOverlappingAlerts")
+        print(overlappingAlerts)
+        if overlappingAlerts > 2:
 
-            print("\nOverlappingAlerts")
-            print(overlappingAlerts)
-            if overlappingAlerts > 3:
+            message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    'Gateway': gateway,
+                    'Deviation_scores': deviation_scores,
+                    'Real_labels': real_labels,
+                    'Attack_types': attack_types,
+                    'Packet_size_distributions': distributions,
+                    'alertDB': self.encodeAlertsDB(self.alertDBDistribution)}
 
-                message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'Gateway': gateway,
-                        'Deviation_scores': deviation_scores,
-                        'Real_labels': real_labels,
-                        'Attack_types': attack_types,
-                        'Packet_size_distributions': distributions,
-                        'alertDB': self.encodeAlertsDB(self.alertDBDistribution)}
-    
-                self.mqtt_client.publish(self.outputDist, json.dumps(message))
-                print("Aggregation published to topic", self.outputDist)
+            self.mqtt_client.publish(self.outputDist, json.dumps(message))
+            print("Aggregation published to topic", self.outputDist)
         else:
-            self.addAlertToGraph(gateway, interval, payload, 1)
             print("No overlapping alerts for distribution for time interval", interval)
     """
         The MQTT commands are listened to and appropriate actions are taken for each.

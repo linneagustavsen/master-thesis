@@ -95,7 +95,7 @@ class Correlation_Distribution:
         gateways = [gateway]
         stime = pd.Timestamp(stime)
         etime = pd.Timestamp(etime)
-        fuzzyStartTime = stime - timedelta(seconds = 2)
+        fuzzyStartTime = stime - timedelta(seconds = 1)
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
 
         for otherGateway in self.graph.G:

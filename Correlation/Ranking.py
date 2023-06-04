@@ -198,7 +198,8 @@ class Ranking:
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsRanking.csv", "a")
             precision = self.highRankingTruePositives/self.highRankingFalsePositives 
-            alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
+            alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision")
+            alertsFile.write("\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
             alertsFile.close()
         else:
             self.alertCounter += 1

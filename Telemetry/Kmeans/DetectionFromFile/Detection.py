@@ -1,4 +1,5 @@
 from pathlib import Path
+import numpy as np
 from sklearn.cluster import KMeans
 import pandas as pd
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -37,8 +38,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KmeansDetectionTelemetry")
@@ -70,7 +70,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
     real_labels = []
 
-    attackTypes = []
+    #attackTypes = []
 
     #Loop for every minute in a week
     for i in range(math.ceil(intervalTime)):
@@ -80,20 +80,21 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
             continue
         if attackCluster["AttackCluster"][0] == 0:
             cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-            attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+            '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
 
             nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         elif attackCluster["AttackCluster"][0] == 1:
             cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-            attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
-            nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            '''attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]'''
 
             nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
         labelsForNonAttackCluster = nonAttackCluster["real_label"]
 
+        cluster = cluster.dropna()
         for label in labelsForNonAttackCluster:
             if label == 0:
                 trueNegatives += 1
@@ -105,7 +106,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
 
         labels = cluster["real_label"]
 
-        db = attackCluster["Davies-bouldin-score"][0]
+        '''db = attackCluster["Davies-bouldin-score"][0]
         attackType = ""
         #If it is a burst attack and non attack cluster is empty
         if db < DBthreshold and nonAttackClusterDiameter == 0:
@@ -117,7 +118,7 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
         elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
             attackType = "Same protocol"
         
-        attackTypes.append(attackType)
+        attackTypes.append(attackType)'''
     
         sTimeCluster.extend(sTime)
         eTimeCluster.extend(eTime)
@@ -137,22 +138,26 @@ def detectionKmeansTelemetry(start, stop, systemId, clusterFrequency, DBthreshol
         if sTimeCluster[i] < startTime:
             continue
         
-        simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
-        attackType = ""
+        
+        '''attackType = ""
         if sTimeCluster[i] < startTime + clusterFrequency:
             attackType = attackTypes[counter]
         if sTimeCluster[i] > startTime + clusterFrequency:
             counter += 1
             attackType = attackTypes[counter]
-            startTime += clusterFrequency
-
+            startTime += clusterFrequency'''
+        simulateRealTime(datetime.now(), eTimeCluster[i], attackDate)
+        if real_labels[i] == np.nan or real_labels[i] == None:
+            attack = None
+        else:
+            attack = int(real_labels[i])
         alert = {
                     "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
-                    "Real_label": int(real_labels[i]),
-                    "Attack_type": attackType
+                    "Real_label": attack,
+                    "Attack_type": None
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 

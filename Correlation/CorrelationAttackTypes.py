@@ -81,61 +81,50 @@ class Correlation_Attack_types:
         etime = pd.Timestamp(etime)
         fuzzyStartTime = stime - timedelta(minutes = 15)
         interval = pd.Interval(fuzzyStartTime, etime, closed='both')
+        
 
-        if attackType in self.alertsAttack:
-            exists = False
-            existingTimes = []
-            overlappingAlerts = 1
-            gateways = [payload.get('Gateway')]
-            deviation_scores = []
-            real_labels = []
-            removeTimes = []
+        self.addAlert(attackType, interval, payload)
 
-            for time in self.getTimes(attackType):
-                if time.left < stime - timedelta(minutes = 15):
-                    removeTimes.append(time)
-                    continue
+        overlappingAlerts = 0
+        gateways = [payload.get('Gateway')]
+        deviation_scores = []
+        real_labels = []
+        removeTimes = []
 
-                if interval.overlaps(time):
-                    exists = True
-                    existingTimes.append(time)
-                    alerts = self.getAlerts(attackType, time)
-                    overlappingAlerts += len(alerts)
+        for time in self.getTimes(attackType):
+            if time.left < stime - timedelta(minutes = 15):
+                removeTimes.append(time)
+                continue
 
-                    for alert in alerts:
-                        gateways.append(alert['Gateway'])
+            if interval.overlaps(time):
+                alerts = self.getAlerts(attackType, time)
+                overlappingAlerts += len(alerts)
+
+                for alert in alerts:
+                    gateways.append(alert['Gateway'])
+                    if not alert["Deviation_score"] == None:
                         deviation_scores.append(alert["Deviation_score"])
-                        real_labels.append(alert["Real_label"])
-    
-            for time in removeTimes:
-                self.removeTimestampFromAttackType(attackType, time)
-                if time in existingTimes:
-                    existingTimes.remove(time)
-            if exists:
-                for existingTime in existingTimes:
-                    self.addAlert(attackType, existingTime, payload)
+                    real_labels.append(alert["Real_label"])
 
-                print("\nOverlappingAlerts")
-                print(overlappingAlerts)
-                if overlappingAlerts > 10:
+        for time in removeTimes:
+            self.removeTimestampFromAttackType(attackType, time)
 
-                    message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                'Gateways': list(set(gateways)),
-                                'Deviation_scores': deviation_scores,
-                                'Real_labels': self.countElements(real_labels),
-                                'Attack_types': {attackType: overlappingAlerts}
-                                }
-                    
-                    self.mqtt_client.publish(self.output, json.dumps(message))
-                    print("\nPublished message to topic", self.output)
-                    print(message)
-            else:
-                self.addAlert(attackType, interval, payload)
-                print("No overlapping alerts for time interval", interval)
+        print("\nOverlappingAlerts on attack type", attackType)
+        print(overlappingAlerts)
+        if overlappingAlerts > 10:
+
+            message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        'Gateways': list(set(gateways)),
+                        'Deviation_scores': deviation_scores,
+                        'Real_labels': self.countElements(real_labels),
+                        'Attack_types': {attackType: overlappingAlerts}
+                        }
+            
+            self.mqtt_client.publish(self.output, json.dumps(message))
+            print("\nPublished message to topic", self.output)
         else:
-            self.addAlert(attackType, interval, payload)
-            print("No attack type of type", attackType)
+            print("No overlapping alerts for time interval", interval)
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.

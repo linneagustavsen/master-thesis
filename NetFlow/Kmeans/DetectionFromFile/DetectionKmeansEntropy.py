@@ -36,8 +36,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
+        print(systemId, "Kmeans entropy detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansEntropyDetectionNetFlow")
@@ -91,7 +90,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-        scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
             
         tn = scores["TN"][0]
         fn = scores["FN"][0]

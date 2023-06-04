@@ -3,7 +3,7 @@ interval=10
 start="2023-03-17 11:00:00"
 stop="2023-03-17 13:00:00"
 attackDate="17.03.23"
-for systemId in "stangnes-gw" "rodbergvn-gw2" "narvik-gw4" "tromso-fh-gw" "tromso-gw5" "teknobyen-gw1" "narvik-gw3" "hovedbygget-gw" "hoytek-gw2" "teknobyen-gw2" "ma2-gw" "bergen-gw3" "narvik-kv-gw" "trd-gw" "ifi2-gw5" "oslo-gw1"
+for systemId in "tromso-gw5" "teknobyen-gw1" "hoytek-gw2" "bergen-gw3" "trd-gw" "ifi2-gw5"
 do
     python3 Attack0803RunBytesDetection.py "$start" "$stop" $attackDate $systemId $interval &
     python3 Attack0803RunBytesDetectionTelemetry.py "$start" "$stop" $attackDate $systemId $interval &
@@ -32,6 +32,5 @@ do
     python3 Attack0803RunSYNEntropyDetection.py "$start" "$stop" $attackDate $systemId $interval &
     python3 Attack0803RunTopKFlows.py "$start" "$stop" $attackDate $systemId &
     python3 Attack0803RunXmasDetection.py "$start" "$stop" $attackDate $systemId &
-    sleep $((30))
+    sleep $((90))
 done
-

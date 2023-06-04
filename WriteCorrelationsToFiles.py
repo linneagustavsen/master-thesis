@@ -17,13 +17,12 @@ def writeDetectionsToFile():
     MQTT_TOPIC_ranking = 'detections/correlation'
     #Function that is called when the sensor is connected to the MQTT broker
     def on_connect(client, userdata, flags, rc):
-        s=0
-        #print(systemId, "Connected with result code "+str(rc))
+        print("Connected with result code "+str(rc))
+      
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        s=0
-        #print(systemId, "Entropy detection published to topic", MQTT_TOPIC)
+        print("Entropy detection published to topic")
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("Write to file")
@@ -31,16 +30,15 @@ def writeDetectionsToFile():
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
 
     
     alert = {
         "sTime": "WRITE"
-    }
-    mqtt_client.publish(MQTT_TOPIC_aggregation,json.dumps(alert))
-    mqtt_client.publish(MQTT_TOPIC_attackType,json.dumps(alert))
-    mqtt_client.publish(MQTT_TOPIC_distribution,json.dumps(alert))
-    mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
+        }
+    #mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
+    #mqtt_client.publish(MQTT_TOPIC_aggregation,json.dumps(alert))
+    #mqtt_client.publish(MQTT_TOPIC_attackType,json.dumps(alert))
+    #mqtt_client.publish(MQTT_TOPIC_distribution,json.dumps(alert))
+    #mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
     mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
-    mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
 writeDetectionsToFile()
