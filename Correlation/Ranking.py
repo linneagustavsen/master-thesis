@@ -7,7 +7,7 @@ from Correlation.NetworkGraph import NetworkGraph
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
-from threading import Thread
+from threading import Thread, Timer
 import json
 
 #Parameters for the MQTT connection
@@ -91,6 +91,7 @@ class Ranking:
         rankingFile.write(line)
         rankingFile.close()
 
+        print("Wrote ranking to file")
 
     def sortByAttackType(self, values):
         def priority_getter(value):
@@ -170,8 +171,6 @@ class Ranking:
                         "Attack_types": attack_types
                         }
             self.ranking.append(newAlert)
-        self.writeRankingToFile()
-        print("Wrote ranking to file")
         
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
@@ -231,6 +230,8 @@ class Ranking:
         try:
             thread = Thread(target=self.mqtt_client.loop_forever)
             thread.start()
+            thread2 = Timer(15, self.writeRankingToFile)
+            thread2.start()
             
         except:
             print("Interrupted")
