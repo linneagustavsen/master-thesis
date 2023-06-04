@@ -108,7 +108,7 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
             nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-            scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Combined.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+            scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
             tn = scores["TN"][0]
             fn = scores["FN"][0]

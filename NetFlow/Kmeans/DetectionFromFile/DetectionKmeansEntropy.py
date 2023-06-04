@@ -91,7 +91,7 @@ def detectionKmeansEntropy(start, stop, systemId, interval, DBthreshold, c0thres
         attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
 
-        scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Entropy.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
         tn = scores["TN"][0]
         fn = scores["FN"][0]
