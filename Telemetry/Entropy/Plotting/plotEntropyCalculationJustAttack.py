@@ -88,6 +88,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
 
 systems = ["teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
+systems = ["hoytek-gw2"]
 
 y_fields = ["entropy_packet_size", "entropy_rate_packet_size", "numberOfPackets", "numberOfBytes"]
 y_field_names = ["Entropy of packet size", "Entropy rate of packet size",

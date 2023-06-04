@@ -113,6 +113,8 @@ for attackDate in attackDates:
     for systemId in systems:
         print(systemId)
         for i in range(len(y_fields)):
+            if not (systemId == "ifi2-gw5" and attackDate == "17.03.23" and (y_fields[i] != "packetSizeEntropy" or y_fields[i] != "packetSizeEntropyRate" or y_fields[i] !="numberOfPackets" or y_fields[i] !="numberOfBytes")):
+                continue
             print(y_fields[i])
             for interval in intervals:
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)

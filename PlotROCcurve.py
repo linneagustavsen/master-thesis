@@ -53,6 +53,8 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
         if not Path(dataFile).exists():
             return
         data = pd.read_csv(dataFile)
+        if len(data) == 0:
+            return
         tpr = pd.to_numeric(data["TPR"],errors='coerce')
         fpr = pd.to_numeric(data["FPR"],errors='coerce')
 
@@ -84,8 +86,12 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
         dataFile = str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
 
         if not Path(dataFile).exists():
+            plt.close(fig)
             return
         data = pd.read_csv(dataFile)
+        if len(data) == 0:
+            plt.close(fig)
+            return
         tpr = pd.to_numeric(data["TPR"],errors='coerce')
         fpr = pd.to_numeric(data["FPR"],errors='coerce')
 
@@ -129,7 +135,7 @@ for attackDate in attackDates:
             print(systemId)
             makeROCcurve(y_field, "NetFlow", "Entropy", systemId, intervals, attackDate)
             
-'''
+
 y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
 print("Telemetry entropy")
 for attackDate in attackDates:
@@ -157,7 +163,7 @@ for attackDate in attackDates:
         for systemId in systems:
             print(systemId)
             makeROCcurve(y_field, "NetFlow", "Threshold", systemId, intervals, attackDate)
-
+'''
 y_fields = ["SYN"]
 print("NetFlow SYN")
 for attackDate in attackDates:
