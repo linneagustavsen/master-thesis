@@ -59,10 +59,16 @@ class Aggregation:
                 counter[element] += 1
             else:
                 counter[element] = 1
-        if counter['0'] > counter['1']:
+
+        if 1 not in counter:
             self.falsePositivesOut += 1
-        elif counter['0'] < counter['1']:
+        elif 0 not in counter:
             self.truePositivesOut += 1
+        else:
+            if counter[0] > counter[1]:
+                self.falsePositivesOut += 1
+            elif counter[0] < counter[1]:
+                self.truePositivesOut += 1
         return counter    
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
@@ -139,7 +145,6 @@ class Aggregation:
 
             print("\nOverlappingAlerts")
             print(overlappingAlerts)
-            print("\n")
             if overlappingAlerts > 10:
                 self.countElements(real_labels)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -188,7 +193,7 @@ class Aggregation:
                     real_labels.append(alert["Real_label"])
                     attack_types.append(alert["Attack_type"])
                     distributions.append(alert["Packet_size_distribution"])
-        
+
         for time in removeTimes:
             self.removeTimestampFromGraph(gateway, time, 1)
 
@@ -198,9 +203,8 @@ class Aggregation:
 
             print("\nOverlappingAlerts")
             print(overlappingAlerts)
-            print("\n")
             if overlappingAlerts > 3:
-                
+
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'Gateway': gateway,
@@ -224,8 +228,7 @@ class Aggregation:
         print("subscribed to", self.input)
 
     def on_message(self, client, userdata, msg):
-        print('Incoming message to topic {}'.format(msg.topic))
-        self.alertCounter += 1
+        #print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
         except Exception as err:
@@ -241,13 +244,15 @@ class Aggregation:
             alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
             alertsFile.close()
         else:
+            self.alertCounter += 1
             stime = payload.get('sTime')
             etime = payload.get('eTime')
             gateway = payload.get('Gateway')
             srcIP = payload.get('srcIP')
             dstIP = payload.get('dstIP')
             packetSizeDistribution = payload.get('Packet_size_distribution')
-            print(packetSizeDistribution)
+            '''print("INCOMMING DISTRIBUTION from gateway", gateway)
+            print(packetSizeDistribution)'''
 
             self.aggregateTime(stime, etime, gateway, payload)
             

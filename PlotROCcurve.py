@@ -53,6 +53,8 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
         if not Path(dataFile).exists():
             return
         data = pd.read_csv(dataFile)
+        if len(data) == 0:
+            return
         tpr = pd.to_numeric(data["TPR"],errors='coerce')
         fpr = pd.to_numeric(data["FPR"],errors='coerce')
 
@@ -84,8 +86,12 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
         dataFile = str(q) + "/" + str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
 
         if not Path(dataFile).exists():
+            plt.close(fig)
             return
         data = pd.read_csv(dataFile)
+        if len(data) == 0:
+            plt.close(fig)
+            return
         tpr = pd.to_numeric(data["TPR"],errors='coerce')
         fpr = pd.to_numeric(data["FPR"],errors='coerce')
 
@@ -116,9 +122,9 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 attackDates = ["08.03.23", "17.03.23","24.03.23"]
-y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
-            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
+'''y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
+            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
 print("NetFlow entropy")
 for attackDate in attackDates:
     print("\n")
@@ -133,9 +139,13 @@ for attackDate in attackDates:
 y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
 print("Telemetry entropy")
 for attackDate in attackDates:
+    if attackDate != "24.03.23":
+        continue
     print("\n")
     print(attackDate)
     for y_field in y_fields:
+        if y_field != "numberOfBytes":
+            continue
         print(y_field)
         for systemId in systems:
             print(systemId)
@@ -153,7 +163,7 @@ for attackDate in attackDates:
         for systemId in systems:
             print(systemId)
             makeROCcurve(y_field, "NetFlow", "Threshold", systemId, intervals, attackDate)
-
+'''
 y_fields = ["SYN"]
 print("NetFlow SYN")
 for attackDate in attackDates:

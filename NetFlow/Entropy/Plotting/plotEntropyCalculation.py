@@ -106,13 +106,15 @@ y_field_names = ["Entropy of destination IP addresses", "Entropy rate of destina
                  "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
     for systemId in systems:
         print(systemId)
         for i in range(len(y_fields)):
+            if not (systemId == "ifi2-gw5" and attackDate == "17.03.23" and (y_fields[i] != "packetSizeEntropy" or y_fields[i] != "packetSizeEntropyRate" or y_fields[i] !="numberOfPackets" or y_fields[i] !="numberOfBytes")):
+                continue
             print(y_fields[i])
             for interval in intervals:
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)

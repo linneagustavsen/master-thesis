@@ -66,15 +66,24 @@ class Ranking:
             line += str(alert['Attack_types']) + ","
             line += str(alert['Real_labels'])
         
-            
-            if alert['Real_labels']['0'] > alert['Real_labels']['1']:
+            if '1' not in alert['Real_labels']:
                 self.falsePositivesOut += 1
-            elif alert['Real_labels']['0'] < alert['Real_labels']['1']:
+            elif '0' not in alert['Real_labels']:
                 self.truePositivesOut += 1
+            else:
+                if alert['Real_labels']['0'] > alert['Real_labels']['1']:
+                    self.falsePositivesOut += 1
+                elif alert['Real_labels']['0'] < alert['Real_labels']['1']:
+                    self.truePositivesOut += 1
             if position <= 10:
-                self.highRankingFalsePositives += alert['Real_labels']['0']
-                self.highRankingTruePositives += alert['Real_labels']['1']
-                self.highRankingTotal += alert['Real_labels']['0'] + alert['Real_labels']['1']
+                if '1' not in alert['Real_labels']:
+                    self.highRankingFalsePositives += alert['Real_labels']['0']
+                elif '0' not in alert['Real_labels']:
+                    self.highRankingTruePositives += alert['Real_labels']['1']
+                else:
+                    self.highRankingFalsePositives += alert['Real_labels']['0']
+                    self.highRankingTruePositives += alert['Real_labels']['1']
+                    self.highRankingTotal += alert['Real_labels']['0'] + alert['Real_labels']['1']
 
             position +=1
         line += "\n"
@@ -175,14 +184,13 @@ class Ranking:
         print("Ranking published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
-        self.alertCounter += 1
         print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
         except Exception as err:
             print('Message sent to topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
-        
+
         if payload.get('sTime') == "WRITE":
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
@@ -193,6 +201,7 @@ class Ranking:
             alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
             alertsFile.close()
         else:
+            self.alertCounter += 1
             stime = payload.get('sTime')
             etime = payload.get('eTime')
             gateways = payload.get('Gateways')
@@ -201,11 +210,15 @@ class Ranking:
             attack_types = payload.get('Attack_types')
 
             self.rank(stime, etime, gateways, deviation_scores, real_labels, attack_types)
-
-            if real_labels['0'] > real_labels['1']:
+            if 1 not in real_labels:
                 self.falsePositivesIn += 1
-            elif real_labels['0'] < real_labels['1']:
+            elif 0 not in real_labels:
                 self.truePositivesIn += 1
+            else:
+                if real_labels['0'] > real_labels['1']:
+                    self.falsePositivesIn += 1
+                elif real_labels['0'] < real_labels['1']:
+                    self.truePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()

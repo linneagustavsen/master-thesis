@@ -30,6 +30,7 @@ def informationDistance(alpha, numberOfPacketsOfSizePi, numberOfPacketsOfSizeQi)
 
     sum1 = 0
     sum2 = 0
+    
     for i in range(len(Qi)):
         sum1 += (Pi[i]**alpha)*(Qi[i]**(1-alpha))
         sum2 += (Qi[i]**alpha)*(Pi[i]**(1-alpha))

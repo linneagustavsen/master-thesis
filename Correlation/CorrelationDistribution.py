@@ -50,11 +50,17 @@ class Correlation_Distribution:
                 counter[element] += 1
             else:
                 counter[element] = 1
-        if '0' or '1' in counter:
-            if counter['0'] > counter['1']:
+
+        if 0 or 1 in counter:
+            if 1 not in counter:
                 self.falsePositivesOut += 1
-            elif counter['0'] < counter['1']:
+            elif 0 not in counter:
                 self.truePositivesOut += 1
+            else:
+                if counter[0] > counter[1]:
+                    self.falsePositivesOut += 1
+                elif counter[0] < counter[1]:
+                    self.truePositivesOut += 1
         return counter
     
     def addElementToCounterDict(self, element, counterDict):
@@ -103,8 +109,9 @@ class Correlation_Distribution:
                             alerts = alertDB[otherGateway][time]
 
                             for alert in alerts:
-                                print(alert["Packet_size_distribution"])
-                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 2:
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 7:
+                                    print("\nINFORMATION DISTANCE at time", str(time), "and gateway", gateway, "and", otherGateway)
+                                    print(informationDistance(10, distribution, alert["Packet_size_distribution"]))
                                     timeExists = True
                                     gateways.append(otherGateway)
                                     deviation_scores.append(alert["Deviation_score"])
@@ -123,7 +130,6 @@ class Correlation_Distribution:
             
             print("\nPublished message to topic", self.output)
             print(message)
-            print("\n")
             self.mqtt_client.publish(self.output, json.dumps(message))
 
 
@@ -138,8 +144,7 @@ class Correlation_Distribution:
         print("Correlation published to topic", self.output)
     
     def on_message(self, client, userdata, msg):
-        self.alertCounter += 1
-        print('Incoming message to topic {}'.format(msg.topic))
+        #print('Incoming message to topic {}'.format(msg.topic))
         try:
             payload = json.loads(msg.payload.decode("utf-8"))
             #print(payload)
@@ -157,6 +162,7 @@ class Correlation_Distribution:
             alertsFile.close()
 
         else:
+            self.alertCounter += 1
             stime = payload.get('sTime')
             etime = payload.get('eTime')
             gateway = payload.get('Gateway')
@@ -166,16 +172,15 @@ class Correlation_Distribution:
             alertDB = payload.get('alertDB')
             alertDB = self.decodeAlertDB(alertDB)
             distributions = payload.get('Packet_size_distributions')
-
             
 
             self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
             falseLabels = 0
             trueLabels = 0
             for label in real_labels:
-                if label == '1':
+                if label == 1:
                     trueLabels += 1
-                elif label == '0':
+                elif label == 0:
                     falseLabels += 1
             if falseLabels > trueLabels:
                 self.falsePositivesIn += 1
