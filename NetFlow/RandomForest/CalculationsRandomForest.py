@@ -47,10 +47,17 @@ def calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator):
     if not modelPath.exists():
         modelPath.mkdir(parents=True)
     filename = str(modelPath) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"
+    if not Path(filename).exists():
+        print("There is no model")
+        return
     classifier_RF = pickle.load(open(filename, 'rb'))
 
     for k in range(1,9):
-        with open(str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy", 'rb') as testingFile:
+        testingFilePath = str(dsPath) + "/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ "." + str(k) + ".npy"
+        if not Path(testingFilePath).exists():
+            print("There is no data for this period")
+            continue
+        with open(testingFilePath, 'rb') as testingFile:
             testingSet = np.load(testingFile, allow_pickle=True)
         
         if len(testingSet) ==0:

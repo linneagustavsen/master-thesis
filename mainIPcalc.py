@@ -4,6 +4,7 @@ from NetFlow.RandomForest.MakeDataSet import makeDataSetNetFlow
 from NetFlow.RandomForest.MakeDataSetFields import makeDataSetNetFlowFields
 from NetFlow.RandomForest.MakeTestingDataSet import makeTestingDataSetNetFlow
 from NetFlow.RandomForest.MakeTestingDataSetFields import makeTestingDataSetNetFlowFields
+from NetFlow.RandomForest.TrainCombined import trainCombined
 from NetFlow.RandomForest.TrainFields import trainFields
 from NetFlow.Threshold.SYNCalculation import synCalculation
 from NetFlow.Threshold.XmasCalculation import xmasCalculation
@@ -83,33 +84,40 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
         testingFile = pathToRawFiles+systemId + "/"+ testingBase
 
         makeDataSetNetFlowFields(trainingFile, startRFTraining, stopRFTraining, "Training", systemId, attackDate)
-        makeTestingDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        print("Made training data set fields")
         trainFields(systemId, attackDate, estimator)
+        print("trained fields")
+        makeTestingDataSetNetFlowFields(testingFile, startRFTesting, stopRFTesting, "Testing", systemId, attackDate)
+        print("Made testing data set fields")
         calculationRandomForestNetFlowFields(systemId, attackDate, estimator)
         print("Finished Random Forest calculations on fields")
 
         for interval in intervals:
             print(interval)
 
-            makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, frequency, interval, "Training", systemId, attackDate)
+            if not (systemId == "tromso-gw5" or systemId == "teknobyen-gw1" or systemId == "hoytek-gw2" or systemId ==  "bergen-gw3" or systemId == "trd-gw" or systemId ==  "ifi2-gw5"):
+                makeDataSetNetFlow(trainingFile, startRFTraining, stopRFTraining, frequency, interval, "Training", systemId, attackDate)
+                if os.path.exists("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+                    os.remove("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+                else:
+                    print("The file NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+                print("Made training data set combined")
+                trainCombined(systemId, interval, attackDate, estimator)
+                print("trained combined")
+                if os.path.exists("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+                    os.remove("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+                else:
+                    print("The file NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+            
             makeTestingDataSetNetFlow(testingFile, startRFTesting, stopRFTesting, frequency, interval, "Testing", systemId, attackDate)
-            calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator)
-            print("Finished Random Forest calculations on all fields")
-
-            if os.path.exists("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
-                os.remove("NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
-            else:
-                print("The file NetFlow/RandomForest/DataSets/Training/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
-
+            print("Made testing data set combined")
             if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
                 os.remove("NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
             else:
                 print("The file NetFlow/RandomForest/DataSets/Testing/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
-            if os.path.exists("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
-                os.remove("NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
-            else:
-                print("The file NetFlow/RandomForest/DataSets/Training/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
+            calculationsRandomForestNetFlow(systemId, interval, attackDate, estimator)
+            print("Finished Random Forest calculations on all fields")
 
             for i in range(1,9):
                 if os.path.exists("NetFlow/RandomForest/DataSets/Testing/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy"):
@@ -127,23 +135,30 @@ def randomForestMain(trainingBase, testingBase, estimator, startRFTraining, stop
             else:
                 print("The file NetFlow/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+"."+ str(i) + ".npy does not exist") 
 
+'''strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
+           ["Mar 24 14:46:30", "Mar 24 14:55:00"], ["Mar 24 14:59:50", "Mar 24 15:15:06"], 
+           ["Mar 24 15:26:51", "Mar 24 15:39:22"], ["Mar 24 15:40:21", "Mar 24 15:47:50"], 
+           ["Mar 24 16:07:29", "Mar 24 16:19:00"], ["Mar 24 16:22:29", "Mar 24 16:29:13"],
+           ["Mar 24 16:29:53", "Mar 24 16:49:50"], ["Mar 24 16:53:22", "Mar 24 17:09:39"],
+           ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
+attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
+        "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]'''
 #Attack number 3
 baseFile="2023-03-24_14-18-sorted.rw"         
-systems = ["bergen-gw3", "hoytek-gw2", "hovedbygget-gw", "trd-gw", "teknobyen-gw2", "teknobyen-gw1", "ifi2-gw5", 
-            "oslo-gw1", "tromso-gw5", "stangnes-gw", "rodbergvn-gw2", "narvik-kv-gw", "narvik-gw3", "tromso-fh-gw",
-            "ma2-gw", "narvik-gw4"]
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+            "oslo-gw1"]
 start = "2023-03-24 14:00:00"
 stop = "2023-03-24 18:00:00"
 frequency = timedelta(minutes = 1)
-interval = timedelta(minutes = 5)
 pathToRawFiles="/data/master-dump/fresh-netflow-data/master-dump/"
 attackDate="24.03.23"
 
-main(baseFile, systems, start, stop, frequency, pathToRawFiles, attackDate)       
+#main(baseFile, systems, start, stop, frequency, pathToRawFiles, attackDate)       
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 clusterFrequency = timedelta(minutes = 15)
-kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, intervals, pathToRawFiles, attackDate)  
+#kmeansMain(baseFile, systems, start, stop, clusterFrequency, frequency, intervals, pathToRawFiles, attackDate)  
 
 estimator = 100
 trainingBase="2023-03-17_11-14-sorted.rw" 

@@ -28,10 +28,12 @@ ytelse_trd6 = IPv6Addr('2001:700:0:4527::2')
 
 trondheim_mp = IPv4Addr('128.39.65.26')
 trondheim_mp6 = IPv6Addr('2001:700:0:452a::26')
-ip_addresses = [amazonuw3_mp, amazonff2_mp, amazonie2_mp, amazonsth2_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
-ipv6_addresses = [amazonuw3_mp6, amazonff2_mp6, amazonie2_mp6, amazonsth2_mp6, ytelse_brg6, ytelse_osl6, ytelse_tos6, ytelse_trd6]
+'''ip_addresses = [amazonuw3_mp, amazonff2_mp, amazonie2_mp, amazonsth2_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
+ipv6_addresses = [amazonuw3_mp6, amazonff2_mp6, amazonie2_mp6, amazonsth2_mp6, ytelse_brg6, ytelse_osl6, ytelse_tos6, ytelse_trd6]'''
 victim = trondheim_mp
 victim6 = trondheim_mp6
+ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
+ipv6_addresses = [ytelse_brg6, ytelse_osl6, ytelse_tos6, ytelse_trd6]
 
 '''
     Checks whether a flow is an attack flow or not
@@ -42,10 +44,6 @@ victim6 = trondheim_mp6
                     boolean, whether the flow is an attack flow or not
 '''
 def isAttackFlow(sip, dip, start, end):
-    if (sip in ipv6_addresses and dip == victim6) or (sip == victim6 and dip in ipv6_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses) or (sip in ip_addresses and dip == victim6) or (sip == victim6 and dip in ip_addresses): 
-        print("MATCH ON IPv6 ADDRESSES:")
-        print(sip)
-        print(dip)
     if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses) or (sip in ipv6_addresses and dip == victim6) or 
         (sip == victim6 and dip in ipv6_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses) or 
         (sip in ip_addresses and dip == victim6) or (sip == victim6 and dip in ip_addresses)) and isAttack(start, end):
