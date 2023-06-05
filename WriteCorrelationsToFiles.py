@@ -4,7 +4,7 @@ import paho.mqtt.client as mqtt
 
 
 
-def writeDetectionsToFile():
+def writeDetectionsToFile(module):
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -35,10 +35,18 @@ def writeDetectionsToFile():
     alert = {
         "sTime": "WRITE"
         }
-    mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
-    #mqtt_client.publish(MQTT_TOPIC_aggregation,json.dumps(alert))
-    #mqtt_client.publish(MQTT_TOPIC_attackType,json.dumps(alert))
-    #mqtt_client.publish(MQTT_TOPIC_distribution,json.dumps(alert))
-    #mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
-    #mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
-writeDetectionsToFile()
+    if module == "ranking":
+        mqtt_client.publish(MQTT_TOPIC_ranking,json.dumps(alert))
+    elif module == "aggregation":
+        mqtt_client.publish(MQTT_TOPIC_aggregation,json.dumps(alert))
+    elif module == "attackType":
+        mqtt_client.publish(MQTT_TOPIC_attackType,json.dumps(alert))
+    elif module == "distribution":
+        mqtt_client.publish(MQTT_TOPIC_distribution,json.dumps(alert))
+    elif module == "ips":
+        mqtt_client.publish(MQTT_TOPIC_ips,json.dumps(alert))
+    elif module == "time":
+        mqtt_client.publish(MQTT_TOPIC_time,json.dumps(alert))
+
+for module in ["ranking", "aggregation", "attackType", "distribution", "ips", "time"]:
+    writeDetectionsToFile(module)

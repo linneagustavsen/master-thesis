@@ -120,7 +120,7 @@ class Correlation_Attack_types:
 
             print("\nOverlappingAlerts on attack type", attackType)
             print(overlappingAlerts)
-            if overlappingAlerts > 40 and (attackType != "Different protocols" or attackType != "Low-Rate"):
+            if overlappingAlerts > 40 and (attackType == "SYN Flood" or attackType == "Flooding"):
 
                 message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -132,7 +132,7 @@ class Correlation_Attack_types:
                 
                 self.mqtt_client.publish(self.output, json.dumps(message))
                 print("\nPublished message to topic", self.output)
-            elif overlappingAlerts > 5:
+            elif overlappingAlerts >=3 and attackType != "SYN Flood" and attackType != "Flooding":
                 message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'Gateways': list(set(gateways)),
@@ -199,7 +199,7 @@ class Correlation_Attack_types:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            self.mqtt_client.loop_forever()
+            self.mqtt_client.loop_start()
             thread2 = Timer(60, self.correlateAttackTypes)
             thread2.start()
             

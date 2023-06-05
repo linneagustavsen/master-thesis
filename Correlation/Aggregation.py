@@ -153,7 +153,7 @@ class Aggregation:
             if not overlappingAlerts == 0:
                 print("\nOverlappingAlerts for gateway", gateway)
                 print(overlappingAlerts)
-            if overlappingAlerts > 100:
+            if overlappingAlerts > 10:
                 self.countElements(real_labels)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -283,7 +283,7 @@ class Aggregation:
 
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            self.mqtt_client.loop_forever()
+            self.mqtt_client.loop_start()
             thread2 = Timer(60, self.aggregateTime)
             thread2.start()
             

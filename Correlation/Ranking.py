@@ -240,7 +240,7 @@ class Ranking:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            self.mqtt_client.loop_forever()
+            self.mqtt_client.loop_start()
             thread2 = Timer(60, self.writeRankingToFile)
             thread2.start()
             

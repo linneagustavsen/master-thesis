@@ -54,42 +54,49 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
 
-    alerts = pd.read_csv("Calculations"+fileString+"/RandomForest/NetFlow/Alerts.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-    sTime = pd.to_datetime(alerts["sTime"])
-    eTime = pd.to_datetime(alerts["eTime"])
+    alertFile ="Calculations"+fileString+"/RandomForest/NetFlow/Alerts.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv"
+    counter = 0
+    countChunks = 0
+    for alerts in pd.read_csv(alertFile, chunksize=100):
+        countChunks += 1
+        sTime = pd.to_datetime(alerts["sTime"])
+        eTime = pd.to_datetime(alerts["eTime"])
 
-    '''srcPort = alerts["srcPort"]
-    dstPort = alerts["dstPort"]
-    protocol = alerts["protocol"]'''
-    real_label = alerts["real_label"]
+        '''srcPort = alerts["srcPort"]
+        dstPort = alerts["dstPort"]
+        protocol = alerts["protocol"]'''
+        real_label = alerts["real_label"]
 
-    for i in range(len(sTime)):
-        sTime[i] = sTime[i].replace(tzinfo=None)
-        eTime[i] = eTime[i].replace(tzinfo=None)
-        if eTime[i] > stopTime:
-            break
-        if sTime[i] < startTime:
-            continue
-        simulateRealTime(datetime.now(), sTime[i], attackDate)
-        alert = {
-                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "Gateway": systemId,
-                "Deviation_score": None,
-                "Real_label": int(real_label[i]),
-                "Attack_type": ""
-            }
-        '''alert = {
-                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "Gateway": systemId,
-                "srcIP":testingMeasurements[i][0],
-                "dstIP": testingMeasurements[i][1],
-                "srcPort": srcPort[i],
-                "dstPort": dstPort[i],
-                "Protocol": protocol[i],
-                "Deviation_score": None,
-                "Real_label": int(real_label[i]),
-                "Attack_type": ""
-            }'''
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+        for i in range(len(sTime)):
+            sTime[counter] = sTime[counter].replace(tzinfo=None)
+            eTime[counter] = eTime[counter].replace(tzinfo=None)
+            if eTime[counter] > stopTime:
+                break
+            if sTime[counter] < startTime:
+                counter += 1
+                continue
+            simulateRealTime(datetime.now(), sTime[counter], attackDate)
+            alert = {
+                    "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": None,
+                    "Real_label": int(real_label[counter]),
+                    "Attack_type": ""
+                }
+            '''alert = {
+                    "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "srcIP":testingMeasurements[counter][0],
+                    "dstIP": testingMeasurements[counter][1],
+                    "srcPort": srcPort[counter],
+                    "dstPort": dstPort[counter],
+                    "Protocol": protocol[counter],
+                    "Deviation_score": None,
+                    "Real_label": int(real_label[counter]),
+                    "Attack_type": ""
+                }'''
+            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            counter += 1
+        counter = 100*countChunks

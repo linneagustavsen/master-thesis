@@ -122,7 +122,7 @@ class Correlation_Time:
                             real_labels.append(alert["Real_label"])
                             if not alert["Attack_type"] == None:
                                 attack_types.append(alert["Attack_type"])
-        if timeExists:
+        if timeExists and len(gateways) > 2:
 
             message = {
                     "sTime": stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -196,7 +196,8 @@ class Correlation_Time:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            self.mqtt_client.loop_forever()
+            thread = Thread(target=self.mqtt_client.loop_forever)
+            thread.start()
             
         except:
             print("Interrupted")

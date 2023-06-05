@@ -109,9 +109,9 @@ class Correlation_Distribution:
                             alerts = alertDB[otherGateway][time]
 
                             for alert in alerts:
-                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 4:
-                                    print("\nINFORMATION DISTANCE at time", str(time), "and gateway", gateway, "and", otherGateway)
-                                    print(informationDistance(10, distribution, alert["Packet_size_distribution"]))
+                                print("\nINFORMATION DISTANCE at time", str(time), "and gateway", gateway, "and", otherGateway)
+                                print(informationDistance(10, distribution, alert["Packet_size_distribution"]))
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 7:
                                     timeExists = True
                                     gateways.append(otherGateway)
                                     deviation_scores.append(alert["Deviation_score"])
@@ -189,7 +189,8 @@ class Correlation_Distribution:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            self.mqtt_client.loop_forever()
+            thread = Thread(target=self.mqtt_client.loop_forever)
+            thread.start()
             
         except:
             print("Interrupted")

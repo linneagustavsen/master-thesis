@@ -35,7 +35,8 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
 
     #Function that is called when the sensor publish something to a MQTT topic
     def on_publish(client, userdata, result):
-        print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
+        s=0
+        #print(systemId, "Kmeans combined detection published to topic", MQTT_TOPIC)
 
     #Connects to the MQTT broker with password and username
     mqtt_client = mqtt.Client("KMeansCombinedDetectionNetFlow")
@@ -103,9 +104,9 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
                 elif label == 1:
                     falseNegatives += 1      
         else:
-            cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-            attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+            clusterFile ="Calculations"+fileString+"/Kmeans/NetFlow/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv"
+            '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
 
             scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
@@ -113,85 +114,91 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             fn = scores["FN"][0]
             trueNegatives += tn
             falseNegatives += fn
+        counter = 0
+        countClusters = 0
+        for cluster in pd.read_csv(clusterFile, chunksize=100):
+            countClusters += 1
+            sTimeCluster = pd.to_datetime(cluster["sTime"])
+            eTimeCluster = pd.to_datetime(cluster["eTime"])
+
+            '''srcPort = cluster["srcPort"]
+            dstPort = cluster["dstPort"]
+            protocol = cluster["protocol"]'''
+
+            real_labels = cluster["real_label"]
+
+            '''db = attackCluster["Davies-bouldin-score"][0]
+            attackType = ""
+            #If it is a burst attack and non attack cluster is empty
+            if db < DBthreshold and nonAttackClusterDiameter == 0:
+                attackType = "Same protocol"
+            #If there is no burst and attack cluster is less compact than normal traffic
+            elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
+                attackType = "Different protocols"
+            #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
+            elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
+                attackType = "Same protocol"
+            
+            attackTypes.append(attackType)
         
-        sTime = pd.to_datetime(cluster["sTime"])
-        eTime = pd.to_datetime(cluster["eTime"])
+            sTimeCluster.extend(sTime)
+            eTimeCluster.extend(eTime)
+            srcPortsCluster.extend(srcPort)
+            dstPortsCluster.extend(dstPort)
+            protocolCluster.extend(protocol)
+            real_labels.extend(labels)'''
 
-        '''srcPort = cluster["srcPort"]
-        dstPort = cluster["dstPort"]
-        protocol = cluster["protocol"]'''
-
-        labels = cluster["real_label"]
-
-        '''db = attackCluster["Davies-bouldin-score"][0]
-        attackType = ""
-        #If it is a burst attack and non attack cluster is empty
-        if db < DBthreshold and nonAttackClusterDiameter == 0:
-            attackType = "Same protocol"
-        #If there is no burst and attack cluster is less compact than normal traffic
-        elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
-            attackType = "Different protocols"
-        #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
-        elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
-            attackType = "Same protocol"
-        
-        attackTypes.append(attackType)'''
     
-        sTimeCluster.extend(sTime)
-        eTimeCluster.extend(eTime)
-        '''srcPortsCluster.extend(srcPort)
-        dstPortsCluster.extend(dstPort)
-        protocolCluster.extend(protocol)'''
-        real_labels.extend(labels)
 
+            starting = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+            stopping = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+            for i in range(len(sTimeCluster)):
+                sTimeCluster[counter] = sTimeCluster[counter].replace(tzinfo=None)
+                eTimeCluster[counter] = eTimeCluster[counter].replace(tzinfo=None)
+                if eTimeCluster[counter] > stopping:
+                    break
+                if sTimeCluster[counter] < starting:
+                    counter += 1
+                    continue
+                
+                '''attackType = ""
+                if sTimeCluster[counter] < startTime + clusterFrequency:
+                    attackType = attackTypes[counter]
+                if sTimeCluster[counter] > startTime + clusterFrequency:
+                    counter += 1
+                    attackType = attackTypes[counter]
+                    startTime += clusterFrequency'''
+                simulateRealTime(datetime.now(), sTimeCluster[counter], attackDate)
+                alert = {
+                            "sTime": sTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "eTime": eTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "Gateway": systemId,
+                            "Deviation_score": None,
+                            "Real_label": int(real_labels[counter]),
+                            "Attack_type": ""
+                        }
+                '''alert = {
+                            "sTime": sTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "eTime": eTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "Gateway": systemId,
+                            "srcIP":measurements[counter][0],
+                            "dstIP": measurements[counter][1],
+                            "srcPort": srcPortsCluster[counter],
+                            "dstPort": dstPortsCluster[counter],
+                            "Protocol": protocolCluster[counter],
+                            "Deviation_score": None,
+                            "Real_label": int(real_labels[counter]),
+                            "Attack_type": attackType
+                        }'''
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
+                if real_labels[counter]:
+                    truePositives += 1
+                elif not real_labels[counter]:
+                    falsePositives += 1
+                counter += 1
+            counter = 100*countClusters
         startTime += clusterFrequency
-
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    counter = 0
-    for i in range(len(sTimeCluster)):
-        sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
-        eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        if eTimeCluster[i] > stopTime:
-            break
-        if sTimeCluster[i] < startTime:
-            continue
-        
-        '''attackType = ""
-        if sTimeCluster[i] < startTime + clusterFrequency:
-            attackType = attackTypes[counter]
-        if sTimeCluster[i] > startTime + clusterFrequency:
-            counter += 1
-            attackType = attackTypes[counter]
-            startTime += clusterFrequency'''
-        simulateRealTime(datetime.now(), sTimeCluster[i], attackDate)
-        alert = {
-                    "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "Gateway": systemId,
-                    "Deviation_score": None,
-                    "Real_label": int(real_labels[i]),
-                    "Attack_type": ""
-                }
-        '''alert = {
-                    "sTime": sTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": eTimeCluster[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "Gateway": systemId,
-                    "srcIP":measurements[i][0],
-                    "dstIP": measurements[i][1],
-                    "srcPort": srcPortsCluster[i],
-                    "dstPort": dstPortsCluster[i],
-                    "Protocol": protocolCluster[i],
-                    "Deviation_score": None,
-                    "Real_label": int(real_labels[i]),
-                    "Attack_type": attackType
-                }'''
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-
-        if real_labels[i]:
-            truePositives += 1
-        elif not real_labels[i]:
-            falsePositives += 1
     sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'

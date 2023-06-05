@@ -50,59 +50,63 @@ def xmasCalculation(start, stop, systemId, attackDate):
         fileString = "1703"
     elif attackDate == "24.03.23":
         fileString = "2403"
-    data = pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/Xmas.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    counter = 0
+    countChunks = 0
+    for data in pd.read_csv("Calculations"+fileString+"/Threshold/NetFlow/Xmas.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", chunksize=100):
+        countChunks += 1
+        sTime = pd.to_datetime(data["sTime"])
+        eTime = pd.to_datetime(data["eTime"])
 
-    sTime = pd.to_datetime(data["sTime"])
-    eTime = pd.to_datetime(data["eTime"])
+        '''srcPort = data["srcPort"]
+        dstPort = data["dstPort"]
+        protocol = data["protocol"]'''
+        real_label = data["real_label"]
 
-    '''srcPort = data["srcPort"]
-    dstPort = data["dstPort"]
-    protocol = data["protocol"]'''
-    real_label = data["real_label"]
+        truePositives = 0
+        falsePositives = 0
 
-    truePositives = 0
-    falsePositives = 0
+        startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+        stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+        #Loop through all the flow records in the input file
+        for i in range(len(sTime)):
+            sTime[counter] = sTime[counter].replace(tzinfo=None)
+            eTime[counter] = eTime[counter].replace(tzinfo=None)
+            if eTime[counter] > stopTime:
+                break
+            if sTime[counter] < startTime:
+                counter += 1
+                continue
 
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    #Loop through all the flow records in the input file
-    for i in range(len(sTime)):
-        sTime[i] = sTime[i].replace(tzinfo=None)
-        eTime[i] = eTime[i].replace(tzinfo=None)
-        if eTime[i] > stopTime:
-            break
-        if sTime[i] < startTime:
-            continue
-
-        attack = real_label[i]
-        simulateRealTime(datetime.now(), sTime[i], attackDate)
-        alert = {
-                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "Gateway": systemId,
-                "Deviation_score": None,
-                "Real_label": int(attack),
-                "Attack_type": "Xmas"
-                }
-        '''alert = {
-                "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                "Gateway": systemId,
-                "Deviation_score": None,
-                "srcIP": int(rec.sip),
-                "dstIP": int(rec.dip),
-                "srcPort": int(srcPort[i]),
-                "dstPort": int(dstPort[i]),
-                #"Protocol": int(protocol[i]),
-                "Real_label": int(attack),
-                "Attack_type": "Xmas"
-                }'''
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-        print(attack)
-        if attack:
-            truePositives += 1
-        elif not attack:
-            falsePositives += 1
+            attack = real_label[counter]
+            simulateRealTime(datetime.now(), sTime[counter], attackDate)
+            alert = {
+                    "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": None,
+                    "Real_label": int(attack),
+                    "Attack_type": "Xmas"
+                    }
+            '''alert = {
+                    "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": None,
+                    "srcIP": int(rec.sip),
+                    "dstIP": int(rec.dip),
+                    "srcPort": int(srcPort[counter]),
+                    "dstPort": int(dstPort[counter]),
+                    #"Protocol": int(protocol[counter]),
+                    "Real_label": int(attack),
+                    "Attack_type": "Xmas"
+                    }'''
+            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            if attack:
+                truePositives += 1
+            elif not attack:
+                falsePositives += 1
+            counter += 1
+        counter = 100*countChunks
     sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'

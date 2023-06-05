@@ -55,7 +55,7 @@ def detectionRandomForestEntropyTelemetry(start, stop, systemId, interval, attac
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
     alerts = pd.read_csv("Calculations"+fileString+"/RandomForest/Telemetry/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-
+    alerts = alerts.dropna()
     sTime = pd.to_datetime(alerts["sTime"])
     eTime = pd.to_datetime(alerts["eTime"])
 
@@ -68,6 +68,10 @@ def detectionRandomForestEntropyTelemetry(start, stop, systemId, interval, attac
             break
         if sTime[i] < startTime:
             continue
+        if real_label[i] == np.nan or real_label[i] == None:
+            attack = None
+        else:
+            attack = int(real_label[i])
         simulateRealTime(datetime.now(), eTime[i], attackDate)
 
         alert = {
@@ -75,7 +79,7 @@ def detectionRandomForestEntropyTelemetry(start, stop, systemId, interval, attac
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "Gateway": systemId,
                 "Deviation_score": None,
-                "Real_label": int(real_label[i]),
+                "Real_label": attack,
                 "Attack_type": "Flooding"
             }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))

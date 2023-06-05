@@ -68,8 +68,11 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
         fileString = "1703"
     elif attackDate == "24.03.23":
         fileString = "2403"
-    data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-
+    
+    
+    data =  pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", 
+                       usecols=["sTime","eTime", "dstEntropy", "dstEntropyRate", "real_label"])
+        
     sTime = pd.to_datetime(data["sTime"])
     eTime = pd.to_datetime(data["eTime"])
 
@@ -77,29 +80,30 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
     dstEntropy = data["dstEntropy"]
     dstEntropyRate = data["dstEntropyRate"]
 
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-    sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
-    eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
-   
-    attackIntervals = []
-    
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-    for i in range(len(sTimeAttacks)):
-        if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            continue
-        elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            attackIntervals.remove(lastInterval)
-            lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
-            attackIntervals.append(lastInterval)
+    if attackDate != "24.03.23":
+        attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
+        eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
+        attackIntervals = []
         
-        elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            attackIntervals.remove(lastInterval)
-            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
-            attackIntervals.append(lastInterval)
-        else:
-            lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
-            attackIntervals.append(lastInterval)
-
+        lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+        for i in range(len(sTimeAttacks)):
+            if sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+                continue
+            elif sTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+                attackIntervals.remove(lastInterval)
+                lastInterval = pd.Interval(lastInterval.left, eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+                attackIntervals.append(lastInterval)
+            
+            elif eTimeAttacks[i].replace(second=0).replace(tzinfo=None) in lastInterval:
+                attackIntervals.remove(lastInterval)
+                lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
+                attackIntervals.append(lastInterval)
+            else:
+                lastInterval = pd.Interval(sTimeAttacks[i].replace(second=0).replace(tzinfo=None), eTimeAttacks[i].replace(second=0).replace(tzinfo=None), closed="both")
+                attackIntervals.append(lastInterval)
+    else:
+        real_labels = data["real_label"]
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
@@ -121,11 +125,13 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
             break
         if sTime[i] < startTime:
             continue
-
-        attack = False
-        for timeInterval in attackIntervals:
-            if sTime[i] in timeInterval or eTime[i] in timeInterval:
-                attack = True
+        if attackDate != "24.03.23":
+            attack = False
+            for timeInterval in attackIntervals:
+                if sTime[i] in timeInterval or eTime[i] in timeInterval:
+                    attack = True
+        else:
+            attack = real_labels[i]
         if i >=windowSize:
             change = dstEntropy[i] - np.nanmean(dstEntropy[i-windowSize: i-1])
             change_r = dstEntropyRate[i] - np.nanmean(dstEntropyRate[i-windowSize: i-1])

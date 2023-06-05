@@ -85,6 +85,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
         if eTime[i] > stopTime:
             break
         if sTime[i] < startTime:
+            i += 1
             continue
         
         attack = real_label[i]
@@ -128,6 +129,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, attackDate):
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
+
     sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
