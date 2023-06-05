@@ -184,8 +184,7 @@ class Correlation_IPs:
 
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            thread = Thread(target=self.mqtt_client.loop_forever)
-            thread.start()
+            self.mqtt_client.loop_forever()
             
         except:
             print("Interrupted")

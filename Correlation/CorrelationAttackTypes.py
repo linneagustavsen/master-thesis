@@ -54,14 +54,14 @@ class Correlation_Attack_types:
                 counter[element] = 1
   
         if 1 not in counter:
-            self.falsePositivesOut += 1
+            self.falsePositivesOut += counter[0]
         elif 0 not in counter:
-            self.truePositivesOut += 1
+            self.truePositivesOut += counter[1]
         else:
             if counter[0] > counter[1]:
-                self.falsePositivesOut += 1
+                self.falsePositivesOut += counter[0]
             elif counter[0] < counter[1]:
-                self.truePositivesOut += 1
+                self.truePositivesOut += counter[1]
         return counter
 
 
@@ -84,28 +84,29 @@ class Correlation_Attack_types:
         del self.alertsAttack[attackType][interval]
 
     def correlateAttackTypes(self):
-        if self.alertCounter == self.lastAlertCounter:
-            thread2 = Timer(60, self.aggregateTime)
+        if self.alertCounter == self.lastAlertCounter or self.alertCounter == 0:
+            thread2 = Timer(60, self.correlateAttackTypes)
             thread2.start()
             return
         stime = self.startTime
         etime = self.startTime + timedelta(seconds=60)
         interval = pd.Interval(stime, etime, closed='both')
-
-        for attackType in self.alertsAttack:
+        attackTypesDb = dict(self.alertsAttack)
+        for attackType in attackTypesDb:
             overlappingAlerts = 0
             gateways = []
             deviation_scores = []
             real_labels = []
             removeTimes = []
-
-            for time in self.getTimes(attackType):
+	    
+            times = list(self.getTimes(attackType).keys())
+            for time in times:
                 if time.left < stime - timedelta(minutes = 15):
                     removeTimes.append(time)
                     continue
 
                 if interval.overlaps(time):
-                    alerts = self.getAlerts(attackType, time)
+                    alerts = list(self.getAlerts(attackType, time))
                     overlappingAlerts += len(alerts)
 
                     for alert in alerts:
@@ -119,8 +120,19 @@ class Correlation_Attack_types:
 
             print("\nOverlappingAlerts on attack type", attackType)
             print(overlappingAlerts)
-            if overlappingAlerts > 10:
+            if overlappingAlerts > 40 and (attackType != "Different protocols" or attackType != "Low-Rate"):
 
+                message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            'Gateways': list(set(gateways)),
+                            'Deviation_scores': deviation_scores,
+                            'Real_labels': self.countElements(real_labels),
+                            'Attack_types': {attackType: overlappingAlerts}
+                            }
+                
+                self.mqtt_client.publish(self.output, json.dumps(message))
+                print("\nPublished message to topic", self.output)
+            elif overlappingAlerts > 5:
                 message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'Gateways': list(set(gateways)),
@@ -187,8 +199,7 @@ class Correlation_Attack_types:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            thread = Thread(target=self.mqtt_client.loop_forever)
-            thread.start()
+            self.mqtt_client.loop_forever()
             thread2 = Timer(60, self.correlateAttackTypes)
             thread2.start()
             

@@ -48,6 +48,10 @@ class Ranking:
             self.fileString = "2403"
         
     def writeRankingToFile(self):
+        if self.alertCounter == self.lastAlertCounter or self.alertCounter == 0:
+            thread2 = Timer(60, self.writeRankingToFile)
+            thread2.start()
+            return
         self.numberOfRankings += 1
         p = Path('Detections' + self.fileString)
         q = p / 'Correlation' 
@@ -57,7 +61,8 @@ class Ranking:
         rankingFile.write("Position,sTime,eTime,Gateways,Deviation_score,Attack_type,Real_labels")
         line = ""
         position = 0
-        for alert in self.ranking:
+        alerts = list(self.ranking)
+        for alert in alerts:
             line += "\n"
             line += str(position) + ","
             line += alert['sTime'].strftime("%Y-%m-%dT%H:%M:%SZ") + ","
@@ -91,8 +96,10 @@ class Ranking:
         line += "\n"
         rankingFile.write(line)
         rankingFile.close()
-
         print("Wrote ranking to file")
+        self.lastAlertCounter = self.alertCounter
+        thread2 = Timer(60, self.writeRankingToFile)
+        thread2.start()
 
     def sortByAttackType(self, values):
         def priority_getter(value):
@@ -118,10 +125,6 @@ class Ranking:
         return sorted(values, key=priority_getter)
 
     def rank(self, stime, etime, gateways, deviation_scores, real_labels, attack_types):
-        if self.alertCounter == self.lastAlertCounter:
-            thread2 = Timer(60, self.aggregateTime)
-            thread2.start()
-            return
         deviation_scores = list(filter(lambda x: x is not None, deviation_scores))
 
         stime = datetime.strptime(stime, "%Y-%m-%dT%H:%M:%SZ")
@@ -138,7 +141,7 @@ class Ranking:
                             "sTime": stime,
                             "eTime": etime,
                             "Gateways": gateways,
-                            "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
+                            "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": np.nanstd(deviation_scores)},
                             "Real_labels": real_labels,
                             "Attack_types": attack_types
                             }
@@ -162,7 +165,7 @@ class Ranking:
                         "sTime": stime,
                         "eTime": etime,
                         "Gateways": gateways,
-                        "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": statistics.stdev(deviation_scores)},
+                        "Deviation_score": {"mean": np.nanmean(deviation_scores), "standard_deviation": np.nanstd(deviation_scores)},
                         "Real_labels": real_labels,
                         "Attack_types": attack_types
                         }
@@ -176,9 +179,6 @@ class Ranking:
                         "Attack_types": attack_types
                         }
             self.ranking.append(newAlert)
-        self.alertCounter = self.alertCounter
-        thread2 = Timer(60, self.writeRankingToFile)
-        thread2.start()
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
     """
@@ -240,8 +240,7 @@ class Ranking:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            thread = Thread(target=self.mqtt_client.loop_forever)
-            thread.start()
+            self.mqtt_client.loop_forever()
             thread2 = Timer(60, self.writeRankingToFile)
             thread2.start()
             

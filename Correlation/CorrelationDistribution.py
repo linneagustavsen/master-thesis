@@ -53,14 +53,14 @@ class Correlation_Distribution:
 
         if 0 or 1 in counter:
             if 1 not in counter:
-                self.falsePositivesOut += 1
+                self.falsePositivesOut += counter[0]
             elif 0 not in counter:
-                self.truePositivesOut += 1
+                self.truePositivesOut += counter[1]
             else:
                 if counter[0] > counter[1]:
-                    self.falsePositivesOut += 1
+                    self.falsePositivesOut += counter[0]
                 elif counter[0] < counter[1]:
-                    self.truePositivesOut += 1
+                    self.truePositivesOut += counter[1]
         return counter
     
     def addElementToCounterDict(self, element, counterDict):
@@ -109,7 +109,7 @@ class Correlation_Distribution:
                             alerts = alertDB[otherGateway][time]
 
                             for alert in alerts:
-                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 7:
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 4:
                                     print("\nINFORMATION DISTANCE at time", str(time), "and gateway", gateway, "and", otherGateway)
                                     print(informationDistance(10, distribution, alert["Packet_size_distribution"]))
                                     timeExists = True
@@ -175,17 +175,11 @@ class Correlation_Distribution:
             
 
             self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
-            falseLabels = 0
-            trueLabels = 0
             for label in real_labels:
                 if label == 1:
-                    trueLabels += 1
+                    self.truePositivesIn += 1
                 elif label == 0:
-                    falseLabels += 1
-            if falseLabels > trueLabels:
-                self.falsePositivesIn += 1
-            elif falseLabels < trueLabels:
-                self.truePositivesIn += 1
+                    self.falsePositivesIn += 1
 
     def start(self):
         self.mqtt_client = mqtt.Client()
@@ -195,8 +189,7 @@ class Correlation_Distribution:
         
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            thread = Thread(target=self.mqtt_client.loop_forever)
-            thread.start()
+            self.mqtt_client.loop_forever()
             
         except:
             print("Interrupted")

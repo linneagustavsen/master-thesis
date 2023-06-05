@@ -68,14 +68,14 @@ class Aggregation:
                 counter[element] = 1
 
         if 1 not in counter:
-            self.falsePositivesOut += 1
+            self.falsePositivesOut += counter[0]
         elif 0 not in counter:
-            self.truePositivesOut += 1
+            self.truePositivesOut += counter[1]
         else:
             if counter[0] > counter[1]:
-                self.falsePositivesOut += 1
+                self.falsePositivesOut += counter[0]
             elif counter[0] < counter[1]:
-                self.truePositivesOut += 1
+                self.truePositivesOut += counter[1]
         return counter    
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
@@ -106,14 +106,15 @@ class Aggregation:
         newAlertDB = {}
         for gateway in alertDB:
             newAlertDB[gateway] = {}
-            for time in alertDB[gateway]:
+            times = list(alertDB[gateway].keys())
+            for time in times:
                 start = time.left.strftime("%Y-%m-%dT%H:%M:%SZ")
                 end = time.right.strftime("%Y-%m-%dT%H:%M:%SZ")
                 newAlertDB[gateway][str(str(start)+ "," + str(end))] = alertDB[gateway][time]
         return newAlertDB
     
     def aggregateTime(self):
-        if self.alertCounter == self.lastAlertCounter:
+        if self.alertCounter == self.lastAlertCounter or self.alertCounter == 0:
             thread2 = Timer(60, self.aggregateTime)
             thread2.start()
             return
@@ -128,7 +129,8 @@ class Aggregation:
             real_labels = []
             attack_types = []
             removeTimes = []
-            for time in self.getTimes(gateway, self.alertDB):
+            times = list(self.getTimes(gateway, self.alertDB).keys())
+            for time in times:
                 #Remove old alerts from the data structure
                 if time.left < stime - timedelta(minutes = 10):
                     removeTimes.append(time)
@@ -136,7 +138,7 @@ class Aggregation:
                 
                 #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
                 if interval.overlaps(time):
-                    alerts = self.getAlerts(gateway, time, self.alertDB)
+                    alerts = list(self.getAlerts(gateway, time, self.alertDB))
                     overlappingAlerts += len(alerts)
 
                     for alert in alerts:
@@ -151,7 +153,7 @@ class Aggregation:
             if not overlappingAlerts == 0:
                 print("\nOverlappingAlerts for gateway", gateway)
                 print(overlappingAlerts)
-            if overlappingAlerts > 500:
+            if overlappingAlerts > 100:
                 self.countElements(real_labels)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -181,7 +183,8 @@ class Aggregation:
         removeTimes = []
 
         self.addAlertToGraph(gateway, interval, payload, 1)
-        for time in self.getTimes(gateway, self.alertDBDistribution):
+        times = list(self.getTimes(gateway, self.alertDBDistribution).keys())
+        for time in times:
             #Remove old alerts from the data structure
             if time.left < stime - timedelta(minutes = 15):
                 removeTimes.append(time)
@@ -189,7 +192,7 @@ class Aggregation:
             
             #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
             if interval.overlaps(time):
-                alerts = self.getAlerts(gateway, time, self.alertDBDistribution)
+                alerts = list(self.getAlerts(gateway, time, self.alertDBDistribution))
                 overlappingAlerts += len(alerts)
 
                 for alert in alerts:
@@ -205,7 +208,7 @@ class Aggregation:
 
         print("\nOverlappingAlerts")
         print(overlappingAlerts)
-        if overlappingAlerts > 2:
+        if overlappingAlerts > 1:
 
             message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -257,10 +260,10 @@ class Aggregation:
 
             if payload.get('Attack_type') != '':
                 self.mqtt_client.publish(self.outputAttackTypes, json.dumps(payload))
-                print("Aggregation published to topic", self.outputAttackTypes)
+                #print("Aggregation published to topic", self.outputAttackTypes)
             if srcIP != None or dstIP != None:
                 self.mqtt_client.publish(self.outputIPs, json.dumps(payload))
-                print("Aggregation published to topic", self.outputIPs)
+                #print("Aggregation published to topic", self.outputIPs)
             if packetSizeDistribution != None:
                 self.aggregateTimeDistribution(stime, etime, gateway, packetSizeDistribution, payload)
             if int(payload.get('Real_label')) == 0:
@@ -280,8 +283,7 @@ class Aggregation:
 
         self.mqtt_client.connect(self.broker, self.port)
         try:
-            thread = Thread(target=self.mqtt_client.loop_forever)
-            thread.start()
+            self.mqtt_client.loop_forever()
             thread2 = Timer(60, self.aggregateTime)
             thread2.start()
             
