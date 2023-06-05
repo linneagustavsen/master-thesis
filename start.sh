@@ -1,7 +1,7 @@
 #!/bin/bash
 interval=5
 start="2023-03-17 11:00:00"
-stop="2023-03-17 13:00:00"
+stop="2023-03-17 11:15:00"
 attackDate="17.03.23"
 for systemId in "tromso-gw5" "teknobyen-gw1" "hoytek-gw2" "bergen-gw3" "trd-gw" "ifi2-gw5"
 do

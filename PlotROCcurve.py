@@ -112,7 +112,7 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
     fig.legend(fontsize=15, loc="right")
 
     if not plotting.exists():
-        plotting.mkdir()
+        plotting.mkdir(parents=True)
     fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
     
     plt.close(fig)
@@ -163,7 +163,7 @@ for attackDate in attackDates:
         for systemId in systems:
             print(systemId)
             makeROCcurve(y_field, "NetFlow", "Threshold", systemId, intervals, attackDate)
-'''
+
 y_fields = ["SYN"]
 print("NetFlow SYN")
 for attackDate in attackDates:
@@ -185,7 +185,7 @@ for attackDate in attackDates:
         for systemId in systems:
             print(systemId)
             makeROCcurve(y_field, "Telemetry", "Threshold", systemId, 0, attackDate)
-            
+'''       
 y_fields = ["TopKFlows"]
 print("NetFlow TopKFlows")
 for attackDate in attackDates:

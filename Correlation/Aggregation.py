@@ -32,6 +32,7 @@ class Aggregation:
         self.outputDist = outputDist
         self.graph = graph
         self.alertCounter = 0
+        self.lastAlertCounter = 0
         self.truePositivesIn = 0
         self.falsePositivesIn = 0
         self.truePositivesOut = 0
@@ -112,6 +113,10 @@ class Aggregation:
         return newAlertDB
     
     def aggregateTime(self):
+        if self.alertCounter == self.lastAlertCounter:
+            thread2 = Timer(60, self.aggregateTime)
+            thread2.start()
+            return
         stime = self.startTime
         etime = self.startTime + timedelta(seconds=60)
         interval = pd.Interval(stime, etime, closed='both')
@@ -158,6 +163,7 @@ class Aggregation:
 
                 self.mqtt_client.publish(self.outputTime, json.dumps(message))
                 print("Aggregation published to topic", self.outputTime)
+        self.lastAlertCounter = self.alertCounter
         self.startTime += timedelta(seconds=60)
         thread2 = Timer(60, self.aggregateTime)
         thread2.start()

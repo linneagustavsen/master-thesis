@@ -30,6 +30,7 @@ class Ranking:
         self.graph = graph
         self.ranking = []
         self.alertCounter = 0
+        self.lastAlertCounter =0
         self.truePositivesIn = 0
         self.falsePositivesIn = 0
         self.truePositivesOut = 0
@@ -117,6 +118,10 @@ class Ranking:
         return sorted(values, key=priority_getter)
 
     def rank(self, stime, etime, gateways, deviation_scores, real_labels, attack_types):
+        if self.alertCounter == self.lastAlertCounter:
+            thread2 = Timer(60, self.aggregateTime)
+            thread2.start()
+            return
         deviation_scores = list(filter(lambda x: x is not None, deviation_scores))
 
         stime = datetime.strptime(stime, "%Y-%m-%dT%H:%M:%SZ")
@@ -171,6 +176,7 @@ class Ranking:
                         "Attack_types": attack_types
                         }
             self.ranking.append(newAlert)
+        self.alertCounter = self.alertCounter
         thread2 = Timer(60, self.writeRankingToFile)
         thread2.start()
     """

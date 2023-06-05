@@ -82,15 +82,15 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         if fileString == "0803":
             if attackCluster["AttackCluster"][0] == 0:
                 cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-                attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-                nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+                '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+                nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
 
                 nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
             elif attackCluster["AttackCluster"][0] == 1:
                 cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster1.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-                attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
-                nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+                '''attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
+                nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]'''
 
                 nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Cluster0.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             labelsForNonAttackCluster = nonAttackCluster["real_label"]
@@ -102,8 +102,8 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                     falseNegatives += 1        
         else:
             cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Fields.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-            attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
-            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]
+            '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
+            nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
             scores = pd.read_csv("Calculations"+fileString+"/Kmeans/NetFlow/Scores.Fields.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             
             tn = scores["TN"][0]
@@ -143,14 +143,14 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
         startTime += clusterFrequency
 
     counter = 0
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+    starting = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopping = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     for i in range(len(sTimeCluster)):
         sTimeCluster[i] = sTimeCluster[i].replace(tzinfo=None)
         eTimeCluster[i] = eTimeCluster[i].replace(tzinfo=None)
-        if eTimeCluster[i] > stopTime:
+        if eTimeCluster[i] > starting:
             break
-        if sTimeCluster[i] < startTime:
+        if sTimeCluster[i] < stopping:
             continue
         
 

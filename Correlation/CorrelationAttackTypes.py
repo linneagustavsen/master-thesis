@@ -26,6 +26,7 @@ class Correlation_Attack_types:
         self.output = outputTopic
         self.alertsAttack ={}
         self.alertCounter = 0
+        self.lastAlertCounter = 0
         self.truePositivesIn = 0
         self.falsePositivesIn = 0
         self.truePositivesOut = 0
@@ -83,6 +84,10 @@ class Correlation_Attack_types:
         del self.alertsAttack[attackType][interval]
 
     def correlateAttackTypes(self):
+        if self.alertCounter == self.lastAlertCounter:
+            thread2 = Timer(60, self.aggregateTime)
+            thread2.start()
+            return
         stime = self.startTime
         etime = self.startTime + timedelta(seconds=60)
         interval = pd.Interval(stime, etime, closed='both')
@@ -126,6 +131,7 @@ class Correlation_Attack_types:
                 
                 self.mqtt_client.publish(self.output, json.dumps(message))
                 print("\nPublished message to topic", self.output)
+        self.lastAlertCounter = self.alertCounter
         self.startTime += timedelta(seconds=60)
         thread2 = Timer(60, self.correlateAttackTypes)
         thread2.start()

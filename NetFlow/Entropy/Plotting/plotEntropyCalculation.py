@@ -95,26 +95,21 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 
-systems = ["tromso-gw5",  "teknobyen-gw1",
-           "hoytek-gw2","bergen-gw3",  "trd-gw", "ifi2-gw5"]
+systems = ["ifi2-gw5"]
 
 
-y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
-            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
-y_field_names = ["Entropy of destination IP addresses", "Entropy rate of destination IP addresses", "Entropy of source IP addresses", "Entropy rate of source IP addresses", "Entropy of bi-directional flows", "Entropy rate of bi-directional flows", 
-                 "Number of bi-directional flows", "ICMP ratio", "Number of ICMP packets", "Entropy of packet size", "Entropy rate of packet size",
+y_fields = ["icmpRatio", "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
+y_field_names = ["ICMP ratio", "Number of ICMP packets", "Entropy of packet size", "Entropy rate of packet size",
                  "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
     for systemId in systems:
         print(systemId)
         for i in range(len(y_fields)):
-            if not (systemId == "ifi2-gw5" and attackDate == "17.03.23" and (y_fields[i] != "packetSizeEntropy" or y_fields[i] != "packetSizeEntropyRate" or y_fields[i] !="numberOfPackets" or y_fields[i] !="numberOfBytes")):
-                continue
             print(y_fields[i])
             for interval in intervals:
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
