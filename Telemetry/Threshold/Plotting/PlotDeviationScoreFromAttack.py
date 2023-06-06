@@ -61,24 +61,42 @@ def makePlotDeviationScore(y_field, y_field_name, systemId, attackDate):
     axs.set_title("Deviation scores for "+ y_field_name, fontsize=20)
     axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel("Deviation score", fontsize=20)
+    axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/Telemetry/StatisticalModel/"+ y_field+ "."+ str(systemId)+ ".png", dpi=500)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/Telemetry/StatisticalModel/LogScale."+ y_field+ "."+ str(systemId)+ ".png", dpi=500)
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+'''systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s"]
 
-systems = ["narvik-gw4", "hoytek-gw2"]
-y_fields = ["egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
-y_field_names = [ "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s"]
-
 attackDates =  ["08.03.23", "17.03.23", "24.03.23"]
+for attackDate in attackDates:
+    for i in range(len(y_fields)):
+        for systemId in systems:
+            makePlotDeviationScore(y_fields[i], y_field_names[i], systemId,  attackDate)
+'''
+
+systems = ["teknobyen-gw2", "bergen-gw3", "oslo-gw1"]
+y_fields = ["egress_queue_info__0__cur_buffer_occupancy"]
+y_field_names = ["current egress queue size"]
+
+attackDates =  ["24.03.23"]
+for attackDate in attackDates:
+    for i in range(len(y_fields)):
+        for systemId in systems:
+            makePlotDeviationScore(y_fields[i], y_field_names[i], systemId,  attackDate)
+
+systems = ["teknobyen-gw1"]
+y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts"]
+y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", ]
+
+attackDates =  ["24.03.23"]
 for attackDate in attackDates:
     for i in range(len(y_fields)):
         for systemId in systems:
