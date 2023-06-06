@@ -36,6 +36,7 @@ class Ranking:
         self.highRankingFalsePositives = 0
         self.highRankingTruePositives = 0
         self.highRankingTotal = 0
+        self.numberOfRankings = 0
         self.victim = victim
         self.victim6 = victim6
         self.ip_addresses = ip_addresses
@@ -74,16 +75,27 @@ class Ranking:
             line += str(alert['Real_labels'])
         
             
-            if alert['Real_labels']['0'] > alert['Real_labels']['1']:
+            if '1' not in alert['Real_labels']:
                 self.falsePositivesOut += 1
-            elif alert['Real_labels']['0'] < alert['Real_labels']['1']:
+            elif '0' not in alert['Real_labels']:
                 self.truePositivesOut += 1
+            else:
+                if alert['Real_labels']['0'] > alert['Real_labels']['1']:
+                    self.falsePositivesOut += 1
+                elif alert['Real_labels']['0'] < alert['Real_labels']['1']:
+                    self.truePositivesOut += 1
             if position <= 10:
-                self.highRankingFalsePositives += alert['Real_labels']['0']
-                self.highRankingTruePositives += alert['Real_labels']['1']
-                self.highRankingTotal += alert['Real_labels']['0'] + alert['Real_labels']['1']
+                if '1' not in alert['Real_labels']:
+                    self.highRankingFalsePositives += alert['Real_labels']['0']
+                elif '0' not in alert['Real_labels']:
+                    self.highRankingTruePositives += alert['Real_labels']['1']
+                else:
+                    self.highRankingFalsePositives += alert['Real_labels']['0']
+                    self.highRankingTruePositives += alert['Real_labels']['1']
+                    self.highRankingTotal += alert['Real_labels']['0'] + alert['Real_labels']['1']
 
             position +=1
+        self.numberOfRankings += position
         line += "\n"
         line += "\n"
         rankingFile.write(line)
