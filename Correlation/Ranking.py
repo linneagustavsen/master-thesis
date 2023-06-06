@@ -208,7 +208,7 @@ class Ranking:
             elif self.highRankingFalsePositives == 0:
                 precision = 1
             else:
-                precision = self.highRankingTruePositives/self.highRankingFalsePositives 
+                precision = self.highRankingTruePositives/(self.highRankingTruePositives + self.highRankingFalsePositives)
             alertsFile.write("NumberOfAlertsIn,NumberOfRankings,TPin,FPin,TPout,FPout,highRankingPrecision")
             alertsFile.write("\n" + str(self.alertCounter) +"," + str(self.numberOfRankings) + "," +str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," + str(precision))
             alertsFile.close()

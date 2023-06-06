@@ -132,7 +132,7 @@ class Correlation_Attack_types:
                 
                 self.mqtt_client.publish(self.output, json.dumps(message))
                 print("\nPublished message to topic", self.output)
-            elif overlappingAlerts >=3 and attackType != "SYN Flood" and attackType != "Flooding":
+            elif overlappingAlerts >=2 and attackType != "SYN Flood" and attackType != "Flooding":
                 message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'Gateways': list(set(gateways)),

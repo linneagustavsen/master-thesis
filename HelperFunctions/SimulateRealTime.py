@@ -8,7 +8,7 @@ def simulateRealTime(timeNow, stime, attackDate):
     attackMonth = int(attackDate[1])
     attackDay = int(attackDate[0])
     
-    movedTime = stime + timedelta(hours=5)
+    movedTime = stime - timedelta(minutes=30)
     if movedTime > timeNow.replace(year=attackYear, month=attackMonth, day=attackDay):
         duration = math.ceil((movedTime - timeNow.replace(year=attackYear, month=attackMonth, day=attackDay)).total_seconds())
     else:

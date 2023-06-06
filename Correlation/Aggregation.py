@@ -80,10 +80,12 @@ class Aggregation:
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
         if alertDB == 0:
+            newAlert = dict(alert)
+            del newAlert["Packet_size_distribution"]
             if interval in self.getTimes(gateway, self.alertDB):
-                self.alertDB[gateway][interval].append(alert)
+                self.alertDB[gateway][interval].append(newAlert)
             else:
-                self.alertDB[gateway][interval] = [alert]
+                self.alertDB[gateway][interval] = [newAlert]
         elif alertDB == 1:
             if interval in self.getTimes(gateway, self.alertDBDistribution):
                 self.alertDBDistribution[gateway][interval].append(alert)
@@ -132,7 +134,7 @@ class Aggregation:
             times = list(self.getTimes(gateway, self.alertDB).keys())
             for time in times:
                 #Remove old alerts from the data structure
-                if time.left < stime - timedelta(minutes = 10):
+                if time.left < stime - timedelta(minutes = 5):
                     removeTimes.append(time)
                     continue
                 
@@ -206,7 +208,7 @@ class Aggregation:
         for time in removeTimes:
             self.removeTimestampFromGraph(gateway, time, 1)
 
-        print("\nOverlappingAlerts")
+        print("\nOverlappingAlerts for gateway", gateway)
         print(overlappingAlerts)
         if overlappingAlerts > 1:
 

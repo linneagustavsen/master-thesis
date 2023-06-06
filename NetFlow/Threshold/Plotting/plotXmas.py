@@ -94,7 +94,7 @@ def plotXmas(systemId, attackDate):
     axs.scatter(timeAxis ,nonAttackValues, color="black", s=30, label="Normal flows")
     axs.scatter(timeAxis, attackValues, color = "blue", s=10, label="Attack flows")
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=1),
+        major_locator=mdates.MinuteLocator(interval=30),
         major_formatter=mdates.DateFormatter("%H:%M"),
     )
     axs.set_title("FIN flag set", fontsize=20)

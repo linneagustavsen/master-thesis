@@ -59,5 +59,8 @@ for ((i=0; i< ${#times[@]}-1; i++)); do
         python3 Attack0803RunXmasDetection.py "${times[i]}" "${times[i+1]}" $attackDate $systemId &
         sleep $((15))
     done
-    sleep $((13*60))
+    sleep $((15*60))
+    python3 WriteCorrelationsToFiles.py
 done
+sleep $((5*60))
+python3 WriteCorrelationsToFiles.py
