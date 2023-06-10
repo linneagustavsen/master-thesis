@@ -31,6 +31,8 @@ class Correlation_Attack_types:
         self.falsePositivesIn = 0
         self.truePositivesOut = 0
         self.falsePositivesOut = 0
+        self.combinedTruePositivesOut = 0
+        self.combinedFalsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -55,13 +57,17 @@ class Correlation_Attack_types:
   
         if 1 not in counter:
             self.falsePositivesOut += counter[0]
+            self.combinedFalsePositivesOut += 1
         elif 0 not in counter:
             self.truePositivesOut += counter[1]
+            self.combinedTruePositivesOut += 1
         else:
             if counter[0] > counter[1]:
                 self.falsePositivesOut += counter[0]
+                self.combinedFalsePositivesOut += 1
             elif counter[0] < counter[1]:
                 self.truePositivesOut += counter[1]
+                self.combinedTruePositivesOut += 1
         return counter
 
 
@@ -120,7 +126,7 @@ class Correlation_Attack_types:
 
             print("\nOverlappingAlerts on attack type", attackType)
             print(overlappingAlerts)
-            if overlappingAlerts > 40 and (attackType == "SYN Flood" or attackType == "Flooding"):
+            if overlappingAlerts > 60 and (attackType == "SYN Flood" or attackType == "Flooding"):
 
                 message = { 'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                             'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -173,7 +179,8 @@ class Correlation_Attack_types:
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsCorrelationAttackType.csv", "a")
-            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout,TPoutCombined,FPoutCombined\n")
+            alertsFile.write(str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," +str(self.combinedTruePositivesOut) + "," + str(self.combinedFalsePositivesOut))
             alertsFile.close()
         else:
             self.alertCounter += 1

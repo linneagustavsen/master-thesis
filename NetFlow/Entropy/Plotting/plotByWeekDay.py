@@ -86,7 +86,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
         axs.set_xlabel('Time')
         axs.set_ylabel(y_fieldName)
         axs.tick_params(axis='both', which='major', labelsize=12)
-        axs.legend()
+        fig.legend()
         fig.tight_layout()
         fig.savefig(path+y_field+day+".png", dpi=500)
         plt.close(fig)

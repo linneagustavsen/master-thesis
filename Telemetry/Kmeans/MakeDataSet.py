@@ -21,9 +21,9 @@ from HelperFunctionsTelemetry.GetDataTelemetry import *
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
 def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields, attackDate):
-    columTitles = ["egress_queue_info__0__cur_buffer_occupancy","egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size", "entropy_rate_packet_size"]
+    columTitles = ["egress_queue_info__0__cur_buffer_occupancy","egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
     if systemId =="hoytek-gw2" or systemId == "narvik-gw4":
-        columTitles = ["egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size", "entropy_rate_packet_size"]
+        columTitles = ["egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
     p = Path('Telemetry')
     dp = p / 'Kmeans' / 'DataSets'
 
@@ -41,6 +41,7 @@ def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields
             df.to_pickle(f)
     if len(df) == 0:
         return pd.DataFrame([])
+
     timeStamps, measurements = structureDataTelemetry(df)
     
     entropy_intervals, entropy_measurements, labels = structureDataEntropy(entropy_df)
@@ -82,11 +83,13 @@ def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields
             lastMinute = curMinute
 
         #Find the corresponding entropy measurements for this timestamp            
-        entropyPacketSize = entropy_measurements[indexInTimeArray][0]
-        entropyRatePacketSize = entropy_measurements[indexInTimeArray][1]
+        entropyPacketSize_ingress = entropy_measurements[indexInTimeArray][0]
+        entropyRatePacketSize_ingress = entropy_measurements[indexInTimeArray][1]
+        entropyPacketSize_egress = entropy_measurements[indexInTimeArray][2]
+        entropyRatePacketSize_egress = entropy_measurements[indexInTimeArray][3]
         curMeasurements = measurements[i]
 
-        newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize])
+        newMeasurements = np.array([entropyPacketSize_ingress, entropyRatePacketSize_ingress, entropyPacketSize_egress, entropyRatePacketSize_egress])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 

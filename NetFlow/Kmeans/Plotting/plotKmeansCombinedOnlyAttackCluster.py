@@ -135,7 +135,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
     axs.tick_params(axis='both', which='major', labelsize=15)
-    axs.legend(fontsize=20)
+    fig.legend(fontsize=20)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
     
     '''axs[1].xaxis.set(

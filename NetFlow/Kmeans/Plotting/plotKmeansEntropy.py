@@ -173,7 +173,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     #axs.ylabel.set_size(15)
     #axs.xlabel.set_size(15)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    axs.legend(fontsize=20)
+    fig.legend(fontsize=20)
     
     
     fig.tight_layout()

@@ -9,7 +9,7 @@ from sklearn.metrics import auc
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def makeROCcurve(y_field, dataSet, dataType, systemId, windowSizes, alphas, frequencies, intervals, attackDate):
+def makeROCcurve(y_field, dataSet, dataType, systemId, attackDate):
     p = Path('ThresholdDecision') 
     plotPath = Path('Plots')
 
@@ -48,37 +48,6 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, windowSizes, alphas, freq
     elif dataSet == "Telemetry":
         plotting = plotting / 'Telemetry' / 'ROC'
 
-    if intervals == 0:
-        dataFile = str(q) + "/" + str(y_field) +".attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
-        if not Path(dataFile).exists():
-            return
-        data = pd.read_csv(dataFile)
-        if len(data) == 0:
-            return
-        tpr = pd.to_numeric(data["TPR"],errors='coerce')
-        fpr = pd.to_numeric(data["FPR"],errors='coerce')
-
-        truePositiveRate = []
-        falsePositiveRate = []
-        for i in range(len(tpr) -1, -1, -1):
-            truePositiveRate.append(tpr[i])
-            falsePositiveRate.append(fpr[i])
-        auc_value = auc(falsePositiveRate, truePositiveRate)
-        fig, axs = plt.subplots(1, 1, figsize=(7, 7))
-    
-        axs.plot(falsePositiveRate ,truePositiveRate, color="#162931", label="AUC=%.3f"%auc_value)
-        axs.set_title("Roc curve", fontsize=20)
-        axs.set_xlabel("False Positive Rate", fontsize=20)
-        axs.set_ylabel("True Positive Rate", fontsize=20)
-        axs.tick_params(axis='both', which='major', labelsize=15)
-        fig.tight_layout()
-        fig.legend(fontsize=15, loc="right")
-
-        if not plotting.exists():
-            plotting.mkdir()
-        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
-        plt.close(fig)
-        return
     def get_cmap(n, name='hsv'):
         '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
         RGB color; the keyword argument name must be a standard mpl colormap name.'''
@@ -91,15 +60,17 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, windowSizes, alphas, freq
         for i in range(1,21):
             interval = timedelta(minutes=i)
             for alpha in range(2, 16):
-                for windowSize in range(1,21):
-                    dataFile = str(q) + "/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+                for windowSize in range(2,21):
+                    dataFile = str(q) + "/RocScores/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
 
                     if not Path(dataFile).exists():
                         plt.close(fig)
+                        print("no file", dataFile)
                         return
                     data = pd.read_csv(dataFile)
                     if len(data) == 0:
                         plt.close(fig)
+                        print("the file is empty")
                         return
                     tpr = pd.to_numeric(data["TPR"],errors='coerce')
                     fpr = pd.to_numeric(data["FPR"],errors='coerce')
@@ -111,18 +82,50 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, windowSizes, alphas, freq
                         falsePositiveRate.append(fpr[i])
                     auc_value = auc(falsePositiveRate, truePositiveRate)
                 
-                    axs.plot(falsePositiveRate ,truePositiveRate, color=cmap[colorCounter], label="Interval: "+ str(int(interval.total_seconds()/60)) +" min\nAUC=%.3f"%auc_value)
+                    axs.plot(falsePositiveRate ,truePositiveRate, color=cmap(colorCounter), label="Frequency: " + str(int(frequency.total_seconds())) +"sec, Interval: "+ str(int(interval.total_seconds()/60)) +" min, α: "+ str(alpha) + ", Window size: "+ str(windowSize) + ", AUC=%.3f"%auc_value)
                     colorCounter += 1
-    axs.set_title("Roc curve", fontsize=20)
-    axs.set_xlabel("False Positive Rate", fontsize=20)
-    axs.set_ylabel("True Positive Rate", fontsize=20)
+                break
+            break
+        break
+    '''cmap = get_cmap(19)
+    colorCounter = 0
+    frequency= timedelta(seconds=5)
+    interval = timedelta(minutes=1)
+    alpha = 2
+    for windowSize in range(2,21):
+        dataFile = str(q) + "/RocScores/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+
+        if not Path(dataFile).exists():
+            plt.close(fig)
+            print("no file")
+            return
+        data = pd.read_csv(dataFile)
+        if len(data) == 0:
+            plt.close(fig)
+            print("the file is empty")
+            return
+        tpr = pd.to_numeric(data["TPR"],errors='coerce')
+        fpr = pd.to_numeric(data["FPR"],errors='coerce')
+
+        truePositiveRate = []
+        falsePositiveRate = []
+        for i in range(len(tpr) -1, -1, -1):
+            truePositiveRate.append(tpr[i])
+            falsePositiveRate.append(fpr[i])
+        auc_value = auc(falsePositiveRate, truePositiveRate)
+    
+        axs.plot(falsePositiveRate ,truePositiveRate, color=cmap(colorCounter), label="Window size: "+ str(windowSize) +" min\nAUC=%.3f"%auc_value)
+        colorCounter += 1'''
+    axs.set_title("Roc curve")
+    axs.set_xlabel("False Positive Rate")
+    axs.set_ylabel("True Positive Rate")
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.tight_layout()
-    fig.legend(fontsize=15, loc="right")
+    #fig.tight_layout()
+    fig.legend()
 
     if not plotting.exists():
         plotting.mkdir(parents=True)
-    fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+    fig.savefig("Plots/RocScores/" + str(y_field)+ ".png", dpi=500)
     
     plt.close(fig)
 
@@ -132,76 +135,11 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 
 attackDates = ["08.03.23", "17.03.23","24.03.23"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
-'''y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
+y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
-print("NetFlow entropy")
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "NetFlow", "Entropy", systemId, intervals, attackDate)
-            
-
-y_fields= ["entropy_packet_size","entropy_rate_packet_size","numberOfPackets","numberOfBytes"]
-print("Telemetry entropy")
-for attackDate in attackDates:
-    if attackDate != "24.03.23":
-        continue
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        if y_field != "numberOfBytes":
-            continue
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "Telemetry", "Entropy", systemId, intervals, attackDate)
-
-
-y_fields = ["ICMPDstUnreachable"]
-intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
-print("NetFlow ICMP dst unreachable")
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "NetFlow", "Threshold", systemId, intervals, attackDate)
-
-y_fields = ["SYN"]
-print("NetFlow SYN")
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "NetFlow", "Threshold", systemId, 0, attackDate)
-
-
-y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "Telemetry", "Threshold", systemId, 0, attackDate)
-'''       
-y_fields = ["TopKFlows"]
-print("NetFlow TopKFlows")
-for attackDate in attackDates:
-    print("\n")
-    print(attackDate)
-    for y_field in y_fields:
-        print(y_field)
-        for systemId in systems:
-            print(systemId)
-            makeROCcurve(y_field, "NetFlow", "TopKFlows", systemId, 0, attackDate)
+y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
+            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
+y_field_names = ["DestinationIPEntropy", "DestinationIPEntropyRate","SourceIPEntropy", "SourceIPEntropyRate", "FlowEntropy", "FlowEntropyRate", "NumberOfFlows", "ICMPRatio", 
+            "ICMPPackets", "PacketSizeEntropy", "PacketSizeEntropyRate", "Packets", "Bytes"]
+for y_field in y_fields:
+    makeROCcurve(y_field, "NetFlow", "Entropy", "hoytek-gw2", "24.03.23")

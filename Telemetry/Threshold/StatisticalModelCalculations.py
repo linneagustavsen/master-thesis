@@ -8,7 +8,7 @@ from time import sleep
 from random import randrange
 
 from HelperFunctions.Normalization import normalization
-from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes, getDataPackets, getDataTables
+from HelperFunctionsTelemetry.GetDataTelemetry import getData
 from Telemetry.Threshold.FindMaxVar import findMaxVar
 
 '''

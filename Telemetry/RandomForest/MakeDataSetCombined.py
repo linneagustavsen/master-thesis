@@ -104,14 +104,16 @@ def makeDataSetRandomForestCombinedTelemetry(start, stop, systemId, bucket, fiel
             lastMinute = curMinute
 
         #Find the corresponding entropy measurements for this timestamp
-        entropyPacketSize = entropy_measurements[indexInTimeArray][0]
-        entropyRatePacketSize = entropy_measurements[indexInTimeArray][1]
+        entropyPacketSize_ingress = entropy_measurements[indexInTimeArray][0]
+        entropyRatePacketSize_ingress = entropy_measurements[indexInTimeArray][1]
+        entropyPacketSize_egress = entropy_measurements[indexInTimeArray][2]
+        entropyRatePacketSize_egress = entropy_measurements[indexInTimeArray][3]
         curMeasurements = measurements[counter]
         
         #Add a label to the measurements
         curLabel = labels[indexInTimeArray]
 
-        newMeasurements = [entropyPacketSize, entropyRatePacketSize, int(curLabel)]
+        newMeasurements = [entropyPacketSize_ingress, entropyRatePacketSize_ingress, entropyPacketSize_egress, entropyRatePacketSize_egress, int(curLabel)]
         times = [timeStamps[counter]]
         times.extend(curMeasurements)
         times.extend(newMeasurements)

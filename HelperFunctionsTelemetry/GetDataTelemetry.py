@@ -25,10 +25,10 @@ def getData(start, stop, bucket, systemId, fields):
     columns = ["_time"]
 
     if systemId == "hoytek-gw2":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "forde-hoytek" or r["link_name"] == "hovedbygget-hoytek"  or r["link_name"] == "hovedbygget-hoytek2" or r["link_name"] == "hovedbygget-hoytek3" or r["link_name"] == "tullin-hoytek" or r["link_name"] =="bergen-hoytek3" or r["link_name"] == "alesund-hoytek" or r["link_name"] == "hoytek-gw1.hoytek-gw2")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
@@ -42,41 +42,25 @@ def getData(start, stop, bucket, systemId, fields):
                     fieldName = fields[i].replace("ingress", "egress")
                 elif "egress" in fields[i]:
                     fieldName = fields[i].replace("egress", "ingress")
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "forde-hoytek", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek2", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek3", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "tullin-hoytek", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "bergen-hoytek3", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "alesund-hoytek", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "'+ fields[i]+ '"),'
+                query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"'+fieldName+'", fieldName: "'+ fields[i]+ '"),'
                 columns.append(fields[i])
             
                 
             query += '],)'
         else:
-            query += 'union(\
-                    tables: ['
             if "ingress" in fields[0]:
                 fieldName = fields[0].replace("ingress", "egress")
             elif "egress" in fields[0]:
                 fieldName = fields[0].replace("egress", "ingress")
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "forde-hoytek", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek2", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hovedbygget-hoytek3", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "tullin-hoytek", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "bergen-hoytek3", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "alesund-hoytek", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "'+ fields[0]+ '"),'
-            query += '],)'
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"'+fieldName+'", fieldName: "'+ fields[0]+ '")'
+            
             columns.append(fields[0])
     
     elif systemId == "narvik-gw4":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "tromso-narvik3" or r["link_name"] == "narvik-gw3.narvik-gw4" or r["link_name"] == "bodo-narvik" or r["link_name"] == "kommunevn-narvik")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
@@ -90,26 +74,18 @@ def getData(start, stop, bucket, systemId, fields):
                     fieldName = fields[i].replace("ingress", "egress")
                 elif "egress" in fields[i]:
                     fieldName = fields[i].replace("egress", "ingress")
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "tromso-narvik3", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "narvik-gw3.narvik-gw4", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "kommunevn-narvik", fieldName: "'+ fields[i]+ '"),'
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "bodo-narvik", fieldName: "'+ fields[i]+ '"),'
+                query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"'+fieldName+'", fieldName: "'+ fields[i]+ '"),'
                 columns.append(fields[i])
             
                 
             query += '],)'
         else:
-            query += 'union(\
-                    tables: ['
             if "ingress" in fields[0]:
                 fieldName = fields[0].replace("ingress", "egress")
             elif "egress" in fields[0]:
                 fieldName = fields[0].replace("egress", "ingress")
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "tromso-narvik3", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "narvik-gw3.narvik-gw4", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "kommunevn-narvik", fieldName: "'+ fields[0]+ '"),'
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"'+fieldName+'", link_name: "bodo-narvik", fieldName: "'+ fields[0]+ '"),'
-            query += '],)'
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"'+fieldName+'", fieldName: "'+ fields[0]+ '")'
+
             columns.append(fields[0])
     else: 
         query = 'data = (startTime, stopTime, systemId, field) =>\
@@ -125,13 +101,13 @@ def getData(start, stop, bucket, systemId, fields):
             query += 'union(\
                     tables: ['
             for i in range(len(fields)):
-                query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"'+fields[i]+'"),'
+                query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"'+fields[i]+'"),'
                 columns.append(fields[i])
             
                 
             query += '],)'
         else:
-            query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"'+fields[0]+'")'
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"'+fields[0]+'")'
             columns.append(fields[0])
     query += '|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")\
         |> keep(columns: ' + str(columns).replace("'", '"') + ')'
@@ -145,65 +121,42 @@ def getData(start, stop, bucket, systemId, fields):
 
     return df
 
-def getDataBytes(start, stop, bucket, systemId):
+def getDataBytes(start, stop, bucket, systemId, direction):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
     query_api = client.query_api()
 
     #Build query for database
     if systemId == "hoytek-gw2":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "forde-hoytek" or r["link_name"] == "hovedbygget-hoytek"  or r["link_name"] == "hovedbygget-hoytek2" or r["link_name"] == "hovedbygget-hoytek3" or r["link_name"] == "tullin-hoytek" or r["link_name"] =="bergen-hoytek3" or r["link_name"] == "alesund-hoytek" or r["link_name"] == "hoytek-gw1.hoytek-gw2")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: fieldName)'
+                        |> set(key: "_field", value: "bytes")'
 
-        query += 'union(\
-                tables: ['
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "forde-hoytek", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek2", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek3", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "tullin-hoytek", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "bergen-hoytek3", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "alesund-hoytek", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "ingress_stats__if_1sec_octets"),'
+        if direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"egress_stats__if_1sec_octets", fieldName: "ingress_stats__if_1sec_octets")'
+        elif direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"ingress_stats__if_1sec_octets", fieldName: "egress_stats__if_1sec_octets")'
 
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "forde-hoytek", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek2", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "hovedbygget-hoytek3", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "tullin-hoytek", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "bergen-hoytek3", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "alesund-hoytek", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "egress_stats__if_1sec_octets"),'
-        query += '],)'
     elif systemId == "narvik-gw4":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "tromso-narvik3" or r["link_name"] == "narvik-gw3.narvik-gw4" or r["link_name"] == "bodo-narvik" or r["link_name"] == "kommunevn-narvik")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: fieldName)'
-        query += 'union(\
-                tables: ['
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "tromso-narvik3", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "narvik-gw3.narvik-gw4", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "kommunevn-narvik", fieldName: "ingress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_octets", link_name: "bodo-narvik", fieldName: "ingress_stats__if_1sec_octets"),'
-
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "tromso-narvik3", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "narvik-gw3.narvik-gw4", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "kommunevn-narvik", fieldName: "egress_stats__if_1sec_octets"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_octets", link_name: "bodo-narvik", fieldName: "egress_stats__if_1sec_octets"),'
-        query += '],)'
+                        |> set(key: "_field", value: "bytes")'
+        if direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"egress_stats__if_1sec_octets", fieldName: "ingress_stats__if_1sec_octets")'
+        elif direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"ingress_stats__if_1sec_octets", fieldName: "egress_stats__if_1sec_octets")'
     else:
         query = 'data = (startTime, stopTime, systemId, field) =>\
                     from(bucket: "' + bucket +'")\
@@ -213,14 +166,15 @@ def getDataBytes(start, stop, bucket, systemId):
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: field)'
-        query += 'union(\
-                    tables: [\
-                    data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_octets"),\
-                    data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_octets"),],)'
-    query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
-            |> map(fn: (r) => ({_time: r._time, bytes: r.egress_stats__if_1sec_octets + r.ingress_stats__if_1sec_octets}))'
+                        |> set(key: "_field", value: "bytes")'
+       
+        if direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_octets")'
+        elif direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_octets")'
 
+    query += '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
+    
     #Make a data frame from the output of the query
     df = query_api.query_data_frame(query=query)
 
@@ -230,65 +184,44 @@ def getDataBytes(start, stop, bucket, systemId):
 
     return df
 
-def getDataPackets(start, stop, bucket, systemId):
+def getDataPackets(start, stop, bucket, systemId, direction):
     client = InfluxDBClient(url="http://localhost:8086", token="XIXjEYH2EUd8fewS0niwHcdif20ytyhNR3dqPYppD0S8LQeA7CnICVVnlke6H3kmN0cvTVoINmXqz1aCbCxL6A==", org="4bad65ca5da036f7", timeout=100000)
 
     query_api = client.query_api()
 
     #Build query for database
     if systemId == "hoytek-gw2":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "forde-hoytek" or r["link_name"] == "hovedbygget-hoytek"  or r["link_name"] == "hovedbygget-hoytek2" or r["link_name"] == "hovedbygget-hoytek3" or r["link_name"] == "tullin-hoytek" or r["link_name"] =="bergen-hoytek3" or r["link_name"] == "alesund-hoytek" or r["link_name"] == "hoytek-gw1.hoytek-gw2")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: fieldName)'
+                        |> set(key: "_field", value: "packets")'
 
-        query += 'union(\
-                tables: ['
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "forde-hoytek", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek2", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek3", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "tullin-hoytek", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "bergen-hoytek3", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "alesund-hoytek", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "ingress_stats__if_1sec_pkts"),'
+        if direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"egress_stats__if_1sec_pkts", fieldName: "ingress_stats__if_1sec_pkts")'
+        elif direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"ingress_stats__if_1sec_pkts", fieldName: "egress_stats__if_1sec_pkts")'
 
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "forde-hoytek", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek2", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "hovedbygget-hoytek3", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "tullin-hoytek", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "bergen-hoytek3", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "alesund-hoytek", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "hoytek-gw1.hoytek-gw2", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += '],)'
     elif systemId == "narvik-gw4":
-        query = 'data = (startTime, stopTime, link_name, field, fieldName) =>\
+        query = 'data = (startTime, stopTime, field, fieldName) =>\
                     from(bucket: "' + bucket +'")\
                         |> range(start: startTime, stop: stopTime)\
-                        |> filter(fn: (r) => r["link_name"] == link_name)\
+                        |> filter(fn: (r) => r["link_name"] == "tromso-narvik3" or r["link_name"] == "narvik-gw3.narvik-gw4" or r["link_name"] == "bodo-narvik" or r["link_name"] == "kommunevn-narvik")\
                         |> filter(fn: (r) => r["_field"] == field )\
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: fieldName)'
-        query += 'union(\
-                tables: ['
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "tromso-narvik3", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "narvik-gw3.narvik-gw4", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "kommunevn-narvik", fieldName: "ingress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"egress_stats__if_1sec_pkts", link_name: "bodo-narvik", fieldName: "ingress_stats__if_1sec_pkts"),'
+                        |> set(key: "_field", value: "packets"")'
 
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "tromso-narvik3", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "narvik-gw3.narvik-gw4", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "kommunevn-narvik", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += 'data(startTime: ' + start + ', stopTime: ' + stop + ', field:"ingress_stats__if_1sec_pkts", link_name: "bodo-narvik", fieldName: "egress_stats__if_1sec_pkts"),'
-        query += '],)'
+        if direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"egress_stats__if_1sec_pkts", fieldName: "ingress_stats__if_1sec_pkts")'
+        elif direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"ingress_stats__if_1sec_pkts", fieldName: "egress_stats__if_1sec_pkts")'
+
     else:
         query = 'data = (startTime, stopTime, systemId, field) =>\
                     from(bucket: "' + bucket +'")\
@@ -298,14 +231,14 @@ def getDataPackets(start, stop, bucket, systemId):
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: field)'
-        query += 'union(\
-                    tables: [\
-                    data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_pkts"),\
-                    data(startTime: ' + start + ', stopTime: ' + stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_pkts"),],)'
-    query+= '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")\
-             |> map(fn: (r) => ({_time: r._time, packets: r.egress_stats__if_1sec_pkts + r.ingress_stats__if_1sec_pkts}))'
+                        |> set(key: "_field", value: "packets")'
 
+        if direction == "out":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"egress_stats__if_1sec_pkts")'
+        elif direction == "in":
+            query += 'data(startTime:'+start + ', stopTime:'+stop + ', systemId: "'+systemId+ '", field:"ingress_stats__if_1sec_pkts")'
+
+    query+= '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")'
 
     #Make a data frame from the output of the query
     df = query_api.query_data_frame(query=query)
@@ -334,7 +267,7 @@ def getDataTables(start, stop, systemId, bucket, field):
 
     #Build query
     query = 'from(bucket: "' + bucket + '")\
-            |> range(start: ' + start + ', stop: ' + stop + ')\
+            |> range(start:'+start + ', stop:'+stop + ')\
             |> filter(fn: (r) => r["systemId"] == "' + systemId + '")\
             |> filter(fn: (r) => r["_field"] == "' + field + '")\
             |> group()        \
@@ -359,8 +292,10 @@ def getDataTables(start, stop, systemId, bucket, field):
 def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
     intervalTime = (stop - start).total_seconds()/frequency.total_seconds()
 
-    packetSizeArray = []
-    packetSizeRateArray = []
+    packetSizeArrayin = []
+    packetSizeRateArrayin = []
+    packetSizeArrayout = []
+    packetSizeRateArrayout = []
     timeArray = []
     labels = []
     startTime = start
@@ -368,15 +303,18 @@ def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        dfBytes = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId)
-        dfPackets = getDataPackets(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId)
-
+        df_bytes_ingress = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId, "in")
+        df_bytes_egress = getDataBytes(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId, "out")
+        df_packets_ingress = getDataPackets(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId, "in")
+        df_packets_egress = getDataPackets(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"), "april", systemId, "out")
         #If there is no data for this interval we skip the calculations
-        if dfBytes.empty or dfPackets.empty:
+        if df_bytes_ingress.empty or df_packets_ingress.empty or df_bytes_egress.empty or df_packets_egress.empty:
             startTime = startTime + frequency
             continue
-        dfBytes = dfBytes["bytes"].to_numpy()
-        dfPackets = dfPackets["packets"].to_numpy()
+        df_bytes_ingress = df_bytes_ingress["bytes"].to_numpy()
+        df_packets_ingress = df_packets_ingress["packets"].to_numpy()
+        df_bytes_egress = df_bytes_egress["bytes"].to_numpy()
+        df_packets_egress = df_packets_egress["packets"].to_numpy()
 
         if counter == 0:
             timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(stopTime), closed="both")
@@ -385,13 +323,21 @@ def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
    
         timeArray.append(timeInterval)
 
-        #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nps = packetSizeDistribution(dfBytes, dfPackets)
+        ##Find the probability distribution based on how big the packets are this time interval
+        PiPS,nps = packetSizeDistribution(df_bytes_ingress, df_packets_ingress)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
-        packetSizeArray.append(entropyPacketSize)
+        packetSizeArrayin.append(entropyPacketSize)
         #Calculate the generalized entropy rate of this distribution
-        packetSizeRateArray.append(entropyPacketSize/nps)
+        packetSizeRateArrayin.append(entropyPacketSize/nps)
+
+        #Find the probability distribution based on how big the packets are this time interval
+        PiPS,nps = packetSizeDistribution(df_bytes_egress, df_packets_egress)
+        #Calculate the generalized entropy of this distribution
+        entropyPacketSize = generalizedEntropy(10, PiPS)
+        packetSizeArrayout.append(entropyPacketSize)
+        #Calculate the generalized entropy rate of this distribution
+        packetSizeRateArrayout.append(entropyPacketSize/nps)
         labels.append(int(isAttack(timeInterval.left, timeInterval.right)))
         
         #Push the start time by the specified frequency
@@ -399,8 +345,10 @@ def getEntropyData(start, stop, systemId,  bucket, interval, frequency):
         counter +=1
     entropy = pd.DataFrame(
     {"time": timeArray,
-     "entropy_packet_size": packetSizeArray,
-     "entropy_rate_packet_size": packetSizeRateArray,
+     "entropy_packet_size_ingress": packetSizeArrayin,
+     "entropy_rate_packet_size_ingress": packetSizeRateArrayin,
+     "entropy_packet_size_egress": packetSizeArrayout,
+     "entropy_rate_packet_size_egress": packetSizeRateArrayout,
      "labels": labels
     })
 

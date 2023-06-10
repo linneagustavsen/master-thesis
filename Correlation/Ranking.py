@@ -15,7 +15,7 @@ MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_USER = 'aggregation'
 MQTT_PASSWORD = 'aggregationPass'
-MQTT_TOPIC_INPUT = 'detections/correlation'
+MQTT_TOPIC_INPUT = 'detections/correlation/#'
 MQTT_TOPIC_OUTPUT = 'detections/ranking'
 
 class Ranking:

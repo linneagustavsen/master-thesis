@@ -31,8 +31,8 @@ def calculationsKmeansEntropyTelemetry(start, stop, systemId, bucket, interval, 
 
     f0 = open(str(q) + "/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f1 = open(str(q) + "/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f0.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
-    f1.write("sTime,eTime,entropy_packet_size,entropy_rate_packet_size,real_label")
+    f0.write("sTime,eTime,entropy_packet_size_ingress,entropy_rate_packet_size_ingress,entropy_packet_size_egress,entropy_rate_packet_size_egress,real_label")
+    f1.write("sTime,eTime,entropy_packet_size_ingress,entropy_rate_packet_size_ingress,entropy_packet_size_egress,entropy_rate_packet_size_egress,real_label")
     cluster = open(str(q) + "/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
     '''f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")

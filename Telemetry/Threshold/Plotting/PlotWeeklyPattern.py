@@ -16,7 +16,7 @@ def makePlot(y_field, y_fieldName):
         with open("Telemetry/Threshold/Calculations/WeeklyPattern/week"+ str(week)+ str(y_field)+ ".csv", 'r') as f:
             data = pd.read_csv(f)
             times = pd.to_datetime(data["Time"])
-            values = pd.to_numeric(data["Value"])
+            values = pd.to_numeric(data["egress_stats__if_1sec_pkts"])
         i = 0
         for timestamp in times:
             if week == 1:
@@ -56,17 +56,17 @@ def makePlot(y_field, y_fieldName):
         minor_locator=mdates.HourLocator((0, 12)),
         minor_formatter=mdates.DateFormatter("%H"),
     )
-    axs.set_title(y_fieldName + " for 8 weeks")
-    axs.set_xlabel('Time')
-    axs.set_ylabel(y_fieldName)
-    axs.tick_params(axis='both', which='major', labelsize=12)
-    axs.legend()
+    axs.set_title(y_fieldName + " for 8 weeks", fontsize=20)
+    axs.set_xlabel('Time', fontsize=15)
+    axs.set_ylabel(y_fieldName, fontsize=15)
+    axs.tick_params(axis='both', which='major', labelsize=15)
+    fig.legend(fontsize=10)
     fig.tight_layout()
     fig.savefig("Plots/Threshold/Telemetry/WeeklyPattern/"+ y_field+".png", dpi=500)
     plt.close(fig)
 
 
-y_fields = ["egress_octets"]
-y_field_names = ["Egress octets per second"]
+y_fields = ["egress_pkts"]
+y_field_names = ["Egress packets/s"]
 counter1 = 0
 makePlot(y_fields[counter1], y_field_names[counter1])

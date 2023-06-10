@@ -18,5 +18,7 @@ attackDate= arguments[3]
 systemId = arguments[4]
 interval = timedelta(minutes=int(arguments[5]))
 thresholdDstEntropy = getThreshold("dstEntropy", systemId, interval, "Entropy", "NetFlow", attackDate)
+print(thresholdDstEntropy)
 thresholdDstEntropyRate = getThreshold("dstEntropyRate", systemId, interval, "Entropy", "NetFlow", attackDate)
+print(thresholdDstEntropyRate)
 detectionDst(start, stop, systemId, frequency, interval, 10, thresholdDstEntropy, thresholdDstEntropyRate, attackDate)

@@ -1,11 +1,13 @@
 from datetime import timedelta,datetime
 from pathlib import Path
+import pprint
 import pandas as pd
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
 from threading import Thread, Timer
 import json
+import networkx as nx
 
 #Parameters for the MQTT connection
 MQTT_BROKER = 'localhost'
@@ -22,11 +24,11 @@ class Aggregation:
     """
         The class is initialized with data fields and database dictionaries.
     """
-    def __init__(self, broker, port, inputTopic, outputTopicTime, outputTopicIPs, outputTopicAttackTypes, outputDist, graph, attackDate):
+    def __init__(self, broker, port, inputTopic, outputTopicRanking, outputTopicIPs, outputTopicAttackTypes, outputDist, graph, attackDate):
         self.port = port
         self.broker = broker
         self.input = inputTopic
-        self.outputTime = outputTopicTime
+        self.outputRanking = outputTopicRanking
         self.outputIPs = outputTopicIPs
         self.outputAttackTypes = outputTopicAttackTypes
         self.outputDist = outputDist
@@ -37,6 +39,8 @@ class Aggregation:
         self.falsePositivesIn = 0
         self.truePositivesOut = 0
         self.falsePositivesOut = 0
+        self.combinedTruePositivesOut = 0
+        self.combinedFalsePositivesOut = 0
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
@@ -66,22 +70,26 @@ class Aggregation:
                 counter[element] += 1
             else:
                 counter[element] = 1
-
-        if 1 not in counter:
-            self.falsePositivesOut += counter[0]
-        elif 0 not in counter:
-            self.truePositivesOut += counter[1]
-        else:
-            if counter[0] > counter[1]:
+        if 0 or 1 in counter:
+            if 1 not in counter:
                 self.falsePositivesOut += counter[0]
-            elif counter[0] < counter[1]:
+                self.combinedFalsePositivesOut += 1
+            elif 0 not in counter:
                 self.truePositivesOut += counter[1]
+                self.combinedTruePositivesOut += 1
+            else:
+                if counter[0] > counter[1]:
+                    self.falsePositivesOut += counter[0]
+                    self.combinedFalsePositivesOut += 1
+                elif counter[0] < counter[1]:
+                    self.truePositivesOut += counter[1]
+                    self.combinedTruePositivesOut += 1
         return counter    
 
     def addAlertToGraph(self, gateway, interval, alert, alertDB):
         if alertDB == 0:
             newAlert = dict(alert)
-            del newAlert["Packet_size_distribution"]
+            newAlert.pop("Packet_size_distribution", None)
             if interval in self.getTimes(gateway, self.alertDB):
                 self.alertDB[gateway][interval].append(newAlert)
             else:
@@ -94,9 +102,9 @@ class Aggregation:
 
     def removeTimestampFromGraph(self, gateway, interval, alertDB):
         if alertDB == 0:
-            del self.alertDB[gateway][interval]
+            self.alertDB[gateway].pop(interval, None)
         elif alertDB == 1:
-            del self.alertDBDistribution[gateway][interval]
+            self.alertDBDistribution[gateway].pop(interval, None)
 
     def getTimes(self, gateway, alertDB):
         return alertDB[gateway]
@@ -124,49 +132,120 @@ class Aggregation:
         etime = self.startTime + timedelta(seconds=60)
         interval = pd.Interval(stime, etime, closed='both')
         
+        overlappingAlerts = 0
+        deviation_scores = []
+        real_labels = []
+        attack_types = []
+        gateways = []
+        alreadyAlertedGateways = []
         
-        for gateway in self.graph.G:
-            overlappingAlerts = 0
-            deviation_scores = []
-            real_labels = []
-            attack_types = []
-            removeTimes = []
-            times = list(self.getTimes(gateway, self.alertDB).keys())
-            for time in times:
+        gatewayNodes = list(self.graph.G.nodes)
+        numberOfGateways = len(gatewayNodes)
+        for i in range(numberOfGateways):
+            gateway = gatewayNodes[i]
+            if gateway in alreadyAlertedGateways:
+                continue
+            removeTimesGateway = []
+            overlapTimes = []
+            timesGateway = list(self.getTimes(gateway, self.alertDB).keys())
+            overlap = False
+            for timeGateway in timesGateway:
                 #Remove old alerts from the data structure
-                if time.left < stime - timedelta(minutes = 5):
-                    removeTimes.append(time)
+                if timeGateway.left < stime - timedelta(minutes = 15):
+                    removeTimesGateway.append(timeGateway)
+                    continue
+                if interval.overlaps(timeGateway):
+                    overlap = True
+                    overlapTimes.append(timeGateway)
+                            
+            for time in removeTimesGateway:
+                self.removeTimestampFromGraph(gateway, time, 0)
+            if len(self.getTimes(gateway, self.alertDB).keys()) == 0 or not overlap:
+                continue
+            timeExists = False
+            removeTimesOtherGatewayBecauseOfAlert = {}
+            for j in range(i +1, numberOfGateways):
+                otherGateway = gatewayNodes[j]
+                if otherGateway == gateway:
+                    continue
+    
+                '''if nx.shortest_path_length(self.graph.G, gateway, otherGateway) > 4:
+                    continue'''
+
+                if otherGateway in alreadyAlertedGateways:
                     continue
                 
-                #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
-                if interval.overlaps(time):
-                    alerts = list(self.getAlerts(gateway, time, self.alertDB))
-                    overlappingAlerts += len(alerts)
+                removeTimesOtherGateway = []
+                removeTimesOtherGatewayBecauseOfAlert[gateway] = []
+                timesOtherGateway = list(self.getTimes(otherGateway, self.alertDB).keys())
+                for timeOtherGateway in timesOtherGateway:
+                    #Remove old alerts from the data structure
+                    if timeOtherGateway.left < stime - timedelta(minutes = 15):
+                        removeTimesOtherGateway.append(timeOtherGateway)
+                        continue
+                
+                    #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
+                    if interval.overlaps(timeOtherGateway):
+                        timeExists = True
+                        alertsOtherGateway = list(self.getAlerts(otherGateway, timeOtherGateway, self.alertDB))
+                        gateways.append(otherGateway)
+                        removeTimesOtherGatewayBecauseOfAlert[gateway].append(timeOtherGateway)
+                        overlappingAlerts +=len(alertsOtherGateway)
 
-                    for alert in alerts:
+                        for alert in alertsOtherGateway:
+                            if not alert["Deviation_score"] == None:
+                                deviation_scores.append(alert["Deviation_score"])
+                            real_labels.append(alert["Real_label"])
+                            if not alert["Attack_type"] == None:
+                                attack_types.append(alert["Attack_type"])
+                
+                for time in removeTimesOtherGateway:
+                    self.removeTimestampFromGraph(otherGateway, time, 0)
+            removeTimesGatewayBecauseOfAlert = []
+            if timeExists and gateway not in alreadyAlertedGateways:
+                gateways.append(gateway)
+                for timeGateway in overlapTimes:
+                    alertsGateway = list(self.getAlerts(gateway, timeGateway, self.alertDB))
+                    overlappingAlerts += len(alertsGateway)
+                    alreadyAlertedGateways.append(gateway)
+                    removeTimesGatewayBecauseOfAlert.append(timeGateway)
+                    for alert in alertsGateway:
                         if not alert["Deviation_score"] == None:
                             deviation_scores.append(alert["Deviation_score"])
                         real_labels.append(alert["Real_label"])
                         if not alert["Attack_type"] == None:
                             attack_types.append(alert["Attack_type"])
             
-            for time in removeTimes:
-                self.removeTimestampFromGraph(gateway, time, 0)
             if not overlappingAlerts == 0:
-                print("\nOverlappingAlerts for gateway", gateway)
+                print("\nOverlappingAlerts for gateway",gateway)
                 print(overlappingAlerts)
-            if overlappingAlerts > 10:
-                self.countElements(real_labels)
+                            
+            if overlappingAlerts > 100 and timeExists and len(gateways) > 2:
+                for gateway in gateways:
+                    alreadyAlertedGateways.append(gateway)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                         'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
-                        'Gateway': gateway,
+                        'Gateways': list(set(gateways)),
                         'Deviation_scores': deviation_scores,
-                        'Real_labels': real_labels,
-                        'Attack_types': attack_types,
-                        'alertDB': self.encodeAlertsDB(self.alertDB)}
+                        'Real_labels': self.countElements(real_labels),
+                        'Attack_types':  self.countElements(attack_types)}
 
-                self.mqtt_client.publish(self.outputTime, json.dumps(message))
-                print("Aggregation published to topic", self.outputTime)
+                self.mqtt_client.publish(self.outputRanking, json.dumps(message))
+                print("Aggregation published to topic", self.outputRanking)
+
+                overlappingAlerts = 0
+                deviation_scores = []
+                real_labels = []
+                attack_types = []
+                gateways = []
+
+                for otherGateway in removeTimesOtherGatewayBecauseOfAlert:
+                    timesOtherGateway = list(self.getTimes(otherGateway, self.alertDB).keys())
+                    for time in timesOtherGateway:
+                        self.removeTimestampFromGraph(otherGateway, time, 0)
+                for time in removeTimesGatewayBecauseOfAlert:
+                    self.removeTimestampFromGraph(gateway, time, 0)
+
         self.lastAlertCounter = self.alertCounter
         self.startTime += timedelta(seconds=60)
         thread2 = Timer(60, self.aggregateTime)
@@ -240,14 +319,15 @@ class Aggregation:
             print('Message sent from topic {} had no valid JSON. Message ignored. {}'.format(msg.topic, err))
             return
         if self.alertCounter == 0:
-            self.startTime = pd.Timestamp(payload.get('sTime'))
+            self.startTime = pd.Timestamp(payload.get('sTime')).replace(second=0)
         if payload.get('sTime') == "WRITE":
             p = Path('Detections' + self.fileString)
             q = p / 'Correlation' 
             if not q.exists():
                 q.mkdir(parents=True)
             alertsFile = open(str(q) + "/NumberOfAlertsAggregation.csv", "a")
-            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout\n" + str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut))
+            alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout,TPoutCombined,FPoutCombined\n")
+            alertsFile.write(str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," +str(self.combinedTruePositivesOut) + "," + str(self.combinedFalsePositivesOut))
             alertsFile.close()
         else:
             self.alertCounter += 1
@@ -273,10 +353,11 @@ class Aggregation:
             elif int(payload.get('Real_label')) == 1:
                 self.truePositivesIn += 1
             
-            stime = pd.Timestamp(stime)
+            stime = pd.Timestamp(stime)- timedelta(seconds = 2)
             etime = pd.Timestamp(etime)
             interval = pd.Interval(stime, etime, closed='both')
             self.addAlertToGraph(gateway, interval, payload, 0)
+
 
     def start(self):
         self.mqtt_client = mqtt.Client()

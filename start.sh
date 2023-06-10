@@ -1,5 +1,4 @@
 #!/bin/bash
-interval=5
 times=(
     "2023-03-24 14:00:00"
     "2023-03-24 14:15:00"
@@ -20,6 +19,14 @@ times=(
     "2023-03-24 18:00:00"
 )
 attackDate="24.03.23"
+
+sleep $((12420))
+python3 runAggregation.py "24.03.23" &
+python3 runCorrelationAttackType.py "24.03.23" &
+python3 runCorrelationDistribution.py "24.03.23" &
+python3 runRanking.py "24.03.23" &
+
+interval=15
 for ((i=0; i< ${#times[@]}-1; i++)); do
     for systemId in "tromso-gw5" "teknobyen-gw1" "hoytek-gw2" "bergen-gw3" "trd-gw" "ifi2-gw5"
     do
@@ -57,10 +64,12 @@ for ((i=0; i< ${#times[@]}-1; i++)); do
         python3 Attack0803RunSYNEntropyDetection.py "${times[i]}" "${times[i+1]}" $attackDate $systemId $interval &
         python3 Attack0803RunTopKFlows.py "${times[i]}" "${times[i+1]}" $attackDate $systemId &
         python3 Attack0803RunXmasDetection.py "${times[i]}" "${times[i+1]}" $attackDate $systemId &
-        sleep $((15))
     done
     sleep $((15*60))
     python3 WriteCorrelationsToFiles.py
 done
-sleep $((5*60))
+sleep $((7*60))
 python3 WriteCorrelationsToFiles.py
+sleep $((60))
+pkill python
+mv Detections2403 Detections2403_15min

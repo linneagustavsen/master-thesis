@@ -35,6 +35,8 @@ from time import sleep
 import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix
+
+from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes
 '''baseFile="two-hours-2011-02-08_10-12-sorted.rw"         
 systems = ["oslo-gw"]
 start = "2011-02-08 10:00:00"
@@ -187,8 +189,7 @@ with open("Telemetry/Kmeans/DataSets/Fields.attack.08.03.23.stopTime.15.30.00.na
     df = pd.read_pickle(f)
 print(df)'''
 
-from Correlation.NetworkGraph import NetworkGraph
+'''from Correlation.NetworkGraph import NetworkGraph
 import networkx as nx
 graph = NetworkGraph().G
-print(nx.shortest_path(graph, "teknobyen-gw1", "trd-gw"))
-
+print(nx.shortest_path(graph, "teknobyen-gw1", "trd-gw"))'''

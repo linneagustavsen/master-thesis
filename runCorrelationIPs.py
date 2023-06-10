@@ -7,6 +7,6 @@ MQTT_PORT = 1883
 MQTT_USER = 'correlation'
 MQTT_PASSWORD = 'correlationPass'
 MQTT_TOPIC_INPUT = 'detections/aggregation/ips'
-MQTT_TOPIC_OUTPUT = 'detections/correlation'
+MQTT_TOPIC_OUTPUT = 'detections/correlation/ips'
 correlation = Correlation_IPs(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT, arguments[1])
 correlation.start()

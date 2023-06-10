@@ -164,17 +164,20 @@ def calculationsRandomForestNoIPNetFlow(systemId, interval, attackDate, estimato
             with open(str(fieldsFileNoIPTesting), 'rb') as testingFile:
                 testingSet = np.load(testingFile, allow_pickle=True)
             if len(testingSet) ==0:
+                print("Testing set is empty")
                 return 
         elif Path(fieldsFileTesting).exists():
             with open(str(fieldsFileTesting), 'rb') as testingFile:
                 df2 = np.load(testingFile, allow_pickle=True)
             if len(df2) ==0:
+                print("Testing set is empty")
                 return
             df3 = np.delete(df2, np.s_[2:4],1)
             testingSet = np.delete(df3, 16, 1)
 
         
         if len(testingSet) ==0:
+            print("Testing set is empty")
             continue 
         
         sTime, eTime, testingMeasurements, testingLabel = structureDataNumpyArrays(testingSet)    

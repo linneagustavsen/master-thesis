@@ -12,6 +12,7 @@ ThresholdDecision/Threshold/NetFlow/Attack*/*.csv
 ThresholdDecision/TopKFlows/NetFlow/Attack*/*.csv
 ThresholdDecision/Entropy/Telemetry/Attack*/*.csv
 ThresholdDecision/Threshold/Telemetry/Attack*/*.csv
+ThresholdDecision/Entropy/NetFlow/Attack*/RocScores/*.csv
 ThresholdDecisionold/Entropy/NetFlow/*.csv
 ThresholdDecisionold/Threshold/NetFlow/*.csv
 ThresholdDecisionold/Entropy/Telemetry/*.csv

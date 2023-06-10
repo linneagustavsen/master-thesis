@@ -26,13 +26,16 @@ def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, 
     labels = data["real_label"]
 
     changes = pd.to_numeric(data["Change"],errors='coerce')
-
-    changeList = list(filter(lambda item: item is not None, changes))
-    thresholds = list(sorted(changeList))
-    f_scores = open(str(q) + "/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    changeList = list(changes.dropna())
+    newChangeList = [i * 10000000000 for i in changeList]
+    thresholds = list(sorted(newChangeList))
+    f_scores = open(str(q) + "/RocScores/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     f_scores.write("Threshold,TP,FP,FN,TN,F1,TPR,FPR,Accuracy,FNR,PPV")
-    print(thresholds)
-    print(changeList)
+
+    lastTruePositives = 0
+    lastFalsePositives = 0
+    lastFalseNegatives = 0
+    lastTrueNegatives = 0
     for threshold in thresholds:
         threshold = threshold/10000000000
         
@@ -49,6 +52,7 @@ def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, 
                 else:
                     trueNegatives += 1
                 continue
+            #print(change, threshold)
             if change > threshold:
                 if attack:
                     truePositives += 1
@@ -59,12 +63,20 @@ def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, 
                     falseNegatives += 1
                 else:
                     trueNegatives += 1
-                
+     
         if truePositives == 0:
+            break
+        if lastTruePositives == truePositives and lastFalsePositives == falsePositives and lastFalseNegatives == falseNegatives and lastTrueNegatives == trueNegatives:
             continue
-        if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
-            continue
-        accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
+        else:
+            lastTruePositives = truePositives
+            lastFalsePositives = falsePositives
+            lastFalseNegatives = falseNegatives
+            lastTrueNegatives = trueNegatives
+        if trueNegatives != 0 and falsePositives != 0 and falseNegatives != 0:
+            accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
+        else:
+            accuracy = None
         if falsePositives != 0 or trueNegatives != 0:
             fpr = falsePositives/(falsePositives + trueNegatives)
         else:
@@ -105,6 +117,8 @@ for frequency in frequencies:
         for alpha in range(2, 16):
             for windowSize in range(2,21):
                 for k in range(len(y_fields)):
+                    if alpha == 2:
+                        continue
                     print("frequency")
                     print(frequency)
                     print("interval")
@@ -117,3 +131,4 @@ for frequency in frequencies:
                     print(y_fields[k])
                     print("\n")
                     findGoodThresholdEntropy(y_field_names[k], y_fields[k], alpha, systemId, frequency, interval, windowSize, attackDate)
+                    
