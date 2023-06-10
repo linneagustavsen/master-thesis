@@ -215,7 +215,7 @@ def getDataPackets(start, stop, bucket, systemId, direction):
                         |> group()\
                         |> sort(columns: ["_time"])\
                         |> aggregateWindow(every: 2s, fn: sum, createEmpty: false)\
-                        |> set(key: "_field", value: "packets"")'
+                        |> set(key: "_field", value: "packets")'
 
         if direction == "in":
             query += 'data(startTime:'+start + ', stopTime:'+stop + ', field:"egress_stats__if_1sec_pkts", fieldName: "ingress_stats__if_1sec_pkts")'

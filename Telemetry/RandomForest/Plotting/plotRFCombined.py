@@ -8,7 +8,7 @@ import pandas as pd
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
+def plotRandomForestCombined(interval, systemId, attackDate):
     if attackDate == "08.03.23":
         fileString = "0803"
         strings = [
@@ -58,12 +58,12 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     #Loop for every minute in a week
     isAttack = False
     
-    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/NetFlow/AlertsNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/Telemetry/Alerts.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     #print(clusterLabels["AttackCluster"])
     sTimeAttack = pd.to_datetime(alerts["sTime"])
 
-    packetsAttack = alerts["packets"]
+    packetsAttack = alerts["ingress_stats__if_1sec_pkt"]
     labelsAttack = alerts["real_label"]
     
 
@@ -81,7 +81,7 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
         print("There was no attack")
         return
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="162931", s=30, label="False positives")
     axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
@@ -100,7 +100,7 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     fig.legend(fontsize=15)
 
     fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Combined/NoIP.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close(fig)
 
 
@@ -113,4 +113,4 @@ attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:
-            plotRandomForestCombinedNoIP(interval, systemId, attackDate)
+            plotRandomForestCombined(interval, systemId, attackDate)

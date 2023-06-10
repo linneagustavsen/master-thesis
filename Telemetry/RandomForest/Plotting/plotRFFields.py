@@ -8,7 +8,7 @@ import pandas as pd
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
+def plotRandomForestFields(interval, systemId, attackDate):
     if attackDate == "08.03.23":
         fileString = "0803"
         strings = [
@@ -58,14 +58,14 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     #Loop for every minute in a week
     isAttack = False
     
-    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/NetFlow/AlertsNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/Telemetry/Alerts.Fields.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     #print(clusterLabels["AttackCluster"])
     sTimeAttack = pd.to_datetime(alerts["sTime"])
 
-    packetsAttack = alerts["packets"]
+    packetsAttack = alerts["ingress_stats__if_1sec_pkt"]
     labelsAttack = alerts["real_label"]
-    
+
 
     for i in range(len(labelsAttack)):
         if labelsAttack[i] == 1:
@@ -99,18 +99,18 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
 
-    fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Combined/NoIP.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    #fig.tight_layout()
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Fields/Packets."+  str(systemId)+ ".png", dpi=500)
     plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-
+clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:
-            plotRandomForestCombinedNoIP(interval, systemId, attackDate)
+            plotRandomForestFields(interval, systemId, attackDate)

@@ -8,7 +8,7 @@ import pandas as pd
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
+def plotRandomForestEntropy(interval, systemId, attackDate):
     if attackDate == "08.03.23":
         fileString = "0803"
         strings = [
@@ -39,8 +39,8 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
-    #Makes datetime objects of the input times
-    fig, axs = plt.subplots(1, 1, figsize=(20, 10))
+    
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
     format = '%b %d %H:%M:%S'
     counterStrings = 0
@@ -49,93 +49,68 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         stop = datetime.strptime(string[1], format).replace(year=2023)
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
-
-    clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-
-    cluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-    
-    sTime0 = pd.to_datetime(cluster["sTime"])
-    
-    packets0 = cluster["number_of_packets"]
-    labels0 = cluster["real_label"]
-    
-    if 1 not in labels0.values :
-        print("No attacks")
-        return
-    #format = '%Y-%m-%dT%H:%M:%SZ'
-    eTime0 = pd.to_datetime(cluster["eTime"])
-    
-
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-    for i in range(len(labels0)):
-        sTime0[i] = sTime0[i].replace(tzinfo=None)
-        eTime0[i] = eTime0[i].replace(tzinfo=None)
-        if labels0[i] == 1:
-            if sTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-                continue
-            elif sTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-
-                nowInterval = pd.Interval(lastInterval.right, eTime0[i].replace(second=0).replace(tzinfo=None)+timedelta(minutes=1), closed="both")
-                lastInterval = pd.Interval(lastInterval.left, eTime0[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
-            
-            elif eTime0[i].replace(second=0).replace(tzinfo=None) in lastInterval:
         
-                nowInterval = pd.Interval(sTime0[i].replace(second=0).replace(tzinfo=None), lastInterval.left, closed="both")
-                lastInterval = pd.Interval(sTime0[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
-            else:
-                nowInterval = pd.Interval(sTime0[i].replace(second=0).replace(tzinfo=None), eTime0[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
-                lastInterval = nowInterval
 
-            axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
+    packetsClusterAttack = []
+    sTimeClusterAttack = []
+    packetsClusterNormal = []
+    sTimeClusterNormal = []
+    #Loop for every minute in a week
+    isAttack = False
+    
+    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/Telemetry/Alerts.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    
+    #print(clusterLabels["AttackCluster"])
+    sTimeAttack = pd.to_datetime(alerts["sTime"])
 
-    labelPlot1 = ""
-    labelPlot2 = ""
+    packetsAttack = alerts["entropy_packet_size_ingress"]
+    labelsAttack = alerts["real_label"]
+    
 
-    if len(clusterLabels["AttackCluster"]) == 0:
+    for i in range(len(labelsAttack)):
+        if labelsAttack[i] == 1:
+            isAttack = True
+            
+            sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
+            packetsClusterAttack.append(packetsAttack[i])
+        else:
+            sTimeClusterNormal.append(sTimeAttack[i].replace(tzinfo=None))
+            packetsClusterNormal.append(packetsAttack[i])
+
+    if not isAttack:
+        print("There was no attack")
         return
-    if clusterLabels["AttackCluster"][0] == 0:
-        labelPlot1 = "Attack cluster"
-        labelPlot2 = "Normal cluster"
-        color1 = "#E76F51"
-        color2 = "#162931"
-        size1 = 70
-        size2 = 30
-    elif clusterLabels["AttackCluster"][0] == 1:
-        labelPlot2 = "Attack cluster"
-        labelPlot1 = "Normal cluster"
-        color1 = "#162931"
-        color2 = "#E76F51"
-        size1 = 30
-        size2 = 70
-    axs.scatter(sTime0 ,packets0, color="#162931", label="Attack cluster")
+
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
+    #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in each cluster")
+    axs.set_title("Entropy of packet size in RF alerts")
     axs.title.set_size(20)
     axs.set_xlabel('Time', fontsize=20)
-    axs.set_ylabel("Packets", fontsize=20)
     #axs.ylabel.set_size(15)
     #axs.xlabel.set_size(15)
+    axs.set_ylabel("Entropy of packet size", fontsize=20)
+    #axs.set_ylim([0,maxValue])
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
-    
-    
-    fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.legend(fontsize=15)
+
+    #fig.tight_layout()
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Entropy/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-startKmeans = "2023-03-08 14:15:00"
-stopKmeans= "2023-03-08 16:00:00"
+
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:
-            plotKmeansEntropy(startKmeans, stopKmeans, interval, systemId, attackDate)
+            plotRandomForestEntropy(interval, systemId, attackDate)

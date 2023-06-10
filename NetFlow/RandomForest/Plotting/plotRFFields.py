@@ -81,8 +81,8 @@ def plotRandomForestFields(interval, systemId, attackDate):
         print("There was no attack")
         return
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="darkRed", s=10, label="False positives")
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="#162931", s=30,label="True positives")
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(

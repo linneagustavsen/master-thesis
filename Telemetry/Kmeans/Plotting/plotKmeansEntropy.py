@@ -103,7 +103,7 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
     if clusterLabels["AttackCluster"][0] == 0:
         labelPlot1 = "Attack cluster"
         labelPlot2 = "Normal cluster"
-        color1 = "#E76F51"
+        color1 = "darkRed"
         color2 = "#162931"
         size1 = 70
         size2 = 30
@@ -111,7 +111,7 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
         labelPlot2 = "Attack cluster"
         labelPlot1 = "Normal cluster"
         color1 = "#162931"
-        color2 = "#E76F51"
+        color2 = "darkRed"
         size1 = 30
         size2 = 70
     axs.scatter(timeAxis ,newPackets0, color=color1, label=labelPlot1, s=size1)

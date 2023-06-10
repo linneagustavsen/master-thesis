@@ -113,10 +113,7 @@ def mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, freq
                 print("The file Telemetry/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl does not exist") 
             startTime += timedelta(minutes=15)
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
-systems = ["hoytek-gw2"]
+systems = [ "trd-gw", "ifi2-gw5", "oslo-gw1"]
 
 #Attack 2
 start = "2023-03-17 11:00:00"
@@ -130,6 +127,9 @@ attackDate= "17.03.23"
 fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
 bucket = "april"
 main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+            "oslo-gw1"]
 mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
 
 #Attack 3

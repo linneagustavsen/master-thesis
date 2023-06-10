@@ -8,7 +8,7 @@ import pandas as pd
 '''
     Make a plot based on arrays of values and timestamps
 '''
-def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDate):
+def plotKmeansCombined(start, stop, interval, clusterFrequency, systemId, attackDate):
     if attackDate == "08.03.23":
         fileString = "0803"
         strings = [
@@ -40,15 +40,14 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     
-    fig, axs = plt.subplots(2, 1, figsize=(20, 10))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 10))
 
     format = '%b %d %H:%M:%S'
     counterStrings = 0
     for string in strings:
         start = datetime.strptime(string[0], format).replace(year=2023)
         stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs[0].axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-        axs[1].axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
         
     
@@ -76,11 +75,11 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         '''
         if len(clusterLabels["AttackCluster"]) ==0:
             continue
-        if clusterLabels["AttackCluster"][0] == 0:
+        if clusterLabels["AttackCluster"] == 0:
             attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             nonAttackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
-        elif clusterLabels["AttackCluster"][0] == 1:
+        elif clusterLabels["AttackCluster"] == 1:
             attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
             nonAttackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         '''
@@ -88,10 +87,10 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         #print(clusterLabels["AttackCluster"])
         sTimeAttack = pd.to_datetime(attackCluster["sTime"])
         sTimeNormal = pd.to_datetime(nonAttackCluster["sTime"])
-        packetsAttack = attackCluster["egress_stats__if_1sec_pkt"]
+        packetsAttack = attackCluster["ingress_stats__if_1sec_pkt"]
         labelsAttack = attackCluster["real_label"]
         
-        packetsNormal = nonAttackCluster["egress_stats__if_1sec_pkt"]
+        packetsNormal = nonAttackCluster["ingress_stats__if_1sec_pkt"]
         labelsNormal = nonAttackCluster["real_label"]
 
         for i in range(len(labelsAttack)):
@@ -109,36 +108,27 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         startTime += clusterFrequency
     if maxValue == 0:
         return
-    axs[0].scatter(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70, label="Attack cluster")
 
-    axs[1].scatter(sTimeClusterNormal ,packetsClusterNormal, color="#E76F51", label="Normal cluster")
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="Normal cluster")
 
-    axs[0].xaxis.set(
+    axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs[0].set_title("Packets in each cluster", fontsize=20)
-    #axs[0].title.set_size(20)
-    axs[0].set_xlabel('Time', fontsize=20)
-    #axs[0].ylabel.set_size(15)
-    #axs[0].xlabel.set_size(15)
-    axs[0].set_ylabel("Packets", fontsize=20)
-    axs[0].set_ylim([0,maxValue])
-    axs[0].tick_params(axis='both', which='major', labelsize=15)
-    axs[0].legend(fontsize=20)
-    #axs[0].text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
+    axs.set_title("Packets in each cluster", fontsize=20)
+    #axs.title.set_size(20)
+    axs.set_xlabel('Time', fontsize=20)
+    #axs.ylabel.set_size(15)
+    #axs.xlabel.set_size(15)
+    axs.set_ylabel("Packets", fontsize=20)
+    #axs.set_ylim([0,maxValue])
+    axs.set_yscale('log')
+    axs.tick_params(axis='both', which='major', labelsize=15)
+    #axs.legend(fontsize=20)
+    #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
     
-    axs[1].xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
-        major_formatter=mdates.DateFormatter("%H:%M")
-    )
-    axs[1].set_xlabel('Time', fontsize=20)
-    axs[1].set_ylabel("Packets", fontsize=20)
-    #axs[1].ylabel.set_size(15)
-    #axs[1].xlabel.set_size(15)
-    axs[1].tick_params(axis='both', which='major', labelsize=15)
-    axs[1].set_ylim([0,maxValue])
-    axs[1].legend(fontsize=20)
+    fig.legend(fontsize=20)
     fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close(fig)
@@ -155,6 +145,6 @@ for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:
             if interval == timedelta(minutes=15):
-                plotKmeansFields(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
+                plotKmeansCombined(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
             else:
-                plotKmeansFields(startKmeans, stopKmeans, interval, clusterFrequency, systemId, attackDate)
+                plotKmeansCombined(startKmeans, stopKmeans, interval, clusterFrequency, systemId, attackDate)

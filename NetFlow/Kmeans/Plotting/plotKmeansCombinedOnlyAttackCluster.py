@@ -48,7 +48,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         start = datetime.strptime(string[0], format).replace(year=2023)
         stop = datetime.strptime(string[1], format).replace(year=2023)
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-        axs[1].axvspan(start, stop, facecolor=colors[counterStrings])
+        #axs[1].axvspan(start, stop, facecolor=colors[counterStrings])
         counterStrings += 1
         
     
@@ -107,19 +107,15 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
                 axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
             sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
             packetsClusterAttack.append(packetsAttack[i])
-            if packetsAttack[i] > maxValue:
-                maxValue = packetsAttack[i]
             
         startTime += clusterFrequency
-    if maxValue == 0:
-        print("the max value was 0")
-        return
+
     if not isAttack:
         print("There was no attack")
         return
 
     axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
-    axs.plot(sTimeClusterAttack ,packetsClusterAttack, color="#162931", label="Attack cluster")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", label="Attack cluster")
 
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
@@ -134,6 +130,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
+    axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
