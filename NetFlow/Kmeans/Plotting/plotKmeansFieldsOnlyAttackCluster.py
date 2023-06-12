@@ -102,9 +102,11 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         startTime += clusterFrequency
     if maxValue == 0:
         print("the max value was 0")
+        plt.close(fig)
         return
     if not isAttack:
         print("There was no attack")
+        plt.close(fig)
         return
     axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
     axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", label="Attack cluster")

@@ -135,7 +135,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     if not q.exists():
         q.mkdir(parents=True)
 
-    scores = open(str(q) + "/Scores.Entropy.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores = open(str(q) + "/Scores.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()

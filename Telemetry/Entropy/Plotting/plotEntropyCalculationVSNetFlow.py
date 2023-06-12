@@ -44,12 +44,14 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     endTime = pd.to_datetime(data["sTime"])
 
     y_values = data[y_field]
-    if y_field == "entropy_packet_size":
+    if y_field == "entropy_packet_size_ingress":
         y_valuesNetFlow = dataNetFlow["packetSizeEntropy"]
-    elif y_field == "entropy_rate_packet_size":
+    elif y_field == "entropy_rate_packet_size_ingress":
         y_valuesNetFlow = dataNetFlow["packetSizeEntropyRate"]
-    else:
-        y_valuesNetFlow = dataNetFlow[y_field]
+    elif y_field == "numberOfPackets_ingress":
+        y_valuesNetFlow = dataNetFlow["numberOfPackets"]
+    elif y_field == "numberOfBytes_ingress":
+        y_valuesNetFlow = dataNetFlow["numberOfBytes"]
     labels = data["real_label"]
     labelsNetFlow = dataNetFlow["real_label"]
 
@@ -85,7 +87,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+systems = ["narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 

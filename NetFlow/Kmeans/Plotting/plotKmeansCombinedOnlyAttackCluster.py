@@ -112,6 +112,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
 
     if not isAttack:
         print("There was no attack")
+        plt.close(fig)
         return
 
     axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")

@@ -52,6 +52,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
 
     clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     if len(clusterLabels["AttackCluster"]) == 0:
+        plt.close(fig)
         return
     cluster0 = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     cluster1 = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
@@ -65,6 +66,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     
     if 1 not in labels0.values and 1 not in labels1.values:
         print("No attacks")
+        plt.close(fig)
         return
     #format = '%Y-%m-%dT%H:%M:%SZ'
     eTime0 = pd.to_datetime(cluster0["eTime"])

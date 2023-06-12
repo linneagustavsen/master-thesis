@@ -79,6 +79,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
 
     if not isAttack:
         print("There was no attack")
+        plt.close(fig)
         return
 
     axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
@@ -105,8 +106,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+systems = ["ifi2-gw5", 
             "oslo-gw1"]
 clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]

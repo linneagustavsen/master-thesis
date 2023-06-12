@@ -71,8 +71,8 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
     eTime = pd.to_datetime(data["eTime"])
 
 
-    bytesArray_ingress = data["numberOfBytes"]
-    bytesArray_egress = data["numberOfBytes"]
+    bytesArray_ingress = data["numberOfBytes_ingress"]
+    bytesArray_egress = data["numberOfBytes_egress"]
     real_label = data["real_label"]
  
     truePositives_ingress = 0

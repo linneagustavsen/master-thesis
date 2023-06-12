@@ -79,6 +79,7 @@ def plotRandomForestCombined(interval, systemId, attackDate):
 
     if not isAttack:
         print("There was no attack")
+        plt.close(fig)
         return
 
     axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")

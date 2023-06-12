@@ -61,6 +61,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     
     if 1 not in labels0.values :
         print("No attacks")
+        plt.close(fig)
         return
     #format = '%Y-%m-%dT%H:%M:%SZ'
     eTime0 = pd.to_datetime(cluster["eTime"])
@@ -92,6 +93,7 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     labelPlot2 = ""
 
     if len(clusterLabels["AttackCluster"]) == 0:
+        plt.close(fig)
         return
 
     axs.scatter(sTime0 ,packets0, color="darkRed", label="Attack cluster")

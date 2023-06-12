@@ -71,8 +71,8 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
     eTime = pd.to_datetime(data["eTime"])
 
 
-    packetNumberArray_ingress = data["numberOfPackets"]
-    packetNumberArray_egress = data["numberOfPackets"]
+    packetNumberArray_ingress = data["numberOfPackets_ingress"]
+    packetNumberArray_egress = data["numberOfPackets_egress"]
     real_label = data["real_label"]
  
     truePositives_ingress = 0

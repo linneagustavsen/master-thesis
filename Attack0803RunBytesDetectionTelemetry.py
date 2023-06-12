@@ -17,6 +17,7 @@ frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
 systemId = arguments[4]
 interval = timedelta(minutes=int(arguments[5]))
-threshold = getThreshold("numberOfBytes", systemId, interval, "Entropy", "Telemetry", attackDate)
+threshold_ingress = getThreshold("numberOfBytes_ingress", systemId, interval, "Entropy", "Telemetry", attackDate)
+threshold_egress = getThreshold("numberOfBytes_egress", systemId, interval, "Entropy", "Telemetry", attackDate)
 
-detectionBytesTelemetry(start, stop, systemId, frequency, interval, 10, threshold, attackDate)
+detectionBytesTelemetry(start, stop, systemId, frequency, interval, 10, threshold_ingress, threshold_egress, attackDate)

@@ -119,7 +119,7 @@ for frequency in frequencies:
         for alpha in range(2, 16):
             for windowSize in range(2,21):
                 for k in range(len(y_fields)):
-                    if alpha < 6:
+                    if alpha < 8:
                         continue
                     print("frequency")
                     print(frequency)

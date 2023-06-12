@@ -17,7 +17,9 @@ frequency = timedelta(minutes = 1)
 attackDate= arguments[3]
 systemId = arguments[4]
 interval = timedelta(minutes=int(arguments[5]))
-thresholdEntropy = getThreshold("entropy_packet_size", systemId, interval, "Entropy", "Telemetry", attackDate)
-thresholdEntropyRate = getThreshold("entropy_rate_packet_size", systemId, interval, "Entropy", "Telemetry", attackDate)
+thresholdEntropy_ingress = getThreshold("entropy_packet_size_ingress", systemId, interval, "Entropy", "Telemetry", attackDate)
+thresholdEntropyRate_ingress = getThreshold("entropy_rate_packet_size_ingress", systemId, interval, "Entropy", "Telemetry", attackDate)
+thresholdEntropy_egress = getThreshold("entropy_packet_size_egress", systemId, interval, "Entropy", "Telemetry", attackDate)
+thresholdEntropyRate_egress = getThreshold("entropy_rate_packet_size_egress", systemId, interval, "Entropy", "Telemetry", attackDate)
 
-detectionEntropyTelemetry(start, stop, systemId,frequency, interval, 10, thresholdEntropy, thresholdEntropyRate, attackDate)
+detectionEntropyTelemetry(start, stop, systemId,frequency, interval, 10, thresholdEntropy_ingress, thresholdEntropyRate_ingress,  thresholdEntropy_egress, thresholdEntropyRate_egress, attackDate)
