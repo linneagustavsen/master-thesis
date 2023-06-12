@@ -6,6 +6,7 @@ Calculations1703/*
 Calculations2403/*
 Detections*/*
 Calculations/*
+FindBestRocScore/Calculations/Entropy/NetFlow/*.csv
 *.npy
 ThresholdDecision/Entropy/NetFlow/Attack*/*.csv
 ThresholdDecision/Threshold/NetFlow/Attack*/*.csv

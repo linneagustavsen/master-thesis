@@ -27,10 +27,13 @@ from HelperFunctionsTelemetry.GetDataTelemetry import getData
             thresholdPackets:       float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdPackets, attackDate):
+def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdPackets_ingress, thresholdPackets_egress, attackDate):
     
-    json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.packets."+ str(int(interval.total_seconds())) +".json", "r")
-    maxmin = json.load(json_file)
+    json_file_ingress = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.packets_ingress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_ingress = json.load(json_file_ingress)
+
+    json_file_egress = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.packets_egress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_egress = json.load(json_file_egress)
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -68,13 +71,19 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
     eTime = pd.to_datetime(data["eTime"])
 
 
-    packetNumberArray = data["numberOfPackets"]
+    packetNumberArray_ingress = data["numberOfPackets"]
+    packetNumberArray_egress = data["numberOfPackets"]
     real_label = data["real_label"]
  
-    truePositives = 0
-    falsePositives = 0
-    falseNegatives = 0
-    trueNegatives  =0
+    truePositives_ingress = 0
+    falsePositives_ingress = 0
+    falseNegatives_ingress = 0
+    trueNegatives_ingress  = 0
+
+    truePositives_egress = 0
+    falsePositives_egress = 0
+    falseNegatives_egress = 0
+    trueNegatives_egress  = 0
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -90,42 +99,72 @@ def detectionPacketsTelemetry(start, stop, systemId, frequency, interval, window
         attack = real_label[i]
         #Compare the difference of each metric with a threshold
         if i >= windowSize:
-            change = packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])
+            change_ingress = packetNumberArray_ingress[i] - np.nanmean(packetNumberArray_ingress[i-windowSize: i-1])
+            change_egress = packetNumberArray_egress[i] - np.nanmean(packetNumberArray_egress[i-windowSize: i-1])
             
             simulateRealTime(datetime.now(), eTime[i], attackDate)
-            if abs(change) > thresholdPackets:
+            if abs(change_ingress) > thresholdPackets_ingress:
                 alert = {
                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                    "Deviation_score": normalization(abs(change_ingress), maxmin_ingress["minimum"], maxmin_ingress["maximum"]),
                     "Real_label": int(attack),
                     "Attack_type": "Flooding"
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-            if abs(change) > thresholdPackets and attack:
-                truePositives += 1
-            elif abs(change) > thresholdPackets and not attack:
-                falsePositives += 1
-            elif abs(change) <= thresholdPackets and attack:
-                falseNegatives +=1
-            elif abs(change) <= thresholdPackets and not attack:
-                trueNegatives += 1
+            if abs(change_egress) > thresholdPackets_egress:
+                alert = {
+                   "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change_egress), maxmin_egress["minimum"], maxmin_egress["maximum"]),
+                    "Real_label": int(attack),
+                    "Attack_type": "Flooding"
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
+            if abs(change_ingress) > thresholdPackets_ingress and attack:
+                truePositives_ingress += 1
+            elif abs(change_ingress) > thresholdPackets_ingress and not attack:
+                falsePositives_ingress += 1
+            elif abs(change_ingress) <= thresholdPackets_ingress and attack:
+                falseNegatives_ingress +=1
+            elif abs(change_ingress) <= thresholdPackets_ingress and not attack:
+                trueNegatives_ingress += 1
+
+            if abs(change_egress) > thresholdPackets_egress and attack:
+                truePositives_egress += 1
+            elif abs(change_egress) > thresholdPackets_egress and not attack:
+                falsePositives_egress += 1
+            elif abs(change_egress) <= thresholdPackets_egress and attack:
+                falseNegatives_egress +=1
+            elif abs(change_egress) <= thresholdPackets_egress and not attack:
+                trueNegatives_egress += 1
         else:
             if attack:
-                falseNegatives +=1
+                falseNegatives_ingress +=1
+                falseNegatives_egress +=1
             elif not attack:
-                trueNegatives += 1
+                trueNegatives_ingress += 1
+                trueNegatives_egress += 1
     sleep(randrange(400))
     p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
         r.mkdir(parents=True)
     #Open file to write alerts to
-    scores = open(str(r) + "/Scores.NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_ingress = open(str(r) + "/Scores.NumberOfPackets_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    scores.write("TP,FP,FN,TN")
-    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
-    scores.close()
+    scores_ingress.write("TP,FP,FN,TN")
+    scores_ingress.write("\n"+ str(truePositives_ingress)+ "," + str(falsePositives_ingress)+ "," + str(falseNegatives_ingress)+ "," + str(trueNegatives_ingress))
+    scores_ingress.close()
+
+    scores_egress = open(str(r) + "/Scores.NumberOfPackets_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    scores_egress.write("TP,FP,FN,TN")
+    scores_egress.write("\n"+ str(truePositives_egress)+ "," + str(falsePositives_egress)+ "," + str(falseNegatives_egress)+ "," + str(trueNegatives_egress))
+    scores_egress.close()

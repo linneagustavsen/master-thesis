@@ -27,12 +27,17 @@ from HelperFunctions.Normalization import normalization
             thresholdEntropyRate:   float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdEntropy_ingress, thresholdEntropyRate_ingress, thresholdEntropy_egress, thresholdEntropyRate_egress, attackDate):
 
-    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
-    maxmin = json.load(json_file)
-    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
-    maxmin_rate = json.load(json_file_rate)
+    json_file_ingress = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_ingress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_ingress = json.load(json_file_ingress)
+    json_file_rate_ingress = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate_ingress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_rate_ingress = json.load(json_file_rate_ingress)
+
+    json_file_egress = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_egress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_egress = json.load(json_file_egress)
+    json_file_rate_egress = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate_egress."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_rate_egress = json.load(json_file_rate_egress)
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -70,20 +75,35 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
     eTime = pd.to_datetime(data["eTime"])
     real_label = data["real_label"]
 
-    packetSizeArray = data["entropy_packet_size"]
-    packetSizeRateArray = data["entropy_rate_packet_size"]
-    if os.path.exists("Calculations"+fileString+"/Entropy/Telemetry/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"):
-        packetSizeDistributionDict = pd.read_pickle("Calculations"+fileString+"/Entropy/Telemetry/packetSizeDistributions."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
+    packetSizeArray_ingress = data["entropy_packet_size_ingress"]
+    packetSizeRateArray_ingress = data["entropy_rate_packet_size_ingress"]
+    if os.path.exists("Calculations"+fileString+"/Entropy/Telemetry/packetSizeDistributions_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl"):
+        packetSizeDistributionDict_ingress = pd.read_pickle("Calculations"+fileString+"/Entropy/Telemetry/packetSizeDistributions_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
 
-    truePositives = 0
-    falsePositives = 0
-    falseNegatives = 0
-    trueNegatives  = 0
 
-    truePositives_r = 0
-    falsePositives_r = 0
-    falseNegatives_r = 0
-    trueNegatives_r  = 0
+    packetSizeArray_egress = data["entropy_packet_size_egress"]
+    packetSizeRateArray_egress = data["entropy_rate_packet_size_egress"]
+   
+    truePositives_ingress = 0
+    falsePositives_ingress = 0
+    falseNegatives_ingress = 0
+    trueNegatives_ingress  = 0
+
+    truePositives_r_ingress = 0
+    falsePositives_r_ingress = 0
+    falseNegatives_r_ingress = 0
+    trueNegatives_r_ingress  = 0
+
+
+    truePositives_egress = 0
+    falsePositives_egress = 0
+    falseNegatives_egress = 0
+    trueNegatives_egress  = 0
+
+    truePositives_r_egress = 0
+    falsePositives_r_egress = 0
+    falseNegatives_r_egress = 0
+    trueNegatives_r_egress  = 0
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -100,64 +120,120 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
         #If there is not enough stored values to compare with we skip the detection
         if i >= windowSize:
             
-            change = packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])
-            change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
+            change_ingress = packetSizeArray_ingress[i] - np.nanmean(packetSizeArray_ingress[i-windowSize: i-1])
+            change_r_ingress = packetSizeRateArray_ingress[i] - np.nanmean(packetSizeRateArray_ingress[i-windowSize: i-1])
 
-            if change < 0:
+            change_egress = packetSizeArray_egress[i] - np.nanmean(packetSizeArray_egress[i-windowSize: i-1])
+            change_r_egress = packetSizeRateArray_egress[i] - np.nanmean(packetSizeRateArray_egress[i-windowSize: i-1])
+
+            if change_ingress < 0:
+                attackType = "Same protocol"
+            else:
+                attackType = "Different protocols"
+
+            if change_egress < 0:
                 attackType = "Same protocol"
             else:
                 attackType = "Different protocols"
 
             simulateRealTime(datetime.now(), eTime[i], attackDate)
             
-            if abs(change) > thresholdEntropy:
+            if abs(change_ingress) > thresholdEntropy_ingress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
-                    "Packet_size_distribution": packetSizeDistributionDict[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
+                    "Deviation_score": normalization(abs(change_ingress), maxmin_ingress["minimum"], maxmin_ingress["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict_ingress[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
                     "Real_label": int(attack),
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
-            if abs(change_r) > thresholdEntropyRate:
+            if abs(change_r_ingress) > thresholdEntropyRate_ingress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
-                    "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
-                    "Packet_size_distribution": packetSizeDistributionDict[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
+                    "Deviation_score": normalization(abs(change_r_ingress), maxmin_rate_ingress["minimum"], maxmin_rate_ingress["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict_ingress[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            
+            if abs(change_egress) > thresholdEntropy_egress:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change_egress), maxmin_egress["minimum"], maxmin_egress["maximum"]),
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            if abs(change_r_egress) > thresholdEntropyRate_egress:
+                alert = {
+                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change_r_egress), maxmin_rate_egress["minimum"], maxmin_rate_egress["maximum"]),
                     "Real_label": int(attack),
                     "Attack_type": attackType
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-            if abs(change) > thresholdEntropy and attack:
-                truePositives += 1
-            elif abs(change) > thresholdEntropy and not attack:
-                falsePositives += 1
-            elif abs(change) <= thresholdEntropy and attack:
-                falseNegatives +=1
-            elif abs(change) <= thresholdEntropy and not attack:
-                trueNegatives += 1
+            if abs(change_ingress) > thresholdEntropy_ingress and attack:
+                truePositives_ingress += 1
+            elif abs(change_ingress) > thresholdEntropy_ingress and not attack:
+                falsePositives_ingress += 1
+            elif abs(change_ingress) <= thresholdEntropy_ingress and attack:
+                falseNegatives_ingress +=1
+            elif abs(change_ingress) <= thresholdEntropy_ingress and not attack:
+                trueNegatives_ingress += 1
 
             
-            if abs(change) > thresholdEntropyRate and attack:
-                truePositives_r += 1
-            elif abs(change) > thresholdEntropyRate and not attack:
-                falsePositives_r += 1
-            elif abs(change) <= thresholdEntropyRate and attack:
-                falseNegatives_r += 1
-            elif abs(change) <= thresholdEntropyRate and not attack:
-                trueNegatives_r += 1
+            if abs(change_r_ingress) > thresholdEntropyRate_ingress and attack:
+                truePositives_r_egress += 1
+            elif abs(change_r_ingress) > thresholdEntropyRate_ingress and not attack:
+                falsePositives_r_egress += 1
+            elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and attack:
+                falseNegatives_r_egress += 1
+            elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and not attack:
+                trueNegatives_r_egress += 1
+
+            if abs(change_egress) > thresholdEntropy_egress and attack:
+                truePositives_egress += 1
+            elif abs(change_egress) > thresholdEntropy_egress and not attack:
+                falsePositives_egress += 1
+            elif abs(change_egress) <= thresholdEntropy_egress and attack:
+                falseNegatives_egress +=1
+            elif abs(change_egress) <= thresholdEntropy_egress and not attack:
+                trueNegatives_egress += 1
+
+            
+            if abs(change_r_egress) > thresholdEntropyRate_egress and attack:
+                truePositives_r_egress += 1
+            elif abs(change_r_egress) > thresholdEntropyRate_egress and not attack:
+                falsePositives_r_egress += 1
+            elif abs(change_r_egress) <= thresholdEntropyRate_egress and attack:
+                falseNegatives_r_egress += 1
+            elif abs(change_r_egress) <= thresholdEntropyRate_egress and not attack:
+                trueNegatives_r_egress += 1
         else:
             if attack:
-               falseNegatives +=1
-               falseNegatives_r += 1
+               falseNegatives_ingress +=1
+               falseNegatives_r_ingress += 1
+
+               falseNegatives_egress +=1
+               falseNegatives_r_egress += 1
             elif not attack:
-                trueNegatives += 1
-                trueNegatives_r += 1
+                trueNegatives_ingress += 1
+                trueNegatives_r_ingress += 1
+
+                trueNegatives_egress += 1
+                trueNegatives_r_egress += 1
+            
+            
 
     sleep(randrange(400))
     p = Path('Detections' + fileString)
@@ -166,14 +242,23 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
         q.mkdir(parents=True)
 
     #Open file to write alerts to
-    scores = open(str(q) + "/Scores.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    scores_r = open(str(q) + "/Scores.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_ingress = open(str(q) + "/Scores.EntropyPacketSize_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r_ingress = open(str(q) + "/Scores.EntropyRatePacketSize_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    scores_egress = open(str(q) + "/Scores.EntropyPacketSize_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_r_egress = open(str(q) + "/Scores.EntropyRatePacketSize_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    scores.write("TP,FP,FN,TN")
-    scores_r.write("TP,FP,FN,TN")
-    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
-    scores.close()
+    scores_ingress.write("TP,FP,FN,TN")
+    scores_r_ingress.write("TP,FP,FN,TN")
+    scores_ingress.write("\n"+ str(truePositives_ingress)+ "," + str(falsePositives_ingress)+ "," + str(falseNegatives_ingress)+ "," + str(trueNegatives_ingress))
+    scores_ingress.close()
 
-    scores_r.write("\n"+ str(truePositives_r)+ "," + str(falsePositives_r)+ "," + str(falseNegatives_r)+ "," + str(trueNegatives_r))
-    scores_r.close()
+    scores_r_ingress.write("\n"+ str(truePositives_r_ingress)+ "," + str(falsePositives_r_ingress)+ "," + str(falseNegatives_r_ingress)+ "," + str(trueNegatives_r_ingress))
+    scores_r_ingress.close()
+
+    scores_egress.write("\n"+ str(truePositives_egress)+ "," + str(falsePositives_egress)+ "," + str(falseNegatives_egress)+ "," + str(trueNegatives_egress))
+    scores_egress.close()
+
+    scores_r_egress.write("\n"+ str(truePositives_r_egress)+ "," + str(falsePositives_r_egress)+ "," + str(falseNegatives_r_egress)+ "," + str(trueNegatives_r_egress))
+    scores_r_egress.close()

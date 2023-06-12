@@ -114,10 +114,12 @@ frequencies = [timedelta(seconds=5),timedelta(seconds=10), timedelta(seconds=20)
 for frequency in frequencies:
     for i in range(1,21):
         interval = timedelta(minutes=i)
+        if timedelta(seconds=5) and i == 1:
+            continue
         for alpha in range(2, 16):
             for windowSize in range(2,21):
                 for k in range(len(y_fields)):
-                    if alpha == 2:
+                    if alpha < 6:
                         continue
                     print("frequency")
                     print(frequency)

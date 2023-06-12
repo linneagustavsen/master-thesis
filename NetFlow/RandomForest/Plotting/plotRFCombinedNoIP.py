@@ -96,10 +96,11 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
+    axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
 
-    fig.tight_layout()
+    #fig.tight_layout()
     fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Combined/NoIP.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close(fig)
 

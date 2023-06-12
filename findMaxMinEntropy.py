@@ -5,7 +5,7 @@ import numpy as np
 from HelperFunctions.GetData import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
-from HelperFunctionsTelemetry.GetDataTelemetry import getData, getDataBytes, getDataPackets
+from HelperFunctionsTelemetry.GetDataTelemetry import getDataBytes, getDataPackets
 
 '''
     Calculates entropy and writes calculations to file
@@ -146,6 +146,8 @@ def findMinMaxEntropyTelemetry(start, stop, systemId, interval, frequency):
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.bytes_egress."+ str(int(interval.total_seconds())) +".json", "w")
     json.dump({"minimum": min(changesBytesout), "maximum":  3*np.nanmean(changesBytesout)},json_file)
     json_file.close()
-'''findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=5), timedelta(minutes=1))
-findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=10), timedelta(minutes=1))
-findMinMaxEntropyTelemetry("oslo-gw1", timedelta(minutes=15), timedelta(minutes=1))'''
+start = "2023-02-23 00:00:00"
+stop = "2023-03-07 00:00:00"
+findMinMaxEntropyTelemetry(start, stop, "oslo-gw1", timedelta(minutes=5), timedelta(minutes=1))
+findMinMaxEntropyTelemetry(start, stop, "oslo-gw1", timedelta(minutes=10), timedelta(minutes=1))
+findMinMaxEntropyTelemetry(start, stop, "oslo-gw1", timedelta(minutes=15), timedelta(minutes=1))

@@ -96,6 +96,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
+    axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
 

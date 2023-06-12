@@ -112,26 +112,15 @@ def findGoodThresholdStatisticalModel(y_field, systemId, attackDate):
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
     f_scores.close()
         
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
-y_fields= ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
+systems = ["narvik-gw4", "hoytek-gw2"]
+attackDates = ["17.03.23","24.03.23"]
+y_fields= ["egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 for attackDate in attackDates:
     print("\n")
     print(attackDate)
-    if attackDate == "08.03.23":
-        for y_field in ["MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
-                if (systemId=="hoytek-gw2" or systemId == "narvik-gw4") and y_field == "MaxVar.egress_queue_info__0__cur_buffer_occupancy":
-                    continue
-                findGoodThresholdStatisticalModel(y_field, systemId, attackDate)
-    else:
-        for y_field in y_fields:
-            print(y_field)
-            for systemId in systems:
-                print(systemId)
-                findGoodThresholdStatisticalModel(y_field, systemId, attackDate)
+    for y_field in y_fields:
+        print(y_field)
+        for systemId in systems:
+            print(systemId)
+            findGoodThresholdStatisticalModel(y_field, systemId, attackDate)

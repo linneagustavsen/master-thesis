@@ -132,7 +132,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     #axs.set_ylim([0,maxValue])
     axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    fig.legend(fontsize=15)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
     
     '''axs[1].xaxis.set(
@@ -146,7 +146,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     axs[1].tick_params(axis='both', which='major', labelsize=15)
     axs[1].set_ylim([0,maxValue])
     axs[1].legend(fontsize=20)'''
-    fig.tight_layout()
+    #fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
     plt.close(fig)
 

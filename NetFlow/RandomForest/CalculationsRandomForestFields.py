@@ -80,15 +80,15 @@ def calculationRandomForestNetFlowFields(systemId, attackDate, estimator):
             '''if predictions[i] == 0:
                 f_not.write(line)
                 f1IP.write(lineIPs)'''
+        f_scores.write("\n"+str(confusion_matrix(testingLabel, predictions)) + ","+ str(accuracy_score(testingLabel, predictions)) + ","+ 
+                   str(f1_score(testingLabel,predictions)) + ","+ str(recall_score(testingLabel,predictions)) + ","+ 
+                   str(precision_score(testingLabel,predictions)))
+    f_scores.close()
 
     f.close()
     '''f_not.close()
     f0IP.close()
     f1IP.close()'''
-    f_scores.write("\n"+str(confusion_matrix(testingLabel, predictions)) + ","+ str(accuracy_score(testingLabel, predictions)) + ","+ 
-                   str(f1_score(testingLabel,predictions)) + ","+ str(recall_score(testingLabel,predictions)) + ","+ 
-                   str(precision_score(testingLabel,predictions)))
-    f_scores.close()
 
 '''
     Detect anomalies based on a random forest classifier and write them to file
@@ -154,10 +154,10 @@ def calculationRandomForestNoIPNetFlowFields(systemId, attackDate, estimator):
                 f.write(line)
             '''if predictions[i] == 0:
             f_not.write(line)'''
-
-    f.close()
-    #f_not.close()
-    f_scores.write("\n"+str(confusion_matrix(testingLabel, predictions)) + ","+ str(accuracy_score(testingLabel, predictions)) + ","+ 
+        f_scores.write("\n"+str(confusion_matrix(testingLabel, predictions)) + ","+ str(accuracy_score(testingLabel, predictions)) + ","+ 
                    str(f1_score(testingLabel,predictions)) + ","+ str(recall_score(testingLabel,predictions)) + ","+ 
                    str(precision_score(testingLabel,predictions)))
     f_scores.close()
+
+    f.close()
+    #f_not.close()
