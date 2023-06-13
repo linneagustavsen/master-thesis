@@ -68,14 +68,14 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     if attackCluster.empty:
         return
     if attackCluster["AttackCluster"][0] == 0:
-        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        clusterFile = "Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv"
         '''attackClusterDiameter = attackCluster["ClusterDiameter0"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter1"][0]'''
 
         nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
     elif attackCluster["AttackCluster"][0] == 1:
-        cluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+        clusterFile = "Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster1."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv"
         '''attackClusterDiameter =  attackCluster["ClusterDiameter1"][0]
         nonAttackClusterDiameter = attackCluster["ClusterDiameter0"][0]'''
 
@@ -89,46 +89,56 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
         elif label == 1:
             falseNegatives += 1
     
-    sTime = pd.to_datetime(cluster["sTime"])
-    eTime = pd.to_datetime(cluster["eTime"])
+    del nonAttackCluster
+    del labelsForNonAttackCluster
+    
+    counter = 0
+    countClusters = 0
+    for cluster in pd.read_csv(clusterFile, chunksize=100):
+        countClusters += 1
+        sTime = pd.to_datetime(cluster["sTime"])
+        eTime = pd.to_datetime(cluster["eTime"])
 
-    real_labels = cluster["real_label"]
+        real_labels = cluster["real_label"]
 
-    '''db = attackCluster["Davies-bouldin-score"][0]
-    attackType = ""
-    #If it is a burst attack and non attack cluster is empty
-    if db < DBthreshold and nonAttackClusterDiameter == 0:
-        attackType = "Same protocol"
-    #If there is no burst and attack cluster is less compact than normal traffic
-    elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
-        attackType = "Different protocols"
-    #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
-    elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
-        attackType = "Same protocol"'''
-        
-    for i in range(len(sTime)):
-        sTime[i] = sTime[i].replace(tzinfo=None)
-        eTime[i] = eTime[i].replace(tzinfo=None)
-        if eTime[i] > stopTime:
-            break
-        if sTime[i] < startTime:
-            continue
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
-        
-        alert = {
-                    "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    "Gateway": systemId,
-                    "Deviation_score": None,
-                    "Real_label": int(real_labels[i]),
-                    "Attack_type": ""
-                }
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+        '''db = attackCluster["Davies-bouldin-score"][0]
+        attackType = ""
+        #If it is a burst attack and non attack cluster is empty
+        if db < DBthreshold and nonAttackClusterDiameter == 0:
+            attackType = "Same protocol"
+        #If there is no burst and attack cluster is less compact than normal traffic
+        elif db > DBthreshold and attackClusterDiameter > (nonAttackClusterDiameter + c0threshold):
+            attackType = "Different protocols"
+        #If there is burst traffic and normal traffic and normal traffic is less compact than attack traffic
+        elif db < DBthreshold and nonAttackClusterDiameter > (attackClusterDiameter + c1threshold):
+            attackType = "Same protocol"'''
+            
+        for i in range(len(sTime)):
+            sTime[counter] = sTime[counter].replace(tzinfo=None)
+            eTime[counter] = eTime[counter].replace(tzinfo=None)
+            if eTime[counter] > stopTime:
+                break
+            if sTime[counter] < startTime:
+                counter += 1
+                continue
+            simulateRealTime(datetime.now(), eTime[counter], attackDate)
+            
+            alert = {
+                        "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "eTime": eTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
+                        "Gateway": systemId,
+                        "Deviation_score": None,
+                        "Real_label": int(real_labels[counter]),
+                        "Attack_type": ""
+                    }
+            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-        if real_labels[i]:
-            truePositives += 1
-        elif not real_labels[i]:
-            falsePositives += 1
+            if real_labels[counter]:
+                truePositives += 1
+            elif not real_labels[counter]:
+                falsePositives += 1
+            counter += 1
+        counter = 100*countClusters
     sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'

@@ -57,5 +57,6 @@ def relabelMetricCalc(systemId, intervals, attackDate):
             newLabels.append(int(attack))
         
         data["real_label"] = newLabels
-        
+        if not q.exists():
+            q.mkdir(parents=True)
         data.to_csv(str(q)+ "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", index= False)

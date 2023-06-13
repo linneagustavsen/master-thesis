@@ -63,9 +63,9 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
     
     intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
 
-    srcPortsCluster = []
+    '''srcPortsCluster = []
     dstPortsCluster = []
-    protocolCluster = []
+    protocolCluster = []'''
 
     sTimeCluster = []
 
@@ -147,8 +147,6 @@ def detectionKmeansCombined(start, stop, systemId, interval, clusterFrequency, D
             dstPortsCluster.extend(dstPort)
             protocolCluster.extend(protocol)
             real_labels.extend(labels)'''
-
-    
 
             starting = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
             stopping = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')

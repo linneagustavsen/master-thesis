@@ -257,6 +257,8 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
     scores_r_ingress.write("\n"+ str(truePositives_r_ingress)+ "," + str(falsePositives_r_ingress)+ "," + str(falseNegatives_r_ingress)+ "," + str(trueNegatives_r_ingress))
     scores_r_ingress.close()
 
+    scores_egress.write("TP,FP,FN,TN")
+    scores_r_egress.write("TP,FP,FN,TN")
     scores_egress.write("\n"+ str(truePositives_egress)+ "," + str(falsePositives_egress)+ "," + str(falseNegatives_egress)+ "," + str(trueNegatives_egress))
     scores_egress.close()
 
