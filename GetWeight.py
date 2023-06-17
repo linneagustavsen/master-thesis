@@ -34,14 +34,14 @@ def getWeight(y_field, systemId, interval, dataType, dataSet, attackDate):
         q = decisionPath /'Attack1703'
     if dataType == "RandomForest" or y_field == "Xmas":
         if interval != 0:
-            thresholdFile = str(decisionPath) + "/Attack"+ fileString +  "/MinMax/MaxTPR."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".csv"
+            thresholdFile = str(decisionPath) + "/Attack"+ fileString +  "/MinMax/MaxF1."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".csv"
         else:
-            thresholdFile = str(decisionPath) + "/Attack"+ fileString +  "//MinMax/MaxTPR."+ str(y_field) +".attack."+str(attackDate)+ ".csv"
+            thresholdFile = str(decisionPath) + "/Attack"+ fileString +  "/MinMax/MaxF1."+ str(y_field) +".attack."+str(attackDate)+ ".csv"
     else:
         if interval != 0:
-            thresholdFile = str(q) + "/MinMax/MaxTPR."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
+            thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
         else:
-            thresholdFile = str(q) + "/MinMax/MaxTPR."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
+            thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
     
     data = pd.read_csv(thresholdFile)
     systemIds = data["SystemId"].values

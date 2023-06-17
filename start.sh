@@ -57,7 +57,7 @@ python3 WriteCorrelationsToFiles.py
 sleep $((5*60))
 python3 WriteCorrelationsToFiles.py
 pkill python
-mv Detections2403 Detections2403_5min_TPR
+mv Detections2403 Detections2403_5min_F1
 mv HelperFunctions/SimulateRealTimeCP.py HelperFunctions/SimulateRealTime.py
 
 interval=10
@@ -118,7 +118,7 @@ python3 WriteCorrelationsToFiles.py
 sleep $((5*60))
 python3 WriteCorrelationsToFiles.py
 pkill python
-mv Detections2403 Detections2403_10min_TPR
+mv Detections2403 Detections2403_10min_F1
 mv HelperFunctions/SimulateRealTimeCP2.py HelperFunctions/SimulateRealTime.py
 sleep $((10*60))
 
@@ -180,4 +180,4 @@ python3 WriteCorrelationsToFiles.py
 sleep $((10*60))
 python3 WriteCorrelationsToFiles.py
 pkill python
-mv Detections2403 Detections2403_15min_TPR
+mv Detections2403 Detections2403_15min_F1
