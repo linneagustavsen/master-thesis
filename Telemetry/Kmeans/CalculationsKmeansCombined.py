@@ -59,8 +59,12 @@ def calculationsKmeansCombinedTelemetry(start, stop, systemId, bucket, interval,
 
         cluster = open(str(q) + "/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
-        '''f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f_scores.write("confusion_matrix,accuracy,f1,recall,precision")'''
+        f_scores = open(str(q) + "/Scores.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f_scores.write("TP,FP,FN,TN")
+        truePositives = 0
+        falsePositives = 0
+        falseNegatives = 0
+        trueNegatives = 0
 
         testingSet =  makeDataSetKmeansTelemetry(startTime, stopTime, entropy_df, systemId, bucket, fields, attackDate)
         if len(testingSet) == 0:
@@ -84,15 +88,33 @@ def calculationsKmeansCombinedTelemetry(start, stop, systemId, bucket, interval,
 
             if prediction[j] == 0: 
                 f0.write(line)
+                if attackCluster == 0:
+                    if attack:
+                        truePositives += 1
+                    else:
+                        falsePositives += 1
+                else:
+                    if attack:
+                        falseNegatives += 1
+                    else:
+                        trueNegatives += 1
             elif prediction[j] == 1: 
                 f1.write(line)
+                if attackCluster == 1:
+                    if attack:
+                        truePositives += 1
+                    else:
+                        falsePositives += 1
+                else:
+                    if attack:
+                        falseNegatives += 1
+                    else:
+                        trueNegatives += 1
 
         
         f0.close()
         f1.close()
         cluster.close()
-        ''' f_scores.write("\n"+str(confusion_matrix(labels, kmeans.labels_)) + ","+ str(accuracy_score(labels, kmeans.labels_)) + ","+ 
-                str(f1_score(labels,kmeans.labels_)) + ","+ str(recall_score(labels,kmeans.labels_)) + ","+ 
-                str(precision_score(labels,kmeans.labels_)))
-        f_scores.close()'''
+        f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
+        f_scores.close()
         startTime += clusterFrequency

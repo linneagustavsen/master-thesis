@@ -8,6 +8,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -25,7 +26,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdBytes:                 float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize, thresholdBytes, attackDate):
+def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize, thresholdBytes, weight, attackDate):
 
     p = Path('NetFlow')
     q = p / 'Threshold' / 'Calculations'
@@ -61,10 +62,29 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -106,8 +126,10 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
+        
         if eTime[i] > stopTime + frequency:
             break
         if sTime[i] < startTime:
@@ -131,7 +153,8 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin_bytes["minimum"], maxmin_bytes["maximum"]),
                     "Real_label": int(attack),
-                    "Attack_type": "Flooding"
+                    "Attack_type": "Flooding",
+                    "Weight": weight,
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
@@ -143,12 +166,26 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
                 falseNegatives +=1
             elif abs(change) <= thresholdBytes and not attack:
                 trueNegatives += 1
+                
+            if abs(change) > thresholdBytes and isInAttackTime and attack:
+                attackDict[attackTypeDuringThisTime]["TP"] += 1
+            elif abs(change) > thresholdBytes and isInAttackTime and not attack:
+                attackDict[attackTypeDuringThisTime]["FP"] += 1
+            elif abs(change) <= thresholdBytes and isInAttackTime and attack:
+                attackDict[attackTypeDuringThisTime]["FN"] +=1
+            elif abs(change) <= thresholdBytes and isInAttackTime and not attack:
+                attackDict[attackTypeDuringThisTime]["TN"] += 1
         else:
             if attack:
                 falseNegatives += 1
             elif not attack:
                 trueNegatives += 1
-    sleep(randrange(400))
+
+            if attack and isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["FN"] +=1
+            elif not attack and isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TN"] += 1
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
@@ -160,3 +197,7 @@ def detectionBytesNetFlow(start, stop, systemId, frequency, interval, windowSize
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.Bytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

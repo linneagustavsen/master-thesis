@@ -130,7 +130,7 @@ def plotKmeansCombined(start, stop, interval, clusterFrequency, systemId, attack
     
     fig.legend(fontsize=20)
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 
 

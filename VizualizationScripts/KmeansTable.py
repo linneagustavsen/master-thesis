@@ -8,9 +8,11 @@ from ast import literal_eval
 
 
 def makeRandomForestTable(featureSet, dataset, interval, attackDate):
-    systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+    if dataset == "NetFlow":
+        systems = ["tromso-gw5",  "teknobyen-gw1", "hoytek-gw2", "bergen-gw3","trd-gw", "ifi2-gw5"]
+    else:
+        systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", "oslo-gw1"]
 
 
 
@@ -41,7 +43,7 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
 
     for systemId in systems:
         print(systemId)
-        if featureSet == "Fields":
+        if featureSet == "Fields" and dataset == "NetFlow":
             start = startTime
             intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
 
@@ -64,7 +66,7 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
                 falseNegatives += data["FN"][0]
                 counter += 1
                 start += clusterFrequency
-        elif featureSet == "Combined":
+        elif featureSet == "Combined"  and dataset == "NetFlow":
             start = startTime
             intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
 
@@ -92,6 +94,21 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
                 print("\n")
                 counter += 1
                 start += clusterFrequency
+        elif featureSet == "Fields" and dataset == "Telemetry":
+            truePositives = 0
+            falsePositives = 0
+            falseNegatives = 0
+            trueNegatives = 0
+            
+            data = pd.read_csv("Calculations"+ fileString+ "/Kmeans/"+dataset+"/Scores."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+            
+            if len(data) == 0:
+                print("There was no data")
+                continue
+            truePositives += data["TP"][0]
+            falsePositives += data["FP"][0]
+            trueNegatives += data["TN"][0]
+            falseNegatives += data["FN"][0]
         else:
             truePositives = 0
             falsePositives = 0
@@ -183,4 +200,4 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
     df = df.sort_values(['F1', 'FPR'], ascending=False)
     print(df.to_latex(index=False, float_format="{:.3f}".format,))
 
-makeRandomForestTable("Fields", "NetFlow", timedelta(minutes=15), "17.03.23")
+makeRandomForestTable("Fields", "Telemetry", timedelta(minutes=15), "17.03.23")

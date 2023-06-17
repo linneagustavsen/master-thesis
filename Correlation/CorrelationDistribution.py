@@ -7,8 +7,8 @@ from random import randrange
 import networkx as nx
 from threading import Thread
 import json
-from datetime import datetime, timedelta
-from datetime import date
+from datetime import datetime, timedelta, timezone
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 from HelperFunctions.InformationDistance import informationDistance
 
@@ -38,13 +38,80 @@ class Correlation_Distribution:
         self.combinedTruePositivesOut = 0
         self.combinedFalsePositivesOut = 0
 
+        self.attackIntervals = []
+        self.detectedAttacks = []
+
+        self.attackDate = attackDate
+        
         if attackDate == "08.03.23":
             self.fileString = "0803"
+            self.startTime = pd.Timestamp("2023-03-08T14:15:00Z")
+            self.stopTime = pd.Timestamp("2023-03-08T16:00:00Z")
+            strings = [["Mar 08 14:29:55", "Mar 08 14:34:56"], ["Mar 08 14:49:56", "Mar 08 15:02:57"],
+           ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
+            self.attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         elif attackDate == "17.03.23":
             self.fileString = "1703"
+            self.startTime = pd.Timestamp("2023-03-17T11:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-17T13:00:00Z")
+            strings = [
+           ["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
+           ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]
+            self.attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         elif attackDate == "24.03.23":
             self.fileString = "2403"
+            self.startTime = pd.Timestamp("2023-03-24T14:00:00Z")
+            self.stopTime = pd.Timestamp("2023-03-24T18:00:00Z")
+            strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
+           ["Mar 24 14:46:30", "Mar 24 14:55:00"], ["Mar 24 14:59:50", "Mar 24 15:15:06"], 
+           ["Mar 24 15:26:51", "Mar 24 15:39:22"], ["Mar 24 15:40:21", "Mar 24 15:47:50"], 
+           ["Mar 24 16:07:29", "Mar 24 16:19:00"], ["Mar 24 16:22:29", "Mar 24 16:29:13"],
+           ["Mar 24 16:29:53", "Mar 24 16:49:50"], ["Mar 24 16:53:22", "Mar 24 17:09:39"],
+           ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
+            self.attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
+                "Xmas", "UDP Flood and SlowLoris", "Ping Flood and R.U.D.Y", "All types"]
+        
+        for string in strings:
+            start = datetime.strptime(string[0], '%b %d %H:%M:%S').replace(year=2023).replace(tzinfo=timezone.utc)
+            stop = datetime.strptime(string[1], '%b %d %H:%M:%S').replace(year=2023).replace(tzinfo=timezone.utc)
 
+            intervalNow = pd.Interval(pd.Timestamp(start), pd.Timestamp(stop), closed="both")
+            self.attackIntervals.append(intervalNow)
+            self.detectedAttacks.append(False)
+    def findPerformance(self, labels, sTime, eTime, didAlert):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime, eTime, self.attackDate)
+    
+        for label in labels:
+            if label == 0 and isInAttackTime:
+                if didAlert:
+                    self.attackDict[attackTypeDuringThisTime]["FP"] += 1
+                else:
+                    self.attackDict[attackTypeDuringThisTime]["TN"] += 1
+            elif label == 1 and isInAttackTime:
+                if didAlert:
+                    self.attackDict[attackTypeDuringThisTime]["TP"] += 1
+                else:
+                    self.attackDict[attackTypeDuringThisTime]["FN"] += 1
+                    
     def countElements(self, listOfElements):
         counter = {}
         for element in listOfElements:
@@ -96,7 +163,7 @@ class Correlation_Distribution:
         else:
             self.alertsCorrelated[interval] = alert
 
-    def correlateDistribution(self, stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB):
+    def correlateDistribution(self, stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, weight, alertDB):
         timeExists = False
         gateways = [gateway]
         stime = pd.Timestamp(stime)
@@ -117,12 +184,16 @@ class Correlation_Distribution:
                             for alert in alerts:
                                 print("\nINFORMATION DISTANCE at time", str(time), "and gateway", gateway, "and", otherGateway)
                                 print(informationDistance(10, distribution, alert["Packet_size_distribution"]))
-                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 7:
+                                if informationDistance(10, distribution, alert["Packet_size_distribution"]) < 10:
                                     timeExists = True
                                     gateways.append(otherGateway)
                                     deviation_scores.append(alert["Deviation_score"])
                                     real_labels.append(alert["Real_label"])
-                                    attack_types.append(alert["Attack_type"])
+                                    if alert["Attack_type"] in attack_types:
+                                        attack_types[alert["Attack_type"]] += alert["Weight"]
+                                    else:
+                                        attack_types[alert["Attack_type"]] = alert["Weight"]
+                                    weight += alert["Weight"]
 
         if timeExists:
             message = {
@@ -131,13 +202,18 @@ class Correlation_Distribution:
                     "Gateways": list(set(gateways)),
                     "Deviation_scores": deviation_scores,
                     "Real_labels": self.countElements(real_labels),
-                    "Attack_types": self.countElements(attack_types)
+                    "Attack_types": attack_types,
+                    "Weight": weight
                     }
             
             print("\nPublished message to topic", self.output)
-            print(message)
             self.mqtt_client.publish(self.output, json.dumps(message))
-
+            self.findPerformance( real_labels, stime, etime, 1)
+            counter = 0
+            for attackInterval in self.attackIntervals:
+                if attackInterval.overlaps(interval) and 1 in real_labels:
+                    self.detectedAttacks[counter] = True
+                counter += 1
 
     """
         The MQTT commands are listened to and appropriate actions are taken for each.
@@ -168,6 +244,16 @@ class Correlation_Distribution:
             alertsFile.write(str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," +str(self.combinedTruePositivesOut) + "," + str(self.combinedFalsePositivesOut))
             alertsFile.close()
 
+            alertsFile = open(str(q) + "/DetectionAttackTypesCorrelationDistribution.csv", "a")
+            alertsFile.write(",".join(attackType for attackType in self.attacks))
+            alertsFile.write("\n")
+            alertsFile.write(",".join(str(i) for i in self.detectedAttacks))
+            alertsFile.close()
+
+            attackScores = open(str(q) + "/ScoresAttackTypes.CorrelationDistribution.json", "w")
+            json.dump(self.attackDict,attackScores)
+            attackScores.close()
+
         else:
             self.alertCounter += 1
             stime = payload.get('sTime')
@@ -176,12 +262,13 @@ class Correlation_Distribution:
             deviation_scores = payload.get('Deviation_scores')
             real_labels = payload.get('Real_labels')
             attack_types = payload.get('Attack_types')
+            weight = payload.get('Weight')
             alertDB = payload.get('alertDB')
             alertDB = self.decodeAlertDB(alertDB)
             distributions = payload.get('Packet_size_distributions')
             
 
-            self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, alertDB)
+            self.correlateDistribution(stime, etime, gateway, distributions, deviation_scores, real_labels, attack_types, weight, alertDB)
             for label in real_labels:
                 if label == 1:
                     self.truePositivesIn += 1

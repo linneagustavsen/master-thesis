@@ -102,7 +102,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
     fig.legend(fontsize=15)
 
     #fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Fields/Packets."+  str(systemId)+ ".png", dpi=500)
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Fields/Packets."+  str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
 
 

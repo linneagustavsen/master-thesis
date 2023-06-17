@@ -7,6 +7,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 import json
 
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -19,7 +20,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             interval:       timedelta object, size of the sliding window which the detection is made on
             attackDate:     string, date of the attack the detection are made on
 '''
-def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
+def detectionRandomForestNetFlow(start, stop, systemId, interval, weight, attackDate):
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -46,10 +47,29 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -68,6 +88,7 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
         real_label = alerts["real_label"]
 
         for i in range(len(sTime)):
+            isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[counter], eTime[counter], attackDate)
             sTime[counter] = sTime[counter].replace(tzinfo=None)
             eTime[counter] = eTime[counter].replace(tzinfo=None)
             if eTime[counter] > stopTime:
@@ -82,7 +103,8 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
                     "Gateway": systemId,
                     "Deviation_score": None,
                     "Real_label": int(real_label[counter]),
-                    "Attack_type": ""
+                    "Attack_type": "",
+                    "Weight": weight
                 }
             '''alert = {
                     "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -98,5 +120,20 @@ def detectionRandomForestNetFlow(start, stop, systemId, interval, attackDate):
                     "Attack_type": ""
                 }'''
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
+            '''if real_label[counter]:
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TP"] += 1
+            elif not real_label[counter]:
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FP"] += 1'''
+    
             counter += 1
         counter = 100*countChunks
+    '''p = Path('Detections' + fileString)
+    q = p / 'RandomForest' / 'NetFlow'
+    if not q.exists():
+        q.mkdir(parents=True)
+    attackScores = open(str(q) + "/ScoresAttacks.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()'''

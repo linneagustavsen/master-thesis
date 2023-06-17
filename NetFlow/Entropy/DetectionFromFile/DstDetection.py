@@ -9,6 +9,7 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -27,7 +28,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdDstEntropyRate:        float, values over this threshold will cause an alert
             attackDate:                     string, date of the attack the calculations are made on
 '''
-def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate, attackDate):
+def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresholdDstEntropy, thresholdDstEntropyRate,weightDstEntropy, weightDstEntropyRate, attackDate):
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
     if not q.exists():
@@ -64,10 +65,48 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     
     
     data =  pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", 
@@ -119,6 +158,7 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
 
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime + frequency:
@@ -149,7 +189,8 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change), maxmin_dip["minimum"], maxmin_dip["maximum"]),
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightDstEntropy
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_r) >  thresholdDstEntropyRate:
@@ -159,36 +200,59 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r), maxmin_dip_rate["minimum"], maxmin_dip_rate["maximum"]),
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightDstEntropyRate
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
             if abs(change) > thresholdDstEntropy and attack:
                 truePositives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change) > thresholdDstEntropy and not attack:
                 falsePositives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change) <= thresholdDstEntropy and attack:
                 falseNegatives +=1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change) <= thresholdDstEntropy and not attack:
                 trueNegatives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TN"] += 1
             
             if abs(change_r) > thresholdDstEntropyRate and attack:
                 truePositives_r += 1
+                if isInAttackTime:
+                    attackDict_r[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_r) > thresholdDstEntropyRate and not attack:
                 falsePositives_r += 1
+                if isInAttackTime:
+                    attackDict_r[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_r) <= thresholdDstEntropyRate and attack:
                 falseNegatives_r += 1
+                if isInAttackTime:
+                    attackDict_r[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_r) <= thresholdDstEntropyRate and not attack:
                 trueNegatives_r += 1
+                if isInAttackTime:
+                    attackDict_r[attackTypeDuringThisTime]["TN"] += 1
         else:
             if attack:
                 falseNegatives += 1
                 falseNegatives_r += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_r[attackTypeDuringThisTime]["FN"] += 1
             elif not attack:
                 trueNegatives += 1
                 trueNegatives_r += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_r[attackTypeDuringThisTime]["TN"] += 1
 
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
@@ -205,3 +269,11 @@ def detectionDst(start, stop, systemId, frequency, interval, windowSize, thresho
 
     scores_r.write("\n"+ str(truePositives_r)+ "," + str(falsePositives_r)+ "," + str(falseNegatives_r)+ "," + str(trueNegatives_r))
     scores_r.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.DestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.DestinationIPEntropyRate."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_r,attackScores)
+    attackScores.close()

@@ -29,25 +29,30 @@ def calculationsKmeansFieldsTelemetry(start, stop, systemId, bucket, clusterFreq
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
- 
+
+
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + clusterFrequency
         if systemId != "hoytek-gw2" and systemId != "narvik-gw4":
             cluster0 = open(str(q) + "/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-            cluster0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
+            cluster0.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,ingress_stats__if_1sec_pkts,ingress_stats__if_1sec_octets,real_label")
+            
             cluster1 = open(str(q) + "/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-            cluster1.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
+            cluster1.write("sTime,eTime,egress_queue_info__0__cur_buffer_occupancy,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,ingress_stats__if_1sec_pkts,ingress_stats__if_1sec_octets,real_label")
         else:
             cluster0 = open(str(q) + "/Fields.Cluster0.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-            cluster0.write("sTime,eTime,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
+            cluster0.write("sTime,eTime,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,ingress_stats__if_1sec_pkts,ingress_stats__if_1sec_octets,real_label")
             cluster1 = open(str(q) + "/Fields.Cluster1.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-            cluster1.write("sTime,eTime,egress_stats__if_1sec_pkt,ingress_stats__if_1sec_pkt,egress_stats__if_1sec_octet,ingress_stats__if_1sec_octet,real_label")
+            cluster1.write("sTime,eTime,egress_stats__if_1sec_pkts,egress_stats__if_1sec_octets,ingress_stats__if_1sec_pkts,ingress_stats__if_1sec_octets,real_label")
         
         cluster = open(str(q) + "/ClusterLabelling.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
         cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
-        
-        '''f_scores = open(str(q) + "/Score.Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
-        f_scores.write("confusion_matrix,accuracy,f1,recall,precision")'''
+        f_scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv", "a")
+        f_scores.write("TP,FP,FN,TN")
+        truePositives = 0
+        falsePositives = 0
+        falseNegatives = 0
+        trueNegatives = 0
 
         dataPath = Path('Telemetry')
         dp = dataPath /'Kmeans'/ 'DataSets' 
@@ -79,20 +84,41 @@ def calculationsKmeansFieldsTelemetry(start, stop, systemId, bucket, clusterFreq
             attack = isAttack(timeStamps[j] -timedelta(seconds = 2), timeStamps[j])
             labels.append(attack)
             line = "\n"  + (timeStamps[j] - timedelta(seconds = 2)).strftime("%Y-%m-%dT%H:%M:%SZ") +","+ timeStamps[j].strftime("%Y-%m-%dT%H:%M:%SZ")
-            for measurement in measurements[j]:
-                line += "," + str(measurement)
+            for field in fields:
+                if (systemId == "hoytek-gw2" or systemId == "narvik-gw4") and field == "egress_queue_info__0__cur_buffer_occupancy":
+                    continue
+                line += "," + str(df[field][j])
             line += "," +str(int(attack))
 
             if prediction[j] == 0: 
                 cluster0.write(line)
-            elif prediction[j] == 1: 
+                if attackCluster == 0:
+                    if attack:
+                        truePositives += 1
+                    else:
+                        falsePositives += 1
+                else:
+                    if attack:
+                        falseNegatives += 1
+                    else:
+                        trueNegatives += 1
+            elif prediction[j] == 1:
                 cluster1.write(line)
+                if attackCluster == 1:
+                    if attack:
+                        truePositives += 1
+                    else:
+                        falsePositives += 1
+                else:
+                    if attack:
+                        falseNegatives += 1
+                    else:
+                        trueNegatives += 1
 
+            
+        f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
+        f_scores.close()
         cluster0.close()
         cluster1.close()
         cluster.close()
-        '''f_scores.write("\n"+str(confusion_matrix(labels, prediction)) + ","+ str(accuracy_score(labels, prediction)) + ","+ 
-                    str(f1_score(labels,prediction)) + ","+ str(recall_score(labels,prediction)) + ","+ 
-                    str(precision_score(labels,prediction)))
-        f_scores.close()'''
         startTime += clusterFrequency

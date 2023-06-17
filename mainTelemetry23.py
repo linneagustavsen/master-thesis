@@ -33,17 +33,16 @@ def main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
 def randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, systems, bucket, fields, intervals, frequency, attackDate):
     for systemId in systems: 
         print("On router:", systemId)
-        if systemId == "hoytek-gw2" or systemId == "narvik-gw4":
-            makeDataSetTelemetryFields(startRFTraining, stopRFTraining, bucket, fields, systemId, "Training", attackDate)
-            makeDataSetTelemetryFields(startRFTesting, stopRFTesting, bucket, fields, systemId, "Testing", attackDate)
-            calculationsRandomForestFieldsTelemetry(systemId, attackDate)
-            print("Finished with calculationsRandomForestFieldsTelemetry")
+        makeDataSetTelemetryFields(startRFTraining, stopRFTraining, bucket, fields, systemId, "Training", attackDate)
+        makeDataSetTelemetryFields(startRFTesting, stopRFTesting, bucket, fields, systemId, "Testing", attackDate)
+        calculationsRandomForestFieldsTelemetry(systemId, attackDate)
+        print("Finished with calculationsRandomForestFieldsTelemetry")
 
         for interval in intervals:
             print("On interval", str(interval))
-            makeDataSetTelemetryEntropy(startRFTraining, stopRFTraining, systemId, bucket, frequency, interval, "Training", attackDate)
+            '''makeDataSetTelemetryEntropy(startRFTraining, stopRFTraining, systemId, bucket, frequency, interval, "Training", attackDate)
             makeDataSetTelemetryEntropy(startRFTesting, stopRFTesting, systemId, bucket, frequency, interval, "Testing", attackDate)
-            calculationsRandomForestTelemetryEntropy(systemId, interval, attackDate)
+            calculationsRandomForestTelemetryEntropy(systemId, interval, attackDate)'''
             print("Finished with calculationsRandomForestTelemetryEntropy")
             
             makeDataSetRandomForestCombinedTelemetry(startRFTraining, stopRFTraining, systemId, bucket, fields, interval, frequency, "Training", attackDate)
@@ -75,20 +74,23 @@ def randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTest
             os.remove("Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
         else:
             print("The file Telemetry/RandomForest/DataSets/Testing/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
-
+        
+        if os.path.exists("Telemetry/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"):
+            os.remove("Telemetry/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy")
+        else:
+            print("The file Telemetry/RandomForest/DataSets/Training/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy does not exist") 
 
 def mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate):
     for systemId in systems:
         print("On router:", systemId)
         
-        if systemId == "hoytek-gw2" or systemId == "narvik-gw4":
-            calculationsKmeansFieldsTelemetry(startKmeans, stopKmeans, systemId, bucket, clusterFrequency, fields, attackDate)
-            print("Finished with calculationsKmeansFieldsTelemetry")
+        calculationsKmeansFieldsTelemetry(startKmeans, stopKmeans, systemId, bucket, clusterFrequency, fields, attackDate)
+        print("Finished with calculationsKmeansFieldsTelemetry")
 
         for interval in intervals:
             print("On interval", str(interval))
-            calculationsKmeansEntropyTelemetry(startKmeans, stopKmeans, systemId, bucket, interval, frequency, attackDate)
-            print("Finished with calculationsKmeansEntropyTelemetry")
+            #calculationsKmeansEntropyTelemetry(startKmeans, stopKmeans, systemId, bucket, interval, frequency, attackDate)
+            #print("Finished with calculationsKmeansEntropyTelemetry")
             if interval != timedelta(minutes=15):
                 calculationsKmeansCombinedTelemetry(startKmeans, stopKmeans, systemId, bucket, interval, frequency, clusterFrequency, fields, attackDate)
             else:
@@ -113,7 +115,9 @@ def mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, freq
                 print("The file Telemetry/Kmeans/DataSets/Fields.attack."+str(attackDate)+ ".stopTime."+stopTime.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl does not exist") 
             startTime += timedelta(minutes=15)
 
-systems = [ "trd-gw", "ifi2-gw5", "oslo-gw1"]
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
+            "oslo-gw1"]
 
 #Attack 2
 start = "2023-03-17 11:00:00"
@@ -126,11 +130,8 @@ clusterFrequency = timedelta(minutes = 15)
 attackDate= "17.03.23"
 fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets"]
 bucket = "april"
-main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
-mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
+#main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
+#mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)
 
 #Attack 3
 start = "2023-03-24 14:00:00"
@@ -142,6 +143,6 @@ startRFTraining = "2023-03-17 11:00:00"
 stopRFTraining = "2023-03-17 13:00:00"
 startRFTesting = "2023-03-24 14:00:00"
 stopRFTesting = "2023-03-24 18:00:00"
-main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
+#main(start, stop, systems, bucket, fields, intervals, frequency, attackDate)
 randomForestMain(startRFTraining, stopRFTraining, startRFTesting, stopRFTesting, systems, bucket, fields, intervals, frequency, attackDate)
 mainKmeans(startKmeans, stopKmeans, systems, bucket, fields, intervals, frequency,clusterFrequency, attackDate)

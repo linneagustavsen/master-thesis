@@ -60,7 +60,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path, interval):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
     fig.tight_layout()
-    fig.savefig(path+y_field+".png", dpi=500)
+    fig.savefig(path+y_field+".pdf", dpi=300)
     plt.close(fig)
 
 

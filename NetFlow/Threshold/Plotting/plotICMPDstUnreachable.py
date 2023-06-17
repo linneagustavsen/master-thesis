@@ -90,7 +90,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+"/NetFlow/ICMPDstUnreachable/"+  str(systemId)+ "." + str("ICMPDstUnreachable")+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+"/NetFlow/ICMPDstUnreachable/"+  str(systemId)+ "." + str("ICMPDstUnreachable")+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 
 

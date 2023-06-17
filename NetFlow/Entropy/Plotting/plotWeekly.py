@@ -90,7 +90,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
     axs.tick_params(axis='both', which='major', labelsize=12)
     fig.legend()
     fig.tight_layout()
-    fig.savefig(path+y_field+".png", dpi=500)
+    fig.savefig(path+y_field+".pdf", dpi=300)
     fig.show()
     
 '''makePlot('NetFlow/Entropy/Calculations/dip_rate.300.json', 'dstEntropyRate','Entropy rate of destination IP', 'Plots/Entropy/WeeklyComparison.300.')

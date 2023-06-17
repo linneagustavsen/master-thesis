@@ -1,4 +1,4 @@
-from datetime import timedelta,datetime
+from datetime import timedelta,datetime, timezone
 from pathlib import Path
 import pprint
 import pandas as pd
@@ -8,6 +8,8 @@ from random import randrange
 from threading import Thread, Timer
 import json
 import networkx as nx
+
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 #Parameters for the MQTT connection
 MQTT_BROKER = 'localhost'
@@ -41,20 +43,64 @@ class Aggregation:
         self.falsePositivesOut = 0
         self.combinedTruePositivesOut = 0
         self.combinedFalsePositivesOut = 0
+        self.attackIntervals = []
+        self.detectedAttacks = []
+        self.attackDate = attackDate
 
         if attackDate == "08.03.23":
             self.fileString = "0803"
             self.startTime = pd.Timestamp("2023-03-08T14:15:00Z")
             self.stopTime = pd.Timestamp("2023-03-08T16:00:00Z")
+            strings = [["Mar 08 14:29:55", "Mar 08 14:34:56"], ["Mar 08 14:49:56", "Mar 08 15:02:57"],
+           ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
+            self.attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         elif attackDate == "17.03.23":
             self.fileString = "1703"
             self.startTime = pd.Timestamp("2023-03-17T11:00:00Z")
             self.stopTime = pd.Timestamp("2023-03-17T13:00:00Z")
+            strings = [
+           ["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
+           ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]
+            self.attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         elif attackDate == "24.03.23":
             self.fileString = "2403"
             self.startTime = pd.Timestamp("2023-03-24T14:00:00Z")
             self.stopTime = pd.Timestamp("2023-03-24T18:00:00Z")
+            strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
+           ["Mar 24 14:46:30", "Mar 24 14:55:00"], ["Mar 24 14:59:50", "Mar 24 15:15:06"], 
+           ["Mar 24 15:26:51", "Mar 24 15:39:22"], ["Mar 24 15:40:21", "Mar 24 15:47:50"], 
+           ["Mar 24 16:07:29", "Mar 24 16:19:00"], ["Mar 24 16:22:29", "Mar 24 16:29:13"],
+           ["Mar 24 16:29:53", "Mar 24 16:49:50"], ["Mar 24 16:53:22", "Mar 24 17:09:39"],
+           ["Mar 24 17:25:15", "Mar 24 17:47:00"]]
+            self.attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+            self.attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
+                "Xmas", "UDP Flood and SlowLoris", "Ping Flood and R.U.D.Y", "All types"]
+        
+        for string in strings:
+            start = datetime.strptime(string[0], '%b %d %H:%M:%S').replace(year=2023).replace(tzinfo=timezone.utc)
+            stop = datetime.strptime(string[1], '%b %d %H:%M:%S').replace(year=2023).replace(tzinfo=timezone.utc)
 
+            intervalNow = pd.Interval(pd.Timestamp(start), pd.Timestamp(stop), closed="both")
+            self.attackIntervals.append(intervalNow)
+            self.detectedAttacks.append(False)
         self.alertDB = {}
         for node in self.graph.G:
             self.alertDB[node] = {}
@@ -62,6 +108,21 @@ class Aggregation:
         self.alertDBDistribution = {}
         for node in self.graph.G:
             self.alertDBDistribution[node] = {}
+
+    def findPerformance(self, labels, sTime, eTime, didAlert):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime, eTime, self.attackDate)
+    
+        for label in labels:
+            if label == 0 and isInAttackTime:
+                if didAlert:
+                    self.attackDict[attackTypeDuringThisTime]["FP"] += 1
+                else:
+                    self.attackDict[attackTypeDuringThisTime]["TN"] += 1
+            elif label == 1 and isInAttackTime:
+                if didAlert:
+                    self.attackDict[attackTypeDuringThisTime]["TP"] += 1
+                else:
+                    self.attackDict[attackTypeDuringThisTime]["FN"] += 1
 
     def countElements(self, listOfElements):
         counter = {}
@@ -135,7 +196,7 @@ class Aggregation:
         overlappingAlerts = 0
         deviation_scores = []
         real_labels = []
-        attack_types = []
+        attack_types = {}
         gateways = []
         alreadyAlertedGateways = []
         
@@ -159,7 +220,14 @@ class Aggregation:
                     overlapTimes.append(timeGateway)
                             
             for time in removeTimesGateway:
+                removeAlerts = list(self.getAlerts(gateway, time, self.alertDB))
+                remove_labels = []
+                for alert in removeAlerts:
+                    remove_labels.append(alert["Real_label"])
+                self.findPerformance(remove_labels, time.left, time.right, 0)
+
                 self.removeTimestampFromGraph(gateway, time, 0)
+
             if len(self.getTimes(gateway, self.alertDB).keys()) == 0 or not overlap:
                 continue
             timeExists = False
@@ -169,8 +237,8 @@ class Aggregation:
                 if otherGateway == gateway:
                     continue
     
-                '''if nx.shortest_path_length(self.graph.G, gateway, otherGateway) > 4:
-                    continue'''
+                if nx.shortest_path_length(self.graph.G, gateway, otherGateway) > 2:
+                    continue
 
                 if otherGateway in alreadyAlertedGateways:
                     continue
@@ -190,23 +258,32 @@ class Aggregation:
                         alertsOtherGateway = list(self.getAlerts(otherGateway, timeOtherGateway, self.alertDB))
                         gateways.append(otherGateway)
                         removeTimesOtherGatewayBecauseOfAlert[gateway].append(timeOtherGateway)
-                        overlappingAlerts +=len(alertsOtherGateway)
+                        #overlappingAlerts +=len(alertsOtherGateway)
 
                         for alert in alertsOtherGateway:
                             if not alert["Deviation_score"] == None:
                                 deviation_scores.append(alert["Deviation_score"])
                             real_labels.append(alert["Real_label"])
                             if not alert["Attack_type"] == None:
-                                attack_types.append(alert["Attack_type"])
+                                if alert["Attack_type"] in attack_types:
+                                    attack_types[alert["Attack_type"]] += alert["Weight"]
+                                else:
+                                    attack_types[alert["Attack_type"]] = alert["Weight"]
+                            overlappingAlerts += alert["Weight"]
                 
                 for time in removeTimesOtherGateway:
+                    removeAlerts = list(self.getAlerts(otherGateway, time, self.alertDB))
+                    remove_labels = []
+                    for alert in removeAlerts:
+                        remove_labels.append(alert["Real_label"])
+                    self.findPerformance(remove_labels, time.left, time.right, 0)
                     self.removeTimestampFromGraph(otherGateway, time, 0)
             removeTimesGatewayBecauseOfAlert = []
             if timeExists and gateway not in alreadyAlertedGateways:
                 gateways.append(gateway)
                 for timeGateway in overlapTimes:
                     alertsGateway = list(self.getAlerts(gateway, timeGateway, self.alertDB))
-                    overlappingAlerts += len(alertsGateway)
+                    #overlappingAlerts += len(alertsGateway)
                     alreadyAlertedGateways.append(gateway)
                     removeTimesGatewayBecauseOfAlert.append(timeGateway)
                     for alert in alertsGateway:
@@ -214,13 +291,17 @@ class Aggregation:
                             deviation_scores.append(alert["Deviation_score"])
                         real_labels.append(alert["Real_label"])
                         if not alert["Attack_type"] == None:
-                            attack_types.append(alert["Attack_type"])
-            
+                            if alert["Attack_type"] in attack_types:
+                                attack_types[alert["Attack_type"]] += alert["Weight"]
+                            else:
+                                attack_types[alert["Attack_type"]] = alert["Weight"]
+                        overlappingAlerts += alert["Weight"]
+
             if not overlappingAlerts == 0:
-                print("\nOverlappingAlerts for gateway",gateway)
+                print("\nOverlappingAlerts for gateway",gateway, "and gateways",list(set(gateways)), "at time", interval)
                 print(overlappingAlerts)
                             
-            if overlappingAlerts > 100 and timeExists and len(gateways) > 2:
+            if overlappingAlerts > 0.03 and timeExists and len(gateways) > 2:
                 for gateway in gateways:
                     alreadyAlertedGateways.append(gateway)
                 message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -228,23 +309,36 @@ class Aggregation:
                         'Gateways': list(set(gateways)),
                         'Deviation_scores': deviation_scores,
                         'Real_labels': self.countElements(real_labels),
-                        'Attack_types':  self.countElements(attack_types)}
+                        'Attack_types':  attack_types,
+                        'Weight': overlappingAlerts}
 
                 self.mqtt_client.publish(self.outputRanking, json.dumps(message))
                 print("Aggregation published to topic", self.outputRanking)
-
-                overlappingAlerts = 0
-                deviation_scores = []
-                real_labels = []
-                attack_types = []
-                gateways = []
+                self.findPerformance(real_labels, stime, etime, 1)
 
                 for otherGateway in removeTimesOtherGatewayBecauseOfAlert:
                     timesOtherGateway = list(self.getTimes(otherGateway, self.alertDB).keys())
                     for time in timesOtherGateway:
                         self.removeTimestampFromGraph(otherGateway, time, 0)
+                        counter = 0
+                        for attackInterval in self.attackIntervals:
+                            if attackInterval.overlaps(time) and 1 in real_labels:
+                                self.detectedAttacks[counter] = True
+                            counter += 1
                 for time in removeTimesGatewayBecauseOfAlert:
                     self.removeTimestampFromGraph(gateway, time, 0)
+                    counter = 0
+                    for attackInterval in self.attackIntervals:
+                        if attackInterval.overlaps(time) and 1 in real_labels:
+                            self.detectedAttacks[counter] = True
+                        counter += 1
+
+                overlappingAlerts = 0
+                deviation_scores = []
+                real_labels = []
+                attack_types = {}
+                gateways = []
+
 
         self.lastAlertCounter = self.alertCounter
         self.startTime += timedelta(seconds=60)
@@ -259,9 +353,10 @@ class Aggregation:
         overlappingAlerts = 0
         deviation_scores = []
         real_labels = []
-        attack_types = []
+        attack_types = {}
         distributions = []
         removeTimes = []
+        removeTimesOtherGatewayBecauseOfAlert = []
 
         self.addAlertToGraph(gateway, interval, payload, 1)
         times = list(self.getTimes(gateway, self.alertDBDistribution).keys())
@@ -274,22 +369,27 @@ class Aggregation:
             #Go through all the time intervals for this gateway and see if this new alert overlaps with any other previous time intervals
             if interval.overlaps(time):
                 alerts = list(self.getAlerts(gateway, time, self.alertDBDistribution))
-                overlappingAlerts += len(alerts)
+                #overlappingAlerts += len(alerts)
+                removeTimesOtherGatewayBecauseOfAlert.append(time)
 
                 for alert in alerts:
                     if not alert["Deviation_score"] == None:
                         deviation_scores.append(alert["Deviation_score"])
                     real_labels.append(alert["Real_label"])
                     if not alert["Attack_type"] == None:
-                        attack_types.append(alert["Attack_type"])
+                        if alert["Attack_type"] in attack_types:
+                            attack_types[alert["Attack_type"]] += alert["Weight"]
+                        else:
+                            attack_types[alert["Attack_type"]] = alert["Weight"]
                     distributions.append(alert["Packet_size_distribution"])
+                    overlappingAlerts += alert["Weight"]
 
         for time in removeTimes:
             self.removeTimestampFromGraph(gateway, time, 1)
 
         print("\nOverlappingAlerts for gateway", gateway)
         print(overlappingAlerts)
-        if overlappingAlerts > 1:
+        if overlappingAlerts > 0:
 
             message = {'sTime': stime.strftime("%Y-%m-%dT%H:%M:%SZ"),
                     'eTime': etime.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -298,7 +398,8 @@ class Aggregation:
                     'Real_labels': real_labels,
                     'Attack_types': attack_types,
                     'Packet_size_distributions': distributions,
-                    'alertDB': self.encodeAlertsDB(self.alertDBDistribution)}
+                    'alertDB': self.encodeAlertsDB(self.alertDBDistribution),
+                    'Weight': overlappingAlerts}
 
             self.mqtt_client.publish(self.outputDist, json.dumps(message))
             print("Aggregation published to topic", self.outputDist)
@@ -329,6 +430,16 @@ class Aggregation:
             alertsFile.write("NumberOfAlertsIn,TPin,FPin,TPout,FPout,TPoutCombined,FPoutCombined\n")
             alertsFile.write(str(self.alertCounter) +"," + str(self.truePositivesIn) + ","+ str(self.falsePositivesIn)+"," + str(self.truePositivesOut) + ","+ str(self.falsePositivesOut) + "," +str(self.combinedTruePositivesOut) + "," + str(self.combinedFalsePositivesOut))
             alertsFile.close()
+
+            alertsFile = open(str(q) + "/DetectionAttackTypesAggregation.csv", "a")
+            alertsFile.write(",".join(attackType for attackType in self.attacks))
+            alertsFile.write("\n")
+            alertsFile.write(",".join(str(i) for i in self.detectedAttacks))
+            alertsFile.close()
+
+            attackScores = open(str(q) + "/ScoresAttackTypes.Aggregation.json", "w")
+            json.dump(self.attackDict,attackScores)
+            attackScores.close()
         else:
             self.alertCounter += 1
             stime = payload.get('sTime')

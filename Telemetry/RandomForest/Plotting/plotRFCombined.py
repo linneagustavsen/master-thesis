@@ -102,7 +102,7 @@ def plotRandomForestCombined(interval, systemId, attackDate):
     fig.legend(fontsize=15)
 
     #fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 
 

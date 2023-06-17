@@ -7,6 +7,7 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 import pickle
 
 from HelperFunctions.SimulateRealTime import simulateRealTime
@@ -20,7 +21,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             interval:       timedelta object, size of the sliding window which the calculation is made on
             attackDate:     string, date of the attack the calculations are made on
 '''
-def detectionRandomForestTelemetry(start, stop, systemId, attackDate):
+def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
     MQTT_PORT = 1883
@@ -47,10 +48,29 @@ def detectionRandomForestTelemetry(start, stop, systemId, attackDate):
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -63,6 +83,7 @@ def detectionRandomForestTelemetry(start, stop, systemId, attackDate):
     if not mqtt_client.is_connected:
         print("ERROR!!!!!!")
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime:
@@ -80,8 +101,23 @@ def detectionRandomForestTelemetry(start, stop, systemId, attackDate):
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "Gateway": systemId,
                     "Deviation_score": None,
-                    #"Value": testingMeasurements[i],
                     "Real_label": attack,
-                    "Attack_type": "Flooding"
+                    "Attack_type": "Flooding",
+                    "Weight": weight
                 }
         mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+
+        if attack:
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TP"] += 1
+        elif not attack:
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["FP"] += 1
+
+    p = Path('Detections' + fileString)
+    q = p / 'RandomForest' / 'Telemetry'
+    if not q.exists():
+        q.mkdir(parents=True)
+    attackScores = open(str(q) + "/ScoresAttacks.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

@@ -8,6 +8,7 @@ import numpy as np
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 import json
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
@@ -28,7 +29,7 @@ from HelperFunctions.SimulateRealTime import simulateRealTime
             thresholdFlow:  float, values over this threshold will cause an alert
             attackDate:     string, date of the attack the calculations are made on
 '''
-def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, thresholdSrc, thresholdDst, thresholdFlow, attackDate):
+def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, thresholdSrc, thresholdDst, thresholdFlow, weightSrc, weightDst, weightFlow, attackDate):
     p = Path('NetFlow')
     q = p / 'Entropy' / 'Calculations'
     if not q.exists():
@@ -67,10 +68,67 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict_s = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_d = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_f = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict_s = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_d = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_f = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict_s = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_d = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_f = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -121,6 +179,7 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime + frequency:
@@ -148,7 +207,8 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
                     "Deviation_score": normalization(abs(change_src), maxmin_src["minimum"], maxmin_src["maximum"]),
                     "Protocol": 6,
                     "Real_label": int(attack),
-                    "Attack_type": "SYN Flood"
+                    "Attack_type": "SYN Flood",
+                    "Weight": weightSrc
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
@@ -160,7 +220,8 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
                     "Deviation_score": normalization(abs(change_dst), maxmin_dst["minimum"], maxmin_dst["maximum"]),
                     "Protocol": 6,
                     "Real_label": int(attack),
-                    "Attack_type": "SYN Flood"
+                    "Attack_type": "SYN Flood",
+                    "Weight": weightDst
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
@@ -172,48 +233,83 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
                     "Deviation_score": normalization(abs(change_flow), maxmin_flow["minimum"], maxmin_flow["maximum"]),
                     "Protocol": 6,
                     "Real_label": int(attack),
-                    "Attack_type": "SYN Flood"
+                    "Attack_type": "SYN Flood",
+                    "Weight": weightFlow
                     }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
         
             if abs(change_src) > thresholdSrc and attack:
                 truePositives_s += 1
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_src) > thresholdSrc and not attack:
                 falsePositives_s += 1
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_src) <= thresholdSrc and attack:
                 falseNegatives_s += 1
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_src) <= thresholdSrc and not attack:
                 trueNegatives_s += 1
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["TN"] += 1
             
             if abs(change_dst) > thresholdDst and attack:
                 truePositives_d += 1
+                if isInAttackTime:
+                    attackDict_d[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_dst) > thresholdDst and not attack:
                 falsePositives_d += 1
+                if isInAttackTime:
+                    attackDict_d[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_dst) <= thresholdDst and attack:
                 falseNegatives_d += 1
+                if isInAttackTime:
+                    attackDict_d[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_dst) <= thresholdDst and not attack:
                 trueNegatives_d += 1
+                if isInAttackTime:
+                    attackDict_d[attackTypeDuringThisTime]["TN"] += 1
             
             if abs(change_flow) > thresholdFlow and attack:
                 truePositives_f += 1
+                if isInAttackTime:
+                    attackDict_f[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_flow) > thresholdFlow and not attack:
                 falsePositives_f += 1
+                if isInAttackTime:
+                    attackDict_f[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_flow) <= thresholdFlow and attack:
                 falseNegatives_f += 1
+                if isInAttackTime:
+                    attackDict_f[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_flow) <= thresholdFlow and not attack:
                 trueNegatives_f += 1
+                if isInAttackTime:
+                    attackDict_f[attackTypeDuringThisTime]["TN"] += 1
         else:
             if attack:
                 falseNegatives_s += 1
                 falseNegatives_d += 1
                 falseNegatives_f += 1
+
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_d[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_f[attackTypeDuringThisTime]["FN"] += 1
             elif not attack:
                 trueNegatives_s += 1
                 trueNegatives_d += 1
                 trueNegatives_f += 1
 
-    sleep(randrange(400))
+                if isInAttackTime:
+                    attackDict_s[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_d[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_f[attackTypeDuringThisTime]["TN"] += 1
+
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
@@ -237,3 +333,15 @@ def synEntropyDetection(start, stop, systemId, frequency, interval, windowSize, 
 
     scores_f.write("\n"+ str(truePositives_f)+ "," + str(falsePositives_f)+ "," + str(falseNegatives_f)+ "," + str(trueNegatives_f))
     scores_f.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.SYNSourceIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_s,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.SYNDestinationIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_d,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.SYNFlowIPEntropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_f,attackScores)
+    attackScores.close()

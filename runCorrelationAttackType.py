@@ -8,5 +8,5 @@ MQTT_USER = 'correlation'
 MQTT_PASSWORD = 'correlationPass'
 MQTT_TOPIC_INPUT = 'detections/aggregation/attackType'
 MQTT_TOPIC_OUTPUT = 'detections/correlation/attackType'
-correlation = Correlation_Attack_types(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT, arguments[1])
+correlation = Correlation_Attack_types(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_INPUT, MQTT_TOPIC_OUTPUT, arguments[1], arguments[2])
 correlation.start()

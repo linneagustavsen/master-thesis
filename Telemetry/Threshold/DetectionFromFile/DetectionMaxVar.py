@@ -10,6 +10,7 @@ from Telemetry.Threshold.FindMaxVar import *
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 '''
     Calculates deviation score of a traffic measurement and alerts in case of an anomaly
@@ -23,7 +24,7 @@ from random import randrange
             attackDate: string, date of the attack to detect
             
 '''
-def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
+def detectionMaxVar(start, stop, systemId, field, threshold, weight, attackDate):
 
     json_file = open("Telemetry/Threshold/Calculations/MinMaxValues/MinMax.StatisticalModel_MaxVar." + str(field)+".json", "r")
     maxmin = json.load(json_file)
@@ -53,10 +54,29 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     data = pd.read_csv("Calculations"+fileString+"/Threshold/Telemetry/MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -74,6 +94,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime:
@@ -92,20 +113,29 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
                 "Gateway": systemId,
                 "Deviation_score": normalization(deviation, maxmin["minimum"], maxmin["maximum"]),
                 "Real_label": int(attack),
-                "Attack_type": "Flooding"
+                "Attack_type": "Flooding",
+                "Weight": weight
             }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
         if deviation > threshold and attack:
             truePositives += 1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TP"] += 1
         elif deviation > threshold and not attack:
             falsePositives += 1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["FP"] += 1
         elif deviation <= threshold and attack:
             falseNegatives +=1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["FN"] += 1
         elif deviation <= threshold and not attack:
             trueNegatives += 1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TN"] += 1
 
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     r = p / 'Threshold' / 'Telemetry'
     if not r.exists():
@@ -115,3 +145,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, attackDate):
     scores.write("TP,FP,FN,TN") 
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
+
+    attackScores = open(str(r) + "/ScoresAttacks.MaxVar." + str(field)+".attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

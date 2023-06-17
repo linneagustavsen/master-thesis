@@ -35,9 +35,12 @@ def calculationsKmeansEntropyTelemetry(start, stop, systemId, bucket, interval, 
     f1.write("sTime,eTime,entropy_packet_size_ingress,entropy_rate_packet_size_ingress,entropy_packet_size_egress,entropy_rate_packet_size_egress,real_label")
     cluster = open(str(q) + "/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     cluster.write("AttackCluster,Davies-bouldin-score,ClusterDiameter0,ClusterDiameter1,ClusterSize0,ClusterSize1")
-    '''f_scores = open(str(q) + "/Entropy.Score."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_scores.write("confusion_matrix,accuracy,f1,recall,precision")
-'''
+    f_scores = open(str(q) + "/Score.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    f_scores.write("TP,FP,FN,TN")
+    truePositives = 0
+    falsePositives = 0
+    falseNegatives = 0
+    trueNegatives = 0
 
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
@@ -76,13 +79,21 @@ def calculationsKmeansEntropyTelemetry(start, stop, systemId, bucket, interval, 
 
         if prediction[i] == 0: 
             f0.write(line)
+            if attackCluster == 0:
+                if labels[i] == 1:
+                    truePositives += 1
+                else:
+                    falsePositives += 1
+            else:
+                if labels[i] == 1:
+                    falseNegatives += 1
+                else:
+                    trueNegatives += 1
         elif prediction[i] == 1: 
             f1.write(line)
 
     f0.close()
     f1.close()
     cluster.close()
-    '''f_scores.write("\n"+str(confusion_matrix(labels, kmeans.labels_)) + ","+ str(accuracy_score(labels, kmeans.labels_)) + ","+ 
-                str(f1_score(labels,kmeans.labels_)) + ","+ str(recall_score(labels,kmeans.labels_)) + ","+ 
-                str(precision_score(labels,kmeans.labels_)))
-    f_scores.close()'''
+    f_scores.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
+    f_scores.close()

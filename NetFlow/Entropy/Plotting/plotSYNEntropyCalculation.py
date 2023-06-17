@@ -32,23 +32,24 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
-    data = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("Calculations/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     timeAxis = pd.to_datetime(data["sTime"])
 
     y_values = data[y_field]
+    labels = data["real_label"]
 
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    '''attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(attackFlows["sTime"])
-    endTime = pd.to_datetime(attackFlows["eTime"])
+    endTime = pd.to_datetime(attackFlows["eTime"])'''
     if len(y_values) == 0:
         return
-    if len(startTime) == 0:
-        return             
+    '''if len(startTime) == 0:
+        return  '''           
     fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
-    axs.plot(timeAxis ,y_values, color="#162931")
+    #axs.plot(timeAxis ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
     counterStrings = 0
     for string in strings:
@@ -58,7 +59,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         counterStrings += 1
     
     
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    '''lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
 
     for i in range(len(startTime)):
         if startTime[i].replace(second=0).replace(tzinfo=None) in lastInterval and endTime[i].replace(second=0).replace(tzinfo=None) in lastInterval:
@@ -78,7 +79,24 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
 
         axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
 
-    axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
+    axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")'''
+
+    attackFlows = []
+    normalFlows = []
+    i= 0
+    for label in labels:
+        if label == 1:
+            attackFlows.append(y_values[i])
+            normalFlows.append(None)
+        elif label == 0:
+            attackFlows.append(None)
+            normalFlows.append(y_values[i])
+
+        i += 1
+    axs.plot(timeAxis,y_values, color="#162931")
+    #axs.axvspan(startTime[index], endTime[index], facecolor=colors[-1], label="Attack flows")
+    axs.scatter(timeAxis ,normalFlows, color="#162931", label="Benign flows", s=10)
+    axs.scatter(timeAxis ,attackFlows, color="darkRed", label="Attack flows",zorder=10)
     axs.xaxis.set(
         major_locator=mdates.HourLocator(),
         major_formatter=mdates.DateFormatter("%H:%M"),
@@ -88,8 +106,8 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     axs.set_ylabel(y_fieldName, fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
     #fig.tight_layout()
-    fig.legend(fontsize=20)
-    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/SYN/SYN."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.legend(fontsize=17)
+    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/SYN/SYN."+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 
 
@@ -102,6 +120,7 @@ y_field_names = ["Entropy of destination IP addresses", "Entropy of source IP ad
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for i in range(len(y_fields)):

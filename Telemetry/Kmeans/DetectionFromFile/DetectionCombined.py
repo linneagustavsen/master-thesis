@@ -11,6 +11,7 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 '''
     Do K-means clustering on entropy data and field data and write both clusters to file
@@ -20,7 +21,7 @@ from random import randrange
             interval:   timedelta object, size of the sliding window which the calculation is made on,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFrequency, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFrequency, DBthreshold, c0threshold, c1threshold, weight, attackDate):
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -48,10 +49,29 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     truePositives = 0
     falsePositives = 0
     falseNegatives = 0
@@ -90,15 +110,25 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
 
             nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Combined.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
         
+        nonAttackCluster_sTime = pd.to_datetime(nonAttackCluster["sTime"])
+        nonAttackCluster_eTime = pd.to_datetime(nonAttackCluster["eTime"])
         labelsForNonAttackCluster = nonAttackCluster["real_label"]
-
-        for label in labelsForNonAttackCluster:
-            if label == 0:
+        
+        for i in range(len(labelsForNonAttackCluster)):
+            isInAttackTime, attackTypeDuringThisTime = inAttackInterval(nonAttackCluster_sTime[i], nonAttackCluster_eTime[i], attackDate)
+            if labelsForNonAttackCluster[i] == 0:
                 trueNegatives += 1
-            elif label == 1:
-                falseNegatives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TN"] += 1
+
+            elif labelsForNonAttackCluster[i] == 1:
+                falseNegatives += 1 
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FN"] += 1   
         del nonAttackCluster
         del labelsForNonAttackCluster
+        del nonAttackCluster_sTime
+        del nonAttackCluster_eTime
         
         counter = 0
         countClusters = 0
@@ -127,6 +157,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
             startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
             stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
             for i in range(len(sTimeCluster)):
+                isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTimeCluster[counter], eTimeCluster[counter], attackDate)
                 sTimeCluster[counter] = sTimeCluster[counter].replace(tzinfo=None)
                 eTimeCluster[counter] = eTimeCluster[counter].replace(tzinfo=None)
                 if eTimeCluster[counter] > stopTime:
@@ -154,18 +185,23 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
                             "Gateway": systemId,
                             "Deviation_score": None,
                             "Real_label": attack,
-                            "Attack_type": ""
+                            "Attack_type": "",
+                            "Weight": weight
                         }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
                 if real_labels[counter]:
                     truePositives += 1
+                    if isInAttackTime:
+                        attackDict[attackTypeDuringThisTime]["TP"] += 1
                 elif not real_labels[counter]:
                     falsePositives += 1
+                    if isInAttackTime:
+                        attackDict[attackTypeDuringThisTime]["FP"] += 1
                 counter += 1
             counter = 100*countClusters
         startTime += clusterFrequency
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
@@ -175,3 +211,8 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
+
+
+    attackScores = open(str(q) + "/ScoresAttacks.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

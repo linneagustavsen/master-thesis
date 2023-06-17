@@ -8,12 +8,13 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 from HelperFunctions.IsAttack import isAttack
 from HelperFunctions.Normalization import normalization
 from HelperFunctions.SimulateRealTime import simulateRealTime
 
 
-def topkflows(start, stop, systemId, threshold, attackDate):
+def topkflows(start, stop, systemId, threshold, weight, attackDate):
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -41,10 +42,29 @@ def topkflows(start, stop, systemId, threshold, attackDate):
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     data = pd.read_csv("Calculations"+fileString+"/TopKFlows/NetFlow/TopFlowChange.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -63,6 +83,7 @@ def topkflows(start, stop, systemId, threshold, attackDate):
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime:
@@ -79,7 +100,8 @@ def topkflows(start, stop, systemId, threshold, attackDate):
                 "Gateway": systemId,
                 "Deviation_score": change[i],
                 "Real_label": int(attack),
-                "Attack_type": "Flooding"
+                "Attack_type": "Flooding",
+                "Weight": weight
             }
             '''alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -98,9 +120,13 @@ def topkflows(start, stop, systemId, threshold, attackDate):
 
         if attack:
             truePositives += 1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TP"] += 1
         elif not attack:
             falsePositives += 1
-    sleep(randrange(400))
+            if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FP"] += 1
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'TopKFlows' / 'NetFlow'
     if not q.exists():
@@ -113,3 +139,7 @@ def topkflows(start, stop, systemId, threshold, attackDate):
     scores.write("TP,FP")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives))
     scores.close()
+    
+    attackScores = open(str(q) + "/ScoresAttacks.TopKFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

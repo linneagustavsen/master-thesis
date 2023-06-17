@@ -50,7 +50,7 @@ def getThreshold(y_field, systemId, interval, dataType, dataSet, attackDate):
                 print("The data type is top k flows")
                 return mean(thresholds)
             
-            decision = decision / 'Telemetry'
+            decision = path / 'Telemetry'
             
             if attackDate == "17.03.23":
                 fileString = "1703"

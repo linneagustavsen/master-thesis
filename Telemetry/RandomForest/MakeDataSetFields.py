@@ -39,7 +39,12 @@ def makeDataSetTelemetryFields(start, stop, bucket, fields, systemId, path, atta
 
         for i in range(len(timeStamps)):
             times = [timeStamps[i]]
-            times.extend(measurements[i]) 
+            curMeasurements = []
+            for field in fields:
+                if (systemId == "hoytek-gw2" or systemId == "narvik-gw4") and field == "egress_queue_info__0__cur_buffer_occupancy":
+                    continue
+                curMeasurements.append(df[field][i])
+            times.extend(curMeasurements) 
             times.append(int(isAttack(timeStamps[i] - timedelta(seconds = 2), timeStamps[i])))
             data.append(times)
         data = np.array(data)

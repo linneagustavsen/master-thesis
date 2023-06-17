@@ -114,7 +114,7 @@ def getData(start, stop, bucket, systemId, fields):
 
     #Make a data frame from the output of the query
     df = query_api.query_data_frame(query=query)
-
+    
     #Clean up dataframe
     if not df.empty:
         df = df.drop(columns=['result', 'table'])

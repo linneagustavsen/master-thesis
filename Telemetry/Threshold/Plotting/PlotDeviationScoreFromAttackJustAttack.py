@@ -80,7 +80,7 @@ def makePlotDeviationScore(y_field, y_field_name, systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=20)
     #fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/Telemetry/StatisticalModel/JustAttack."+ y_field+ "."+ str(systemId)+ ".png", dpi=500)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/Telemetry/StatisticalModel/JustAttack."+ y_field+ "."+ str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
 
 

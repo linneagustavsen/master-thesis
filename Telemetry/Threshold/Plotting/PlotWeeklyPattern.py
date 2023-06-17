@@ -62,7 +62,7 @@ def makePlot(y_field, y_fieldName):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=10)
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Telemetry/WeeklyPattern/"+ y_field+".png", dpi=500)
+    fig.savefig("Plots/Threshold/Telemetry/WeeklyPattern/"+ y_field+".pdf", dpi=300)
     plt.close(fig)
 
 

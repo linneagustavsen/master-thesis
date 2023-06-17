@@ -91,7 +91,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
             axs.tick_params(axis='both', which='major', labelsize=12)
             fig.legend()
             fig.tight_layout()
-            fig.savefig(path+y_field+hour+".png", dpi=500)
+            fig.savefig(path+y_field+hour+".pdf", dpi=300)
             plt.close(fig)
             x_values = []
             y_values = [[] for _ in range(7)]  # Initialize empty lists for 7 weeks

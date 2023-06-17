@@ -1,2 +1,2 @@
-SystemId,threshold,maxTPR
-teknobyen-gw1,1.44,1.0
+SystemId,threshold,maxTPR,PPV,total
+teknobyen-gw1,1.44,1.0,0.0046082949308755,699

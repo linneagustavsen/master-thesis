@@ -1,5 +1,5 @@
-SystemId,threshold,maxTPR
-tromso-gw5,1.1799331296,1.0
-bergen-gw3,0.5281210232,1.0
-trd-gw,2.1660869634,1.0
-ifi2-gw5,1.7715594518,1.0
+SystemId,threshold,maxTPR,PPV,total
+tromso-gw5,1.1799331296,1.0,0.0444444444444444,705
+bergen-gw3,0.5281210232,1.0,0.21875,705
+trd-gw,2.1660869634,1.0,0.21875,705
+ifi2-gw5,1.7715594518,1.0,0.2,705

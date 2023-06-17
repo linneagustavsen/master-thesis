@@ -8,7 +8,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDate = "08.03.23"
+attackDate = "24.03.23"
 for systemId in systems:
     print(systemId)
     relabelMetricCalc(systemId, intervals, attackDate)

@@ -479,104 +479,108 @@ def makeHeatMapKmeans(dataset, attackDate):
     transposed_accuracy_scores = np.transpose(accuracy_scores)
     transposed_fpr_scores = np.transpose(fpr_scores)
     transposed_fnr_scores = np.transpose(fnr_scores)'''
-    colors = ["#E9D4C7","#CB997E", "#3A2D32"]
+    colorsGood = ["#E9D4C7","#CB997E", "#3A2D32"]
+    colorsBad = ["#3A2D32","#CB997E", "#E9D4C7"]
+    '''colorsBad = ["#006400","#F6BE00", "#8B0000"]
+    colorsGood = ["#8B0000","#F6BE00", "#006400"]'''
     x_labels = ['Fields', 'Entropy, 5 min interval', 'Entropy, 10 min interval', 'Entropy, 15 min interval','Combined, 5 min interval', 'Combined, 10 min interval', 'Combined, 15 min interval']
 
-    cmap = LinearSegmentedColormap.from_list("custom_cmap", colors)
+    cmapGood = LinearSegmentedColormap.from_list("custom_cmap", colorsGood)
+    cmapBad = LinearSegmentedColormap.from_list("custom_cmap", colorsBad)
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(f1_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(f1_scores, annot=True, fmt=".3f", cmap=cmapGood, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("F1-scores for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/F1.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/F1.pdf", dpi=300)
     plt.close(fig)
 
 
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(precision_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(precision_scores, annot=True, fmt=".3f", cmap=cmapGood, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("Precision for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/Precision.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/Precision.pdf", dpi=300)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(tpr_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(tpr_scores, annot=True, fmt=".3f", cmap=cmapGood, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("TPR for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/TPR.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/TPR.pdf", dpi=300)
     plt.close(fig)
 
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(accuracy_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(accuracy_scores, annot=True, fmt=".3f", cmap=cmapGood, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("Accuracy for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/Accuracy.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/Accuracy.pdf", dpi=300)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(fpr_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(fpr_scores, annot=True, fmt=".3f", cmap=cmapBad, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("FPR for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/FPR.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/FPR.pdf", dpi=300)
     plt.close(fig)
 
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    sns.heatmap(fnr_scores, annot=True, fmt=".3f", cmap=cmap, ax=ax)
+    sns.heatmap(fnr_scores, annot=True, fmt=".3f", cmap=cmapBad, ax=ax, center=0.5, vmax=1)
     
     ax.set_xticklabels(x_labels, rotation = 30, ha='right')
     ax.set_yticklabels(systems, rotation = 30,ha='right')
 
     # Manually create a colorbar
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 0.5, 0.99])
-    cbar.set_ticklabels(['Low', 'Medium', 'High'])
+    #cbar = ax.collections[0].colorbar
+    #cbar.set_ticks([0, 0.5, 0.99])
+    #cbar.set_ticklabels(['Low', 'Medium', 'High'])
     plt.title("FNR for K-means clustering")
     fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/FNR.png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/"+dataset+"/FNR.pdf", dpi=300)
     plt.close(fig)
     
 
-makeHeatMapKmeans("Telemetry", "24.03.23")
+makeHeatMapKmeans("NetFlow", "24.03.23")

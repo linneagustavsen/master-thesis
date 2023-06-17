@@ -35,13 +35,13 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     data = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     startTime = pd.to_datetime(data["sTime"])
+
     y_values = data[y_field]
     labels = data["real_label"]
     #attackFlows = pd.read_csv("Calculations"+ fileString+ "/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     '''startTime = pd.to_datetime(attackFlows["sTime"])
     endTime = pd.to_datetime(attackFlows["eTime"])'''
-    endTime = pd.to_datetime(data["eTime"])
     if len(y_values) == 0:
         return
     if len(startTime) == 0:
@@ -80,7 +80,6 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     attackFlows = []
     normalFlows = []
     i= 0
-    index = 0
     for label in labels:
         if label == 1:
             attackFlows.append(y_values[i])
@@ -90,12 +89,12 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
             normalFlows.append(y_values[i])
 
         i += 1
-
+    axs.plot(startTime,y_values, color="#162931")
     #axs.axvspan(startTime[index], endTime[index], facecolor=colors[-1], label="Attack flows")
-    axs.plot(startTime ,normalFlows, color="#162931", label="Benign flows")
-    axs.plot(startTime ,attackFlows, color="darkRed", label="Attack flows")
+    axs.scatter(startTime ,normalFlows, color="#162931", label="Benign flows", s=10)
+    axs.scatter(startTime ,attackFlows, color="darkRed", label="Attack flows",zorder=10)
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=int(interval.total_seconds()/60)),
+        major_locator=mdates.MinuteLocator(interval=30),
         major_formatter=mdates.DateFormatter("%H:%M"),
     )
     axs.set_title(y_fieldName, fontsize=20)
@@ -104,13 +103,13 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     #fig.tight_layout()
     fig.legend(fontsize=15)
-    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/"+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.png", dpi=500)
+    fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/"+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
-
+        
+    
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
-
 
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
                     "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
@@ -129,7 +128,5 @@ for attackDate in attackDates:
             print(y_fields[i])
             for interval in intervals:
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)
-        
+                
     
-
-

@@ -120,7 +120,7 @@ def plotSYN(systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.png", dpi=500)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.pdf", dpi=300)
     plt.close(fig)
 
 

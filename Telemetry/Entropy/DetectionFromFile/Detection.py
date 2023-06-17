@@ -11,6 +11,7 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 from HelperFunctions.Normalization import normalization
 
@@ -27,7 +28,7 @@ from HelperFunctions.Normalization import normalization
             thresholdEntropyRate:   float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdEntropy_ingress, thresholdEntropyRate_ingress, thresholdEntropy_egress, thresholdEntropyRate_egress, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, windowSize, thresholdEntropy_ingress, thresholdEntropyRate_ingress,  thresholdEntropy_egress, thresholdEntropyRate_egress, weightEntropy_ingress,weightEntropyRate_ingress, weightEntropy_egress, weightEntropyRate_egress,  attackDate):
 
     json_file_ingress = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_ingress."+ str(int(interval.total_seconds())) +".json", "r")
     maxmin_ingress = json.load(json_file_ingress)
@@ -65,10 +66,88 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict_ingress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_ingress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_egress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_egress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict_ingress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_ingress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_egress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_egress = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict_ingress = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_ingress = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_egress = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        attackDict_r_egress = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
+        
     data = pd.read_csv("Calculations"+fileString+"/Entropy/Telemetry/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     sTime = pd.to_datetime(data["sTime"])
@@ -109,6 +188,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     #Loop through all the flow records in the input file
     for i in range(len(sTime)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[i], eTime[i], attackDate)
         sTime[i] = sTime[i].replace(tzinfo=None)
         eTime[i] = eTime[i].replace(tzinfo=None)
         if eTime[i] > stopTime + frequency:
@@ -146,7 +226,8 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Deviation_score": normalization(abs(change_ingress), maxmin_ingress["minimum"], maxmin_ingress["maximum"]),
                     "Packet_size_distribution": packetSizeDistributionDict_ingress[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightEntropy_ingress
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_r_ingress) > thresholdEntropyRate_ingress:
@@ -157,7 +238,8 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Deviation_score": normalization(abs(change_r_ingress), maxmin_rate_ingress["minimum"], maxmin_rate_ingress["maximum"]),
                     "Packet_size_distribution": packetSizeDistributionDict_ingress[eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ")],
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightEntropyRate_ingress
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
@@ -168,7 +250,8 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_egress), maxmin_egress["minimum"], maxmin_egress["maximum"]),
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightEntropy_egress
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_r_egress) > thresholdEntropyRate_egress:
@@ -178,64 +261,111 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Gateway": systemId,
                     "Deviation_score": normalization(abs(change_r_egress), maxmin_rate_egress["minimum"], maxmin_rate_egress["maximum"]),
                     "Real_label": int(attack),
-                    "Attack_type": attackType
+                    "Attack_type": attackType,
+                    "Weight": weightEntropyRate_egress
                 }
                 mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if abs(change_ingress) > thresholdEntropy_ingress and attack:
                 truePositives_ingress += 1
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_ingress) > thresholdEntropy_ingress and not attack:
                 falsePositives_ingress += 1
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_ingress) <= thresholdEntropy_ingress and attack:
                 falseNegatives_ingress +=1
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_ingress) <= thresholdEntropy_ingress and not attack:
                 trueNegatives_ingress += 1
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["TN"] += 1
 
             
             if abs(change_r_ingress) > thresholdEntropyRate_ingress and attack:
                 truePositives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_ingress[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_r_ingress) > thresholdEntropyRate_ingress and not attack:
                 falsePositives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_ingress[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and attack:
                 falseNegatives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_ingress[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and not attack:
                 trueNegatives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_ingress[attackTypeDuringThisTime]["TN"] += 1
 
             if abs(change_egress) > thresholdEntropy_egress and attack:
                 truePositives_egress += 1
+                if isInAttackTime:
+                    attackDict_egress[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_egress) > thresholdEntropy_egress and not attack:
                 falsePositives_egress += 1
+                if isInAttackTime:
+                    attackDict_egress[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_egress) <= thresholdEntropy_egress and attack:
                 falseNegatives_egress +=1
+                if isInAttackTime:
+                    attackDict_egress[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_egress) <= thresholdEntropy_egress and not attack:
                 trueNegatives_egress += 1
+                if isInAttackTime:
+                    attackDict_egress[attackTypeDuringThisTime]["TN"] += 1
 
             
             if abs(change_r_egress) > thresholdEntropyRate_egress and attack:
                 truePositives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_egress[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_r_egress) > thresholdEntropyRate_egress and not attack:
                 falsePositives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_egress[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_r_egress) <= thresholdEntropyRate_egress and attack:
                 falseNegatives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_egress[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_r_egress) <= thresholdEntropyRate_egress and not attack:
                 trueNegatives_r_egress += 1
+                if isInAttackTime:
+                    attackDict_r_egress[attackTypeDuringThisTime]["TN"] += 1
         else:
             if attack:
-               falseNegatives_ingress +=1
-               falseNegatives_r_ingress += 1
+                falseNegatives_ingress +=1
+                falseNegatives_r_ingress += 1
 
-               falseNegatives_egress +=1
-               falseNegatives_r_egress += 1
+                falseNegatives_egress +=1
+                falseNegatives_r_egress += 1
+
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_r_ingress[attackTypeDuringThisTime]["FN"] += 1
+
+                    attackDict_egress[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_r_egress[attackTypeDuringThisTime]["FN"] += 1
             elif not attack:
                 trueNegatives_ingress += 1
                 trueNegatives_r_ingress += 1
 
                 trueNegatives_egress += 1
                 trueNegatives_r_egress += 1
+
+                if isInAttackTime:
+                    attackDict_ingress[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_r_ingress[attackTypeDuringThisTime]["TN"] += 1
+
+                    attackDict_egress[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_r_egress[attackTypeDuringThisTime]["TN"] += 1
             
             
 
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
@@ -264,3 +394,20 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
     scores_r_egress.write("\n"+ str(truePositives_r_egress)+ "," + str(falsePositives_r_egress)+ "," + str(falseNegatives_r_egress)+ "," + str(trueNegatives_r_egress))
     scores_r_egress.close()
+
+
+    attackScores = open(str(q) + "/ScoresAttacks.EntropyPacketSize_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_ingress,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.EntropyRatePacketSize_ingress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_r_ingress,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.EntropyPacketSize_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_egress,attackScores)
+    attackScores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.EntropyRatePacketSize_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict_r_egress,attackScores)
+    attackScores.close()

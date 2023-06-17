@@ -102,7 +102,7 @@ def plotTopKFlows(systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=15)
     #fig.tight_layout()
-    fig.savefig("Plots/TopKFlows/Attack"+ fileString+ "/NetFlow/Scatter."+  str(systemId)+ ".png", dpi=500)
+    fig.savefig("Plots/TopKFlows/Attack"+ fileString+ "/NetFlow/Scatter."+  str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
 
 

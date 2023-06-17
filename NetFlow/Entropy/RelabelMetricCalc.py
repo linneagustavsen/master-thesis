@@ -13,7 +13,7 @@ def relabelMetricCalc(systemId, intervals, attackDate):
     elif attackDate == "24.03.23":
         fileString = "2403"
 
-    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    attackFlows = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/AttackFlows.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     sTimeAttacks = pd.to_datetime(attackFlows["sTime"])
     eTimeAttacks = pd.to_datetime(attackFlows["eTime"])
    
@@ -38,7 +38,7 @@ def relabelMetricCalc(systemId, intervals, attackDate):
 
     for interval in intervals:
         print(interval)
-        data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        data = pd.read_csv("Calculations"+fileString+"/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
         sTime = pd.to_datetime(data["sTime"])
         eTime = pd.to_datetime(data["eTime"])
@@ -59,4 +59,4 @@ def relabelMetricCalc(systemId, intervals, attackDate):
         data["real_label"] = newLabels
         if not q.exists():
             q.mkdir(parents=True)
-        data.to_csv(str(q)+ "/Metrics."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", index= False)
+        data.to_csv(str(q)+ "/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", index= False)

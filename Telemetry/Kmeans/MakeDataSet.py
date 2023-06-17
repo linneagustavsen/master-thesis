@@ -21,9 +21,9 @@ from HelperFunctionsTelemetry.GetDataTelemetry import *
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
 def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields, attackDate):
-    columTitles = ["egress_queue_info__0__cur_buffer_occupancy","egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
+    columTitles = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
     if systemId =="hoytek-gw2" or systemId == "narvik-gw4":
-        columTitles = ["egress_stats__if_1sec_pkt","ingress_stats__if_1sec_pkt","egress_stats__if_1sec_octet","ingress_stats__if_1sec_octet","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
+        columTitles = ["egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
     p = Path('Telemetry')
     dp = p / 'Kmeans' / 'DataSets'
 
@@ -87,7 +87,12 @@ def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields
         entropyRatePacketSize_ingress = entropy_measurements[indexInTimeArray][1]
         entropyPacketSize_egress = entropy_measurements[indexInTimeArray][2]
         entropyRatePacketSize_egress = entropy_measurements[indexInTimeArray][3]
-        curMeasurements = measurements[i]
+        curMeasurements = []
+        for field in columTitles[:-4]:
+            if (systemId == "hoytek-gw2" or systemId == "narvik-gw4") and field == "egress_queue_info__0__cur_buffer_occupancy":
+                continue
+            curMeasurements.append(df[field][i])
+        curMeasurements = np.array(curMeasurements)
 
         newMeasurements = np.array([entropyPacketSize_ingress, entropyRatePacketSize_ingress, entropyPacketSize_egress, entropyRatePacketSize_egress])
 

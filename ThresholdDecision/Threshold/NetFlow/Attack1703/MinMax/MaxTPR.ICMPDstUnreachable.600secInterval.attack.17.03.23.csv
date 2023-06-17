@@ -1,2 +1,3 @@
-SystemId,threshold,maxTPR
-hoytek-gw2,20.0,1.0
+SystemId,threshold,maxTPR,PPV,total
+teknobyen-gw1,7.4444444444,1.0,0.3333333333333333,160
+hoytek-gw2,6.5555555555,1.0,0.0327868852459016,160

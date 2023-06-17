@@ -23,7 +23,7 @@ from HelperFunctions.GeneralizedEntropy import *
 def makeDataSetRandomForestCombinedTelemetry(start, stop, systemId, bucket, fields, interval, frequency, path, attackDate):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-
+    isDataFrame = False
     p = Path('Telemetry')
     q = p / 'RandomForest' / 'DataSets'
     fieldsFile = str(q) + "/" + str(path) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
@@ -41,6 +41,7 @@ def makeDataSetRandomForestCombinedTelemetry(start, stop, systemId, bucket, fiel
         if not q.exists():
             q.mkdir(parents=True, exist_ok=False)
         df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),bucket, systemId, fields)
+        isDataFrame = True
         if len(df) == 0:
             with open(str(q) + "/" +str(path) + "/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
                 np.save(f, np.array([]))
@@ -108,7 +109,14 @@ def makeDataSetRandomForestCombinedTelemetry(start, stop, systemId, bucket, fiel
         entropyRatePacketSize_ingress = entropy_measurements[indexInTimeArray][1]
         entropyPacketSize_egress = entropy_measurements[indexInTimeArray][2]
         entropyRatePacketSize_egress = entropy_measurements[indexInTimeArray][3]
-        curMeasurements = measurements[counter]
+        if isDataFrame:
+            curMeasurements = []
+            for field in fields:
+                if (systemId == "hoytek-gw2" or systemId == "narvik-gw4") and field == "egress_queue_info__0__cur_buffer_occupancy":
+                    continue
+                curMeasurements.append(df[field][counter])
+        else:
+            curMeasurements = measurements[counter]
         
         #Add a label to the measurements
         curLabel = labels[indexInTimeArray]

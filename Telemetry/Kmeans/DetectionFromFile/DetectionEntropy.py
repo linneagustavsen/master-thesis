@@ -10,6 +10,7 @@ import json
 import paho.mqtt.client as mqtt
 from time import sleep
 from random import randrange
+from HelperFunctions.AttackIntervals import inAttackInterval
 
 from Telemetry.Kmeans.ClusterLabelling import labelCluster
 
@@ -23,7 +24,7 @@ from Telemetry.Kmeans.ClusterLabelling import labelCluster
             frequency:  timedelta object, frequency of metric calculation,
             attackDate: string, date of the attack the calculations are made on
 '''
-def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, attackDate):
+def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold, c0threshold, c1threshold, weight, attackDate):
 
     #Parameters for the MQTT connection
     MQTT_BROKER = 'localhost'
@@ -51,10 +52,29 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
     if attackDate == "08.03.23":
         fileString = "0803"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "17.03.23":
         fileString = "1703"
+        attackDict = {"SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     elif attackDate == "24.03.23":
         fileString = "2403"
+        attackDict = {"UDP Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SlowLoris": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Ping Flood": {"TP":0, "FP":0, "TN": 0, "FN": 0}, 
+                       "Slow Read":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Blacknurse":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "SYN Flood":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Xmas":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "UDP Flood and SlowLoris":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "Ping Flood and R.U.D.Y":{"TP":0, "FP":0, "TN": 0, "FN": 0},
+                       "All types":{"TP":0, "FP":0, "TN": 0, "FN": 0}}
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     
@@ -81,13 +101,21 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
 
         nonAttackCluster = pd.read_csv("Calculations"+fileString+"/Kmeans/Telemetry/Entropy.Cluster0."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
+    nonAttackCluster_sTime = pd.to_datetime(nonAttackCluster["sTime"])
+    nonAttackCluster_eTime = pd.to_datetime(nonAttackCluster["eTime"])
     labelsForNonAttackCluster = nonAttackCluster["real_label"]
-
-    for label in labelsForNonAttackCluster:
-        if label == 0:
+    
+    for i in range(len(labelsForNonAttackCluster)):
+        isInAttackTime, attackTypeDuringThisTime = inAttackInterval(nonAttackCluster_sTime[i], nonAttackCluster_eTime[i], attackDate)
+        if labelsForNonAttackCluster[i] == 0:
             trueNegatives += 1
-        elif label == 1:
-            falseNegatives += 1
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["TN"] += 1
+
+        elif labelsForNonAttackCluster[i] == 1:
+            falseNegatives += 1 
+            if isInAttackTime:
+                attackDict[attackTypeDuringThisTime]["FN"] += 1   
     
     del nonAttackCluster
     del labelsForNonAttackCluster
@@ -114,6 +142,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
             attackType = "Same protocol"'''
             
         for i in range(len(sTime)):
+            isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTime[counter], eTime[counter], attackDate)
             sTime[counter] = sTime[counter].replace(tzinfo=None)
             eTime[counter] = eTime[counter].replace(tzinfo=None)
             if eTime[counter] > stopTime:
@@ -129,17 +158,22 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
                         "Gateway": systemId,
                         "Deviation_score": None,
                         "Real_label": int(real_labels[counter]),
-                        "Attack_type": ""
+                        "Attack_type": "",
+                        "Weight": weight
                     }
             mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if real_labels[counter]:
                 truePositives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["TP"] += 1
             elif not real_labels[counter]:
                 falsePositives += 1
+                if isInAttackTime:
+                    attackDict[attackTypeDuringThisTime]["FP"] += 1
             counter += 1
         counter = 100*countClusters
-    sleep(randrange(400))
+    #sleep(randrange(400))
     p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'Telemetry'
     if not q.exists():
@@ -149,3 +183,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
     scores.close()
+
+    attackScores = open(str(q) + "/ScoresAttacks.Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    json.dump(attackDict,attackScores)
+    attackScores.close()

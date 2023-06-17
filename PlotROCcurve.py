@@ -76,7 +76,7 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
 
         if not plotting.exists():
             plotting.mkdir()
-        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+        fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".pdf", dpi=300)
         plt.close(fig)
         return
     fig, axs = plt.subplots(1, 1, figsize=(7, 7))
@@ -113,7 +113,7 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, intervals, attackDate):
 
     if not plotting.exists():
         plotting.mkdir(parents=True)
-    fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".png", dpi=500)
+    fig.savefig(str(plotting) + "/"+  str(systemId)+ "." + str(y_field)+ ".pdf", dpi=300)
     
     plt.close(fig)
 

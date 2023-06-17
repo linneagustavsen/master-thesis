@@ -116,7 +116,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
 
    
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Scatter.Packets."+  str(systemId)+ ".png", dpi=500)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Scatter.Packets."+  str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
 
 
