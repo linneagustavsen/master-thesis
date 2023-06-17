@@ -117,7 +117,7 @@ def findGoodThresholdFromFile(y_field, dataSet, dataType, systems, interval, att
             f = open(str(q) + "/MinMax/MaxTPR."+ str(y_field) +".attack."+str(attackDate)+ ".csv", "a")
             f.write("SystemId,PPV,total")
             f1 = open(str(q) + "/MinMax/MaxF1."+ str(y_field) +".attack."+str(attackDate)+ ".csv", "a")
-            f1.write("SystemId,PPV.total")
+            f1.write("SystemId,PPV,total")
 
         for systemId in systems:
             if dataType == "RandomForest":

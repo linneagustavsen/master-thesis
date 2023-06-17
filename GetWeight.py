@@ -42,7 +42,7 @@ def getWeight(y_field, systemId, interval, dataType, dataSet, attackDate):
             thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
         else:
             thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
-    
+
     data = pd.read_csv(thresholdFile)
     systemIds = data["SystemId"].values
     precisionScores = pd.to_numeric(data["PPV"],errors='coerce')

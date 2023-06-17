@@ -120,7 +120,7 @@ python3 WriteCorrelationsToFiles.py
 pkill python
 mv Detections2403 Detections2403_10min_F1
 mv HelperFunctions/SimulateRealTimeCP2.py HelperFunctions/SimulateRealTime.py
-sleep $((10*60))
+
 
 interval=15
 start="2023-03-24 14:00:00"
