@@ -15,12 +15,16 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
             ["Mar 08 15:09:56", "Mar 08 15:17:02"], ["Mar 08 15:37:00", "Mar 08 15:52:02"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-08 14:15:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-08 16:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "17.03.23":
         fileString = "1703"
         strings = [["Mar 17 11:00:01", "Mar 17 11:07:02"], ["Mar 17 11:37:02", "Mar 17 11:50:04"],
            ["Mar 17 11:57:02", "Mar 17 12:04:12"], ["Mar 17 12:44:10", "Mar 17 13:00:17"]]
         attacks = ["SYN Flood", "SlowLoris", "Ping Flood", "R.U.D.Y"]
         colors = ["#CB997E","#DDBEA9", "#99958C", "#B7B7A4", "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-17 11:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-17 13:00:00", '%Y-%m-%d %H:%M:%S')
     elif attackDate == "24.03.23":
         fileString = "2403"
         strings = [["Mar 24 14:00:01", "Mar 24 14:03:57"], ["Mar 24 14:13:29", "Mar 24 14:29:08"],
@@ -32,6 +36,8 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         attacks = ["UDP Flood", "SlowLoris", "Ping Flood", "Slow Read", "Blacknurse", "SYN Flood", "R.U.D.Y",
                 "Xmas", "UDP Flood\nand SlowLoris", "Ping Flood\nand R.U.D.Y", "All types"]
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
+        startAttack = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
+        stopAttack = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     data = pd.read_csv("Calculations/Entropy/NetFlow/SYN."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
 
     timeAxis = pd.to_datetime(data["sTime"])
@@ -94,6 +100,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
             normalFlows.append(y_values[i])
 
         i += 1
+    timeAxis[0] = startAttack
     axs.plot(timeAxis,y_values, color="#162931")
     #axs.axvspan(startTime[index], endTime[index], facecolor=colors[-1], label="Attack flows")
     axs.scatter(timeAxis ,normalFlows, color="#162931", label="Benign flows", s=10)
