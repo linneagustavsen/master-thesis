@@ -51,8 +51,9 @@ def findGoodThreshold(systemId, attackDate):
                     falseNegatives += 1
                 else:
                     trueNegatives += 1
-        if falsePositives == 0 and trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
+        if trueNegatives == 0 and falsePositives == 0 and falseNegatives == 0:
             continue
+
         accuracy = (truePositives +trueNegatives)/(truePositives +trueNegatives + falsePositives + falseNegatives)
         if falsePositives != 0 or trueNegatives != 0:
             fpr = falsePositives/(falsePositives + trueNegatives)
@@ -83,7 +84,6 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 attackDates = ["08.03.23","17.03.23", "24.03.23"]
-attackDates = ["17.03.23", "24.03.23"]
 print("Top K flows")
 for attackDate in attackDates:
     print("\n")

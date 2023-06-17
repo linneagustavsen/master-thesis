@@ -107,8 +107,8 @@ def plotSYN(systemId, attackDate):
     
     if counter == 0:
         return
-    axs.scatter(timeAxis ,nonAttackValues, color="black", s=10, label="Normal flows")
-    axs.scatter(timeAxis, attackValues, color = "blue", s=30, label="Attack flows")
+    axs.scatter(timeAxis ,nonAttackValues, color="#162931", s=10, label="Normal flows")
+    axs.scatter(timeAxis, attackValues, color = "darkRed", s=30, label="Attack flows")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -118,7 +118,7 @@ def plotSYN(systemId, attackDate):
     axs.set_xlabel('Time',fontsize=20)
     axs.set_ylabel("SYN packets per flow", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     fig.tight_layout()
     fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.pdf", dpi=300)
     plt.close(fig)

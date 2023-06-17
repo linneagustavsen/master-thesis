@@ -40,17 +40,6 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     #Makes datetime objects of the input times
-    fig, axs = plt.subplots(1, 1, figsize=(20, 10))
-
-    format = '%b %d %H:%M:%S'
-    counterStrings = 0
-    for string in strings:
-        start = datetime.strptime(string[0], format).replace(year=2023)
-        stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-        counterStrings += 1
-
-    clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
 
     cluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
     
@@ -61,13 +50,21 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     
     if 1 not in labels0.values :
         print("No attacks")
-        plt.close(fig)
         return
+    
+    fig, axs = plt.subplots(1, 1, figsize=(20, 10))
+
+    format = '%b %d %H:%M:%S'
+    counterStrings = 0
+    for string in strings:
+        start = datetime.strptime(string[0], format).replace(year=2023)
+        stop = datetime.strptime(string[1], format).replace(year=2023)
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        counterStrings += 1
     #format = '%Y-%m-%dT%H:%M:%SZ'
-    eTime0 = pd.to_datetime(cluster["eTime"])
     
 
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    '''lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
     for i in range(len(labels0)):
         sTime0[i] = sTime0[i].replace(tzinfo=None)
         eTime0[i] = eTime0[i].replace(tzinfo=None)
@@ -87,16 +84,21 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
                 nowInterval = pd.Interval(sTime0[i].replace(second=0).replace(tzinfo=None), eTime0[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
                 lastInterval = nowInterval
 
-            axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
+            axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])'''
+    attackFlows = []
+    normalFlows = []
+    i= 0
+    for label in labels0:
+        if label == 1:
+            attackFlows.append(packets0[i])
+            normalFlows.append(None)
+        elif label == 0:
+            attackFlows.append(None)
+            normalFlows.append(packets0[i])
+        i+= 1
 
-    labelPlot1 = ""
-    labelPlot2 = ""
-
-    if len(clusterLabels["AttackCluster"]) == 0:
-        plt.close(fig)
-        return
-
-    axs.scatter(sTime0 ,packets0, color="darkRed", label="Attack cluster")
+    axs.scatter(sTime0 ,normalFlows, color="#162931", s=10, label="False positives")
+    axs.scatter(sTime0 ,attackFlows, color="darkRed", s=30,label="True positives")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),

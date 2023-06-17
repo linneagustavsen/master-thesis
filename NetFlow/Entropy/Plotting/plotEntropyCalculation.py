@@ -44,7 +44,8 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     endTime = pd.to_datetime(attackFlows["eTime"])'''
     if len(y_values) == 0:
         return
-    if len(startTime) == 0:
+    if 1 not in labels.values :
+        print("No attacks")
         return             
     fig, axs = plt.subplots(1, 1, figsize=(25, 6))
    
@@ -102,7 +103,10 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     axs.set_ylabel(y_fieldName, fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
     #fig.tight_layout()
-    fig.legend(fontsize=15)
+    if attackDate == "24.03.23":
+        fig.legend(fontsize=17)
+    else:
+        fig.legend(fontsize=20)
     fig.savefig("Plots/Entropy/Attack"+ fileString+ "/NetFlow/"+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
         

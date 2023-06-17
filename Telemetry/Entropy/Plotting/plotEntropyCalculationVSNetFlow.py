@@ -84,7 +84,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
         axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     #fig.tight_layout()
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     fig.savefig("Plots/Entropy/Attack"+ fileString+ "/Combined/"+  str(systemId)+ "." + str(y_field)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 
@@ -93,8 +93,9 @@ systems = ["narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 
-y_fields = ["entropy_rate_packet_size_ingress"]
-y_field_names = ["Entropy rate of packet size"]
+y_fields = ["entropy_packet_size_ingress", "entropy_rate_packet_size_ingress", "numberOfPackets_ingress", "numberOfBytes_ingress"]
+y_field_names = ["Entropy of packet size", "Entropy rate of packet size",
+                 "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["24.03.23"]

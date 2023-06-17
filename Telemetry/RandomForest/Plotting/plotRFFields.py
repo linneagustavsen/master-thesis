@@ -39,16 +39,6 @@ def plotRandomForestFields(interval, systemId, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
-    
-    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
-
-    format = '%b %d %H:%M:%S'
-    counterStrings = 0
-    for string in strings:
-        start = datetime.strptime(string[0], format).replace(year=2023)
-        stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-        counterStrings += 1
         
 
     packetsClusterAttack = []
@@ -63,9 +53,22 @@ def plotRandomForestFields(interval, systemId, attackDate):
     #print(clusterLabels["AttackCluster"])
     sTimeAttack = pd.to_datetime(alerts["sTime"])
 
-    packetsAttack = alerts["ingress_stats__if_1sec_pkt"]
+    packetsAttack = alerts["ingress_stats__if_1sec_pkts"]
     labelsAttack = alerts["real_label"]
 
+    if 1 not in labelsAttack.values :
+        print("No attacks")
+        return  
+    
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
+
+    format = '%b %d %H:%M:%S'
+    counterStrings = 0
+    for string in strings:
+        start = datetime.strptime(string[0], format).replace(year=2023)
+        stop = datetime.strptime(string[1], format).replace(year=2023)
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        counterStrings += 1
 
     for i in range(len(labelsAttack)):
         if labelsAttack[i] == 1:
@@ -82,15 +85,15 @@ def plotRandomForestFields(interval, systemId, attackDate):
         plt.close(fig)
         return
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="False positives")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=30,label="True positives")
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in RF alerts")
+    axs.set_title("Ingress packets in alerts")
     axs.title.set_size(20)
     axs.set_xlabel('Time', fontsize=20)
     #axs.ylabel.set_size(15)
@@ -99,7 +102,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
     #axs.set_ylim([0,maxValue])
     
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
 
     #fig.tight_layout()
     fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Fields/Packets."+  str(systemId)+ ".pdf", dpi=300)

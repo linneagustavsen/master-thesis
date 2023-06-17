@@ -39,6 +39,46 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
+        
+    
+    intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
+
+    packetsClusterAttack = []
+    sTimeClusterAttack = []
+    attackFlows = []
+    normalFlows = []
+    #Loop for every minute in a week
+    isAttack = False
+    for i in range(math.ceil(intervalTime)):
+        stopTime = startTime + clusterFrequency
+
+        attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
+        
+        #print(clusterLabels["AttackCluster"])
+        sTimeAttack = pd.to_datetime(attackCluster["sTime"])
+
+        packetsAttack = attackCluster["packets"]
+        labelsAttack = attackCluster["real_label"]
+
+        i= 0
+        for label in labelsAttack:
+            if label == 1:
+                attackFlows.append(packetsAttack[i])
+                normalFlows.append(None)
+                isAttack = True
+            elif label == 0:
+                attackFlows.append(None)
+                normalFlows.append(packetsAttack[i])
+            else:
+                print("is not triggered")
+            sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
+            
+            i+= 1
+        startTime += clusterFrequency
+
+    if not isAttack:
+        print("There was no attack")
+        return
     
     fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
@@ -50,78 +90,14 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         #axs[1].axvspan(start, stop, facecolor=colors[counterStrings])
         counterStrings += 1
-        
-    
-    intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
 
-    packetsClusterAttack = []
-    sTimeClusterAttack = []
-    #Loop for every minute in a week
-    isAttack = False
-    for i in range(math.ceil(intervalTime)):
-        stopTime = startTime + clusterFrequency
-
-        clusterLabels = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Combined.ClusterLabelling."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
-        if len(clusterLabels) ==0:
-            continue
-
-        attackCluster = clusterLabels["AttackCluster"][0]
-
-        attackCluster = pd.read_csv("Calculations"+ fileString+ "/Kmeans/NetFlow/Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ ".stopTime." + stopTime.strftime("%H.%M.%S")+ "."+ str(systemId)+ ".csv")
-        
-        #print(clusterLabels["AttackCluster"])
-        sTimeAttack = pd.to_datetime(attackCluster["sTime"])
-
-        packetsAttack = attackCluster["packets"]
-        labelsAttack = attackCluster["real_label"]
-        
-        #format = '%Y-%m-%dT%H:%M:%SZ'
-        eTimeAttack = pd.to_datetime(attackCluster["eTime"])
-        '''timeAxis = []
-        intervalTime = (stopTime - startTime).total_seconds()/60
-        for i in range(math.ceil(intervalTime)+1):
-            timeAxis.append(startTime+ timedelta(minutes=i))
-        '''
-        lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
-
-
-        for i in range(len(labelsAttack)):
-            if labelsAttack[i] == 1:
-                isAttack = True
-                if sTimeAttack[i].replace(second=0).replace(tzinfo=None) in lastInterval and eTimeAttack[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-                    continue
-                elif sTimeAttack[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-
-                    nowInterval = pd.Interval(lastInterval.right, eTimeAttack[i].replace(second=0).replace(tzinfo=None)+timedelta(minutes=1), closed="both")
-                    lastInterval = pd.Interval(lastInterval.left, eTimeAttack[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
-                
-                elif eTimeAttack[i].replace(second=0).replace(tzinfo=None) in lastInterval:
-            
-                    nowInterval = pd.Interval(sTimeAttack[i].replace(second=0).replace(tzinfo=None), lastInterval.left, closed="both")
-                    lastInterval = pd.Interval(sTimeAttack[i].replace(second=0).replace(tzinfo=None), lastInterval.right, closed="both")
-                else:
-                    nowInterval = pd.Interval(sTimeAttack[i].replace(second=0).replace(tzinfo=None), eTimeAttack[i].replace(second=0).replace(tzinfo=None) +timedelta(minutes=1), closed="both")
-                    lastInterval = nowInterval
-
-                axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
-            sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
-            packetsClusterAttack.append(packetsAttack[i])
-            
-        startTime += clusterFrequency
-
-    if not isAttack:
-        print("There was no attack")
-        plt.close(fig)
-        return
-
-    axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", label="Attack cluster")
+    axs.scatter(sTimeClusterAttack ,normalFlows, color="#162931", s=10, label="False positives")
+    axs.scatter(sTimeClusterAttack ,attackFlows, color="darkRed", s=20,label="True positives")
 
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
+        major_locator=mdates.MinuteLocator(interval=int(clusterFrequency.total_seconds()/60)),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
     axs.set_title("Packets in each cluster")
@@ -133,7 +109,7 @@ def plotKmeansFields(start, stop, interval, clusterFrequency, systemId, attackDa
     #axs.set_ylim([0,maxValue])
     axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
     
     '''axs[1].xaxis.set(
@@ -161,8 +137,11 @@ clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
+    print(attackDate)
     for systemId in systems:
+        print(systemId)
         for interval in intervals:
+            print(interval)
             if interval == timedelta(minutes=15):
                 plotKmeansFields(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
             else:

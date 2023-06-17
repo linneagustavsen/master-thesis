@@ -39,16 +39,6 @@ def plotRandomForestCombined(interval, systemId, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
-    
-    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
-
-    format = '%b %d %H:%M:%S'
-    counterStrings = 0
-    for string in strings:
-        start = datetime.strptime(string[0], format).replace(year=2023)
-        stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-        counterStrings += 1
         
 
     packetsClusterAttack = []
@@ -65,7 +55,9 @@ def plotRandomForestCombined(interval, systemId, attackDate):
 
     packetsAttack = alerts["packets"]
     labelsAttack = alerts["real_label"]
-    
+    if 1 not in labelsAttack.values :
+        print("No attacks")
+        return         
 
     for i in range(len(labelsAttack)):
         if labelsAttack[i] == 1:
@@ -79,11 +71,20 @@ def plotRandomForestCombined(interval, systemId, attackDate):
 
     if not isAttack:
         print("There was no attack")
-        plt.close(fig)
         return
+    
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
+    format = '%b %d %H:%M:%S'
+    counterStrings = 0
+    for string in strings:
+        start = datetime.strptime(string[0], format).replace(year=2023)
+        stop = datetime.strptime(string[1], format).replace(year=2023)
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        counterStrings += 1
+
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="False positives")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=30,label="True positives")
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(
@@ -97,9 +98,9 @@ def plotRandomForestCombined(interval, systemId, attackDate):
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
-    axs.set_yscale('log')
+    #axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
 
     #fig.tight_layout()
     fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)

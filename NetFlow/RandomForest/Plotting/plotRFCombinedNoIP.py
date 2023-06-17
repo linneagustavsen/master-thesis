@@ -40,6 +40,26 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
     
+    
+        
+
+    packetsClusterAttack = []
+    sTimeClusterAttack = []
+    packetsClusterNormal = []
+    sTimeClusterNormal = []
+    #Loop for every minute in a week
+    
+    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/NetFlow/AlertsNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
+    
+    #print(clusterLabels["AttackCluster"])
+    sTimeAttack = pd.to_datetime(alerts["sTime"])
+
+    packetsAttack = alerts["packets"]
+    labelsAttack = alerts["real_label"]
+    if 1 not in labelsAttack.values :
+        print("No attacks")
+        return   
+    
     fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
     format = '%b %d %H:%M:%S'
@@ -49,27 +69,8 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
         stop = datetime.strptime(string[1], format).replace(year=2023)
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
-        
-
-    packetsClusterAttack = []
-    sTimeClusterAttack = []
-    packetsClusterNormal = []
-    sTimeClusterNormal = []
-    #Loop for every minute in a week
-    isAttack = False
-    
-    alerts = pd.read_csv("Calculations"+ fileString+ "/RandomForest/NetFlow/AlertsNoIP.Combined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
-    
-    #print(clusterLabels["AttackCluster"])
-    sTimeAttack = pd.to_datetime(alerts["sTime"])
-
-    packetsAttack = alerts["packets"]
-    labelsAttack = alerts["real_label"]
-    
-
     for i in range(len(labelsAttack)):
         if labelsAttack[i] == 1:
-            isAttack = True
             
             sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
             packetsClusterAttack.append(packetsAttack[i])
@@ -77,13 +78,9 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
             sTimeClusterNormal.append(sTimeAttack[i].replace(tzinfo=None))
             packetsClusterNormal.append(packetsAttack[i])
 
-    if not isAttack:
-        print("There was no attack")
-        plt.close(fig)
-        return
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="False positives")
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70,label="True positives")
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="False positives")
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=30,label="True positives")
     #axs[1].plot(sTimeClusterNormal ,packetsClusterNormal, color="#162931", label="Normal cluster")
 
     axs.xaxis.set(
@@ -97,9 +94,9 @@ def plotRandomForestCombinedNoIP(interval, systemId, attackDate):
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
-    axs.set_yscale('log')
+    #axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
 
     #fig.tight_layout()
     fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Combined/NoIP.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)

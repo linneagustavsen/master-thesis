@@ -91,8 +91,8 @@ def plotXmas(systemId, attackDate):
 
     if counter == 0:
         return
-    axs.scatter(timeAxis ,nonAttackValues, color="black", s=30, label="Normal flows")
-    axs.scatter(timeAxis, attackValues, color = "blue", s=10, label="Attack flows")
+    axs.scatter(timeAxis ,nonAttackValues, color="#162931", s=30, label="Normal flows")
+    axs.scatter(timeAxis, attackValues, color = "darkRed", s=10, label="Attack flows")
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=30),
         major_formatter=mdates.DateFormatter("%H:%M"),
@@ -101,7 +101,7 @@ def plotXmas(systemId, attackDate):
     axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel("FIN flag set", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     #fig.tight_layout()
     fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/Xmas/Scatter."+  str(systemId)+ ".Xmas.pdf", dpi=300)
     plt.close(fig)

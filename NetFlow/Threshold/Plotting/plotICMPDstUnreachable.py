@@ -34,21 +34,24 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
     data = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/ICMPDstUnreachable."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     
-    attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    '''attackFlows = pd.read_csv("Calculations"+ fileString+ "/Threshold/NetFlow/AttackFlows.ICMPDstUnreachable.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
     startTime = pd.to_datetime(attackFlows["sTime"])
-    endTime = pd.to_datetime(attackFlows["eTime"])
+    endTime = pd.to_datetime(attackFlows["eTime"])'''
 
     y_values = data["ICMPDstUnreachable"]
+    labels = data["real_label"]
+
+    startTime = pd.to_datetime(data["sTime"])
 
     if len(y_values) == 0:
         return
     if len(startTime) == 0:
         return
-    timeAxis = pd.to_datetime(data["sTime"])
+    if 1 not in labels:
+        return
            
     fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
-    axs.plot(timeAxis ,y_values, color="#162931")
     format = '%b %d %H:%M:%S'
    
     counterStrings = 0
@@ -58,7 +61,7 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
     
-    lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
+    '''lastInterval = pd.Interval(pd.Timestamp.now().replace(tzinfo=None), pd.Timestamp.now().replace(tzinfo=None), closed="both")
 
     for i in range(len(startTime)):
         if startTime[i].replace(second=0).replace(tzinfo=None) in lastInterval and endTime[i].replace(second=0).replace(tzinfo=None) in lastInterval:
@@ -78,17 +81,32 @@ def makePlotICMPDstUnreachable(systemId, interval, attackDate):
 
         axs.axvspan(nowInterval.left, nowInterval.right, facecolor=colors[-1])
     
-    axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")
+    axs.axvspan(nowInterval.left,nowInterval.right, facecolor=colors[-1], label="Attack flows")'''
+
+    attackFlows = []
+    normalFlows = []
+    i= 0
+    for label in labels:
+        if label == 1:
+            attackFlows.append(y_values[i])
+            normalFlows.append(None)
+        elif label == 0:
+            attackFlows.append(None)
+            normalFlows.append(y_values[i])
+        i += 1
+    axs.plot(startTime,y_values, color="#162931")
+    axs.scatter(startTime ,normalFlows, color="#162931", label="Benign flows", s=10)
+    axs.scatter(startTime ,attackFlows, color="darkRed", label="Attack flows",zorder=10)
     axs.xaxis.set(
         major_locator=mdates.HourLocator(),
         major_formatter=mdates.DateFormatter("%H:%M"),
         
     )
     axs.set_title("ICMP destination unreachable packets", fontsize=20)
-    axs.set_xlabel('Time', fontsize=15)
+    axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel("Packets", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    fig.legend(fontsize=17)
     #fig.tight_layout()
     fig.savefig("Plots/Threshold/Attack"+ fileString+"/NetFlow/ICMPDstUnreachable/"+  str(systemId)+ "." + str("ICMPDstUnreachable")+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
@@ -99,7 +117,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for interval in intervals:
         for systemId in systems:

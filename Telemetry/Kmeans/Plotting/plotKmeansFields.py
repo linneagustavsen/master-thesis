@@ -39,17 +39,6 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         colors = ['#CABBB1','#BDAA9D','#AD9585','#997B66','#D08C60',"#DAA684",'#FFC876','#F1DCA7','#D9AE94','#9B9B7A','#797D62', "#7F6A93"]
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
-    fig, axs = plt.subplots(1, 1, figsize=(20, 12))
-
-    format = '%b %d %H:%M:%S'
-    
-    counterStrings = 0
-    for string in strings:
-        start = datetime.strptime(string[0], format).replace(year=2023)
-        stop = datetime.strptime(string[1], format).replace(year=2023)
-        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
-       
-        counterStrings += 1
     
     intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
     timeAxis = []
@@ -75,9 +64,9 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         sTimeAttack = pd.to_datetime(attackCluster["sTime"])
         sTimeNormal = pd.to_datetime(nonAttackCluster["sTime"])
 
-        packetsAttack = attackCluster["egress_stats__if_1sec_pkt"]
+        packetsAttack = attackCluster["ingress_stats__if_1sec_pkts"]
         labelsAttack = attackCluster["real_label"]
-        packetsNormal = nonAttackCluster["egress_stats__if_1sec_pkt"]
+        packetsNormal = nonAttackCluster["ingress_stats__if_1sec_pkts"]
         labelsNormal = nonAttackCluster["real_label"]
         
         for i in range(len(labelsAttack)):
@@ -96,9 +85,20 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         startTime += clusterFrequency
     if maxValue == 0:
         return
-    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=70, label="Attack cluster")
+    
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
 
-    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=30, label="Normal cluster")
+    format = '%b %d %H:%M:%S'
+    counterStrings = 0
+    for string in strings:
+        start = datetime.strptime(string[0], format).replace(year=2023)
+        stop = datetime.strptime(string[1], format).replace(year=2023)
+        axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
+        counterStrings += 1
+        
+    axs.scatter(sTimeClusterAttack ,packetsClusterAttack, color="darkRed", s=30, label="Attack cluster")
+
+    axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="Normal cluster")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -112,7 +112,10 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     #axs.set_ylim([0,maxValue])
     axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    if attackDate == "24.03.23":
+        fig.legend(fontsize=17)
+    else:
+        fig.legend(fontsize=20)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
 
    
@@ -126,7 +129,7 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
-attackDates = ["08.03.23","17.03.23","24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)

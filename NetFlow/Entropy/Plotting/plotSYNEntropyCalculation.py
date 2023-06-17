@@ -45,8 +45,9 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     endTime = pd.to_datetime(attackFlows["eTime"])'''
     if len(y_values) == 0:
         return
-    '''if len(startTime) == 0:
-        return  '''           
+    if 1 not in labels.values :
+        print("No attacks")
+        return        
     fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     #axs.plot(timeAxis ,y_values, color="#162931")
@@ -98,7 +99,7 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
     axs.scatter(timeAxis ,normalFlows, color="#162931", label="Benign flows", s=10)
     axs.scatter(timeAxis ,attackFlows, color="darkRed", label="Attack flows",zorder=10)
     axs.xaxis.set(
-        major_locator=mdates.HourLocator(),
+        major_locator=mdates.MinuteLocator(interval=30),
         major_formatter=mdates.DateFormatter("%H:%M"),
     )
     axs.set_title(y_fieldName, fontsize=20)

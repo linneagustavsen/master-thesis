@@ -88,9 +88,11 @@ def plotTopKFlows(systemId, attackDate):
             nonAttackValues.append(y_values[i])
     
     if counter == 0:
+        plt.close(fig)
+        print("no attacks")
         return
-    axs.scatter(timeAxis ,nonAttackValues, color="black", s=10, label="Normal flows")
-    axs.scatter(timeAxis, attackValues, color = "blue", s=30, label="Attack flows")
+    axs.scatter(timeAxis ,nonAttackValues, color="#162931", s=10, label="Normal flows")
+    axs.scatter(timeAxis, attackValues, color = "darkRed", s=30, label="Attack flows")
 
     axs.xaxis.set(
         major_locator=mdates.MinuteLocator(interval=15),
@@ -100,7 +102,7 @@ def plotTopKFlows(systemId, attackDate):
     axs.set_xlabel('Time',fontsize=20)
     axs.set_ylabel("Change in position", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     #fig.tight_layout()
     fig.savefig("Plots/TopKFlows/Attack"+ fileString+ "/NetFlow/Scatter."+  str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
@@ -111,7 +113,6 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
             "oslo-gw1"]
 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
-attackDates = ["08.03.23","17.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         print(systemId)

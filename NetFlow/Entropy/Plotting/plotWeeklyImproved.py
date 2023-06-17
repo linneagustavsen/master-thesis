@@ -58,7 +58,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path, interval):
     axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel(y_fieldName, fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=15)
+    fig.legend(fontsize=17)
     fig.tight_layout()
     fig.savefig(path+y_field+".pdf", dpi=300)
     plt.close(fig)
