@@ -65,7 +65,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -213,7 +213,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
             else:
                 attackType = ""
                 
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change) > thresholdFlowEntropy:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -224,7 +224,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                     "Attack_type": attackType,
                     "Weight": weightFlowEntropy
                     }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if abs(change_r) > thresholdFlowEntropyRate:
                 alert = {
@@ -236,7 +236,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                     "Attack_type": attackType,
                     "Weight": weightFlowEntropyRate
                     }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if abs(change_nf) > thresholdNumberOfFlows:
                 alert = {
@@ -248,7 +248,7 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
                     "Attack_type": attackType,
                     "Weight": weightNumberOfFlows
                     }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
             if abs(change) > thresholdFlowEntropy and attack:
                 truePositives += 1
@@ -291,15 +291,15 @@ def detectionFlow(start, stop, systemId, frequency, interval, windowSize, thresh
             elif abs(change_nf) > thresholdNumberOfFlows and not attack:
                 falsePositives_nf += 1
                 if isInAttackTime:
-                    attackDict_r[attackTypeDuringThisTime]["FP"] += 1
+                    attackDict_nf[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_nf) <= thresholdNumberOfFlows and attack:
                 falseNegatives_nf += 1
                 if isInAttackTime:
-                    attackDict_r[attackTypeDuringThisTime]["FN"] += 1
+                    attackDict_nf[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_nf) <= thresholdNumberOfFlows and not attack:
                 trueNegatives_nf += 1
                 if isInAttackTime:
-                    attackDict_r[attackTypeDuringThisTime]["TN"] += 1
+                    attackDict_nf[attackTypeDuringThisTime]["TN"] += 1
         else:
             if attack:
                 falseNegatives +=1

@@ -101,20 +101,23 @@ def plotKmeansEntropy(start, stop, interval, systemId, attackDate):
     axs.scatter(sTime0 ,attackFlows, color="darkRed", s=30,label="True positives")
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
+        major_locator=mdates.MinuteLocator(byminute=[0, 15, 30, 45]),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in each cluster")
+    axs.set_title("Packets in cluster labeled attack")
     axs.title.set_size(20)
     axs.set_xlabel('Time', fontsize=20)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.ylabel.set_size(15)
     #axs.xlabel.set_size(15)
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    if attackDate == "24.03.23":
+        fig.legend(fontsize=17)
+    else:
+        fig.legend(fontsize=20)
     
     
-    fig.tight_layout()
+    #fig.tight_layout()
     fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Entropy/Packets.ClusterLabelling."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
     plt.close(fig)
 

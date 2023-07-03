@@ -1,7 +1,9 @@
 
 
 from datetime import datetime, timedelta
+import json
 import math
+from pathlib import Path
 import numpy as np
 import pandas as pd
 from ast import literal_eval
@@ -9,10 +11,14 @@ from ast import literal_eval
 
 def makeRandomForestTable(featureSet, dataset, interval, attackDate):
     if dataset == "NetFlow":
-        systems = ["tromso-gw5",  "teknobyen-gw1", "hoytek-gw2", "bergen-gw3","trd-gw", "ifi2-gw5"]
+        systems = ["trd-gw", "ifi2-gw5", "bergen-gw3", "tromso-gw5", "teknobyen-gw1",  "hoytek-gw2"]
+    
+        anonymizedSystems = ["AR1", "AR2", "AR3", "AR4", "VR", "CR3"]
     else:
-        systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", "oslo-gw1"]
+        systems = ["trd-gw", "ifi2-gw5", "bergen-gw3", "tromso-gw5", "teknobyen-gw1", "teknobyen-gw2", "oslo-gw1", "hoytek-gw2", "hovedbygget-gw", "narvik-gw3", "narvik-gw4", "ma2-gw",  "tromso-fh-gw", "narvik-kv-gw", "stangnes-gw", "rodbergvn-gw2"]
+    
+        anonymizedSystems = ["AR1", "AR2", "AR3", "AR4", "VR", "CR1", "CR2", "CR3", "CR4", "CR5", "CR6", "CR7", "CR8", "CR9", "CR10", "CR11"]
+
     systemNames = []
     f1_scores = []
     precision_scores = []
@@ -62,6 +68,10 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
                         falsePositives += 1
                 falseNegatives = totalPositives - truePositives
                 trueNegatives = totalNegatives - falsePositives
+                print(totalPositives, totalNegatives)
+                print(totalNegatives/totalPositives)
+                print(totalPositives/totalNegatives)
+                print(totalNegatives+ totalPositives)
             elif featureSet ==  "FieldsNoIP":
                 alerts = pd.read_csv("Calculations2403/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv")
                 labels  = alerts["real_label"]
@@ -161,6 +171,13 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
                 falsePositives = confusion_matrix[0][1]
                 falseNegatives = confusion_matrix[1][0]
                 trueNegatives = confusion_matrix[0][0]
+            totalPositives = truePositives+falseNegatives
+            totalNegatives = falsePositives+trueNegatives
+            print(truePositives+falseNegatives, falsePositives+trueNegatives)
+            print(totalNegatives/totalPositives)
+            print(totalPositives/totalNegatives)
+            print(totalNegatives+ totalPositives)
+            print(truePositives, falsePositives, trueNegatives, falseNegatives)
             accuracy = (truePositives + trueNegatives)/(truePositives+trueNegatives+falsePositives+falseNegatives)
             if falsePositives != 0 or trueNegatives != 0:
                 fpr = falsePositives/(falsePositives + trueNegatives)
@@ -234,7 +251,7 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
         return "${0}\\cdot10^{{{1}}}$".format(mantissa_format, str(int(exponent)))
 
     
-    df = pd.DataFrame(dict(Routers=systems,
+    df = pd.DataFrame(dict(Routers=anonymizedSystems,
                         F1=f1_scores,
                         Precision=precision_scores,
                         TPR=tpr_scores,
@@ -245,4 +262,127 @@ def makeRandomForestTable(featureSet, dataset, interval, attackDate):
     df = df.applymap(lambda x:exp_tex(x))
     print(df.to_latex(index=False, escape = False))
 
-makeRandomForestTable("Combined", "Telemetry", timedelta(minutes=15), "24.03.23")
+
+def makeRandomForestTableAttackTypes(featureSet, dataset, dataType, metric, interval, attackDate):
+    if attackDate == "08.03.23":
+        fileString = "0803"
+    elif attackDate == "17.03.23":
+        fileString = "1703"
+    elif attackDate == "24.03.23":
+        fileString = "2403"
+    if dataset == "NetFlow":
+        systems = ["trd-gw", "ifi2-gw5", "bergen-gw3", "tromso-gw5", "teknobyen-gw1",  "hoytek-gw2"]
+    
+        anonymizedSystems = ["AR1", "AR2", "AR3", "AR4", "VR", "CR3"]
+        tableColumns = ["", "AR1", "AR2", "AR3", "AR4", "VR", "CR3"]
+    else:
+        systems = ["trd-gw", "ifi2-gw5", "bergen-gw3", "tromso-gw5", "teknobyen-gw1", "teknobyen-gw2", "oslo-gw1", "hoytek-gw2", "hovedbygget-gw", "narvik-gw3", "narvik-gw4", "ma2-gw",  "tromso-fh-gw", "narvik-kv-gw", "stangnes-gw", "rodbergvn-gw2"]
+    
+        anonymizedSystems = ["AR1", "AR2", "AR3", "AR4", "VR", "CR1", "CR2", "CR3", "CR4", "CR5", "CR6", "CR7", "CR8", "CR9", "CR10", "CR11"]
+        tableColumns = ["","AR1", "AR2", "AR3", "AR4", "VR", "CR1", "CR2", "CR3", "CR4", "CR5", "CR6", "CR7", "CR8", "CR9", "CR10", "CR11"]
+
+    systemNames = []
+    f1_scores = []
+    precision_scores = []
+    tpr_scores = []
+    accuracy_scores = []
+    fpr_scores = []
+    fnr_scores = []
+
+    startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
+    if interval == timedelta(minutes = 5):
+        windowSize = "5min"
+    elif interval == timedelta(minutes = 10):
+        windowSize = "10min"
+    elif interval == timedelta(minutes = 15):
+        windowSize = "15min"
+
+    p = Path('Detections' + fileString +"_"+ windowSize +"_"+ metric)
+    attackTypes = ["UDP Flood",
+                    "SlowLoris", 
+                    "Ping Flood", 
+                    "Slow Read",
+                    "Blacknurse",
+                    "SYN Flood",
+                    "R.U.D.Y",
+                    "Xmas",
+                    "UDP Flood and SlowLoris",
+                    "Ping Flood and R.U.D.Y",
+                    "All types"]
+    attackTypes = {"UDP Flood": 0,
+                    "SlowLoris": 0,
+                    "Ping Flood": 0,
+                    "Slow Read": 0,
+                    "Blacknurse": 0,
+                    "SYN Flood": 0,
+                    "R.U.D.Y": 0,
+                    "Xmas": 0,
+                    "UDP Flood and SlowLoris": 0,
+                    "Ping Flood and R.U.D.Y": 0,
+                    "All types": 0}
+    
+
+    precision_scores = []
+    for attack in attackTypes:
+        precision_scores_this_system = [attack]
+        for systemId in systems:
+            print(systemId)
+            
+            if interval == 0:
+                fileName =str(p)+ "/"+dataType+"/"+dataset+"/ScoresAttacks."+featureSet+".attack."+str(attackDate)+ "."+str(systemId)+ ".json"
+            else:
+                fileName = str(p)+ "/"+dataType+"/"+dataset+"/ScoresAttacks."+featureSet+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".json"
+
+            jsonFile = open(fileName, 'r')
+            data = json.load(jsonFile)
+            truePositives = data[attack]["TP"]
+            falsePositives = data[attack]["FP"]
+            if truePositives != 0 or falsePositives != 0:
+                precision = truePositives/(truePositives+falsePositives)
+            else:
+                precision = np.nan
+
+            print(truePositives, falsePositives, precision)
+        
+
+            precision_scores_this_system.append(precision)
+        precision_scores.append(precision_scores_this_system)
+    print(precision_scores)     
+    def exp_tex(float_number):
+        print(float_number)
+        if isinstance(float_number, str):
+            return float_number
+        if np.isnan(float_number):
+            print(float_number)
+            return "undef"
+        """
+        Returns a string representation of the scientific
+        notation of the given number formatted for use with
+        LaTeX or Mathtext.
+        """
+        neg = False
+        if float_number == 0.0:
+            return r"0"
+        elif float_number == 1:
+            print(float_number)
+            return r"1"
+        elif float_number >= 0.01:
+            return "{:.3f}".format(float_number)
+        elif float_number < 0.0:
+            neg = True
+
+        exponent = np.floor(np.log10(abs(float_number)))
+        mantissa = float_number/10**exponent
+        if neg:
+            mantissa = -mantissa
+        mantissa_format = str(mantissa)[0:3]
+        return "${0}\\cdot10^{{{1}}}$".format(mantissa_format, str(int(exponent)))
+
+    
+    df = pd.DataFrame(precision_scores, columns=tableColumns)
+    print(df)
+    df = df.applymap(lambda x:exp_tex(x))
+    print(df.to_latex(index=False, escape = False))
+
+makeRandomForestTableAttackTypes("SYNDestinationIPEntropy", "NetFlow", "Entropy", "F1", timedelta(minutes=5), "24.03.23")

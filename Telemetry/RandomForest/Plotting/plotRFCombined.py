@@ -106,15 +106,13 @@ def plotRandomForestCombined(interval, systemId, attackDate):
     fig.legend(fontsize=17)
 
     #fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Combined/Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.jpg", dpi=300)
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["bergen-gw3"]
 
-intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
+intervals = [timedelta(minutes = 5)]
 attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:

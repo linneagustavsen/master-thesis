@@ -74,6 +74,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
             else:
                 print("is not triggered")
             sTimeClusterAttack.append(sTimeAttack[i].replace(tzinfo=None))
+            i+=1
             
 
         startTime += clusterFrequency
@@ -92,23 +93,25 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
         axs.axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         #axs[1].axvspan(start, stop, facecolor=colors[counterStrings], label=attacks[counterStrings])
         counterStrings += 1
-    axs.scatter(sTimeClusterAttack ,normalFlows, color="#162931", s=10, label="False positives")
-    axs.scatter(sTimeClusterAttack ,attackFlows, color="darkRed", s=20,label="True positives")
+    axs.plot(sTimeClusterAttack ,normalFlows, color="#162931", label="False positives")
+    axs.scatter(sTimeClusterAttack ,attackFlows, color="darkRed", label="True positives")
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=int(clusterFrequency.total_seconds()/60)),
+        major_locator=mdates.MinuteLocator(byminute=[0, 15, 30, 45]),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in each cluster")
+    axs.set_title("Packets in cluster labeled attack")
     axs.title.set_size(20)
     axs.set_xlabel('Time',fontsize=20)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.ylabel.set_size(15)
     #axs.xlabel.set_size(15)
     #axs.set_ylim([0,maxValue])
-    axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
-    fig.legend(fontsize=20)
+    if attackDate == "24.03.23":
+        fig.legend(fontsize=17)
+    else:
+        fig.legend(fontsize=20)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
 
     '''axs[1].xaxis.set(
@@ -123,17 +126,20 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs[1].tick_params(axis='both', which='major', labelsize=15)
     axs[1].legend(fontsize=20)'''
     #fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Fields/Packets.ClusterLabelling."+  str(systemId)+ ".pdf", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/NetFlow/Fields/Packets.Both."+  str(systemId)+ ".jpg", format="jpg")
     plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
+
+systems = ["tromso-gw5"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
-attackDates = ["17.03.23","24.03.23"]
-for attackDate in attackDates:
+attackDates = ["24.03.23"]
+'''for attackDate in attackDates:
     for systemId in systems:
-        plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)
+        plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)'''
+plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, "tromso-gw5", "24.03.23")

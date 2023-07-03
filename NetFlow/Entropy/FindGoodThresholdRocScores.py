@@ -2,11 +2,13 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
 
-def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, interval, windowSize, attackDate):
+def findGoodThresholdEntropy(y_field, alpha, systemId, frequency, interval, windowSize, attackDate):
     p = Path('ThresholdDecision')
     decisionPath = p / 'Entropy' / 'NetFlow'
     if attackDate == "08.03.23":
@@ -21,11 +23,29 @@ def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, 
     if not q.exists():
         q.mkdir(parents=True)
     
-    data = pd.read_csv("FindBestRocScore/Calculations/Entropy/NetFlow/" + str(y_field_name) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    data = pd.read_csv("FindBestRocScore/Calculations/Entropy/NetFlow/alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+    '''y_field_names = ["DestinationIPEntropy", "DestinationIPEntropyRate","SourceIPEntropy", "SourceIPEntropyRate", "FlowEntropy", "FlowEntropyRate", "NumberOfFlows", "ICMPRatio", 
+            "ICMPPackets", "PacketSizeEntropy", "PacketSizeEntropyRate", "Packets", "Bytes"]'''
+    i = 0
+    for y_field in y_fields:
+        '''data = pd.read_csv("FindBestRocScore/Calculations/Entropy/NetFlow/" + str(y_field_names[i]) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")        
+        data = data.drop(data[data["Change"] == 'None'].index)'''
+        data = data.drop(data[data[y_field] == 'None'].index)
+        labels = data["real_label"]
+        
+        #changes = pd.to_numeric(data["Change"],errors='coerce')
+        changes = pd.to_numeric(data[y_field],errors='coerce')
+        '''fpr, tpr, thresholds = roc_curve(labels, changes)
+        df = pd.DataFrame({'Threshold': thresholds, "TPR": tpr, "FPR": fpr})
+        f_scores = str(q) + "/RocScoresOnlyFPRandTPR/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+        df.to_csv(f_scores, index=False)'''
+        precision, recall, thresholds = precision_recall_curve(labels, changes)
+        df = pd.DataFrame({'Threshold': thresholds, "Precision": precision[:-1], "Recall": recall[:-1]})
+        f_scores = str(q) + "/PrecisionRecall/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+        df.to_csv(f_scores, index=False)
+        i +=1
 
-    labels = data["real_label"]
-
-    changes = pd.to_numeric(data["Change"],errors='coerce')
+    '''changes = pd.to_numeric(data["Change"],errors='coerce')
     changeList = list(changes.dropna())
     newChangeList = [i * 10000000000 for i in changeList]
     thresholds = list(sorted(newChangeList))
@@ -101,7 +121,7 @@ def findGoodThresholdEntropy(y_field_name, y_field, alpha, systemId, frequency, 
         f_scores.write("\n" + str(threshold) + "," + str(truePositives) + "," + str(falsePositives) + ","
                        + str(falseNegatives) + "," + str(trueNegatives) + "," + str(f1) +  "," + str(tpr) + ","+
                        str(fpr) + "," + str(accuracy) + "," + str(fnr) + ","+ str(ppv))
-    f_scores.close()
+    f_scores.close()'''
         
 systemId = "hoytek-gw2"
 attackDate="24.03.23"
@@ -113,24 +133,21 @@ y_field_names = ["DestinationIPEntropy", "DestinationIPEntropyRate","SourceIPEnt
 frequencies = [timedelta(seconds=5),timedelta(seconds=10), timedelta(seconds=20), timedelta(seconds=30), timedelta(seconds=40), timedelta(seconds=50),timedelta(minutes=1)]
 for frequency in frequencies:
     for i in range(1,21):
-        interval = timedelta(minutes=i)
-        if timedelta(seconds=5) and i< 3:
+        if frequency == timedelta(seconds=5) and i < 7:
             continue
+        interval = timedelta(minutes=i)
         for alpha in range(2, 16):
             for windowSize in range(2,21):
-                for k in range(len(y_fields)):
-                    if timedelta(seconds=5) and i>= 3 and alpha > 8 and i < 5:
-                        continue
-                    print("frequency")
-                    print(frequency)
-                    print("interval")
-                    print(i)
-                    print("alpha")
-                    print(alpha)
-                    print("Window size")
-                    print(windowSize)
-                    print("y_field")
-                    print(y_fields[k])
-                    print("\n")
-                    findGoodThresholdEntropy(y_field_names[k], y_fields[k], alpha, systemId, frequency, interval, windowSize, attackDate)
-                    
+                if frequency == timedelta(seconds=5) and i == 7 and windowSize < 4:
+                    continue
+                print("frequency")
+                print(frequency)
+                print("interval")
+                print(i)
+                print("alpha")
+                print(alpha)
+                print("Window size")
+                print(windowSize)
+                print("y_field")
+                print("\n")
+                findGoodThresholdEntropy(y_fields, alpha, systemId, frequency, interval, windowSize, attackDate)

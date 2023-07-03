@@ -50,7 +50,7 @@ def plotXmas(systemId, attackDate):
     if not 1 in labels:
         print("no true positives")
         return
-    fig, axs = plt.subplots(1, 1, figsize=(15, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 6))
    
     format = '%b %d %H:%M:%S'
 
@@ -97,19 +97,17 @@ def plotXmas(systemId, attackDate):
         major_locator=mdates.MinuteLocator(interval=30),
         major_formatter=mdates.DateFormatter("%H:%M"),
     )
-    axs.set_title("FIN flag set", fontsize=20)
+    #axs.set_title("FIN flag set", fontsize=20)
     axs.set_xlabel('Time', fontsize=20)
-    axs.set_ylabel("FIN flag set", fontsize=20)
+    axs.set_ylabel("Xmas flags set to one", fontsize=20)
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=17)
     #fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/Xmas/Scatter."+  str(systemId)+ ".Xmas.pdf", dpi=300)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/Xmas/Scatter."+  str(systemId)+ ".Xmas.jpg", dpi=600)
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = [ "ifi2-gw5"]
 
 
 attackDates = ["24.03.23"]

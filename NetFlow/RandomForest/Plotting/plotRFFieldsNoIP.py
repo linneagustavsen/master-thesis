@@ -101,15 +101,12 @@ def plotRandomForestFields(interval, systemId, attackDate):
     fig.legend(fontsize=17)
 
     #fig.tight_layout()
-    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Fields/NoIP.Packets."+  str(systemId)+ ".pdf", dpi=300)
+    fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/NetFlow/Fields/NoIP.Packets."+  str(systemId)+ ".jpg", dpi=300)
     plt.close(fig)
 
+systems = ["trd-gw"]
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
-clusterFrequency = timedelta(minutes = 15)
-intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
+intervals = [timedelta(minutes = 5)]
 attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:

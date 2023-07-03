@@ -43,7 +43,7 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, weight, attack
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -76,6 +76,8 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, weight, attack
     alertFile = "Calculations"+fileString+"/RandomForest/NetFlow/AlertsNoIP.Fields.attack."+str(attackDate)+ "."+ str(systemId)+ ".csv"
     counter = 0
     countChunks = 0
+    truePositives = 0
+    falsePositives = 0
     for alerts in pd.read_csv(alertFile, chunksize=100):
         countChunks += 1
         sTime = pd.to_datetime(alerts["sTime"])
@@ -96,7 +98,7 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, weight, attack
             if sTime[counter] < startTime:
                 counter += 1
                 continue
-            simulateRealTime(datetime.now(), sTime[counter], attackDate)
+            #simulateRealTime(datetime.now(), sTime[counter], attackDate)
         
             alert = {
                     "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -118,11 +120,13 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, weight, attack
                     "Real_label": int(real_label[counter]),
                     "Attack_type": ""
                     }'''
-            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if real_label[counter]:
+                truePositives +=1
                 if isInAttackTime:
                     attackDict[attackTypeDuringThisTime]["TP"] += 1
             elif not real_label[counter]:
+                falsePositives += 1
                 if isInAttackTime:
                     attackDict[attackTypeDuringThisTime]["FP"] += 1
             counter += 1
@@ -131,6 +135,11 @@ def detectionRandomForestNoIPNetFlowFields(start, stop, systemId, weight, attack
     q = p / 'RandomForest' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
-    attackScores = open(str(q) + "/ScoresAttacks.FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    '''attackScores = open(str(q) + "/ScoresAttacks.FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(attackDict,attackScores)
-    attackScores.close()
+    attackScores.close()'''
+
+    scores = open(str(q) + "/Scores.FieldsNoIP.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP")
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives))
+    scores.close()

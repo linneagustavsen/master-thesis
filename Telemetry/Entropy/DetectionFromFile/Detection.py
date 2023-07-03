@@ -62,7 +62,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -216,7 +216,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
             else:
                 attackType = "Different protocols"
 
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             
             if abs(change_ingress) > thresholdEntropy_ingress:
                 alert = {
@@ -229,7 +229,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType,
                     "Weight": weightEntropy_ingress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_r_ingress) > thresholdEntropyRate_ingress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -241,7 +241,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType,
                     "Weight": weightEntropyRate_ingress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
             if abs(change_egress) > thresholdEntropy_egress:
                 alert = {
@@ -253,7 +253,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType,
                     "Weight": weightEntropy_egress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_r_egress) > thresholdEntropyRate_egress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -264,7 +264,7 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
                     "Attack_type": attackType,
                     "Weight": weightEntropyRate_egress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if abs(change_ingress) > thresholdEntropy_ingress and attack:
                 truePositives_ingress += 1
@@ -285,19 +285,19 @@ def detectionEntropyTelemetry(start, stop, systemId, frequency, interval, window
 
             
             if abs(change_r_ingress) > thresholdEntropyRate_ingress and attack:
-                truePositives_r_egress += 1
+                truePositives_r_ingress += 1
                 if isInAttackTime:
                     attackDict_r_ingress[attackTypeDuringThisTime]["TP"] += 1
             elif abs(change_r_ingress) > thresholdEntropyRate_ingress and not attack:
-                falsePositives_r_egress += 1
+                falsePositives_r_ingress += 1
                 if isInAttackTime:
                     attackDict_r_ingress[attackTypeDuringThisTime]["FP"] += 1
             elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and attack:
-                falseNegatives_r_egress += 1
+                falseNegatives_r_ingress += 1
                 if isInAttackTime:
                     attackDict_r_ingress[attackTypeDuringThisTime]["FN"] += 1
             elif abs(change_r_ingress) <= thresholdEntropyRate_ingress and not attack:
-                trueNegatives_r_egress += 1
+                trueNegatives_r_ingress += 1
                 if isInAttackTime:
                     attackDict_r_ingress[attackTypeDuringThisTime]["TN"] += 1
 

@@ -73,23 +73,20 @@ def makePlot(y_field, y_fieldName, systemId, interval, attackDate):
 
 
 
-systems = ["hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["bergen-gw3"]
 
-y_fields = ["entropy_packet_size", "entropy_rate_packet_size", "numberOfPackets", "numberOfBytes"]
+y_fields = ["entropy_packet_size_ingress", "entropy_rate_packet_size_ingress", "numberOfPackets_ingress", "numberOfBytes_ingress"]
 y_field_names = ["Entropy of packet size", "Entropy rate of packet size",
                  "Number of packets", "Number of bytes"]
 
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
-attackDates = ["24.03.23"]
+attackDates = ["17.03.23","24.03.23"]
 for attackDate in attackDates:
     print(attackDate)
     for systemId in systems:
         print(systemId)
         for i in range(len(y_fields)):
             print(y_field_names[i])
-            if systemId == "hoytek-gw2" and y_fields[i] == "entropy_packet_size":
-                continue
             for interval in intervals:
                 print(interval)
                 makePlot(y_fields[i], y_field_names[i], systemId, interval, attackDate)

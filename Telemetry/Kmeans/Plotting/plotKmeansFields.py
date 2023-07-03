@@ -101,7 +101,7 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="Normal cluster")
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
+        major_locator=mdates.MinuteLocator(byminute=[0, 15, 30, 45]),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
     axs.set_title("Packets in each cluster", fontsize=20)
@@ -119,17 +119,18 @@ def plotKmeansFields(start, stop, clusterFrequency, systemId, attackDate):
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
 
    
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Scatter.Packets."+  str(systemId)+ ".pdf", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Fields/Scatter.Packets."+  str(systemId)+ ".jpg", dpi=300)
     plt.close(fig)
 
 
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
+systems = ["tromso-gw5"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
-attackDates = ["17.03.23","24.03.23"]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         plotKmeansFields(startKmeans, stopKmeans, clusterFrequency, systemId, attackDate)

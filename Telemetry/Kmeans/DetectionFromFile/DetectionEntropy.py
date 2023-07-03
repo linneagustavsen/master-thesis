@@ -48,7 +48,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -150,7 +150,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
             if sTime[counter] < startTime:
                 counter += 1
                 continue
-            simulateRealTime(datetime.now(), eTime[counter], attackDate)
+            #simulateRealTime(datetime.now(), eTime[counter], attackDate)
             
             alert = {
                         "sTime": sTime[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -161,7 +161,7 @@ def detectionKmeansEntropyTelemetry(start, stop, systemId, interval, DBthreshold
                         "Attack_type": "",
                         "Weight": weight
                     }
-            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if real_labels[counter]:
                 truePositives += 1

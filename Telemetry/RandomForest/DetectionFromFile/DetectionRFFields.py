@@ -44,7 +44,7 @@ def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -80,6 +80,8 @@ def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
     eTime = pd.to_datetime(alerts["eTime"])
 
     real_label = alerts["real_label"]
+    truePositives = 0
+    falsePositives = 0
     if not mqtt_client.is_connected:
         print("ERROR!!!!!!")
     for i in range(len(sTime)):
@@ -94,7 +96,7 @@ def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
             attack = None
         else:
             attack = int(real_label[i])
-        simulateRealTime(datetime.now(), eTime[i], attackDate)
+        #simulateRealTime(datetime.now(), eTime[i], attackDate)
        
         alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -105,12 +107,14 @@ def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
                     "Attack_type": "Flooding",
                     "Weight": weight
                 }
-        mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+        #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
         if attack:
+            truePositives +=1
             if isInAttackTime:
                 attackDict[attackTypeDuringThisTime]["TP"] += 1
         elif not attack:
+            falsePositives += 1
             if isInAttackTime:
                 attackDict[attackTypeDuringThisTime]["FP"] += 1
 
@@ -118,6 +122,12 @@ def detectionRandomForestTelemetry(start, stop, systemId, weight, attackDate):
     q = p / 'RandomForest' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
-    attackScores = open(str(q) + "/ScoresAttacks.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    '''attackScores = open(str(q) + "/ScoresAttacks.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(attackDict,attackScores)
-    attackScores.close()
+    attackScores.close()'''
+
+
+    scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores.write("TP,FP")
+    scores.write("\n"+ str(truePositives)+ "," + str(falsePositives))
+    scores.close()

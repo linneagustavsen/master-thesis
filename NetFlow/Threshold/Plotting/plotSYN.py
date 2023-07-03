@@ -120,13 +120,11 @@ def plotSYN(systemId, attackDate):
     axs.tick_params(axis='both', which='major', labelsize=15)
     fig.legend(fontsize=17)
     fig.tight_layout()
-    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.pdf", dpi=300)
+    fig.savefig("Plots/Threshold/Attack"+ fileString+ "/NetFlow/SYN/Scatter."+  str(systemId)+ ".SYN.jpg", dpi=300)
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
-           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
-            "oslo-gw1"]
+systems = ["trd-gw", "ifi2-gw5"]
 
 attackDates = ["08.03.23","17.03.23","24.03.23"]
 attackDates = ["24.03.23"]

@@ -53,7 +53,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, weight, attackDat
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -112,7 +112,7 @@ def synDetection(start, stop, systemId, windowSize, threshold, weight, attackDat
         attack = real_label[i]
         if i >= windowSize:
             change = synPacketsPerFlow[i] - np.nanmean(synPacketsPerFlow[i-windowSize: i-1])
-            simulateRealTime(datetime.now(), sTime[i], attackDate)
+            #simulateRealTime(datetime.now(), sTime[i], attackDate)
             if synPacketsPerFlow[i] > threshold:
                 alert = {
                         "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -136,9 +136,9 @@ def synDetection(start, stop, systemId, windowSize, threshold, weight, attackDat
                         "Real_label": int(attack),
                         "Attack_type": "SYN Flood"
                         }'''
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             
-            '''if synPacketsPerFlow[i] > threshold and attack:
+            if synPacketsPerFlow[i] > threshold and attack:
                 truePositives += 1
                 if isInAttackTime:
                     attackDict[attackTypeDuringThisTime]["TP"] += 1
@@ -162,10 +162,10 @@ def synDetection(start, stop, systemId, windowSize, threshold, weight, attackDat
             elif not attack:
                 trueNegatives += 1
                 if isInAttackTime:
-                    attackDict[attackTypeDuringThisTime]["TN"] += 1'''
+                    attackDict[attackTypeDuringThisTime]["TN"] += 1
 
     #sleep(randrange(400))
-    '''p = Path('Detections' + fileString)
+    p = Path('Detections' + fileString)
     q = p / 'Threshold' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
@@ -180,4 +180,4 @@ def synDetection(start, stop, systemId, windowSize, threshold, weight, attackDat
 
     attackScores = open(str(q) + "/ScoresAttacks.SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(attackDict,attackScores)
-    attackScores.close()'''
+    attackScores.close()

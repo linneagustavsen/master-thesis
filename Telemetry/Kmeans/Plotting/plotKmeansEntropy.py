@@ -121,12 +121,12 @@ def plotKmeansFields(start, stop, interval, systemId, attackDate):
 
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
+        major_locator=mdates.MinuteLocator(byminute=[0, 15, 30, 45]),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
-    axs.set_title("Packets in each cluster", fontsize=20)
+    axs.set_title("Entropy of ingress packet size in each cluster", fontsize=20)
     axs.set_xlabel('Time', fontsize=20)
-    axs.set_ylabel("Packets", fontsize=20)
+    axs.set_ylabel("Entropy", fontsize=20)
     #axs.ylabel.set_size(15)
     #axs.xlabel.set_size(15)
     axs.tick_params(axis='both', which='major', labelsize=15)

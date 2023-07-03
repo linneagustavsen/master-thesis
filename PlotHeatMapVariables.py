@@ -1,4 +1,6 @@
+from operator import itemgetter
 from pathlib import Path
+from pprint import pprint
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import json
@@ -54,40 +56,82 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, attackDate):
         '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
         RGB color; the keyword argument name must be a standard mpl colormap name.'''
         return plt.cm.get_cmap(name, n)
-    fig, axs = plt.subplots(1, 1, figsize=(10, 10))
-    cmap = get_cmap(5600)
-    colorCounter = 0
+    #fig, axs = plt.subplots(1, 1, figsize=(10, 10))
+    #cmap = get_cmap(5600)
     frequencies = [timedelta(seconds=5),timedelta(seconds=10), timedelta(seconds=20), timedelta(seconds=30), timedelta(seconds=40), timedelta(seconds=50),timedelta(minutes=1)]
+    auc_scores = {}
+    auc_scores_pr = {}
     for frequency in frequencies:
         for i in range(1,21):
             interval = timedelta(minutes=i)
             for alpha in range(2, 16):
+                if (y_field == "numberOfPackets" or y_field == "numberOfBytes" or y_field == "numberOfFlows" or y_field == "icmpRatio" or y_field == "icmpPackets") and alpha > 2:
+                    continue
                 for windowSize in range(2,21):
-                    dataFile = str(q) + "/RocScores/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+                    dataFile = str(q) + "/RocScoresOnlyFPRandTPR/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
 
                     if not Path(dataFile).exists():
-                        plt.close(fig)
                         print("no file", dataFile)
-                        return
+                        break
                     data = pd.read_csv(dataFile)
                     if len(data) == 0:
-                        plt.close(fig)
                         print("the file is empty")
-                        return
-                    tpr = pd.to_numeric(data["TPR"],errors='coerce')
-                    fpr = pd.to_numeric(data["FPR"],errors='coerce')
+                        break
+                    truePositiveRate = pd.to_numeric(data["TPR"],errors='coerce')
+                    falsePositiveRate = pd.to_numeric(data["FPR"],errors='coerce')
 
-                    truePositiveRate = []
-                    falsePositiveRate = []
-                    for i in range(len(tpr) -1, -1, -1):
-                        truePositiveRate.append(tpr[i])
-                        falsePositiveRate.append(fpr[i])
                     auc_value = auc(falsePositiveRate, truePositiveRate)
-                
-                    axs.plot(falsePositiveRate ,truePositiveRate, color=cmap(colorCounter), label="Frequency: " + str(int(frequency.total_seconds())) +"sec, Interval: "+ str(int(interval.total_seconds()/60)) +" min, α: "+ str(alpha) + ", Window size: "+ str(windowSize) + ", AUC=%.3f"%auc_value)
-                    colorCounter += 1
 
-    axs.set_title("Roc curve")
+                    if y_field == "numberOfPackets" or y_field == "numberOfBytes" or y_field == "numberOfFlows" or y_field == "icmpRatio" or y_field == "icmpPackets":
+                        auc_scores[str("Frequency: " + str(int(frequency.total_seconds())) +"sec Interval: "+ str(int(interval.total_seconds()/60))+ " Window size: "+ str(windowSize) +" min")] = auc_value
+                    else:
+                        auc_scores[str("Frequency: " + str(int(frequency.total_seconds())) +"sec Interval: "+ str(int(interval.total_seconds()/60))+ " Window size: "+ str(windowSize) +" min α: "+ str(alpha))] = auc_value
+                    
+                    dataFile = str(q) + "/PrecisionRecall/" + str(y_field) +".alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv"
+
+                    if not Path(dataFile).exists():
+                        print("no file", dataFile)
+                        break
+                    data = pd.read_csv(dataFile)
+
+                    if len(data) == 0:
+                        print("the file is empty")
+                        break
+                    precision = pd.to_numeric(data["Precision"],errors='coerce')
+                    recall = pd.to_numeric(data["Recall"],errors='coerce')
+          
+                    auc_value = auc(recall, precision)
+                    if y_field == "numberOfPackets" or y_field == "numberOfBytes":
+                        auc_scores_pr[str("Frequency: " + str(int(frequency.total_seconds())) +"sec Interval: "+ str(int(interval.total_seconds()/60))+ " Window size: "+ str(windowSize) +" min")] = auc_value
+                    else:
+                        auc_scores_pr[str("Frequency: " + str(int(frequency.total_seconds())) +"sec Interval: "+ str(int(interval.total_seconds()/60))+ " Window size: "+ str(windowSize) +" min α: "+ str(alpha))] = auc_value
+                    
+
+    new_auc_scores =sorted(auc_scores.items(), key=itemgetter(1), reverse=True)[:100]
+    print("ROC curve")
+    pprint(new_auc_scores)
+    new_auc_scores =sorted(auc_scores.items(), key=itemgetter(1), reverse=True)
+    for i, tuple in enumerate(new_auc_scores):
+        if tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(5)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("5 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(10)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("10 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(15)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("15 min interval", i, tuple[1])
+
+    new_auc_scores =sorted(auc_scores_pr.items(), key=itemgetter(1), reverse=True)[:100]
+    print("PR curve")
+    pprint(new_auc_scores)
+    new_auc_scores =sorted(auc_scores_pr.items(), key=itemgetter(1), reverse=True)
+    for i, tuple in enumerate(new_auc_scores):
+        if tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(5)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("5 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(10)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("10 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(15)+ " Window size: "+ str(10) +" min α: "+ str(alpha)):
+            print("15 min interval", i, tuple[1])
+
+    '''axs.set_title("Roc curve")
     axs.set_xlabel("False Positive Rate")
     axs.set_ylabel("True Positive Rate")
     axs.tick_params(axis='both', which='major', labelsize=15)
@@ -98,7 +142,7 @@ def makeROCcurve(y_field, dataSet, dataType, systemId, attackDate):
         plotting.mkdir(parents=True)
     fig.savefig("Plots/RocScores/" + str(y_field)+ ".pdf", dpi=300)
     
-    plt.close(fig)
+    plt.close(fig)'''
 
 def makeHeatMap(y_field, dataSet, dataType, systemId, attackDate):
     p = Path('ThresholdDecision') 
@@ -196,6 +240,51 @@ def makeHeatMap(y_field, dataSet, dataType, systemId, attackDate):
     
     plt.close(fig)
 
+
+def findBestROCandPRCurveTelemetry(y_field):
+    json_file = open("ThresholdDecision/Entropy/Telemetry/AUC_roc.json", "r")
+    auc_scores_roc = json.load(json_file)
+    json_file.close()
+
+    json_file = open("ThresholdDecision/Entropy/Telemetry/AUC_pr.json", "r")
+    auc_scores_pr = json.load(json_file)
+    json_file.close()
+
+    auc_scores_roc = auc_scores_roc[y_field]
+    auc_scores_pr = auc_scores_pr[y_field]
+
+    new_auc_scores =sorted(auc_scores_roc.items(), key=itemgetter(1), reverse=True)[:10]
+    print("ROC curve")
+    pprint(new_auc_scores)
+    new_auc_scores =sorted(auc_scores_roc.items(), key=itemgetter(1), reverse=True)
+    '''print("My choice")
+    for i, tuple in enumerate(new_auc_scores):
+        if tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(5)+ " Window size: "+ str(10) +" min α: "+ str(10)):
+            print("5 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(10)+ " Window size: "+ str(10) +" min α: "+ str(10)):
+            print("10 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(15)+ " Window size: "+ str(10) +" min α: "+ str(10)):
+            print("15 min interval", i, tuple[1])'''
+    print("The worst selection")
+    worst = sorted(auc_scores_roc.items(), key=itemgetter(1))[:10]
+    pprint(worst)
+
+    new_auc_scores =sorted(auc_scores_pr.items(), key=itemgetter(1), reverse=True)[:10]
+    print("\nPR curve")
+    pprint(new_auc_scores)
+    new_auc_scores =sorted(auc_scores_pr.items(), key=itemgetter(1), reverse=True)
+    '''print("My choice")
+    for i, tuple in enumerate(new_auc_scores):
+        #print(i, tuple)
+        if tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(300)+ "sec Window size: "+ str(10) +" alpha: "+ str(10)):
+            print("5 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(600)+ "sec Window size: "+ str(10) +" alpha: "+ str(10)):
+            print("10 min interval", i, tuple[1])
+        elif tuple[0] == str("Frequency: " + str(60) +"sec Interval: "+ str(900)+ "sec Window size: "+ str(10) +" alpha: "+ str(10)):
+            print("15 min interval", i, tuple[1])'''
+    print("The worst selection")
+    worst = sorted(auc_scores_pr.items(), key=itemgetter(1))[:10]
+    pprint(worst)
 systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
@@ -203,13 +292,22 @@ systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso
 attackDates = ["08.03.23", "17.03.23","24.03.23"]
 intervals = [timedelta(minutes = 5),timedelta(minutes = 10), timedelta(minutes = 15)]
 y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
-            "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes", "SYN.dstEntropy", "SYN.srcEntropy", "SYN.flowEntropy"]
-y_fields = ["dstEntropy", "dstEntropyRate","srcEntropy", "srcEntropyRate", "flowEntropy", "flowEntropyRate", "numberOfFlows", "icmpRatio", 
             "icmpPackets", "packetSizeEntropy", "packetSizeEntropyRate", "numberOfPackets", "numberOfBytes"]
 y_field_names = ["DestinationIPEntropy", "DestinationIPEntropyRate","SourceIPEntropy", "SourceIPEntropyRate", "FlowEntropy", "FlowEntropyRate", "NumberOfFlows", "ICMPRatio", 
             "ICMPPackets", "PacketSizeEntropy", "PacketSizeEntropyRate", "Packets", "Bytes"]
+
+y_fields = ["flowEntropy", "flowEntropyRate"]
+y_field_names = ["Packets", "Bytes"]
 '''for y_field in y_fields:
-    makeROCcurve(y_field, "NetFlow", "Entropy", "hoytek-gw2", "24.03.23")'''
+    makeROCcurve(y_field, "NetFlow", "Entropy", "hoytek-gw2", "24.03.23")
 
 for y_field in y_fields:
-    makeHeatMap(y_field, "NetFlow", "Entropy", "hoytek-gw2", "24.03.23")
+    makeHeatMap(y_field, "NetFlow", "Entropy", "hoytek-gw2", "24.03.23")'''
+
+
+y_fields = ["Entropy of ingress packet sizes", "Entropy of egress packet sizes", "Entropy rate of ingress packet sizes", "Entropy rate of egress packet sizes", "Number of ingress packets", "Number of egress packets", "Number of ingress bytes", "Number of egress bytes"]
+y_fields = ["Entropy of ingress packet sizes", "Entropy of egress packet sizes", "Entropy rate of ingress packet sizes", "Entropy rate of egress packet sizes"]
+
+for y_field in y_fields:
+    print("\n", y_field)
+    findBestROCandPRCurveTelemetry(y_field)

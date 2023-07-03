@@ -45,7 +45,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -114,14 +114,14 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
         nonAttackCluster_eTime = pd.to_datetime(nonAttackCluster["eTime"])
         labelsForNonAttackCluster = nonAttackCluster["real_label"]
         
-        for i in range(len(labelsForNonAttackCluster)):
-            isInAttackTime, attackTypeDuringThisTime = inAttackInterval(nonAttackCluster_sTime[i], nonAttackCluster_eTime[i], attackDate)
-            if labelsForNonAttackCluster[i] == 0:
+        for k in range(len(labelsForNonAttackCluster)):
+            isInAttackTime, attackTypeDuringThisTime = inAttackInterval(nonAttackCluster_sTime[k], nonAttackCluster_eTime[k], attackDate)
+            if labelsForNonAttackCluster[k] == 0:
                 trueNegatives += 1
                 if isInAttackTime:
                     attackDict[attackTypeDuringThisTime]["TN"] += 1
 
-            elif labelsForNonAttackCluster[i] == 1:
+            elif labelsForNonAttackCluster[k] == 1:
                 falseNegatives += 1 
                 if isInAttackTime:
                     attackDict[attackTypeDuringThisTime]["FN"] += 1   
@@ -154,15 +154,15 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
             
             attackTypes.append(attackType)'''
 
-            startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-            stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
+            starting = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+            stopping = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
             for i in range(len(sTimeCluster)):
                 isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTimeCluster[counter], eTimeCluster[counter], attackDate)
                 sTimeCluster[counter] = sTimeCluster[counter].replace(tzinfo=None)
                 eTimeCluster[counter] = eTimeCluster[counter].replace(tzinfo=None)
-                if eTimeCluster[counter] > stopTime:
+                if eTimeCluster[counter] > stopping:
                     break
-                if sTimeCluster[counter] < startTime:
+                if sTimeCluster[counter] < starting:
                     counter += 1
                     continue
 
@@ -178,7 +178,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
                     counter += 1
                     attackType = attackTypes[counter]
                     startTime += clusterFrequency'''
-                simulateRealTime(datetime.now(), eTimeCluster[counter], attackDate)
+                #simulateRealTime(datetime.now(), eTimeCluster[counter], attackDate)
                 alert = {
                             "sTime": sTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
                             "eTime": eTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -188,7 +188,7 @@ def detectionKmeansCombinedTelemetry(start, stop, systemId, interval, clusterFre
                             "Attack_type": "",
                             "Weight": weight
                         }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
                 if real_labels[counter]:
                     truePositives += 1

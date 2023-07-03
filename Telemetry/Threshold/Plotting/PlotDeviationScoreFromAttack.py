@@ -82,19 +82,10 @@ for attackDate in attackDates:
             makePlotDeviationScore(y_fields[i], y_field_names[i], systemId,  attackDate)
 '''
 
-systems = ["teknobyen-gw2", "bergen-gw3", "oslo-gw1"]
-y_fields = ["egress_queue_info__0__cur_buffer_occupancy"]
-y_field_names = ["current egress queue size"]
+systems = ["tromso-gw5"]
+y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts", "MaxVar.ingress_stats__if_1sec_octets"]
+y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "ingress bytes/s"]
 
-attackDates =  ["24.03.23"]
-for attackDate in attackDates:
-    for i in range(len(y_fields)):
-        for systemId in systems:
-            makePlotDeviationScore(y_fields[i], y_field_names[i], systemId,  attackDate)
-
-systems = ["teknobyen-gw1"]
-y_fields = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "MaxVar.egress_queue_info__0__cur_buffer_occupancy", "MaxVar.egress_stats__if_1sec_pkts", "MaxVar.egress_stats__if_1sec_octets", "MaxVar.ingress_stats__if_1sec_pkts"]
-y_field_names = ["current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", "current egress queue size", "egress packets/s", "egress bytes/s", "ingress packets/s", ]
 
 attackDates =  ["24.03.23"]
 for attackDate in attackDates:

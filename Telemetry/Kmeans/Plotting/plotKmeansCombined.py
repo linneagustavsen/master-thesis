@@ -113,7 +113,7 @@ def plotKmeansCombined(start, stop, interval, clusterFrequency, systemId, attack
     axs.scatter(sTimeClusterNormal ,packetsClusterNormal, color="#162931", s=10, label="Normal cluster")
 
     axs.xaxis.set(
-        major_locator=mdates.MinuteLocator(interval=15),
+        major_locator=mdates.MinuteLocator(byminute=[0, 15, 30, 45]),
         major_formatter=mdates.DateFormatter("%H:%M")
     )
     axs.set_title("Packets in each cluster", fontsize=20)
@@ -123,7 +123,7 @@ def plotKmeansCombined(start, stop, interval, clusterFrequency, systemId, attack
     #axs.xlabel.set_size(15)
     axs.set_ylabel("Packets", fontsize=20)
     #axs.set_ylim([0,maxValue])
-    axs.set_yscale('log')
+    #axs.set_yscale('log')
     axs.tick_params(axis='both', which='major', labelsize=15)
     #axs.legend(fontsize=20)
     #axs.text(0.7, 0.9, 'Labeled attack cluster: ' + str(deviation), horizontalalignment='center', verticalalignment='center', transform=ax.transAxes, bbox=dict(facecolor='blue', alpha=0.2))
@@ -133,17 +133,31 @@ def plotKmeansCombined(start, stop, interval, clusterFrequency, systemId, attack
     else:
         fig.legend(fontsize=20)
     #fig.tight_layout()
-    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.pdf", dpi=300)
+    fig.savefig("Plots/Kmeans/Attack"+ fileString+ "/Telemetry/Combined/Scatter.Packets."+  str(systemId)+ "."+ str(int(interval.total_seconds())) +"secInterval.jpg", dpi=300)
     plt.close(fig)
 
 
-systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+'''systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", "oslo-gw1"]
 startKmeans = "2023-03-08 14:15:00"
 stopKmeans= "2023-03-08 16:00:00"
 clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]
 attackDates = ["08.03.23","17.03.23","24.03.23"]
+for attackDate in attackDates:
+    for systemId in systems:
+        for interval in intervals:
+            if interval == timedelta(minutes=15):
+                plotKmeansCombined(startKmeans, stopKmeans, interval, timedelta(minutes=30), systemId, attackDate)
+            else:
+                plotKmeansCombined(startKmeans, stopKmeans, interval, clusterFrequency, systemId, attackDate)
+'''
+systems = ["trd-gw"]
+startKmeans = "2023-03-08 14:15:00"
+stopKmeans= "2023-03-08 16:00:00"
+clusterFrequency = timedelta(minutes = 15)
+intervals = [timedelta(minutes = 5)]
+attackDates = ["24.03.23"]
 for attackDate in attackDates:
     for systemId in systems:
         for interval in intervals:

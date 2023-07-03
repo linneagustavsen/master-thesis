@@ -2,6 +2,7 @@
 
 from datetime import timedelta,datetime
 import math
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
@@ -133,8 +134,11 @@ def makeScoresKmeans(featureSet, dataset, interval, attackDate):
             scoreFile.write("TP,FP,FN,TN")
             scoreFile.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
         
-def makeScoresXmas(featureSet, dataset, interval, attackDate):
-    systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+def makeScoresXmas(featureSet, dataset, dataType, metric, attackDate):
+    if dataset == "NetFlow":
+        systems = ["tromso-gw5",  "teknobyen-gw1", "hoytek-gw2", "bergen-gw3","trd-gw", "ifi2-gw5"]
+    else:
+        systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
            "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", "oslo-gw1"]
 
     if attackDate == "08.03.23":
@@ -150,46 +154,33 @@ def makeScoresXmas(featureSet, dataset, interval, attackDate):
         startTime = datetime.strptime("2023-03-24 14:00:00", '%Y-%m-%d %H:%M:%S')
         stopTime = datetime.strptime("2023-03-24 18:00:00", '%Y-%m-%d %H:%M:%S')
 
-    if interval != timedelta(minutes=15):
-        clusterFrequency = timedelta(minutes=15)
-    else:
-        clusterFrequency = timedelta(minutes=30)
 
     for systemId in systems:
         print(systemId)
-        
-        start = startTime
-        intervalTime = (stopTime - startTime).total_seconds()/clusterFrequency.total_seconds()
-        total = 0
+
+        positives = 0
+        negatives = 0
         truePositives = 0
         falsePositives = 0
         falseNegatives = 0
         trueNegatives = 0
-        counter = 0
-        #Loop for every minute in a week
-        for i in range(math.ceil(intervalTime)):
-            stop = start + clusterFrequency
-            data = pd.read_csv("Calculations"+ fileString+ "/Kmeans/"+dataset+"/Scores.Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".csv")
+        p = Path('Detections' + fileString +"_5min_"+ metric)
+       
+        data = pd.read_csv(str(p) + "/Kmeans/"+dataset+"/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
             
-            if len(data) == 0:
-                print("There was no data")
-                continue
-            total += data["TP"][0]
-            total += data["FP"][0]
-            total += data["TN"][0]
-            total += data["FN"][0]
-            counter += 1
-            start += clusterFrequency
-        data = pd.read_csv("Calculations"+ fileString+ "/Threshold/"+dataset+"/"+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
-        real_labels = data["real_label"]
-        for label in real_labels:
-            if label == 1:
-                truePositives+= 1
-            elif label == 0:
-                falsePositives += 1
-        falseNegatives = 0
-        trueNegatives = total - falsePositives- truePositives
-        scoreFile = open("Calculations/Threshold/"+dataset+"/Scores."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+        if len(data) == 0:
+            print("There was no data")
+            continue
+        positives += data["TP"][0]
+        negatives += data["FP"][0]
+        negatives += data["TN"][0]
+        positives += data["FN"][0]
+        data = pd.read_csv(str(p) + "/"+dataType+"/"+dataset+"/Scores."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv")
+        truePositives = data["TP"][0]
+        falsePositives += data["FP"][0]
+        trueNegatives = negatives - falsePositives
+        falseNegatives = positives - truePositives
+        scoreFile = open("Calculations/"+dataType+"/"+dataset+"/Scores."+featureSet+ ".attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
         scoreFile.write("TP,FP,FN,TN")
         scoreFile.write("\n"+str(truePositives) + "," + str(falsePositives) + "," + str(falseNegatives) + "," + str(trueNegatives))
         
@@ -201,9 +192,9 @@ makeScoresKmeans("Combined", "Telemetry", timedelta(minutes=5), "17.03.23")
 makeScoresKmeans("Combined", "Telemetry", timedelta(minutes=10), "17.03.23")
 makeScoresKmeans("Combined", "Telemetry", timedelta(minutes=15), "17.03.23")'''
 
-makeScoresKmeans("Entropy", "Telemetry", timedelta(minutes=5), "17.03.23")
+'''makeScoresKmeans("Entropy", "Telemetry", timedelta(minutes=5), "17.03.23")
 makeScoresKmeans("Entropy", "Telemetry", timedelta(minutes=10), "17.03.23")
-makeScoresKmeans("Entropy", "Telemetry", timedelta(minutes=15), "17.03.23")
+makeScoresKmeans("Entropy", "Telemetry", timedelta(minutes=15), "17.03.23")'''
 
 '''makeScoresKmeans("Combined", "NetFlow", timedelta(minutes=5), "17.03.23")
 makeScoresKmeans("Combined", "NetFlow", timedelta(minutes=10), "17.03.23")
@@ -223,3 +214,5 @@ makeScoresKmeans("Combined", "NetFlow", timedelta(minutes=15), "24.03.23")
 
 
 makeScoresXmas("Xmas", "NetFlow", 0, "24.03.23")'''
+
+makeScoresXmas("TopKFlows", "NetFlow", "TopKFlows", "F1", "24.03.23")

@@ -81,7 +81,7 @@ def plotRandomForestFields(interval, systemId, attackDate):
             packetsClusterNormal.append(packetsAttack[i])
 
     if not isAttack:
-        print("There was no attack")
+        print("There was no attack", systemId)
         plt.close(fig)
         return
 
@@ -108,8 +108,8 @@ def plotRandomForestFields(interval, systemId, attackDate):
     fig.savefig("Plots/RandomForest/Attack"+ fileString+ "/Telemetry/Fields/Packets."+  str(systemId)+ ".pdf", dpi=300)
     plt.close(fig)
 
-
-systems = ["ifi2-gw5", 
+systems = ["stangnes-gw", "rodbergvn-gw2", "narvik-gw4", "tromso-fh-gw", "tromso-gw5",  "teknobyen-gw1", "narvik-gw3", "hovedbygget-gw",
+           "hoytek-gw2", "teknobyen-gw2", "ma2-gw", "bergen-gw3", "narvik-kv-gw",  "trd-gw", "ifi2-gw5", 
             "oslo-gw1"]
 clusterFrequency = timedelta(minutes = 15)
 intervals = [timedelta(minutes = 5), timedelta(minutes = 10), timedelta(minutes = 15)]

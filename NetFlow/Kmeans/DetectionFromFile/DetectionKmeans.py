@@ -45,7 +45,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -176,7 +176,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
             starting = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
             stopping = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
             for i in range(len(sTimeCluster)):
-                #isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTimeCluster[counter], eTimeCluster[counter], attackDate)
+                isInAttackTime, attackTypeDuringThisTime = inAttackInterval(sTimeCluster[counter], eTimeCluster[counter], attackDate)
                 sTimeCluster[counter] = sTimeCluster[counter].replace(tzinfo=None)
                 eTimeCluster[counter] = eTimeCluster[counter].replace(tzinfo=None)
                 if eTimeCluster[counter] > stopping:
@@ -194,7 +194,7 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                     counter += 1
                     attackType = attackTypes[counter]
                     startTime += clusterFrequency'''
-                simulateRealTime(datetime.now(), sTimeCluster[counter], attackDate)
+                #simulateRealTime(datetime.now(), sTimeCluster[counter], attackDate)
 
                 alert = {
                             "sTime": sTimeCluster[counter].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -218,21 +218,21 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
                             "Real_label": int(real_labels[counter]),
                             "Attack_type": attackType
                         }'''
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
-                '''if real_labels[counter]:
+                if real_labels[counter]:
                     truePositives += 1
                     if isInAttackTime:
                         attackDict[attackTypeDuringThisTime]["TP"] += 1
                 elif not real_labels[counter]:
                     falsePositives += 1
                     if isInAttackTime:
-                        attackDict[attackTypeDuringThisTime]["FP"] += 1'''
+                        attackDict[attackTypeDuringThisTime]["FP"] += 1
                 counter += 1
             counter = 100*countClusters
         startTime += clusterFrequency
     #sleep(randrange(400))
-    '''p = Path('Detections' + fileString)
+    p = Path('Detections' + fileString)
     q = p / 'Kmeans' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True)
@@ -240,8 +240,8 @@ def detectionKmeans(start, stop, systemId, clusterFrequency, DBthreshold, c0thre
     scores = open(str(q) + "/Scores.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     scores.write("TP,FP,FN,TN")
     scores.write("\n"+ str(truePositives)+ "," + str(falsePositives)+ "," + str(falseNegatives)+ "," + str(trueNegatives))
-    scores.close()'''
+    scores.close()
 
-    '''attackScores = open(str(q) + "/ScoresAttacks.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
+    attackScores = open(str(q) + "/ScoresAttacks.Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".json", "w")
     json.dump(attackDict,attackScores)
-    attackScores.close()'''
+    attackScores.close()

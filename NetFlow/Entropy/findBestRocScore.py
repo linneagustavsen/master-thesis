@@ -1,4 +1,4 @@
-import pickle
+
 import pandas as pd
 from silk import *
 from HelperFunctions.Distributions import *
@@ -18,41 +18,13 @@ from pathlib import Path
             interval:   timedelta object, size of the sliding window which the calculation is made on
             attackDate: string, date of the attack the calculations are made on
 '''
-def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windowSize, attackDate):
+def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windowSizes, alphas, attackDate):
     #Open files to write alerts to
     p = Path('Calculations')
     q = p / 'Entropy' / 'NetFlow'
     if not q.exists():
         q.mkdir(parents=True, exist_ok=False)
     #Open file to write alerts to
-    srcEntropyFile = open(str(q) + "/SourceIPEntropy.windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    srcEntropyRateFile = open(str(q) + "/SourceIPEntropyRatewindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyFile = open(str(q) + "/DestinationIPEntropywindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    dstEntropyRateFile = open(str(q) + "/DestinationIPEntropyRatewindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowEntropyFile = open(str(q) + "/FlowEntropywindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowEntropyRateFile = open(str(q) + "/FlowEntropyRatewindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    flowFile = open(str(q) + "/NumberOfFlowswindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    icmpRatioFile = open(str(q) + "/ICMPRatiowindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    icmpPacketsFile = open(str(q) + "/ICMPPacketswindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetSizeEntropyFile = open(str(q) + "/PacketSizeEntropywindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetSizeEntropyRateFile = open(str(q) + "/PacketSizeEntropyRatewindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    packetsFile = open(str(q) + "/PacketswindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    bytesFile = open(str(q) + "/ByteswindowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-
-    #Write the column titles to the files
-    srcEntropyFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    srcEntropyRateFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    dstEntropyFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    dstEntropyRateFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    flowEntropyFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    flowEntropyRateFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    flowFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    icmpRatioFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    icmpPacketsFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    packetSizeEntropyFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    packetSizeEntropyRateFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    packetsFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
-    bytesFile.write("sTime,eTime,Change,Value,Mean_last_"+ str(windowSize)+",real_label")
 
 
     #Makes datetime objects of the input times
@@ -91,6 +63,7 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
     i = 0
     sizes = []
     attackFlowArray = []
+    labels = []
 
     #Loop through all the flow records in the input file
     for rec in infile:
@@ -181,9 +154,6 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
                 PiSIP.append(value/sumOfPackets)
             ns = len(numberOfPacketsPerSIP)
 
-            #Calculate the generalized entropy of this distribution
-            entropySip = generalizedEntropy(10,PiSIP)
-
             PiDIP = []
             
             #Loop through each IP flow in the time interval
@@ -191,9 +161,6 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
                 #Add the probability of the current source flow having the size that it does to the distribution
                 PiDIP.append(value/sumOfPackets)
             nd = len(numberOfPacketsPerDIP)
-
-            #Calculate the generalized entropy of this distribution
-            entropyDip = generalizedEntropy(10,PiDIP)
             
             PiF = []
 
@@ -202,8 +169,6 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
                 #Add the probability of flow having the size that it does to the distribution
                 PiF.append(value/sumOfPackets)
             nf = len(flows)
-            #Calculate the generalized entropy of this distribution
-            entropyFlow = generalizedEntropy(10, PiF)
 
             #Find the ratio of ICMP packets in this time interval
             icmpRatio = icmpPackets/sumOfPackets
@@ -218,21 +183,49 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
                 PiPS.append(value/sumOfNP)
             nps = len(numberOfPacketsOfSizei)
 
-            #Calculate the generalized entropy of this distribution
-            entropyPacketSize = generalizedEntropy(10, PiPS)
+            currentIpSrcArray = []
+            currentIpSrcRateArray = []
+            currentIpDstArray = []
+            currentIpDstRateArray = []
+            currentFlowArray = []
+            currentFlowRateArray = []
+            currentPacketSizeArray = []
+            currentPacketSizeRateArray = []
+            for alpha in alphas:
+                #Calculate the generalized entropy of this distribution
+                entropyPacketSize = generalizedEntropy(alpha, PiPS)
 
+                #Calculate the generalized entropy of this distribution
+                entropyDip = generalizedEntropy(alpha,PiDIP)
 
-            ipSrcArray.append(entropySip)
-            ipSrcRateArray.append(entropySip/ns)
-            ipDstArray.append(entropyDip)
-            ipDstRateArray.append(entropyDip/nd)
-            flowArray.append(entropyFlow)
-            flowRateArray.append(entropyFlow/nf)
+                #Calculate the generalized entropy of this distribution
+                entropySip = generalizedEntropy(alpha,PiSIP)
+
+                #Calculate the generalized entropy of this distribution
+                entropyFlow = generalizedEntropy(alpha, PiF)
+
+                currentIpSrcArray.append(entropySip)
+                currentIpSrcRateArray.append(entropySip/ns)
+                currentIpDstArray.append(entropyDip)
+                currentIpDstRateArray.append(entropyDip/nd)
+                currentFlowArray.append(entropyFlow)
+                currentFlowRateArray.append(entropyFlow/nf)
+                currentPacketSizeArray.append(entropyPacketSize)
+                currentPacketSizeRateArray.append(entropyPacketSize/nps)
+
+            ipSrcArray.append(currentIpSrcArray)
+            ipSrcRateArray.append(currentIpSrcRateArray)
+            ipDstArray.append(currentIpDstArray)
+            ipDstRateArray.append(currentIpDstRateArray)
+            flowArray.append(currentFlowArray)
+            flowRateArray.append(currentFlowRateArray)
+            packetSizeArray.append(currentPacketSizeArray)
+            packetSizeRateArray.append(currentPacketSizeRateArray)
+
             numberOfFlows.append(nf)
             icmpRatioArray.append(icmpRatio)
             icmpPacketsArray.append(icmpPackets)
-            packetSizeArray.append(entropyPacketSize)
-            packetSizeRateArray.append(entropyPacketSize/nps)
+            
             packetNumberArray.append(numberOfPackets(records))
             bytesArray.append(numberOfBytes(records))
         
@@ -244,62 +237,7 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
             for timestamp in attackFlowArray:
                 if timestamp in timeInterval:
                     label = 1
-            
-            if i >=windowSize:
-                srcEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcArray[i] - np.nanmean(ipSrcArray[i-windowSize: i-1]))) + "," + str(ipSrcArray[i]) + "," + str(np.nanmean(ipSrcArray[i-windowSize: i-1])) + "," + str(label))
-                
-                srcEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipSrcRateArray[i] - np.nanmean(ipSrcRateArray[i-windowSize: i-1]))) + "," + str(ipSrcRateArray[i]) + "," + str(np.nanmean(ipSrcRateArray[i-windowSize: i-1])) + "," + str(label))
-                
-                dstEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstArray[i] - np.nanmean(ipDstArray[i-windowSize: i-1]))) + "," + str(ipDstArray[i]) + "," + str(np.nanmean(ipDstArray[i-windowSize: i-1])) + "," + str(label))
-
-                dstEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(ipDstRateArray[i] - np.nanmean(ipDstRateArray[i-windowSize: i-1]))) + "," + str(ipDstRateArray[i]) + "," + str(np.nanmean(ipDstRateArray[i-windowSize: i-1])) + "," + str(label))
-
-                flowEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(flowArray[i] - np.nanmean(flowArray[i-windowSize: i-1]))) + "," + str(flowArray[i]) + "," + str(np.nanmean(flowArray[i-windowSize: i-1])) + "," + str(label))
-                
-                flowEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(flowRateArray[i] - np.nanmean(flowRateArray[i-windowSize: i-1]))) + "," + str(flowRateArray[i]) + "," + str(np.nanmean(flowRateArray[i-windowSize: i-1])) + "," + str(label))
-                
-                flowFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))) + "," + str(numberOfFlows[i]) + "," + str(np.nanmean(numberOfFlows[i-windowSize: i-1]))+ "," + str(label))
-                 
-                icmpRatioFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) + "," + str(icmpRatioArray[i]) + "," + str(np.nanmean(icmpRatioArray[i-windowSize: i-1])) + "," + str(label))
-                
-                icmpPacketsFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1]))) + "," + str(icmpPacketsArray[i]) + "," + str(np.nanmean(icmpPacketsArray[i-windowSize: i-1])) + "," + str(label))
-                
-                packetSizeEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])) + "," + str(label))
-                
-                packetSizeEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])) + "," + str(label))
-                 
-                packetsFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])) + "," + str(label))
-                
-                bytesFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])) + "," + str(label))
-            
-            
-            else:
-                srcEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(ipSrcArray[i]) + "," + str(None) + "," + str(label))
-                
-                srcEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(ipSrcRateArray[i]) + "," + str(None) + "," + str(label))
-                
-                dstEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(ipDstArray[i]) + "," + str(None) + "," + str(label))
-
-                dstEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(ipDstRateArray[i]) + "," + str(None) + "," + str(label))
-
-                flowEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(flowArray[i]) + "," + str(None) + "," + str(label))
-                
-                flowEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(flowRateArray[i]) + "," + str(None) + "," + str(label))
-                
-                flowFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(numberOfFlows[i]) + "," + str(None)+ "," + str(label))
-                 
-                icmpRatioFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(icmpRatioArray[i]) + "," + str(None) + "," + str(label))
-                
-                icmpPacketsFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(icmpPacketsArray[i]) + "," + str(None) + "," + str(label))
-                
-                packetSizeEntropyFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(packetSizeArray[i]) + "," + str(None) + "," + str(label))
-                
-                packetSizeEntropyRateFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(packetSizeRateArray[i]) + "," + str(None) + "," + str(label))
-                 
-                packetsFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(packetNumberArray[i]) + "," + str(None) + "," + str(label))
-                
-                bytesFile.write("\n" + timeInterval.left.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + timeInterval.right.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(None) + "," + str(bytesArray[i]) + "," + str(None) + "," + str(label))
-
+            labels.append(label)
             
             startTime = startTime + frequency
             records = records[sizes[0]:]
@@ -309,18 +247,34 @@ def findBestRocScore(silkFile, start, stop, systemId, frequency, interval, windo
         if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
             attackFlowArray.append(rec.stime)
         records.append(rec)
-    srcEntropyFile.close()
-    srcEntropyRateFile.close()
-    dstEntropyFile.close()
-    dstEntropyRateFile.close()
-    flowEntropyFile.close()
-    flowEntropyRateFile.close()
-    flowFile.close()
-    icmpRatioFile.close()
-    icmpPacketsFile.close()
-    packetSizeEntropyFile.close()
-    packetSizeEntropyRateFile.close()
-    packetsFile.close()
-    bytesFile.close()
-
     infile.close()
+
+    ipSrcArray = np.array(ipSrcArray)
+    ipSrcRateArray = np.array(ipSrcRateArray)
+    ipDstArray = np.array(ipDstArray)
+    ipDstRateArray = np.array(ipDstRateArray)
+    flowArray = np.array(flowArray)
+    flowRateArray = np.array(flowRateArray)
+    packetSizeArray = np.array(packetSizeArray)
+    packetSizeRateArray = np.array(packetSizeRateArray)
+    for windowSize in windowSizes:
+        for a in range(len(alphas)):
+            alpha = alphas[a]
+            calculations = open(str(q) + "/alpha."+ str(alpha)+ ".windowSize."+ str(windowSize)+ "."+ str(int(frequency.total_seconds()))+ "secFrequency." +str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+            
+            #Write the column titles to the files
+            calculations.write("dstEntropy,dstEntropyRate,srcEntropy,srcEntropyRate,flowEntropy,flowEntropyRate,numberOfFlows,icmpRatio,icmpPackets,packetSizeEntropy,packetSizeEntropyRate,numberOfPackets,numberOfBytes,real_label")
+            for i in range(len(labels)):
+                if i >=windowSize:
+                    calculations.write("\n" + str(abs(ipSrcArray[i,a] - np.nanmean(ipSrcArray[i-windowSize: i-1,a]))) + "," + str(abs(ipSrcRateArray[i,a] - np.nanmean(ipSrcRateArray[i-windowSize: i-1,a]))) 
+                                + "," + str(abs(ipDstArray[i,a] - np.nanmean(ipDstArray[i-windowSize: i-1,a]))) + "," + str(abs(ipDstRateArray[i,a] - np.nanmean(ipDstRateArray[i-windowSize: i-1,a]))) + "," + str(abs(flowArray[i,a] - np.nanmean(flowArray[i-windowSize: i-1,a]))) 
+                                + "," + str(abs(flowRateArray[i,a] - np.nanmean(flowRateArray[i-windowSize: i-1,a]))) + "," + str(abs(numberOfFlows[i] - np.nanmean(numberOfFlows[i-windowSize: i-1]))) + "," + str(abs(icmpRatioArray[i] - np.nanmean(icmpRatioArray[i-windowSize: i-1]))) 
+                                + "," + str(abs(icmpPacketsArray[i] - np.nanmean(icmpPacketsArray[i-windowSize: i-1])))+ "," + str(abs(packetSizeArray[i,a] - np.nanmean(packetSizeArray[i-windowSize: i-1,a]))) + "," + str(abs(packetSizeRateArray[i,a] - np.nanmean(packetSizeRateArray[i-windowSize: i-1,a])))
+                                + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(labels[i]))
+
+                else:
+                    calculations.write("\n" +  str(None) + "," + str(None) + ","+str(None) + ","+str(None) + ","+str(None) + ","+str(None) + ","+str(None) + ","+str(None) + "," + str(None) + ","+str(None) + ","+str(None) + ","+str(None) + ","+str(None) + ","+ str(labels[i]))
+                    
+               
+
+        calculations.close()

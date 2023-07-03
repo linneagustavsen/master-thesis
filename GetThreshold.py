@@ -30,9 +30,9 @@ def getThreshold(y_field, systemId, interval, dataType, dataSet, attackDate):
         q = decisionPath /'Attack1703'
 
     if interval != 0:
-        thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
+        thresholdFile = str(q) + "/MinMax/MaxTPR."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
     else:
-        thresholdFile = str(q) + "/MinMax/MaxF1."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
+        thresholdFile = str(q) + "/MinMax/MaxTPR."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
     
     data = pd.read_csv(thresholdFile)
     systemIds = data["SystemId"].values
@@ -69,9 +69,9 @@ def getThreshold(y_field, systemId, interval, dataType, dataSet, attackDate):
         
 
         if interval != 0:
-            thresholdFileTelemetry = str(telemetryPath) + "/MinMax/MaxF1."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
+            thresholdFileTelemetry = str(telemetryPath) + "/MinMax/MaxTPR."+ str(y_field) +"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(thresholdDate)+ ".csv"
         else:
-            thresholdFileTelemetry = str(telemetryPath) + "/MinMax/MaxF1."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
+            thresholdFileTelemetry = str(telemetryPath) + "/MinMax/MaxTPR."+ str(y_field) +".attack."+str(thresholdDate)+ ".csv"
         if not Path(thresholdFileTelemetry).exists():
             print("There is no telemetry file for this field")
             return mean(thresholds)

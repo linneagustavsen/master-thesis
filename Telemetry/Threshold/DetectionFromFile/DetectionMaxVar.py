@@ -50,7 +50,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, weight, attackDate)
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -106,7 +106,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, weight, attackDate)
         deviation = deviations[i]
         
         if deviation > threshold:
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             alert = {
                 "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "eTime": eTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -116,7 +116,7 @@ def detectionMaxVar(start, stop, systemId, field, threshold, weight, attackDate)
                 "Attack_type": "Flooding",
                 "Weight": weight
             }
-            mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
         if deviation > threshold and attack:
             truePositives += 1

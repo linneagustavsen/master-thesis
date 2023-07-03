@@ -58,7 +58,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
     mqtt_client.on_publish = on_publish
     mqtt_client.on_connect = on_connect
     mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
-    mqtt_client.loop_start()
+    #mqtt_client.loop_start()
 
     if attackDate == "08.03.23":
         fileString = "0803"
@@ -142,7 +142,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
             change_ingress = bytesArray_ingress[i] - np.nanmean(bytesArray_ingress[i-windowSize: i-1])
             change_egress = bytesArray_egress[i] - np.nanmean(bytesArray_egress[i-windowSize: i-1])
             
-            simulateRealTime(datetime.now(), eTime[i], attackDate)
+            #simulateRealTime(datetime.now(), eTime[i], attackDate)
             if abs(change_ingress) > thresholdBytes_ingress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -153,7 +153,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
                     "Attack_type": "Flooding",
                     "Weight": weight_ingress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
             if abs(change_egress) > thresholdBytes_egress:
                 alert = {
                     "sTime": sTime[i].strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -164,7 +164,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
                     "Attack_type": "Flooding",
                     "Weight": weight_egress
                 }
-                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+                #mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
 
             if abs(change_ingress) > thresholdBytes_ingress and attack:
                 truePositives_ingress += 1
@@ -229,7 +229,7 @@ def detectionBytesTelemetry(start, stop, systemId, frequency, interval, windowSi
     scores_ingress.write("\n"+ str(truePositives_ingress)+ "," + str(falsePositives_ingress)+ "," + str(falseNegatives_ingress)+ "," + str(trueNegatives_ingress))
     scores_ingress.close()
 
-    scores_egress = open(str(r) + "/Scores.NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    scores_egress = open(str(r) + "/Scores.NumberOfBytes_egress."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
     scores_egress.write("TP,FP,FN,TN")
