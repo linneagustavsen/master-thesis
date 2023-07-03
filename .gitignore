@@ -12,6 +12,7 @@ Calculations/*
 FindBestRocScore/Calculations/Entropy/NetFlow/*.csv
 *.npy
 ThresholdDecision/Entropy/NetFlow/Attack*/*.csv
+ThresholdDecision/Entropy/Telemetry/*.json
 ThresholdDecision/Threshold/NetFlow/Attack*/*.csv
 ThresholdDecision/TopKFlows/NetFlow/Attack*/*.csv
 ThresholdDecision/Entropy/Telemetry/Attack*/*.csv
