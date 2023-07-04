@@ -15,26 +15,26 @@ import numpy as np
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+def makeDataSetNetFlowFields(silkFile, start, stop, path, systemId, attackDate):
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["srcIP","dstIP","srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "nestHopIP", "label"]   
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q)+ "/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    sTime, eTime, measurements = structureData(df)
-    data = np.empty((len(sTime),len(columTitles)))
+    fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(fieldsFile).exists():
+        print("Cant find", fieldsFile)
+        #If the systemId == ifi2-gw you have to make an empty numpy array of shape 14 319 852 rows and 20 columns and set sTime and eTime to 0 and save sTime in a separate numpy array
+        data = getDataNetFlow(silkFile, startTime, stopTime)
 
-    for i in range(len(sTime)):
-        curMeasurements = np.concatenate((measurements[i][:-1], measurements[i][-1]), axis=None)
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, data)
 
-        data[i] = curMeasurements
-    dataSet = pd.DataFrame(data, columns=columTitles)
-    
-    return dataSet
+        if len(data) <2:
+            return []
+    #return data
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -46,21 +46,23 @@ def makeDataSetNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNoIPNetFlowFields(silkFile, start, stop, systemId, path, attackDate):
+def makeDataSetNoIPNetFlowFields(silkFile, start, stop, path, systemId, attackDate):  
+    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["srcPort","dstPort","protocol","packets","bytes","fin","syn","rst","psh","ack","urg","ece","cwr","duration", "label"]    
-    df = getDataNetFlow(silkFile, start, stop)
-    df.to_pickle(str(q) + "/NoIP"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q) + "/NoIP"+path+"."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    sTime, eTime, measurements = structureData(df)
-    data = np.empty((len(sTime),len(columTitles)))
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    for i in range(len(sTime)):
-        curMeasurements = np.concatenate((measurements[i][2:-2], measurements[i][-1]), axis=None)
+    fieldsFile = str(q) +"/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(fieldsFile).exists():
+        print("Cant find", fieldsFile)
+        data = getDataNetFlow(silkFile, startTime, stopTime)
+        
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Fields.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, data)
 
-        data[i] = curMeasurements
-    dataSet = pd.DataFrame(data, columns=columTitles)
-    return dataSet
+        if len(data) <2:
+            return []
+    
+    #return data

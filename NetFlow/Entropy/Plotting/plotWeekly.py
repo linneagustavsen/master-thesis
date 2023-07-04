@@ -88,9 +88,9 @@ def makePlot(jsonFile, y_field, y_fieldName, path):
     axs.set_xlabel('Time')
     axs.set_ylabel(y_fieldName)
     axs.tick_params(axis='both', which='major', labelsize=12)
-    axs.legend()
+    fig.legend()
     fig.tight_layout()
-    fig.savefig(path+y_field+".png", dpi=300)
+    fig.savefig(path+y_field+".pdf", dpi=300)
     fig.show()
     
 '''makePlot('NetFlow/Entropy/Calculations/dip_rate.300.json', 'dstEntropyRate','Entropy rate of destination IP', 'Plots/Entropy/WeeklyComparison.300.')

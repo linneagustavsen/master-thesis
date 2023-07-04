@@ -104,8 +104,8 @@ def detection(silkFile, start, stop, systemId, frequency, interval, windowSize, 
 
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
+        if rec.etime > stopTime + frequency:
+            continue
         if rec.stime < startTime:
             continue
         #Implement the sliding window

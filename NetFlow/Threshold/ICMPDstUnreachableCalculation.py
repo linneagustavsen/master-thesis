@@ -43,8 +43,8 @@ def icmpDstUnreachableCalculation(silkFile, start, stop, systemId, frequency, in
     sizes = []
    
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
+        if rec.etime > stopTime + frequency:
+            continue
         if rec.stime < startTime:
             continue
         #Implement the sliding window

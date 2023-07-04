@@ -43,7 +43,7 @@ def makePlot(jsonFile, y_field, y_fieldName, path, interval):
  
                     
     #print(x_values)    
-    fig, axs = plt.subplots(1, 1, figsize=(20, 5))
+    fig, axs = plt.subplots(1, 1, figsize=(20, 7))
 
     #print(x_values)
     for i, y_week in enumerate(y_values):
@@ -54,14 +54,14 @@ def makePlot(jsonFile, y_field, y_fieldName, path, interval):
         minor_locator=mdates.HourLocator((0, 12)),
         minor_formatter=mdates.DateFormatter("%H"),
     )
-    axs.set_title(y_fieldName)
-    axs.set_xlabel('Time')
-    axs.set_ylabel(y_fieldName)
-    axs.tick_params(axis='both', which='major', labelsize=12)
-    axs.legend()
+    axs.set_title(y_fieldName, fontsize=20)
+    axs.set_xlabel('Time', fontsize=20)
+    axs.set_ylabel(y_fieldName, fontsize=20)
+    axs.tick_params(axis='both', which='major', labelsize=15)
+    fig.legend(fontsize=17)
     fig.tight_layout()
-    fig.savefig(path+y_field+".png", dpi=300)
-    plt.close()
+    fig.savefig(path+y_field+".pdf", dpi=300)
+    plt.close(fig)
 
 
 files = ["sip","sip_rate","dip", "dip_rate","flow", "f_rate","nf", "icmp_ratio", "icmp_packets", "packet_size", "packet_size_r", "packets", "bytes"]
@@ -71,6 +71,9 @@ y_field_names = ["Entropy of source IP flows", "Entropy rate of source IP flows"
                  "Entropy rate of destination IP flows", "Entropy of bi-directional flows", "Entropy rate of bi-directional flows", 
                  "Number of bi-directional flows", "ICMP ratio", "Number of ICMP packets", "Entropy of packet size", "Entropy rate of packet size",
                  "Number of packets", "Number of bytes"]
+files = ["nf", "icmp_ratio"]
+y_fields = ["numberOfFlows", "icmpRatio"]
+y_field_names = ["Number of bi-directional flows", "ICMP ratio"]
 counter1 = 0
 for file in files:
     makePlot(file, y_fields[counter1], y_field_names[counter1], 'Plots/Entropy/ImprovedWeeklyComparison.600.', timedelta(minutes = 10))

@@ -1,9 +1,16 @@
 from datetime import datetime,timedelta
 from pathlib import Path
 import numpy as np
+from HelperFunctions.IsAttack import isAttack
 from HelperFunctionsTelemetry.GetDataTelemetry import *
 from HelperFunctions.GeneralizedEntropy import *
 from HelperFunctions.Distributions import *
+import json
+import paho.mqtt.client as mqtt
+from time import sleep
+from random import randrange
+
+from HelperFunctions.Normalization import normalization
 
 '''
     Calculates entropy, packet and byte count and alerts in case of an anomaly
@@ -16,35 +23,78 @@ from HelperFunctions.Distributions import *
             windowSize:             int, represents a multiplier of frequency, how far back we want to compare the value with
             thresholdEntropy:       float, values over this threshold will cause an alert
             thresholdEntropyRate:   float, values over this threshold will cause an alert
-            thresholdPackets:       float, values over this threshold will cause an alert
-            thresholdBytes:         float, values over this threshold will cause an alert
             attackDate:             string, date of the attack the calculations are made on
 '''
-def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, thresholdPackets, thresholdBytes, attackDate):
+def detectionEntropyTelemetry(start, stop, systemId, interval, frequency, windowSize, thresholdEntropy, thresholdEntropyRate, attackDate):
     p = Path('Detections')
     q = p / 'Entropy' / 'Telemetry'
     if not q.exists():
         q.mkdir(parents=True)
-    r = p / 'Threshold' / 'Telemetry'
-    if not r.exists():
-        r.mkdir(parents=True)
+
     #Open file to write alerts to
-    f = open(str(q) + "EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_rate = open(str(q) + "EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_pkts = open(str(r) + "NumberOfPackets."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
-    f_bytes = open(str(r) + "NumberOfBytes."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf = open(str(q) + "/TP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TPf_rate = open(str(q) + "/TP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
 
     #Write the column titles to the files
-    f.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    f_rate.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    f_pkts.write("Time,Change,Value,Mean_last_"+ str(windowSize))
-    f_bytes.write("Time,Change,Value,Mean_last_"+ str(windowSize))
+    TPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FPf = open(str(q) + "/FP.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FPf_rate = open(str(q) + "/FP.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FPf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FPf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    FNf = open(str(q) + "/FN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    FNf_rate = open(str(q) + "/FN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    FNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    FNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    #Open file to write alerts to
+    TNf = open(str(q) + "/TN.EntropyPacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+    TNf_rate = open(str(q) + "/TN.EntropyRatePacketSize."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
+
+    #Write the column titles to the files
+    TNf.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+    TNf_rate.write("sTime,eTime,Deviation_score,Change,Value,Mean_last_"+ str(windowSize))
+
+    json_file = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin = json.load(json_file)
+    json_file_rate = open("Telemetry/Entropy/Calculations/MinMaxValues/MinMax.packet_size_rate."+ str(int(interval.total_seconds())) +".json", "r")
+    maxmin_rate = json.load(json_file_rate)
+   
+    #Parameters for the MQTT connection
+    MQTT_BROKER = 'localhost'
+    MQTT_PORT = 1883
+    MQTT_USER = 'entropyDetectionTelemetry'
+    MQTT_PASSWORD = 'entropyDetectionPass'
+    MQTT_TOPIC = 'detections/modules/telemetry'
+
+    #Function that is called when the sensor is connected to the MQTT broker
+    def on_connect(client, userdata, flags, rc):
+        s=0
+        #print(systemId, "Connected with result code "+str(rc))
+
+    #Function that is called when the sensor publish something to a MQTT topic
+    def on_publish(client, userdata, result):
+        print("Entropy detection published to topic", MQTT_TOPIC)
+
+    #Connects to the MQTT broker with password and username
+    mqtt_client = mqtt.Client("EntropyDetectionTelemetry")
+    #mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_connect = on_connect
+    mqtt_client.connect(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.loop_start()
 
     #Instantiate empty arrays for the calculated values
     packetSizeArray = []
     packetSizeRateArray = []
-    packetNumberArray = []
-    bytesArray = []
 
     #Makes datetime objects of the input times
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
@@ -56,12 +106,10 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
     for i in range(math.ceil(intervalTime)):
         stopTime = startTime + interval
         #Get data for a specified time interval
-        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
+        df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, ["egress_stats__if_1sec_octets","egress_stats__if_1sec_pkts"])
         if df.empty:
             packetSizeArray.append(np.nan)
             packetSizeRateArray.append(np.nan)
-            packetNumberArray.append(np.nan)
-            bytesArray.append(np.nan)
             startTime = startTime + frequency
             continue
         dfEgressBytes = df["egress_stats__if_1sec_octets"].to_numpy()
@@ -71,74 +119,103 @@ def detectionEntropyTelemetry(start, stop, systemId, if_name, interval, frequenc
         if len(dfEgressBytes) < 10 or len(dfEgressPackets) < 10:
             packetSizeArray.append(np.nan)
             packetSizeRateArray.append(np.nan)
-            packetNumberArray.append(np.nan)
-            bytesArray.append(np.nan)
             startTime = startTime + frequency
             continue
 
         #Find the probability distribution based on how big the packets are this time interval
-        PiPS,nps = packetSizeDistribution(dfEgressBytes, dfEgressPackets)
+        PiPS,nps,packetSizeDistributionDict = packetSizeDistributionDetection(dfEgressBytes, dfEgressPackets)
         #Calculate the generalized entropy of this distribution
         entropyPacketSize = generalizedEntropy(10, PiPS)
         packetSizeArray.append(entropyPacketSize)
         #Calculate the generalized entropy rate of this distribution
         packetSizeRateArray.append(entropyPacketSize/nps)
 
-        #Store the number of packets and bytes this time interval
-        packetNumberArray.append(sum(dfEgressPackets))
-        bytesArray.append(sum(dfEgressBytes))
-
         #If there is not enough stored values to compare with we skip the detection
         if i < windowSize:
             #Push the start time by the specified frequency
             startTime = startTime + frequency
             continue
-        
+        attack = isAttack(stopTime- frequency, stopTime)
         #Compare the difference of each metric with a threshold
         if packetSizeArray !=  np.nan:
-            if abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])) > thresholdEntropy:
-                f.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1]))) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1])))
-
+            change = packetSizeArray[i] - np.nanmean(packetSizeArray[i-windowSize: i-1])
+            if change < 0:
+                attackType = "Same protocol"
+            else:
+                attackType = "Different protocols"
+            if abs(change) > thresholdEntropy:
+                alert = {
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change), maxmin["minimum"], maxmin["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict,
+                    '''"Change": abs(change),
+                    "Value": packetSizeArray[i],
+                    "Mean_last_10": np.nanmean(packetSizeArray[i-windowSize: i-1]),'''
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change), maxmin["minimum"], maxmin["maximum"])) + ","+ str(abs(change)) + "," + str(packetSizeArray[i]) + "," + str(np.nanmean(packetSizeArray[i-windowSize: i-1]))
+            if abs(change) > thresholdEntropy and attack:
+                TPf.write(line)
+            elif abs(change) > thresholdEntropy and not attack:
+                FPf.write(line)
+            elif abs(change) <= thresholdEntropy and attack:
+                FNf.write(line)
+            elif abs(change) <= thresholdEntropy and not attack:
+                TNf.write(line)
+        else:
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNf.write(line)
+            elif not attack:
+                TNf.write(line)
         if packetSizeRateArray !=  np.nan:
-            if abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])) > thresholdEntropyRate:
-                f_rate.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1]))) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1])))
-
-        if packetNumberArray !=  np.nan:
-            if abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1])) > thresholdPackets:
-                f_pkts.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(packetNumberArray[i] - np.nanmean(packetNumberArray[i-windowSize: i-1]))) + "," + str(packetNumberArray[i]) + "," + str(np.nanmean(packetNumberArray[i-windowSize: i-1])))
-
-        if bytesArray !=  np.nan:
-            if abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1])) > thresholdBytes:
-                f_bytes.write("\n" + stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(bytesArray[i] - np.nanmean(bytesArray[i-windowSize: i-1]))) + "," + str(bytesArray[i]) + "," + str(np.nanmean(bytesArray[i-windowSize: i-1])))
-
-        '''
-        #CHATGPT VERSION
-        # Define a list of tuples where each tuple contains the array, threshold value,
-        # and the file object to write the output to.
-        data = [
-            (packetSizeArray, thresholdEntropy, f),
-            (packetSizeRateArray, thresholdEntropyRate, f_rate),
-            (packetNumberArray, thresholdPackets, f_pkts),
-            (bytesArray, thresholdBytes, f_bytes)
-        ]
-
-        # Loop through the list of tuples and process each array accordingly.
-        for arr, threshold, file_obj in data:
-            if arr is not None and not np.isnan(arr):
-                if abs(arr[i] - np.nanmean(arr[i-windowSize:i-1])) > threshold:
-                    file_obj.write("\n" + startTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(abs(arr[i] - np.nanmean(arr[i-windowSize:i-1]))) + "," + str(arr[i]) + "," + str(np.nanmean(arr[i-windowSize:i-1])))
-
-        '''
-
+            change_r = packetSizeRateArray[i] - np.nanmean(packetSizeRateArray[i-windowSize: i-1])
+            if abs(change_r) > thresholdEntropyRate:
+                alert = {
+                    "sTime": (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "eTime": stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "Gateway": systemId,
+                    "Deviation_score": normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"]),
+                    "Packet_size_distribution": packetSizeDistributionDict,
+                    '''"Change": abs(change_r),
+                    "Value": packetSizeRateArray[i],
+                    "Mean_last_10": np.nanmean(packetSizeRateArray[i-windowSize: i-1]),'''
+                    "Real_label": int(attack),
+                    "Attack_type": attackType
+                }
+                mqtt_client.publish(MQTT_TOPIC,json.dumps(alert))
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(normalization(abs(change_r), maxmin_rate["minimum"], maxmin_rate["maximum"])) + ","+ str(abs(change_r)) + "," + str(packetSizeRateArray[i]) + "," + str(np.nanmean(packetSizeRateArray[i-windowSize: i-1]))
+            if abs(change) > thresholdEntropyRate and attack:
+                TPf_rate.write(line)
+            elif abs(change) > thresholdEntropyRate and not attack:
+                FPf_rate.write(line)
+            elif abs(change) <= thresholdEntropyRate and attack:
+                FNf_rate.write(line)
+            elif abs(change) <= thresholdEntropyRate and not attack:
+                TNf_rate.write(line)
+        else:
+            line = "\n" + (stopTime- frequency).strftime("%Y-%m-%dT%H:%M:%SZ") + "," +  stopTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+            if attack:
+                FNf_rate.write(line)
+            elif not attack:
+                TNf_rate.write(line)
         #Push the start time by the specified frequency
         startTime = startTime + frequency
 
-    f.close()
-    f_rate.close()
-    f_pkts.close()
-    f_bytes.close()
-
-'''start = "2022-09-21 01:00:00"
+    TPf.close()
+    FPf.close()
+    FNf.close()
+    TNf.close()
+    TPf_rate.close()
+    FPf_rate.close()
+    FNf_rate.close()
+    TNf_rate.close()
+'''
+start = "2022-09-21 01:00:00"
 stop = "2022-09-22 00:00:00"
 systemId = "trd-gw"
 if_name = "xe-0/1/0"

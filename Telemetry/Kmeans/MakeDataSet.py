@@ -20,27 +20,31 @@ from HelperFunctionsTelemetry.GetDataTelemetry import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset       
 '''
-def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate):
-    columTitles = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets","entropy_packet_size", "entropy_rate_packet_size"]
-    
-    fields = ["egress_queue_info__0__avg_buffer_occupancy", "egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets"]
-
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    df = getData(startTime.strftime("%Y-%m-%dT%H:%M:%SZ"), stopTime.strftime("%Y-%m-%dT%H:%M:%SZ"),systemId, if_name, fields)
-
+def makeDataSetKmeansTelemetry(start, stop, entropy_df, systemId, bucket, fields, attackDate):
+    columTitles = ["egress_queue_info__0__cur_buffer_occupancy", "egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
+    if systemId =="hoytek-gw2" or systemId == "narvik-gw4":
+        columTitles = ["egress_stats__if_1sec_pkts", "egress_stats__if_1sec_octets", "ingress_stats__if_1sec_pkts", "ingress_stats__if_1sec_octets","entropy_packet_size_ingress","entropy_rate_packet_size_ingress", "entropy_packet_size_egress", "entropy_rate_packet_size_egress"]
     p = Path('Telemetry')
-    q = p / 'Kmeans' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True)
-    df.to_pickle(str(q) +"/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #df = pd.read_pickle(str(q) +"/"+path+".attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    timeStamps, measurements = structureDataTelemetry(df)
+    dp = p / 'Kmeans' / 'DataSets'
 
-    entropy_df = getEntropyData(startTime, stopTime, systemId, if_name, interval, frequency)
-    entropy_df.to_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle(str(q) +"/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")  
-    entropy_timeStamps, entropy_measurements = structureDataTelemetry(entropy_df)
+    fieldsFile = str(dp) +"/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl"
+    if Path(fieldsFile).exists():
+        with open(str(fieldsFile), 'rb') as f:
+            df = pd.read_pickle(f)
+    else:
+        print("Cant find", fieldsFile)
+        df = getData(start.strftime("%Y-%m-%dT%H:%M:%SZ"), stop.strftime("%Y-%m-%dT%H:%M:%SZ"), bucket, systemId, fields)
+
+        if not dp.exists():
+            dp.mkdir(parents=True, exist_ok=False)
+        with open(str(dp) + "/Fields.attack."+str(attackDate)+ ".stopTime."+stop.strftime("%H.%M.%S")+ "."+str(systemId)+ ".pkl", 'wb') as f:
+            df.to_pickle(f)
+    if len(df) == 0:
+        return pd.DataFrame([])
+
+    timeStamps, measurements = structureDataTelemetry(df)
+    
+    entropy_intervals, entropy_measurements, labels = structureDataEntropy(entropy_df)
 
     data = np.empty((len(timeStamps),len(columTitles) ))
 
@@ -53,7 +57,9 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
     lastMinute = now.minute
     
     for i in range(len(timeStamps)):
-        timestamp = timeStamps[i]
+        timestamp = timeStamps[i].replace(tzinfo=None)
+        #timestamp = datetime.utcfromtimestamp(((timeStamps[i] - np.datetime64('1970-01-01T00:00:00'))/ np.timedelta64(1, 's')))
+        #timestamp = timeStamps[i]
         curYear = timestamp.year
         curMonth = timestamp.month
         curDay = timestamp.day
@@ -63,7 +69,10 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
         #Check if the current timestamp is the same as the last one
         #If so, do not search through the entropy timestamp array
         if not (lastYear == curYear and lastMonth == curMonth and lastDay == curDay and lastHour == curHour and lastMinute == curMinute):
-            indexArray = np.where(entropy_timeStamps == timestamp.strftime("%Y-%m-%d %H:%M"))
+            for entropy_interval in entropy_intervals:
+                if timestamp.replace(second = 0, microsecond = 0) in entropy_interval:
+                    indexArray = np.where(entropy_intervals == entropy_interval)
+            
             if len(indexArray[0]) == 0:
                 continue
             indexInTimeArray = indexArray[0][0]
@@ -74,11 +83,18 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
             lastMinute = curMinute
 
         #Find the corresponding entropy measurements for this timestamp            
-        entropyPacketSize = entropy_measurements[indexInTimeArray][0]
-        entropyRatePacketSize = entropy_measurements[indexInTimeArray][1]
-        curMeasurements = measurements[i]
+        entropyPacketSize_ingress = entropy_measurements[indexInTimeArray][0]
+        entropyRatePacketSize_ingress = entropy_measurements[indexInTimeArray][1]
+        entropyPacketSize_egress = entropy_measurements[indexInTimeArray][2]
+        entropyRatePacketSize_egress = entropy_measurements[indexInTimeArray][3]
+        curMeasurements = []
+        for field in columTitles[:-4]:
+            if (systemId == "hoytek-gw2" or systemId == "narvik-gw4") and field == "egress_queue_info__0__cur_buffer_occupancy":
+                continue
+            curMeasurements.append(df[field][i])
+        curMeasurements = np.array(curMeasurements)
 
-        newMeasurements = np.array([entropyPacketSize, entropyRatePacketSize])
+        newMeasurements = np.array([entropyPacketSize_ingress, entropyRatePacketSize_ingress, entropyPacketSize_egress, entropyRatePacketSize_egress])
 
         curMeasurements = np.concatenate((curMeasurements,newMeasurements), axis=None)
 
@@ -86,15 +102,3 @@ def makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequen
     
     dataSet = pd.DataFrame(data, columns=columTitles)
     return dataSet
-
-'''start = "2022-09-21 01:00:00"
-stop = "2022-09-22 00:00:00"
-systemId = "trd-gw"
-if_name = "xe-0/1/0"
-interval = timedelta(minutes = 5)
-frequency = timedelta(minutes = 1)
-path = "Testing"
-attackDate = "21.09"
-
-dataSet = makeDataSetKmeansTelemetry(systemId, if_name, start, stop, interval, frequency, path, attackDate)
-dataSet.to_pickle("Telemetry/Kmeans/Data/TestingSetCombined."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")'''

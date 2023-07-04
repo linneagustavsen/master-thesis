@@ -12,6 +12,12 @@ def structureDataTelemetry(df):
     measurements = df.values[:,1:]
     return timeStamps, measurements
 
+def structureDataTelemetryLabels(df):
+    timeStamps = df["_time"].to_numpy()
+    measurements = df.values[:,1:-1]
+    labels = df.values[:,-1]
+    return timeStamps, measurements, labels
+
 '''
     Structure data to separate the timestamps from the values
     Specific for SiLK NetFlow data
@@ -39,6 +45,20 @@ def structureData(df):
 '''
 def structureDataEntropy(df):
     timeStamps = df["time"].to_numpy()
-    measurements = df.values[:,1:]
-    return timeStamps, measurements
+    measurements = df.values[:,1:-1]
+    labels = df.values[:,-1]
+    return timeStamps, measurements, labels
 
+
+def structureDataNumpyArrays(npArray):
+    sTime = npArray[:,0]
+    eTime = npArray[:,1]
+    measurements = npArray[:,2:-1]
+    labels = npArray[:,-1]
+    return sTime, eTime, measurements, labels
+
+def structureDataEntropyNumpyArrays(npArray):
+    timeStamps = npArray[:, 0]
+    measurements = npArray[:,1:-1]
+    labels = npArray[:,-1]
+    return timeStamps, measurements, labels

@@ -1,10 +1,6 @@
 from pathlib import Path
-from HelperFunctions.GetData import *
-from datetime import datetime
-import pandas as pd
-from HelperFunctions.StructureData import *
+from HelperFunctions.GetData import getEntropyDataNetFlow
 import numpy as np
-from HelperFunctions.IsAttack import *
 
 '''
     Make a dataset to use for either training or testing a Random Forest classifier
@@ -18,24 +14,20 @@ from HelperFunctions.IsAttack import *
             attackDate: string, date of the attack the calculations are made on
     Output: dataSet:    pandas dataframe, contains the dataset         
 '''
-def makeDataSetNetFlowEntropy(silkFile, start, stop, systemId, frequency, interval, path, attackDate):
+def makeDataSetNetFlowEntropy(silkFile, start, stop, frequency, interval, path, systemId, attackDate):
     p = Path('NetFlow')
-    q = p / 'RandomForest' / 'RawData'
-    if not q.exists():
-        q.mkdir(parents=True, exist_ok=False)
-    columTitles = ["entropy_ip_source","entropy_rate_ip_source","entropy_ip_destination","entropy_rate_ip_destination","entropy_flow","entropy_rate_flow","number_of_flows","icmp_ratio","number_of_icmp_packets","packet_size_entropy","packet_size_entropy_rate","number_of_packets","number_of_bytes", "label"]   
+    q = p /'RandomForest'/ 'DataSets' / str(path) 
 
-    entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
-    entropy_df.to_pickle(str(q) + "/"+path+".Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")
-    #entropy_df = pd.read_pickle(str(q) + "/"+path+"Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".pkl")   
-    entropy_timeStamps, entropy_measurements = structureDataEntropy(entropy_df)
-    entropy_timeStamps = pd.to_datetime(entropy_timeStamps)
-    
-    data = np.empty((len(entropy_timeStamps),len(columTitles)))
-    
-    for i in range(len(entropy_timeStamps)):
-        curMeasurements = np.concatenate((entropy_measurements[i],isAttack(entropy_timeStamps[i]- frequency, entropy_timeStamps[i])), axis=None)
+    entropyFile = str(q) +"/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy"
+    if not Path(entropyFile).exists():
+        print("Cant find", entropyFile)
+        entropy_df = getEntropyDataNetFlow(silkFile, start, stop, frequency, interval)
 
-        data[i] = curMeasurements
-    dataSet = pd.DataFrame(data, columns=columTitles)
-    return dataSet
+        if not q.exists():
+            q.mkdir(parents=True, exist_ok=False)
+        with open(str(q) + "/Entropy."+ str(int(interval.total_seconds())) +"secInterval.attack."+str(attackDate)+ "."+str(systemId)+ ".npy", 'wb') as f:
+            np.save(f, entropy_df)
+
+        if len(entropy_df) <2:
+            return []
+    

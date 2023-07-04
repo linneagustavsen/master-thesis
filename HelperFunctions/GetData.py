@@ -1,3 +1,4 @@
+import numpy as np
 from .Distributions import *
 from .GeneralizedEntropy import *
 import pandas as pd
@@ -16,80 +17,59 @@ from .IsAttack import *
 '''
 def getDataNetFlow(silkFile, start, stop):
     infile = silkfile_open(silkFile, READ)
-    startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-    stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
-    sIP=[]
-    dIP=[]
-    sPort=[]
-    dPort=[]
-    protocol=[]
-    packets=[]
-    flowBytes=[]
-    fin=[]
-    syn=[]
-    rst=[]
-    psh=[]
-    ack=[]
-    urg=[]
-    ece=[]
-    cwr=[]
-    sTime=[]
-    duration=[]
-    eTime=[]
-    nhIP=[]
-    label=[]
+    print(start,stop)
 
-
+    data = []
+    i = 0
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
-        if rec.stime < startTime:
+        if rec.etime > stop:
             continue
-        sIP.append(int(rec.sip))
-        dIP.append(int(rec.dip))
-        sPort.append(rec.sport)
-        dPort.append(rec.dport)
-        protocol.append(rec.protocol)
-        packets.append(rec.packets)
-        flowBytes.append(rec.bytes)
-        fin.append(int(rec.tcpflags.fin))
-        syn.append(int(rec.tcpflags.syn))
-        rst.append(int(rec.tcpflags.rst))
-        psh.append(int(rec.tcpflags.psh))
-        ack.append(int(rec.tcpflags.ack))
-        urg.append(int(rec.tcpflags.urg))
-        ece.append(int(rec.tcpflags.ece))
-        cwr.append(int(rec.tcpflags.cwr))
-        sTime.append(rec.stime)
-        duration.append(rec.duration_secs)
-        eTime.append(rec.etime)
-        nhIP.append(int(rec.nhip))
-        label.append(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime)))
+        if rec.stime < start:
+            continue
 
-    data= pd.DataFrame(
-    {"sTime": sTime,
-     "eTime": eTime,
-     "srcIP": sIP,
-     "dstIP": dIP,
-     "srcPort": sPort,
-     "dstPort": dPort,
-     "protocol": protocol,
-     "packets": packets,
-     "bytes": flowBytes,
-     "fin": fin,
-     "syn": syn,
-     "rst": rst,
-     "psh": psh,
-     "ack": ack,
-     "urg": urg,
-     "ece": ece,
-     "cwr": cwr,
-     "duration": duration,
-     "nestHopIP": nhIP,
-     "label": label
-    })
+        data.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                            int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration_secs, int(rec.nhip), 
+                            int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))])
+        if i % 1000000 == 0:
+            print("i")
+            print(i)
+            print(rec.stime)
+            print("\n")
+        i+=1
+    data = np.array(data)
+    print(len(data))
     return data
 
+'''
+    Get data from an raw SiLK file of NetFlow records
+    Input:  
+            silkFile:   string, path to the raw SiLK file sorted on time
+            start:      datetime object, indicating the start time of the data wanted
+            stop:       datetime object, indicating the stop time of the data wanted
+    Output: 
+            df:         pandas dataframe, dataframe containing the data from the SiLK file 
+'''
+def getDataNetFlowNoIP(silkFile, start, stop):
+    infile = silkfile_open(silkFile, READ)
+    print(start,stop)
+
+    data = []
+    i = 0
+    for rec in infile:
+        if rec.etime > stop:
+            continue
+        if rec.stime < start:
+            continue
+
+        data.append([rec.stime, rec.etime, rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                            int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration_secs, 
+                            int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))])
+        i+=1
+    data = np.array(data)
+    print(len(data))
+    return data
 '''
     Get data from an raw SiLK file of NetFlow records
     Use the data to calculate the entropy and entropy rate of packet size
@@ -107,43 +87,29 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
     windowTime = startTime
+    starting = startTime
+    pushed = False
     # Open a silk flow file for reading
     infile = silkfile_open(silkFile, READ)
 
     #Instantiate empty arrays for the calculated values
     records = []
-    
-    ipSrcArray = []
-    ipSrcRateArray = []
-
-    ipDstArray = []
-    ipDstRateArray = []
-
-    flowArray = []
-    flowRateArray = []
-
-    numberOfFlows = []
-
-    icmpRatioArray = []
-    icmpPacketsArray = []
-
-    packetSizeArray = []
-    packetSizeRateArray = []
-
-    packetNumberArray = []
-    bytesArray = []
-
-    timeArray = []
     #Instantiate variables
     sizes = []
 
+    data = []
+    attackFlows = []
+    print(start, stop)
+    counter = 0
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
+        if rec.etime > stopTime:
+            continue
         if rec.stime < startTime:
             continue
-
+        if rec.stime >= starting and not pushed:
+            startTime = rec.stime.replace(microsecond = 0, second = 0)
+            pushed = True
         #Implement the sliding window
         if rec.stime > windowTime + frequency:
             lastSizes  = sum(sizes)
@@ -161,69 +127,47 @@ def getEntropyDataNetFlow(silkFile, start, stop, frequency, interval):
             PiSIP, ns = ipSourceDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropySip = generalizedEntropy(10,PiSIP)
-            ipSrcArray.append(entropySip)
-            #Calculate the generalized entropy rate of this distribution
-            ipSrcRateArray.append(entropySip/ns)
 
             #Find the probability distribution based on how many packets there is in each destination flow in this time interval
             PiDIP, nd = ipDestinationDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropyDip = generalizedEntropy(10,PiDIP)
-            ipDstArray.append(entropyDip)
-            #Calculate the generalized entropy rate of this distribution
-            ipDstRateArray.append(entropyDip/nd)
             
             #Find the probability distribution based on how many packets there is in each bi-directional flow in this time interval
             PiF, nf = flowDistribution(records)
             #Calculate the generalized entropy of this distribution
             entropyFlow = generalizedEntropy(10, PiF)
-            flowArray.append(entropyFlow)
-            #Calculate the generalized entropy rate of this distribution
-            flowRateArray.append(entropyFlow/nf)
-
-            #Store the number of bi-directional flows in this time interval
-            numberOfFlows.append(nf)
 
             #Find the ratio of ICMP packets in this time interval
             icmpRatio, icmpPackets = icmpDistribution(records)
-            icmpRatioArray.append(icmpRatio)
-            icmpPacketsArray.append(icmpPackets)
 
             #Find the probability distribution based on how big the packets are this time interval
             PiPS,nps = packetSizeDistributionNetFlow(records)
             #Calculate the generalized entropy of this distribution
             entropyPacketSize = generalizedEntropy(10, PiPS)
-            packetSizeArray.append(entropyPacketSize)
-            #Calculate the generalized entropy rate of this distribution
-            packetSizeRateArray.append(entropyPacketSize/nps)
+            if counter == 0:
+                timeInterval = pd.Interval(pd.Timestamp(startTime), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="both")
+            else:
+                timeInterval = pd.Interval(pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0) - frequency), pd.Timestamp(rec.stime.replace(microsecond = 0, second = 0)), closed="right")
+            label = 0
+            for timestamp in attackFlows:
+                if timestamp in timeInterval:
+                    label = 1
+            
+            data.append([timeInterval, entropySip, entropySip/ns, entropyDip, entropyDip/nd, entropyFlow, 
+                                entropyFlow/nf, nf, icmpRatio, icmpPackets, entropyPacketSize, entropyPacketSize/nps, 
+                                numberOfPackets(records), numberOfBytes(records), label])
 
-            #Store the number of packets and bytes this time interval
-            packetNumberArray.append(numberOfPackets(records))
-            bytesArray.append(numberOfBytes(records))
-
-            timeArray.append(startTime.strftime("%Y-%m-%d %H:%M"))
             #Push the sliding window
             startTime = startTime + frequency
             records = records[sizes[0]:]
             sizes.pop(0)
-
+            counter += 1
         records.append(rec)
-        
-    entropy = pd.DataFrame(
-    {"time": timeArray,
-     "entropy_ip_source": ipSrcArray,
-     "entropy_rate_ip_source": ipSrcRateArray,
-     "entropy_ip_destination": ipDstArray,
-     "entropy_rate_ip_destination": ipDstRateArray,
-     "entropy_flow": flowArray,
-     "entropy_rate_flow": flowRateArray,
-     "number_of_flows": numberOfFlows,
-     "icmp_ratio": icmpRatioArray,
-     "number_of_icmp_packets": icmpPacketsArray,
-     "packet_size_entropy": packetSizeArray,
-     "packet_size_entropy_rate": packetSizeRateArray,
-     "number_of_packets": packetNumberArray,
-     "number_of_bytes": bytesArray
-    })
+        #Check if it is an attack flow
+        if isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime):
+            attackFlows.append(rec.stime)
 
-    return entropy
+    data = np.array(data)
+    print(len(data))
+    return data

@@ -17,10 +17,10 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
     if not q.exists():
         q.mkdir(parents=True)
     #Open file to write alerts to
-    #Open file to write alerts to
     calculations = open(str(q) + "/SYN.attack."+str(attackDate)+ "."+str(systemId)+ ".csv", "a")
     #Write the column titles to the files
-    calculations.write("sTime,eTime,synPacketsPerFlow,srcPort,dstPort,real_label")
+    #calculations.write("sTime,eTime,synPacketsPerFlow,srcPort,dstPort,real_label")
+    calculations.write("sTime,eTime,synPacketsPerFlow,real_label")
     startTime = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
     stopTime = datetime.strptime(stop, '%Y-%m-%d %H:%M:%S')
 
@@ -35,13 +35,14 @@ def synCalculation(silkFile, start, stop, systemId, attackDate):
 
     #Loop through all the flow records
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
+        if rec.etime > stopTime:
+            continue
         if rec.stime < startTime:
             continue
         synPacketsPerFlow.append(rec.packets)
 
         if rec.packets >= 2:
-            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i])+ ","+ str(rec.sport)+ ","+ str(rec.dport)+  "," + str(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))))
+            '''calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i])+ ","+ str(rec.sport)+ ","+ str(rec.dport)+  "," + str(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))))'''
+            calculations.write("\n" + rec.stime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + rec.etime.strftime("%Y-%m-%dT%H:%M:%SZ") + "," + str(synPacketsPerFlow[i])+  "," + str(int(isAttackFlow(rec.sip, rec.dip, rec.stime, rec.etime))))
         i += 1
     infile.close()

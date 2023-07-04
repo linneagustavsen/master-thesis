@@ -1,22 +1,37 @@
 from datetime import timedelta
 from silk import *
 from .AttackTimestamps import attackTimestamps
-googleeu_mp = IPv4Addr('34.105.154.156')
-amazonuw2_mp = IPv4Addr('18.236.63.8')
-amazonff_mp = IPv4Addr('3.69.241.159')
-amazonie_mp = IPv4Addr('34.254.179.150')
-amazonsth_mp = IPv4Addr('13.48.73.156')
-azure_mp = IPv4Addr('13.82.53.167')
-azurene_mp = IPv4Addr('13.79.144.22')
-googlefi_mp = IPv4Addr('35.228.220.215')
+
+amazonuw3_mp = IPv4Addr('44.232.96.55')
+amazonuw3_mp6 = IPv6Addr('2600:1f14:5b9:3b00:7c8f:fb81:3dd3:f8c4')
+
+amazonff2_mp6 = IPv6Addr('2a05:d014:c07:5d00:d58f:b117:785:2455')
+amazonff2_mp = IPv4Addr('3.64.103.227')
+
+amazonie2_mp6 = IPv6Addr('2a05:d018:1d6d:b800:b792:c146:2c31:3a56')
+amazonie2_mp = IPv4Addr('63.33.90.46')
+
+amazonsth2_mp6 = IPv6Addr('2a05:d016:cb:8600:bd0e:6306:bd6d:633e')
+amazonsth2_mp = IPv4Addr('16.170.114.107')
+
 ytelse_brg = IPv4Addr('158.39.1.94')
+ytelse_brg6 = IPv6Addr('2001:700:0:4302::2')
+
 ytelse_osl = IPv4Addr('158.39.1.126')
+ytelse_osl6 = IPv6Addr('2001:700:0:412d::2')
+
 ytelse_tos = IPv4Addr('158.39.1.98')
+ytelse_tos6 = IPv6Addr('2001:700:0:8035::2')
+
 ytelse_trd = IPv4Addr('158.39.1.90')
+ytelse_trd6 = IPv6Addr('2001:700:0:4527::2')
+
 trondheim_mp = IPv4Addr('128.39.65.26')
-ip_addresses_cloud = [googleeu_mp, amazonuw2_mp, amazonff_mp, amazonie_mp, amazonsth_mp, azure_mp, azurene_mp, googlefi_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd, trondheim_mp]
-ip_addresses = [ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
+trondheim_mp6 = IPv6Addr('2001:700:0:452a::26')
+ip_addresses = [amazonuw3_mp, amazonff2_mp, amazonie2_mp, amazonsth2_mp, ytelse_brg, ytelse_osl, ytelse_tos, ytelse_trd]
+ipv6_addresses = [amazonuw3_mp6, amazonff2_mp6, amazonie2_mp6, amazonsth2_mp6, ytelse_brg6, ytelse_osl6, ytelse_tos6, ytelse_trd6]
 victim = trondheim_mp
+victim6 = trondheim_mp6
 
 '''
     Checks whether a flow is an attack flow or not
@@ -27,7 +42,13 @@ victim = trondheim_mp
                     boolean, whether the flow is an attack flow or not
 '''
 def isAttackFlow(sip, dip, start, end):
-    if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses)) and isAttack(start, end):
+    if (sip in ipv6_addresses and dip == victim6) or (sip == victim6 and dip in ipv6_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses) or (sip in ip_addresses and dip == victim6) or (sip == victim6 and dip in ip_addresses): 
+        print("MATCH ON IPv6 ADDRESSES:")
+        print(sip)
+        print(dip)
+    if ((sip in ip_addresses and dip == victim) or (sip == victim and dip in ip_addresses) or (sip in ipv6_addresses and dip == victim6) or 
+        (sip == victim6 and dip in ipv6_addresses) or (sip in ipv6_addresses and dip == victim) or (sip == victim and dip in ipv6_addresses) or 
+        (sip in ip_addresses and dip == victim6) or (sip == victim6 and dip in ip_addresses)) and isAttack(start, end):
         return True
     else:
         return False
@@ -43,7 +64,7 @@ def isAttackFlow(sip, dip, start, end):
 def isAttack(start, end):
     exists = False
     for i in range(int((end-start).total_seconds())+1):
-        time = start + timedelta(seconds = i)
+        time = start.replace(tzinfo=None) + timedelta(seconds = i)
         if time.replace(microsecond=0) in attackTimestamps:
             exists = True
     return exists

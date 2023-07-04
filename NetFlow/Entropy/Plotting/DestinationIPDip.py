@@ -40,8 +40,8 @@ def metricCalculation(silkFile, start, stop, interval):
     numberOfPacketsPerIP ={}
     #Loop through all the flow records in the input file
     for rec in infile:
-        if rec.etime >= stopTime:
-            break
+        if rec.etime > stopTime + frequency:
+            continue
         if rec.stime < startTime:
             continue
         #Aggregate flows into the specified time interval
