@@ -59,6 +59,3 @@ sleep $((20*60))
 python3 WriteCorrelationsToFiles.py
 pkill python
 mv Detections2403 Detections2403_15min_F1
-
-python3 NetFlow/Kmeans/Plotting/plotKmeansEntropyOnlyAttackCluster.py
-python3 NetFlow/Kmeans/Plotting/plotKmeansFieldsOnlyAttackCluster.py
