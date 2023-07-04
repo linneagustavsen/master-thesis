@@ -1,6 +1,7 @@
 __pycache__/
 *.pkl
 *.png
+!Plots/DetectionSystem.png
 ThresholdDecision/Entropy/NetFlow/Attack2403/RocScores*/*
 ThresholdDecision/Entropy/NetFlow/Attack2403/PrecisionRecall*/*
 ThresholdDecision/Entropy/NetFlow/Attack2403/PrecisionRecall/*
