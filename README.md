@@ -26,7 +26,7 @@ pip install -r requirements.txt
 The whole IDS is run offline by reading calculations from files and communicating the alerts to the fusion unit via [MQTT](https://www.eclipse.org/paho/).
 This is started by the command:
 ```bash
-start.sh
+./start.sh
 ```
 
 Docker containers used to generate DDoS attacks are provided in the folder [Attack](Attack). These attacks should only be used for educational purposes. There are different variations of the attack containers, mainly depending on if the attack data should be used for producing training or testing data. To start the docker container for producing testing data, the following commands should be executed:
