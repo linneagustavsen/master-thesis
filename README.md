@@ -1,5 +1,5 @@
 # Alert Fusion: A Combined Approach for DDoS Attack Detection
-This IDS is developed as a part of a master's thesis at Norwegian University of Science and Technology (NTNU) written about DDoS detection.
+This IDS is developed as a part of a master's thesis at Norwegian University of Science and Technology (NTNU) written about DDoS detection. The master thesis can be access [here](https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/3101216).
 
 ## Architecture
 An overview of the IDS architecture can be seen below.
@@ -29,7 +29,7 @@ This is started by the command:
 start.sh
 ```
 
-Docker containers used to generate DDoS attacks are provided in the folder [Attack](Attack). There are different variations of the attack containers, mainly depending on if the attack data should be used for training or testing. To start the docker container for testing, the following commands should be executed:
+Docker containers used to generate DDoS attacks are provided in the folder [Attack](Attack). These attacks should only be used for educational purposes. There are different variations of the attack containers, mainly depending on if the attack data should be used for producing training or testing data. To start the docker container for producing testing data, the following commands should be executed:
 ```bash
 docker build . -t testing -f Attack/AttackContainers/Testing/dockerfile
 docker run --it --name testing_attacker testing bash
